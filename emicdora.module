@@ -1,0 +1,559 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function emicdora_menu() {
+  return array(
+    'admin/islandora/emicdora' => array(
+      'title' => 'EMiC (Editing Modernism in Canada)',
+      'description' => 'Configure Editing Modernism in Canada.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_admin_settings_form'),
+      'access arguments' => array('administer site configuration'),
+      'file' => 'includes/admin.form.inc',
+      'type' => MENU_NORMAL_ITEM,
+    ),
+    'islandora/object/%islandora_object/manage/apparatus' => array(
+      'title' => 'Apparatus',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_apparatus_form', 2),
+      'access callback' => 'islandora_object_manage_access_callback',
+      'access arguments' => array(
+        array(
+          ISLANDORA_ADD_DS,
+        ), 2),
+      'file path' => drupal_get_path('module', 'emicdora'),
+      'file' => 'includes/apparatus.inc',
+    ),
+    // Contextual Links for Blocks
+    'emicdora/contextual-links/apparatus/%islandora_object' => array(
+      'title' => 'Apparatus',
+      'page callback' => TRUE,
+      'access callback' => 'islandora_object_manage_access_callback',
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/apparatus/%islandora_object/edit' => array(
+      'title' => 'Edit Apparatus',
+      'file' => 'includes/apparatus.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_apparatus_form', 3),
+      'access callback' => 'islandora_object_manage_access_callback',
+      'access arguments' => array(
+        array(
+          ISLANDORA_ADD_DS,
+        ), 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/source/%islandora_object' => array(
+      'title' => 'Sources',
+      'page callback' => TRUE,
+      'access callback' => 'islandora_object_manage_access_callback',
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/source/%islandora_object/add' => array(
+      'title' => 'Add New Source',
+      'file' => 'includes/add_source.form.inc',
+      'page callback' => 'emicdora_add_source_form',
+      'page arguments' => array(NULL, 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/source/%islandora_object/link' => array(
+      'title' => 'Add Existing Source',
+      'file' => 'includes/link_source.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_link_source_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object' => array(
+      'title' => 'Versions',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/add' => array(
+      'title' => 'Add New Version',
+      'file' => 'includes/add_version.form.inc',
+      'page callback' => 'emicdora_add_version_form',
+      // @todo How are we gonna get around passing several arguments
+      // via contextual links?
+      'page arguments' => array(3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/link' => array(
+      'title' => 'Add Existing Version',
+      'file' => 'includes/link_version.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_link_version_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/transcription/%islandora_object' => array(
+      'title' => 'Transcriptions',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/transcription/%islandora_object/add' => array(
+      'title' => 'Add New Transcription',
+      'file' => 'includes/add_transcription.form.inc',
+      'page callback' => 'emicdora_add_transcription_form',
+      'page arguments' => array(3),
+      'access callback' => TRUE,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    // @todo Workbench, etc.
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function emicdora_permission() {
+  return array(
+    // @todo Permissions, etc.
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function emicdora_theme() {
+  return array(
+    // @todo Theme functions, etc.
+  );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function emicdora_block_info() {
+  return array(
+    'critical_apparatus' => array(
+      'info' => t('Critical Apparatus'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -40,
+      'status' => 1,
+      'region' => 'sidebar_first'
+    ),
+    'source_material' => array(
+      'info' => t('Source Material'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -30,
+      'status' => 1,
+      'region' => 'sidebar_first'
+    ),
+    'versions' => array(
+      'info' => t('Versions'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -40,
+      'status' => 1,
+      'region' => 'sidebar_second'
+    ),
+    'operations' => array(
+      'info' => t('Operations'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -30,
+      'status' => 1,
+      'region' => 'sidebar_second'
+    ),
+    'tei' => array(
+      'info' => t('TEI'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -20,
+      'status' => 1,
+      'region' => 'sidebar_second'
+    ),
+    'transcriptions' => array(
+      'info' => t('Transcriptions'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -10,
+      'status' => 1,
+      'region' => 'sidebar_second'
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function emicdora_block_configure($delta = '') {
+  $form = array();
+  switch ($delta) {
+    case 'critical_apparatus':
+      break;
+    case 'source_material':
+      break;
+    case 'versions':
+      break;
+    case 'transcriptions':
+      $form['emicdora_transcription_block_count'] = array(
+        '#type' => 'select',
+        '#title' => t('Number of Transcriptions to display'),
+        '#default_value' => variable_get('emicdora_transcription_block_count', 10),
+        '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
+      );
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function emicdora_block_view($delta = '') {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  // Check to see if we are on a critical edition object.
+  $object = menu_get_object('islandora_object', 2);
+  $is_critical_edition = is_object($object) && emicdora_is_critical_edition($object);
+  if (!$is_critical_edition) {
+    return array();
+  }
+  // Build the block uses paths relative to our current path.
+  $path = current_path();
+  $block = array();
+  switch ($delta) {
+    case 'critical_apparatus':
+      $apparatus_datastreams = emicdora_critical_apparatus_supported_datastreams();
+      $links = array();
+      foreach ($object as $dsid => $datastream) {
+        if (in_array($dsid, $apparatus_datastreams)) {
+          $links[] = array(
+            'title' => $datastream->label,
+            'href' => $path,
+            'fragment' => strtolower($dsid),
+          );
+        }
+      }
+      if (!empty($links)) {
+        $block['subject'] = t('Apparatus');
+        $block['content'] = array(
+          '#theme' => 'links',
+          '#links' => $links,
+          '#contextual_links' => array(
+            'emicdora' => array(
+              'emicdora/contextual-links/apparatus',
+              array($object->id),
+            ),
+          ),
+        );
+      }
+      break;
+    case 'source_material':
+      // @todo Make this list not hard-coded.
+      $links = array();
+      $links[] = array(
+        'title' => 'All',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Books',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Audio',
+        'href' => $path,
+      );
+      $block['subject'] = t('Source Material');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'emicdora/contextual-links/source',
+            array($object->id),
+          ),
+        ),
+      );
+      break;
+    case 'versions':
+      // @todo Make this list not hard-coded.
+      $links = array();
+      $links[] = array(
+        'title' => 'All',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Books',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Audio',
+        'href' => $path,
+      );
+      $block['subject'] = t('Versions');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'emicdora/contextual-links/version',
+            array($object->id),
+          ),
+        ),
+      );
+      break;
+    case 'operations':
+      $block['subject'] = t('Operations');
+      break;
+    case 'tei':
+      $links = array();
+      $links[] = array(
+        'title' => 'Reading Transcription',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Diplomatic Transcription',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Edit',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Consolidate',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Upload',
+        'href' => $path,
+      );
+      $links[] = array(
+        'title' => 'Download',
+        'href' => $path,
+      );
+      $block['subject'] = t('TEI');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+      );
+      break;
+    case 'transcriptions':
+      // @todo Remove hard coded links.
+      // @todo Handle configured display number.
+      $links = array();
+      $links[] = array(
+        'title' => 'Transcription #1',
+        'href' => $path,
+      );
+      $block['subject'] = t('Transcriptions');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'emicdora/contextual-links/transcription',
+            array($object->id),
+          ),
+        ),
+      );
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_islandora_required_objects().
+ */
+function emicdora_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'emicdora');
+  $create_object = function(array $args) use ($connection){
+    $object = $connection->repository->constructObject($args['pid']);
+    $object->owner = 'fedoraAdmin';
+    $object->label = $args['label'];
+    $object->models = $args['model'];
+    foreach($args['datastreams'] as $dsid => $properties) {
+      $label = isset($properties['label']) ? $properties['label'] : 'M';
+      $datastream = $object->constructDatastream($dsid, $label);
+      $datastream->label = isset($properties['label']) ? $properties['label'] : $dsid;
+      $datastream->mimetype = isset($properties['mimetype']) ? $properties['mimetype'] : 'text/xml';
+      $datastream->setContentFromFile($properties['file'], FALSE);
+      $object->ingestDatastream($datastream);
+    }
+    return $object;
+  };
+  // Critical Edition Content Model.
+  $critical_edition_content_model = $create_object(array(
+    'pid' => 'islandora:criticalEditionCModel',
+    'label' => 'Critical Edition Content Model',
+    'model' => 'fedora-system:ContentModel-3.0',
+    'datastreams' => array(
+      'DS-COMPOSITE-MODEL' => array(
+        'file' => "$module_path/data/objects/critical_edition_ds_composite_model.xml",
+      ),
+    ),
+  ));
+  // Version Content Model.
+  $version_content_model = $create_object(array(
+    'pid' => 'islandora:versionCModel',
+    'label' => 'Version Content Model',
+    'model' => 'fedora-system:ContentModel-3.0',
+    'datastreams' => array(
+      'DS-COMPOSITE-MODEL' => array(
+        'file' => "$module_path/data/objects/version_ds_composite_model.xml",
+      ),
+    ),
+  ));
+  // TEI-RDF Content Model.
+  $tei_rdf_content_model = $create_object(array(
+    'pid' => 'islandora:tei-rdfCModel',
+    'label' => 'TEI-RDF Content Model',
+    'model' => 'fedora-system:ContentModel-3.0',
+    'datastreams' => array(
+      'DS-COMPOSITE-MODEL' => array(
+        'file' => "$module_path/data/objects/tei_rdf_ds_composite_model.xml",
+      ),
+    ),
+  ));
+  // Transcription Content Model.
+  $transcription_content_model = $create_object(array(
+    'pid' => 'islandora:transcriptionCModel',
+    'label' => 'Transcription Content Model',
+    'model' => 'fedora-system:ContentModel-3.0',
+    'datastreams' => array(
+      'DS-COMPOSITE-MODEL' => array(
+        'file' => "$module_path/data/objects/transcription_ds_composite_model.xml",
+      ),
+    ),
+  ));
+  // Editions - Critical Edition Collection.
+  $editions = $create_object(array(
+    'pid' => 'islandora:editions',
+    'label' => 'Editions',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        'file' => "$module_path/data/objects/editions_collection_policy.xml",
+      ),
+    ),
+  ));
+  $editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  // CO-OP - Source Object Collection.
+  $coop = $create_object(array(
+    'pid' => 'islandora:co-op',
+    'label' => 'CO-OP',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        'file' => "$module_path/data/objects/co_op_collection_policy.xml",
+      ),
+    ),
+  ));
+  $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  return array(
+    'emicdora' => array(
+      'title' => 'EMiC (Editing Modernism in Canada)',
+      'objects' => array(
+        $critical_edition_content_model,
+        $version_content_model,
+        $tei_rdf_content_model,
+        $transcription_content_model,
+        $editions,
+        $coop,
+      ),
+    ),
+  );
+}
+
+/**
+ *
+ * @param AbstractObject $object
+ */
+function emicdora_islandora_criticalEditionCModel_islandora_view_object(AbstractObject $object) {
+  module_load_include('inc', 'emicdora', 'includes/apparatus');
+  $datastreams = emicdora_critical_get_apparatus_datastreams($object);
+  $tabs = array();
+  foreach($datastreams as $dsid => $datastream) {
+    $tabs[$dsid] = array(
+      '#title' => t('Create PDF'),
+      '#type' => 'fieldset',
+      'form' => drupal_get_form('islandora_paged_content_manage_pages_pdf_form', $object),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+  }
+  return array(
+    'apparatus' => array(
+      '#type' => 'vertical_tabs',
+      'pdf' => array(
+        '#access' => user_access(ISLANDORA_ADD_DS),
+        '#title' => t('Create PDF'),
+        '#type' => 'fieldset',
+        'form' => drupal_get_form('islandora_paged_content_manage_pages_pdf_form', $object),
+        '#collapsible' => TRUE,
+        '#collapsed' => FALSE,
+      ),
+      'ocr' => array(
+        '#access' => user_access(ISLANDORA_ADD_DS),
+        '#title' => t('Perform OCR'),
+        '#type' => 'fieldset',
+        'form' => drupal_get_form('islandora_paged_content_manage_pages_ocr_form', $object),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      ),
+      'images' => array(
+        '#access' => user_access(ISLANDORA_ADD_DS),
+        '#title' => t('Create Images'),
+        '#type' => 'fieldset',
+        'form_1' => drupal_get_form('islandora_paged_content_manage_pages_thumbnail_form', $object),
+        'form_2' => drupal_get_form('islandora_paged_content_manage_pages_images_form', $object),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      ),
+      'sequence' => array(
+        '#access' => user_access(ISLANDORA_METADATA_EDIT),
+        '#title' => t('Reorder Pages'),
+        '#type' => 'fieldset',
+        'form' => drupal_get_form('islandora_paged_content_manage_pages_sequences_form', $object),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      ),
+      'delete' => array(
+        '#access' => user_access(ISLANDORA_PURGE),
+        '#title' => t('Delete Pages'),
+        '#type' => 'fieldset',
+        'form' => drupal_get_form('islandora_paged_content_manage_pages_delete_form', $object),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      ),
+    ),
+  );
+}

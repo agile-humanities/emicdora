@@ -1,0 +1,6 @@
+name = "EMiC Collations"
+description = "Create collations of transcriptions and analyze text variance."
+package = EMiC
+dependencies[] = emicdora
+version = 7.x-dev
+core = 7.x
