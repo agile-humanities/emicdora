@@ -33,7 +33,7 @@ function emicdora_menu() {
       'file path' => drupal_get_path('module', 'emicdora'),
       'file' => 'includes/apparatus.inc',
     ),
-    // Contextual Links for Blocks
+    // Contextual Links for Blocks.
     'emicdora/contextual-links/apparatus/%islandora_object' => array(
       'title' => 'Apparatus',
       'page callback' => TRUE,
@@ -154,7 +154,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -40,
       'status' => 1,
-      'region' => 'sidebar_first'
+      'region' => 'sidebar_first',
     ),
     'source_material' => array(
       'info' => t('Source Material'),
@@ -163,7 +163,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -30,
       'status' => 1,
-      'region' => 'sidebar_first'
+      'region' => 'sidebar_first',
     ),
     'versions' => array(
       'info' => t('Versions'),
@@ -172,7 +172,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -40,
       'status' => 1,
-      'region' => 'sidebar_second'
+      'region' => 'sidebar_second',
     ),
     'operations' => array(
       'info' => t('Operations'),
@@ -181,7 +181,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -30,
       'status' => 1,
-      'region' => 'sidebar_second'
+      'region' => 'sidebar_second',
     ),
     'tei' => array(
       'info' => t('TEI'),
@@ -190,7 +190,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -20,
       'status' => 1,
-      'region' => 'sidebar_second'
+      'region' => 'sidebar_second',
     ),
     'transcriptions' => array(
       'info' => t('Transcriptions'),
@@ -199,7 +199,7 @@ function emicdora_block_info() {
       'pages' => 'islandora/object/*',
       'weight' => -10,
       'status' => 1,
-      'region' => 'sidebar_second'
+      'region' => 'sidebar_second',
     ),
   );
 }
@@ -212,10 +212,13 @@ function emicdora_block_configure($delta = '') {
   switch ($delta) {
     case 'critical_apparatus':
       break;
+
     case 'source_material':
       break;
+
     case 'versions':
       break;
+
     case 'transcriptions':
       $form['emicdora_transcription_block_count'] = array(
         '#type' => 'select',
@@ -244,6 +247,7 @@ function emicdora_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
+      module_load_include('inc', 'emicdora', 'includes/apparatus');
       $apparatus_datastreams = emicdora_critical_apparatus_supported_datastreams();
       $links = array();
       foreach ($object as $dsid => $datastream) {
@@ -269,6 +273,7 @@ function emicdora_block_view($delta = '') {
         );
       }
       break;
+
     case 'source_material':
       // @todo Make this list not hard-coded.
       $links = array();
@@ -296,6 +301,7 @@ function emicdora_block_view($delta = '') {
         ),
       );
       break;
+
     case 'versions':
       // @todo Make this list not hard-coded.
       $links = array();
@@ -323,9 +329,11 @@ function emicdora_block_view($delta = '') {
         ),
       );
       break;
+
     case 'operations':
       $block['subject'] = t('Operations');
       break;
+
     case 'tei':
       $links = array();
       $links[] = array(
@@ -358,6 +366,7 @@ function emicdora_block_view($delta = '') {
         '#links' => $links,
       );
       break;
+
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
@@ -387,12 +396,12 @@ function emicdora_block_view($delta = '') {
  */
 function emicdora_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'emicdora');
-  $create_object = function(array $args) use ($connection){
+  $create_object = function (array $args) use ($connection) {
     $object = $connection->repository->constructObject($args['pid']);
     $object->owner = 'fedoraAdmin';
     $object->label = $args['label'];
     $object->models = $args['model'];
-    foreach($args['datastreams'] as $dsid => $properties) {
+    foreach ($args['datastreams'] as $dsid => $properties) {
       $label = isset($properties['label']) ? $properties['label'] : 'M';
       $datastream = $object->constructDatastream($dsid, $label);
       $datastream->label = isset($properties['label']) ? $properties['label'] : $dsid;
@@ -494,66 +503,26 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
 }
 
 /**
- *
- * @param AbstractObject $object
+ * Implements hook_CMODEL_islandora_view_object().
  */
 function emicdora_islandora_criticalEditionCModel_islandora_view_object(AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   $datastreams = emicdora_critical_get_apparatus_datastreams($object);
-  $tabs = array();
-  foreach($datastreams as $dsid => $datastream) {
-    $tabs[$dsid] = array(
-      '#title' => t('Create PDF'),
-      '#type' => 'fieldset',
-      'form' => drupal_get_form('islandora_paged_content_manage_pages_pdf_form', $object),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-    );
-  }
-  return array(
+  $content = array(
     'apparatus' => array(
       '#type' => 'vertical_tabs',
-      'pdf' => array(
-        '#access' => user_access(ISLANDORA_ADD_DS),
-        '#title' => t('Create PDF'),
-        '#type' => 'fieldset',
-        'form' => drupal_get_form('islandora_paged_content_manage_pages_pdf_form', $object),
-        '#collapsible' => TRUE,
-        '#collapsed' => FALSE,
-      ),
-      'ocr' => array(
-        '#access' => user_access(ISLANDORA_ADD_DS),
-        '#title' => t('Perform OCR'),
-        '#type' => 'fieldset',
-        'form' => drupal_get_form('islandora_paged_content_manage_pages_ocr_form', $object),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      ),
-      'images' => array(
-        '#access' => user_access(ISLANDORA_ADD_DS),
-        '#title' => t('Create Images'),
-        '#type' => 'fieldset',
-        'form_1' => drupal_get_form('islandora_paged_content_manage_pages_thumbnail_form', $object),
-        'form_2' => drupal_get_form('islandora_paged_content_manage_pages_images_form', $object),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      ),
-      'sequence' => array(
-        '#access' => user_access(ISLANDORA_METADATA_EDIT),
-        '#title' => t('Reorder Pages'),
-        '#type' => 'fieldset',
-        'form' => drupal_get_form('islandora_paged_content_manage_pages_sequences_form', $object),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      ),
-      'delete' => array(
-        '#access' => user_access(ISLANDORA_PURGE),
-        '#title' => t('Delete Pages'),
-        '#type' => 'fieldset',
-        'form' => drupal_get_form('islandora_paged_content_manage_pages_delete_form', $object),
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-      ),
     ),
   );
+  foreach ($datastreams as $dsid => $datastream) {
+    $content['apparatus'][$dsid] = array(
+      '#title' => $datastream->label,
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      'markup' => array(
+        '#markup' => filter_xss($datastream->content),
+      ),
+    );
+  }
+  return $content;
 }

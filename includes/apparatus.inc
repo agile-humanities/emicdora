@@ -2,7 +2,6 @@
 
 /**
  * @file
- *
  * Defines forms and functions related to the Critical Apparatus.
  */
 
@@ -41,7 +40,7 @@ function emicdora_critical_apparatus_supported_datastreams() {
 function emicdora_critical_get_apparatus_datastreams(AbstractObject $object) {
   $apparatus_datastreams = array();
   $supported_datastreams = emicdora_critical_apparatus_supported_datastreams();
-  foreach($object as $dsid => $datastream) {
+  foreach ($object as $dsid => $datastream) {
     if (in_array($dsid, $supported_datastreams)) {
       $apparatus_datastreams[$dsid] = $datastream;
     }

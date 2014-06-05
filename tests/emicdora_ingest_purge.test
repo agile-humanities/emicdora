@@ -5,12 +5,13 @@
  * Attempts to ingest and purge all the content types this module defines.
  */
 
+/**
+ * Class EmicdoraIngestPurgeTestCase.
+ */
 class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
 
   /**
    * Get test information.
-   *
-   * @see IslandoraWebTestCase::getInfo()
    */
   public static function getInfo() {
     return array(
@@ -22,8 +23,6 @@ class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
 
   /**
    * Set up the test environment.
-   *
-   * @see IslandoraWebTestCase::setUp()
    */
   public function setUp() {
     parent::setUp(array(
@@ -54,8 +53,7 @@ class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
     $this->createTestCollection($label, 'islandora:criticalEditionCModel', $collection_pid);
 
     // @todo Set configuration, when one is defined.
-    $edit = array(
-    );
+    $edit = array();
     $this->drupalPost('admin/islandora/emicdora', $edit, 'Save configuration');
 
     // Attempts to create the book.

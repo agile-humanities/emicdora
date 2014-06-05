@@ -17,26 +17,3 @@
 function emicdora_is_critical_edition(AbstractObject $object) {
   return in_array('islandora:criticalEditionCModel', $object->models);
 }
-
-/**
- * Gets the list of datastreams the critical apparatus supports.
- *
- * @return array
- *   The DSID's that make up the critical apparatus.
- */
-function emicdora_critical_apparatus_supported_datastreams() {
-  return array(
-    'EPIGRAPH',
-    'ACKNOWLEDGEMENTS',
-    'PREFACE',
-    'FOREWORD',
-    'INTRODUCTION',
-    'EDITORIAL_PROCEDURES',
-    'CHRONOLOGY',
-    'ILLUSTRATIONS',
-    'EPILOGUE',
-    'AFTERWORD',
-    'APPENDIX',
-    'BIBLIOGRAPHY',
-  );
-}
