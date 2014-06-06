@@ -46,7 +46,7 @@ function tei_editor_theme($existing, $type, $theme, $path) {
  */
 function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
-  dsm(array(), "tei_editor preprocessor");
+
   // Get our required path's.
   $tei_editor_module_path = drupal_get_path('module', 'islandora_critical_edition');
   $islandora_markup_editor_path = drupal_get_path('module', 'islandora_markup_editor');

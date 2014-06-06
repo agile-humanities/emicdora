@@ -241,7 +241,7 @@ function emicdora_block_view($delta = '') {
   }
   // Build the block uses paths relative to our current path.
   $path = current_path();
-  dsm($path, "path");
+
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
