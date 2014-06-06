@@ -34,6 +34,7 @@ function emicdora_is_critical_edition(AbstractObject $object) {
  *     - label: The datastream's label.
  *     - file: The file path to the datastream's content.
  *     - mimetype: The mimetype of the given file. Defaults to 'text/xml'.
+ *
  * @return AbstractObject
  *   A new Fedora Object, that has yet to be persisted to the repository.
  */
