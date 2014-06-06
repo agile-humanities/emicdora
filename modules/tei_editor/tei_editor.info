@@ -4,5 +4,7 @@ package = EMiC
 dependencies[] = emicdora
 dependencies[] = islandora_markup_editor
 dependencies[] = islandora_image_annotation
+dependencies[] = islandora_paged_content
+dependencies[] = php_lib
 version = 7.x-dev
 core = 7.x
