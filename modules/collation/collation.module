@@ -9,6 +9,7 @@
  * Implements hook_islandora_required_objects().
  */
 function collation_islandora_required_objects(IslandoraTuque $connection) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'collation');
   $create_object = function(array $args) use ($connection){
     $object = $connection->repository->constructObject($args['pid']);
@@ -26,7 +27,7 @@ function collation_islandora_required_objects(IslandoraTuque $connection) {
     return $object;
   };
   // Critical Edition Content Model.
-  $collation_content_model = $create_object(array(
+  $collation_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:collationCModel',
     'label' => 'Collation Content Model',
     'model' => 'fedora-system:ContentModel-3.0',

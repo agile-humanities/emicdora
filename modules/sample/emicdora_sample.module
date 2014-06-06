@@ -9,23 +9,11 @@
  * Implements hook_islandora_required_objects().
  */
 function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/apparatus');
   $module_path = drupal_get_path('module', 'emicdora_sample');
   $object_path = "$module_path/data/objects";
-  $create_object = function (array $args) use ($connection) {
-    $object = $connection->repository->constructObject($args['pid']);
-    $object->owner = 'fedoraAdmin';
-    $object->label = $args['label'];
-    foreach ($args['datastreams'] as $dsid => $properties) {
-      $control_group = isset($properties['control_group']) ? $properties['control_group'] : 'M';
-      $datastream = $object->constructDatastream($dsid, $control_group);
-      $datastream->label = isset($properties['label']) ? $properties['label'] : $dsid;
-      $datastream->mimetype = isset($properties['mimetype']) ? $properties['mimetype'] : 'text/xml';
-      $datastream->setContentFromFile($properties['file'], FALSE);
-      $object->ingestDatastream($datastream);
-    }
-    return $object;
-  };
-  module_load_include('inc', 'emicdora', 'includes/apparatus');
+
   $supported_apparatus_datastreams = emicdora_apparatus_supported_datastreams();
   $apparatus_datastreams = array();
   foreach ($supported_apparatus_datastreams as $dsid => $label) {
@@ -36,7 +24,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     );
   }
   // Critical Edition Object.
-  $critical_edition_object = $create_object(array(
+  $critical_edition_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-critical_edition',
     'label' => 'Legends of Vancouver (Sample)',
     'model' => 'islandora:criticalEditionCModel',
@@ -51,7 +39,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ) + $apparatus_datastreams,
   ));
   // Version Object.
-  $version_object = $create_object(array(
+  $version_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-version',
     'label' => 'Sample Version',
     'model' => 'islandora:versionCModel',
@@ -68,7 +56,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // TEI-RDF Object.
-  $tei_rdf_object = $create_object(array(
+  $tei_rdf_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-tei-rdf-01',
     'label' => 'Sample TEI-RDF',
     'model' => 'islandora:tei-rdfCModel',
@@ -82,7 +70,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // Transcription Object.
-  $transcription_object = $create_object(array(
+  $transcription_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-transcription',
     'label' => 'Sample Transcription',
     'model' => 'islandora:transcriptionCModel',
@@ -97,7 +85,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // Book Object.
-  $source_book_object = $create_object(array(
+  $source_book_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-book',
     'label' => 'Sample Book',
     'model' => 'islandora:transcriptionCModel',
@@ -111,7 +99,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // Page Object.
-  $source_page_01_object = $create_object(array(
+  $source_page_01_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-page-01',
     'label' => 'Sample Page',
     'model' => 'islandora:pageCModel',
