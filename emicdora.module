@@ -391,24 +391,10 @@ function emicdora_block_view($delta = '') {
  * Implements hook_islandora_required_objects().
  */
 function emicdora_islandora_required_objects(IslandoraTuque $connection) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
-  $create_object = function (array $args) use ($connection) {
-    $object = $connection->repository->constructObject($args['pid']);
-    $object->owner = 'fedoraAdmin';
-    $object->label = $args['label'];
-    $object->models = $args['model'];
-    foreach ($args['datastreams'] as $dsid => $properties) {
-      $control_group = isset($properties['control_group']) ? $properties['control_group'] : 'M';
-      $datastream = $object->constructDatastream($dsid, $control_group);
-      $datastream->label = isset($properties['label']) ? $properties['label'] : $dsid;
-      $datastream->mimetype = isset($properties['mimetype']) ? $properties['mimetype'] : 'text/xml';
-      $datastream->setContentFromFile($properties['file'], FALSE);
-      $object->ingestDatastream($datastream);
-    }
-    return $object;
-  };
   // Critical Edition Content Model.
-  $critical_edition_content_model = $create_object(array(
+  $critical_edition_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:criticalEditionCModel',
     'label' => 'Critical Edition Content Model',
     'model' => 'fedora-system:ContentModel-3.0',
@@ -419,7 +405,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // Version Content Model.
-  $version_content_model = $create_object(array(
+  $version_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:versionCModel',
     'label' => 'Version Content Model',
     'model' => 'fedora-system:ContentModel-3.0',
@@ -430,7 +416,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // TEI-RDF Content Model.
-  $tei_rdf_content_model = $create_object(array(
+  $tei_rdf_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:tei-rdfCModel',
     'label' => 'TEI-RDF Content Model',
     'model' => 'fedora-system:ContentModel-3.0',
@@ -441,7 +427,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // Transcription Content Model.
-  $transcription_content_model = $create_object(array(
+  $transcription_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:transcriptionCModel',
     'label' => 'Transcription Content Model',
     'model' => 'fedora-system:ContentModel-3.0',
@@ -452,7 +438,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // Editions - Critical Edition Collection.
-  $editions = $create_object(array(
+  $editions = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:editions',
     'label' => 'Editions',
     'model' => 'islandora:collectionCModel',
@@ -468,7 +454,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
   ));
   $editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
   // CO-OP - Source Object Collection.
-  $coop = $create_object(array(
+  $coop = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:co-op',
     'label' => 'CO-OP',
     'model' => 'islandora:collectionCModel',
