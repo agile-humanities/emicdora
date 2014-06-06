@@ -21,30 +21,28 @@ function emicdora_menu() {
     ),
     'islandora/object/%islandora_object/manage/apparatus' => array(
       'title' => 'Apparatus',
+      'file' => 'includes/apparatus.form.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('emicdora_edit_apparatus_form', 2),
+      'page arguments' => array('emicdora_apparatus_form', 2),
       'access callback' => 'islandora_object_manage_access_callback',
       'access arguments' => array(
         array(
           ISLANDORA_ADD_DS,
         ), 2),
-      'file path' => drupal_get_path('module', 'emicdora'),
-      'file' => 'includes/apparatus.inc',
     ),
     // Contextual Links for Blocks.
     'emicdora/contextual-links/apparatus/%islandora_object' => array(
       'title' => 'Apparatus',
       'page callback' => TRUE,
-      'access callback' => 'islandora_object_manage_access_callback',
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/apparatus/%islandora_object/edit' => array(
       'title' => 'Edit Apparatus',
-      'file' => 'includes/apparatus.inc',
+      'file' => 'includes/apparatus.form.inc',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('emicdora_edit_apparatus_form', 3),
+      'page arguments' => array('emicdora_apparatus_form', 3),
       'access callback' => 'islandora_object_manage_access_callback',
       'access arguments' => array(
         array(
@@ -56,7 +54,6 @@ function emicdora_menu() {
     'emicdora/contextual-links/source/%islandora_object' => array(
       'title' => 'Sources',
       'page callback' => TRUE,
-      'access callback' => 'islandora_object_manage_access_callback',
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/source/%islandora_object/add' => array(
@@ -248,10 +245,9 @@ function emicdora_block_view($delta = '') {
   switch ($delta) {
     case 'critical_apparatus':
       module_load_include('inc', 'emicdora', 'includes/apparatus');
-      $apparatus_datastreams = emicdora_critical_apparatus_supported_datastreams();
       $links = array();
       foreach ($object as $dsid => $datastream) {
-        if (in_array($dsid, $apparatus_datastreams)) {
+        if (emicdora_is_apparatus_supported_datastream($dsid)) {
           $links[] = array(
             'title' => $datastream->label,
             'href' => $path,
@@ -402,8 +398,8 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     $object->label = $args['label'];
     $object->models = $args['model'];
     foreach ($args['datastreams'] as $dsid => $properties) {
-      $label = isset($properties['label']) ? $properties['label'] : 'M';
-      $datastream = $object->constructDatastream($dsid, $label);
+      $control_group = isset($properties['control_group']) ? $properties['control_group'] : 'M';
+      $datastream = $object->constructDatastream($dsid, $control_group);
       $datastream->label = isset($properties['label']) ? $properties['label'] : $dsid;
       $datastream->mimetype = isset($properties['mimetype']) ? $properties['mimetype'] : 'text/xml';
       $datastream->setContentFromFile($properties['file'], FALSE);
@@ -507,7 +503,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
  */
 function emicdora_islandora_criticalEditionCModel_islandora_view_object(AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
-  $datastreams = emicdora_critical_get_apparatus_datastreams($object);
+  $datastreams = emicdora_get_apparatus_datastreams($object);
   $content = array(
     'apparatus' => array(
       '#type' => 'vertical_tabs',
@@ -517,6 +513,7 @@ function emicdora_islandora_criticalEditionCModel_islandora_view_object(Abstract
     $content['apparatus'][$dsid] = array(
       '#title' => $datastream->label,
       '#type' => 'fieldset',
+      '#id' => strtolower($dsid),
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       'markup' => array(

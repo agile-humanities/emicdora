@@ -4,3 +4,23 @@
  * @file
  * Install hooks for this module.
  */
+
+/**
+ * Implements hook_install().
+ *
+ * @see islandora_book_islandora_required_objects()
+ */
+function emicdora_install() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('emicdora');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function emicdora_uninstall() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('emicdora', 'uninstall');
+  $variables = array();
+  array_walk($variables, 'variable_del');
+}
