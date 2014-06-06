@@ -6,9 +6,27 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function tei_editor_menu() {
+  $items['emicdora/tei_editor/%islandora_object'] = array(
+    'title' => 'Emicdora TEI Editor',
+    'page callback' => 'tei_editor_view_editor',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+function tei_editor_view_editor(AbstractObject $islandora_object) {
+  return theme('tei_editor_viewer', array());
+}
+/**
  * Implements hook_islandora_required_objects().
  */
-function collation_islandora_required_objects(IslandoraTuque $connection) {
+function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'collation');
   $create_object = function(array $args) use ($connection){
     $object = $connection->repository->constructObject($args['pid']);
@@ -17,11 +35,11 @@ function collation_islandora_required_objects(IslandoraTuque $connection) {
     $object->models = $args['model'];
     foreach($args['datastreams'] as $dsid => $datastream) {
       $label = isset($datastream['label']) ? $datastream['label'] : 'M';
-      $ds = $object->constructDatastream($dsid, $label);
-      $ds->label = isset($datastream['label']) ? $datastream['label'] : $dsid;
-      $ds->mimetype = isset($datastream['mimetype']) ? $datastream['mimetype'] : 'text/xml';
-      $ds->setContentFromFile($datastream['file'], FALSE);
-      $object->ingestDatastream($ds);
+      $datastream = $object->constructDatastream($dsid, $label);
+      $datastream->label = isset($datastream['label']) ? $datastream['label'] : $dsid;
+      $datastream->mimetype = isset($datastream['mimetype']) ? $datastream['mimetype'] : 'text/xml';
+      $datastream->setContentFromFile($datastream['file'], FALSE);
+      $object->ingestDatastream($datastream);
     }
     return $object;
   };
