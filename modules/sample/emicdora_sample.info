@@ -1,0 +1,6 @@
+name = "EMiC (Editing Modernism in Canada) - Sample Objects"
+description = "Adds a number of sample objects to help test and develop."
+package = EMiC
+dependencies[] = emicdora
+version = 7.x-dev
+core = 7.x
