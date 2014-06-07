@@ -32,6 +32,6 @@ before_install:
 script:
   - ant -buildfile sites/all/modules/emicdora/build.xml lint
   - $ISLANDORA_DIR/tests/scripts/line_endings.sh sites/all/modules/emicdora
-  - drush coder-review --reviews=production,security,style,i18n,potx,sniffer emicdora
+  - drush coder-review --reviews=production,security,style,i18n,potx,sniffer emicdora emicdora_sample collation tei_editor
   - phpcpd --names *.module,*.inc,*.test sites/all/modules/emicdora
   - drush test-run --user=1 --uri=http://localhost:8081 "Emicdora"

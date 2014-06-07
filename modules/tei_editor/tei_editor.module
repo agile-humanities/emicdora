@@ -14,7 +14,7 @@ function tei_editor_menu() {
     'page callback' => 'tei_editor_view_editor',
     'page arguments' => array(2),
     'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    'access arguments' => array(ISLANDORA_METADATA_EDIT, 2),
     'type' => MENU_NORMAL_ITEM,
   );
   return $items;
@@ -24,6 +24,10 @@ function tei_editor_menu() {
  * Page callback for the tei_editor.
  *
  * @param AbstractObject $islandora_object
+ *   The object the tei editor will operate on.
+ *
+ * @return string
+ *   An HTML string representing the themed output.
  */
 function tei_editor_view_editor(AbstractObject $islandora_object) {
   return theme('tei_editor_viewer', array('islandora_object' => $islandora_object));
@@ -35,106 +39,9 @@ function tei_editor_view_editor(AbstractObject $islandora_object) {
 function tei_editor_theme($existing, $type, $theme, $path) {
   return array(
     'tei_editor_viewer' => array(
+      'file' => 'theme/theme.inc',
       'template' => 'theme/tei-editor-viewer',
       'variables' => array('islandora_object' => NULL),
-    ),
-  );
-}
-
-/**
- * Implements hook_preprocess().
- */
-function tei_editor_preprocess_tei_editor_viewer(&$variables) {
-  module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
-
-  // Get our required path's.
-  $tei_editor_module_path = drupal_get_path('module', 'islandora_critical_edition');
-  $islandora_markup_editor_path = drupal_get_path('module', 'islandora_markup_editor');
-  $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
-
-  // Theme our custom components to the tei editor viewer.
-  $variables['anno_list_pane'] = theme('islandora_anno_list_pane');
-  $variables['anno_img_pane'] = theme('islandora_anno_image_pane');
-
-  // Use this flag to include our own init js scripts.
-  $variables['custom_js'] = TRUE;
-  $variables['cwrc_lib_path'] = $islandora_markup_editor_path;
-
-  // Custom JS for our editor.
-  tei_editor_add_js($variables);
-  theme('islandora_markup_editor', $variables);
-
-  drupal_add_js($tei_editor_module_path . "/js/test.js");
-
-  // This is gross. We cant rely on the image_annotation module to
-  // add the required js at the correct time. It needs to be abstracted.
-  drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
-  drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-1.7.js');
-
-  // This is where we add our own init scripts, since we indicated we would with
-  // the vars flag '$variables['custom_js'] = TRUE'.
-  drupal_add_js($tei_editor_module_path . "/js/custom_delegate.js");
-  drupal_add_js($tei_editor_module_path . '/js/writer_wrapper.js');
-  drupal_add_js($tei_editor_module_path . "/js/dialog_text_image_anno.js");
-  drupal_add_js($tei_editor_module_path . "/js/startup.js");
-  drupal_add_js($tei_editor_module_path . "/js/init.js");
-
-  // Include common JS/CSS for critical editions and shared canvas,
-  // located in image_annotation module.
-  islandora_image_annotation_include_common_js();
-  islandora_image_annotation_include_common_css();
-}
-
-/**
- * Abstraction of preprocessing functions.
- *
- * @global String $base_url
- * @global User $user
- *
- * @param array $variables
- *   Display variables
- */
-function tei_editor_add_js(&$variables, $media = FALSE) {
-  // TODO: Add custom override stuff if/when we want it.
-}
-
-/**
- * Implements hook_islandora_required_objects().
- */
-function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
-  $module_path = drupal_get_path('module', 'collation');
-  $create_object = function(array $args) use ($connection){
-    $object = $connection->repository->constructObject($args['pid']);
-    $object->owner = 'fedoraAdmin';
-    $object->label = $args['label'];
-    $object->models = $args['model'];
-    foreach($args['datastreams'] as $dsid => $datastream) {
-      $label = isset($datastream['label']) ? $datastream['label'] : 'M';
-      $datastream = $object->constructDatastream($dsid, $label);
-      $datastream->label = isset($datastream['label']) ? $datastream['label'] : $dsid;
-      $datastream->mimetype = isset($datastream['mimetype']) ? $datastream['mimetype'] : 'text/xml';
-      $datastream->setContentFromFile($datastream['file'], FALSE);
-      $object->ingestDatastream($datastream);
-    }
-    return $object;
-  };
-  // Critical Edition Content Model.
-  $collation_content_model = $create_object(array(
-    'pid' => 'islandora:collationCModel',
-    'label' => 'Collation Content Model',
-    'model' => 'fedora-system:ContentModel-3.0',
-    'datastreams' => array(
-      'DS-COMPOSITE-MODEL' => array(
-        'file' => "$module_path/data/objects/collation_ds_composite_model.xml",
-      ),
-    ),
-  ));
-  return array(
-    'collation' => array(
-      'title' => 'EMiC (Editing Modernism in Canada) - Collations',
-      'objects' => array(
-        $collation_content_model,
-      ),
     ),
   );
 }

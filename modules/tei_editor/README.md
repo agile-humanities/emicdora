@@ -1,17 +1,20 @@
-# Collation [![Build Status](https://travis-ci.org/discoverygarden/emicdora.png?branch=7.x)](https://travis-ci.org/discoverygarden/emicdora)
+# TEI Editor [![Build Status](https://travis-ci.org/discoverygarden/emicdora.png?branch=7.x)](https://travis-ci.org/discoverygarden/emicdora)
 
 ## Introduction
 
-Editing Modernism in Canada - Collation
+Editing Modernism in Canada - TEI Editor
 
-This module extends Emicdora to allow for the creation of Collations as well as
-the visualization of those collations.
+This module extends Emicdora to allow for editing of TEI-RDF objects via the
+[Islandora Markup Editor](https://github.com/discoverygarden/islandora_markup_editor)
+module, which itself relies on the CWRC-Writer.
 
 ## Requirements
 
 This module requires the following modules/libraries:
 
-* [Emicdora](https://github.com/islandora/islandora)
+* [Islandora Markup Editor](https://github.com/discoverygarden/islandora_markup_editor)
+* [Islandora Image Annotation](https://github.com/islandora/islandora_image_annotation)
+* [Islandora Paged Content](https://github.com/islandora/islandora_paged_content)
 
 ## Installation
 
