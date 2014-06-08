@@ -27,7 +27,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $critical_edition_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-critical_edition',
     'label' => 'Legends of Vancouver (Sample)',
-    'model' => 'islandora:criticalEditionCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_critical_edition_rels_ext.rdf",
@@ -42,7 +41,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $version_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-version',
     'label' => 'Sample Version',
-    'model' => 'islandora:versionCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_version_rels_ext.rdf",
@@ -59,7 +57,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $tei_rdf_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-tei-rdf-01',
     'label' => 'Sample TEI-RDF',
-    'model' => 'islandora:tei-rdfCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_tei_rdf_01_rels_ext.rdf",
@@ -73,7 +70,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $transcription_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-transcription',
     'label' => 'Sample Transcription',
-    'model' => 'islandora:transcriptionCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_transcription_rels_ext.rdf",
@@ -88,7 +84,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $source_book_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-book',
     'label' => 'Sample Book',
-    'model' => 'islandora:transcriptionCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_book_rels_ext.rdf",
@@ -102,7 +97,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $source_page_01_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-page-01',
     'label' => 'Sample Page',
-    'model' => 'islandora:pageCModel',
     'datastreams' => array(
       'TN' => array(
         'file' => "$object_path/sample_page_01_tn.jpg",
