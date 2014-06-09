@@ -11,21 +11,6 @@
 function collation_islandora_required_objects(IslandoraTuque $connection) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'collation');
-  $create_object = function(array $args) use ($connection){
-    $object = $connection->repository->constructObject($args['pid']);
-    $object->owner = 'fedoraAdmin';
-    $object->label = $args['label'];
-    $object->models = $args['model'];
-    foreach($args['datastreams'] as $dsid => $datastream) {
-      $label = isset($datastream['label']) ? $datastream['label'] : 'M';
-      $ds = $object->constructDatastream($dsid, $label);
-      $ds->label = isset($datastream['label']) ? $datastream['label'] : $dsid;
-      $ds->mimetype = isset($datastream['mimetype']) ? $datastream['mimetype'] : 'text/xml';
-      $ds->setContentFromFile($datastream['file'], FALSE);
-      $object->ingestDatastream($ds);
-    }
-    return $object;
-  };
   // Critical Edition Content Model.
   $collation_content_model = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:collationCModel',

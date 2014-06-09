@@ -1,6 +1,6 @@
 <?php
 
-
-function one() {
-
-}
+/**
+ * @file
+ * Utility functions.
+ */
