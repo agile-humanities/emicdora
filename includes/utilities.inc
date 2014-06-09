@@ -15,7 +15,7 @@
  *   TRUE if it is a critical edition, FALSE otherwise.
  */
 function emicdora_is_critical_edition(AbstractObject $object) {
-  return in_array('islandora:criticalEditionCModel', $object->models);
+  return in_array('islandora:criticalEditionContainerCModel', $object->models);
 }
 
 /**

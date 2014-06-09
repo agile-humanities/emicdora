@@ -27,7 +27,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   $critical_edition_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-critical_edition',
     'label' => 'Legends of Vancouver (Sample)',
-    'model' => 'islandora:criticalEditionCModel',
+    'model' => 'islandora:criticalEditionContainerCModel',
     'datastreams' => array(
       'RELS-EXT' => array(
         'file' => "$object_path/sample_critical_edition_rels_ext.rdf",
