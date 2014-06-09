@@ -6,6 +6,56 @@
  */
 
 /**
+ * Defines the set source content models.
+ *
+ * @return array
+ *   The content models which are considered source objects.
+ */
+function emicdora_source_content_models() {
+  return array(
+    'islandora:bookCModel' => t('Textual Content'),
+    'islandora:sp-audioCModel' => t('Audio'),
+    'islandora:sp_videoCModel' => t('Video'),
+    'islandora:sp_large_image_cmodel' => t('Image'),
+  );
+}
+
+/**
+ * Checks if the given content model is a source content model.
+ *
+ * @param string $content_model
+ *   The identifier of the content model.
+ *
+ * @return bool
+ *   TRUE if the given content model belongs to the set of source content
+ *   models.
+ */
+function emicdora_is_source_content_model($content_model) {
+  $source_content_models = emicdora_source_content_models();
+  return isset($source_content_models[$content_model]);
+}
+
+/**
+ * Checks if the given object has a source content model.
+ *
+ * @param AbstractObject $object
+ *   The object to check.
+ *
+ * @return bool
+ *   TRUE if one of the given object's content models belongs to the set of
+ *   source content models.
+ */
+function emicdora_is_source(AbstractObject $object) {
+  $source_content_models = emicdora_source_content_models();
+  foreach ($object->models as $content_model) {
+    if (in_array($content_model, $source_content_models)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
+
+/**
  * Checks if the given object is a critical edition object.
  *
  * @param AbstractObject $object
@@ -16,6 +66,26 @@
  */
 function emicdora_is_critical_edition(AbstractObject $object) {
   return in_array('islandora:criticalEditionContainerCModel', $object->models);
+}
+
+/**
+ * Gets the default collection to ingest the given content model type into.
+ *
+ * @param string $content_model
+ *   A content model identifier.
+ *
+ * @return string|bool
+ *   The default collection identifier in which to ingest the given content
+ *   model type if one exists, otherwise FALSE.
+ */
+function emicdora_get_default_collection($content_model) {
+  if ($content_model == 'islandora:criticalEditionCModel') {
+    return EMICDORA_EDITION_COLLECTION;
+  }
+  elseif (emicdora_is_source_content_model($content_model)) {
+    return EMICDORA_SOURCE_COLLECTION;
+  }
+  return FALSE;
 }
 
 /**
@@ -42,7 +112,11 @@ function emicdora_create_required_object(IslandoraTuque $connection, array $args
   $object = $connection->repository->constructObject($args['pid']);
   $object->owner = 'fedoraAdmin';
   $object->label = $args['label'];
-  $object->models = $args['model'];
+  // Tuque is broken in that if you set the model then set the content of the
+  // RELS-EXT datastream afterwards it will be ignored.
+  if (isset($args['model'])) {
+    $object->models = $args['model'];
+  }
   foreach ($args['datastreams'] as $dsid => $properties) {
     $control_group = isset($properties['control_group']) ? $properties['control_group'] : 'M';
     $datastream = $object->constructDatastream($dsid, $control_group);
