@@ -17,8 +17,9 @@ function emicdora_menu() {
   $add_source_contextual_links = array();
   foreach ($source_content_models as $content_model => $label) {
     $url = "emicdora/contextual-links/source/%islandora_object/add/{$content_model}";
+    $title = "Add New {$label}";
     $add_source_contextual_links[$url] = array(
-      'title' => "Add New {$label}",
+      'title' => $title,
       'file' => 'includes/add_source.form.inc',
       'page callback' => 'emicdora_add_source_form',
       'page arguments' => array($content_model, 3),
@@ -638,6 +639,15 @@ function emicdora_islandora_criticalEditionCModel_islandora_view_object(Abstract
   return $content;
 }
 
+/**
+ * Display the sources related to this critical edition.
+ *
+ * @param AbstractObject $object
+ *   The critical edition the sources belong to.
+ *
+ * @return string
+ *   HTML displaying the SOLR search results containing the related sources.
+ */
 function emicdora_critical_edition_sources(AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
@@ -660,6 +670,15 @@ function emicdora_critical_edition_sources(AbstractObject $object) {
   return $output;
 }
 
+/**
+ * Display the versions related to this critical edition.
+ *
+ * @param AbstractObject $object
+ *   The critical edition the sources belong to.
+ *
+ * @return string
+ *   HTML displaying the SOLR search results containing the related versions.
+ */
 function emicdora_critical_edition_versions(AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');

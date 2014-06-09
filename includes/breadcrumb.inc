@@ -9,7 +9,10 @@
  * Gets the breadcrumbs for the critical edition object display.
  *
  * @param AbstractObject $critical_edition
+ *   The critical edition object.
+ *
  * @return array
+ *   An array of links to use as breadcrumbs.
  */
 function emicdora_get_critical_edition_breadcrumbs(AbstractObject $critical_edition) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
@@ -37,6 +40,7 @@ function emicdora_set_critical_edition_breadcrumbs(AbstractObject $critical_edit
  * Sets the breadcrumbs for the apparatus.
  *
  * @param AbstractObject $critical_edition
+ *   The critical edition to which the breadcrumbs will navigate to.
  */
 function emicdora_set_apparatus_breadcrumbs(AbstractObject $critical_edition) {
   $breadcrumbs = emicdora_get_critical_edition_breadcrumbs($critical_edition);
@@ -48,6 +52,7 @@ function emicdora_set_apparatus_breadcrumbs(AbstractObject $critical_edition) {
  * Sets the breadcrumbs for the source.
  *
  * @param AbstractObject $critical_edition
+ *   The critical edition to which the breadcrumbs will navigate to.
  */
 function emicdora_set_source_breadcrumbs(AbstractObject $critical_edition) {
   emicdora_set_apparatus_breadcrumbs($critical_edition);
