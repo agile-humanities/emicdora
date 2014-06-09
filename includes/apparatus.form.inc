@@ -20,9 +20,10 @@
  */
 function emicdora_apparatus_form(array $form, array $form_state, AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   drupal_set_title(t('Critical Apparatus'));
+  emicdora_set_apparatus_breadcrumbs($object);
   $form_state['pid'] = $object->id;
   $supported_datastreams = emicdora_apparatus_supported_datastreams();
   $default_selected_datastream = key($supported_datastreams);
