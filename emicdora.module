@@ -7,6 +7,10 @@
 
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
+define('EMICDORA_CREATE_EMICDORA_EDITION', 'emic create edition');
+define('EMICDORA_READ_EMICDORA_EDITION', 'emic read edition');
+define('EMICDORA_MODIFY_EMICDORA_EDITION', 'emic modify edition');
+define('EMICDORA_DELETE_EMICDORA_EDITION', 'emic delete edition');
 
 /**
  * Implements hook_menu().
@@ -185,7 +189,22 @@ function emicdora_menu_alter(array &$items) {
  */
 function emicdora_permission() {
   return array(
-    // @todo Permissions, etc.
+    EMICDORA_CREATE_EDITION => array(
+      'title' => t('Create Emic Editions'),
+      'description' => t('Create EMiC Critical Editions'),
+    ),
+    EMICDORA_READ_EDITION => array(
+      'title' => t('Read Emic Editions'),
+      'description' => t('Read EMiC Critical Editions'),
+    ),
+    EMICDORA_MODIFY_EDITION => array(
+      'title' => t('Modify Emic Editions'),
+      'description' => t('Modify EMiC Critical Editions'),
+    ),
+    EMICDORA_DELETE_EDITION => array(
+      'title' => t('Delete Emic Editions'),
+      'description' => t('Delete EMiC Critical Editions'),
+    ),
   );
 }
 
@@ -194,7 +213,7 @@ function emicdora_permission() {
  */
 function emicdora_theme() {
   return array(
-    // @todo Theme functions, etc.
+      // @todo Theme functions, etc.
   );
 }
 
