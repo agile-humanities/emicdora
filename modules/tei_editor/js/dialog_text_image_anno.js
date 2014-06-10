@@ -57,15 +57,15 @@ function text_image_anno_dialog(data) {
           return;
         }
         init_for_create();
-        
         build_combo();
+        //$("#text_image_accordion").accordion('activate', 0 );
         $('#anno_text1').val(config_data.query);
         $('#anno_title1').val("Text image annotation");
         $('#anno_classification1').val("TextImageLink");
         
         $('#img_anno_text').hide();
         $('#img_anno_title').hide();
-        $("#text_image_accordion").accordion('activate', 0 );
+        //$("#text_image_accordion").accordion('activate', 0 );
         
       },
       title: 'Image/Text Annotation',
@@ -96,9 +96,12 @@ function text_image_anno_dialog(data) {
           }
           
           txt_image_anno_dialog.dialog('close');
-          writer.finalizeEntity('txtimglnk', save_result);
-          writer.fm.saveDocument();
-          writer.removeHighlights();
+          console.log(config_data.w);
+          console.log("save result");
+          console.log(save_result);
+          config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
+          config_data.w.fileManager.saveDocument();
+          config_data.w.removeHighlights();
         },
       'Cancel': function() {
          $("#cbo_image_anno").val('0');
@@ -201,7 +204,9 @@ function init_for_create(){
      $('.ui-widget-overlay').remove();
      $('#canvases .canvas').each(function() {
        var cnv = $(this).attr('canvas');
-       initForCreate(cnv);
+       if (cnv) {
+         initForCreate(cnv);
+       }
      });
 };
 

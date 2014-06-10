@@ -149,7 +149,8 @@ var islandoraCWRCWriter = {
           var data = {
             title: writer.entitiesModel.getTitle('person'),
             pos: writer.editor.contextMenuPos,
-            query: query
+            query: query,
+            w: writer
           };
           text_image_anno_dialog(data);
         }

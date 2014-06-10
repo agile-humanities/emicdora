@@ -15,12 +15,16 @@ function cwrcWriterInit(Writer, Delegator) {
 				writer.fileManager.loadInitialDocument(window.location.hash);
 			});
 		});
+		writer.event('entityFocused').subscribe(function(entityId) {
+			console.log("haraksdfndf " + entityId);
+		});
 	}
 	function doResize() {
 		var uiHeight = $('#'+writer.editor.id+'_tbl tr.mceFirst').outerHeight() + 2;
 		writer.editor.theme.resizeTo($(window).width(), $(window).height() - uiHeight);
 		// Call out to our 'init.js' script, fixes image annotation size.
 		resizeCanvas();
+		
 	}
 	PID = Drupal.settings.islandora_markup_editor.page_pid;
 	console.log(PID);
@@ -60,6 +64,7 @@ function cwrcWriterInit(Writer, Delegator) {
 		        update_loading_text("Building Image Viewer");
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
 				$(window).on('resize', doResize);
+				
 				
 			},
 			error: function() {

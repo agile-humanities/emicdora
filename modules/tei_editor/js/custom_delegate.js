@@ -290,7 +290,7 @@ var CustomDelegator = function(writer) {
 		var docText = w.converter.getDocumentContent(true);
 		
 		$.ajax({
-			url : window.parent.Drupal.settings.basePath + 'islandora/cwrcwriter/save_data/' + PID,
+			url : window.parent.Drupal.settings.basePath + 'islandora/tei_editor/save_data/' + PID,
 			type: 'PUT',
 			dataType: 'json',
 		    data: {
@@ -322,41 +322,6 @@ var CustomDelegator = function(writer) {
 				}
 			}
 		});
-		
-		
-//		$.ajax({
-//			url : window.parent.Drupal.settings.basePath + 'islandora/cwrcwriter/save_data/' + PID,
-//			type: 'POST',
-//			dataType: 'json',
-//		    data: {
-//		        "text": docText,
-//		        "valid": true,
-//		        "schema": schemaUrl,
-//		    },
-//			success: function(data, status, xhr) {
-//				w.editor.isNotDirty = 1; // force clean state
-//				w.dialogManager.show('message', {
-//					title: 'Document Saved',
-//					msg: w.currentDocId+' was saved successfully.'
-//				});
-//				window.location.hash = '#'+w.currentDocId;
-//				if (callback) {
-//					callback.call(w, true);
-//				}
-//				
-//				w.event('documentSaved').publish();
-//			},
-//			error: function() {
-//				w.dialogManager.show('message', {
-//					title: 'Error',
-//					msg: 'An error occurred and '+w.currentDocId+' was not saved.',
-//					type: 'error'
-//				});
-//				if (callback) {
-//					callback.call(w, false);
-//				}
-//			}
-//		});
 	};
 	
 	del.getHelp = function(tagName) {

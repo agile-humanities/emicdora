@@ -44,6 +44,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
 
 
 
+
   // This is where we add our own init scripts, since we indicated we would with
   // the vars flag '$variables['custom_js'] = TRUE'.
   drupal_add_css($tei_editor_module_path . "/css/tei_editor.css");
@@ -57,6 +58,8 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   // Include common JS/CSS for critical editions and shared canvas
   islandora_image_annotation_include_common_js();
   islandora_image_annotation_include_common_css();
+
+  drupal_add_js($islandora_markup_editor_path . '/CWRC-Writer/src/js/lib/jquery/jquery-ui-1.10.3.custom.js');
 
   drupal_add_js("$tei_editor_module_path/js/loader/js/loading.js");
   drupal_add_css("$tei_editor_module_path/js/loader/css/loading.css");

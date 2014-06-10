@@ -1,6 +1,7 @@
 $(window).load(function() {
-  $('#loading').hide();
   $("#iframe_replacement").css({ opacity: 1 });
+    $('#loading').hide();
+  console.log(window.document);
 });
 
 $(document).ready(function() {

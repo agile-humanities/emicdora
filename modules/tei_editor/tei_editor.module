@@ -25,6 +25,15 @@ function tei_editor_menu() {
     'access arguments' => array(3),
     'file' => 'includes/callbacks.inc',
   );
+  $items['islandora/tei_editor/save_data/%islandora_object'] = array(
+    'title' => 'Save TEI Data',
+    'page callback' => 'tei_editor_savedata',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/callbacks.inc',
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_ADD_DS, 3),
+  );
   return $items;
 }
 

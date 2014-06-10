@@ -17,7 +17,6 @@ function tei_editor_setup(AbstractObject $fedora_object) {
   module_load_include('inc', 'islandora_basic_collection', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
-  dsm(array(), "hit setup");
   $stroke_width = variable_get('image_annotation_annotation_stroke_width', '1%');
   $editor_object_relationships = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageOf');
 
@@ -50,4 +49,49 @@ function tei_editor_setup(AbstractObject $fedora_object) {
   $results['create_entity_callbacks']['people'] = url('islandora/object/' . $person_entity_collection . '/manage/overview/ingest');
 
   drupal_json_output($results);
+}
+
+/**
+ * Menu callback for the editor to persist TEI data.
+ *
+ * @param AbstractObject $fedora_object
+ *   The fedora object
+ */
+function tei_editor_savedata(AbstractObject $fedora_object) {
+  module_load_include('inc', 'islandora_markup_editor', 'includes/utilities');
+  try {
+    parse_str(file_get_contents('php://input'), $put);
+    // @codingStandardsIgnoreStart
+    $data = $put['text'];
+    $cwrc = str_replace('<br>', '<br />', $data);
+    // @codingStandardsIgnoreEnd
+    $cwrc = str_replace('&', '&amp;', $cwrc);
+    // Update ds.
+    if (!isset($fedora_object["CWRC"])) {
+      $obj_ds = $fedora_object->constructDatastream('CWRC', 'M');
+      $fedora_object->ingestDatastream($obj_ds);
+    }
+    else {
+      $obj_ds = $fedora_object["CWRC"];
+    }
+    $obj_ds->setContentFromString($cwrc);
+
+    // Sanitize the schema URL, incase it gets managled during transport.
+    $schema = html_entity_decode(stripslashes(check_plain($put['schema'])), ENT_QUOTES, 'UTF-8');
+    islandora_markup_editor_add_tei_processing_instruction($fedora_object, $schema, "CWRC");
+
+    drupal_json_output($cwrc);
+  }
+  catch (Exception $e) {
+    watchdog('islandora_markup_editor',
+      'Failed to set CWRC datastream content for pid @pid</br>code: @code<br/>message: @msg',
+      array(
+        '@pid' => $fedora_object->id,
+        '@code' => $e->getCode(),
+        '@msg' => $e->getMessage(),
+      ),
+      WATCHDOG_ERROR
+    );
+    drupal_json_output(array("Error" => "An error occured updating "));
+  }
 }
