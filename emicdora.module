@@ -329,6 +329,7 @@ function emicdora_block_view($delta = '') {
   }
   // Build the block uses paths relative to our current path.
   $path = current_path();
+
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
@@ -428,10 +429,12 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      $links[] = array(
-        'title' => 'Edit',
-        'href' => $path,
-      );
+      if (module_exists('tei_editor')) {
+        $links[] = array(
+          'title' => 'Edit',
+          'href' => $path . '/tei_editor/edit',
+        );
+      }
       $links[] = array(
         'title' => 'Consolidate',
         'href' => $path,
