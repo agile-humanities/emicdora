@@ -87,7 +87,7 @@ var islandoraCWRCWriter = {
     Extensions: {
       text_image_linking: function() {
         var img_local = Drupal.settings.basePath +
-            Drupal.settings.islandora_critical_edition.module_base;
+            Drupal.settings.islandora_markup_editor.module_base;
         if ($('#editor_addtxtimglnk').length == 0) {
           // Hack to add the image text linking to the tinymce toolbar.
           $('#editor_toolbar1 tr td:first').after('<td style="position: relative">' +
@@ -171,7 +171,7 @@ var islandoraCWRCWriter = {
 function get_schema_id_for_pid(schema_pid, writer) {
   if (schema_pid) {
     for (var key in writer.schemas) {
-      // if we find the right pid, and the schema is valid, use that schema. && Drupal.settings.islandora_critical_edition.schema_pref['valid'] == 1
+      // if we find the right pid, and the schema is valid, use that schema. && Drupal.settings.islandora_markup_editor.schema_pref['valid'] == 1
       if (writer.schemas[key]['pid'] == schema_pid) {
         return writer.schemas[key];
       }

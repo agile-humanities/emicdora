@@ -20,7 +20,7 @@
         $('#cwrc_wrapper').layout().resizeAll();
       });
       $("#bookview_button").click(function(){
-          location.href = Drupal.settings.basePath + 'islandora/object/' + Drupal.settings.islandora_critical_edition.book_pid;
+          location.href = Drupal.settings.basePath + 'islandora/object/' + Drupal.settings.islandora_markup_editor.book_pid;
       });
     }
   };

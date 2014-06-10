@@ -10,8 +10,11 @@
  *   The image annotation pane, as themed by image annotation.
  */
 ?>
-<div class="islandora-crited-wrapper">
+
+<div id="islandora-crited-wrapper-id" class="islandora-crited-wrapper">
   <div id="iframe_replacement" class=".iframe_replacement" style="height: 100%">
+
+
     <input id="full-window-button" type="button" value="<?php print t('Full Window'); ?>" />
     <?php if (!isset($suppress_button)): ?>
     <?php $label = t('Return to Book View'); ?>
@@ -19,9 +22,10 @@
     <?php endif; ?>
 
     <div id="cwrc_wrapper" class="cwrc_wrapper islandora-crited-iframe-wrapper" style="width: 100%; height:600px">
+
       <div id="header" class="ui-layout-north">
         <!-- TODO: We need new full page buttons. So much going on in the header right now -->
-        <div id="page_selector">Loading....</div>
+        <div id="page_selector">Loading......</div>
         <div id="header-inner">
           <div class="header-nav">
             <a href="" id="page-prev"></a>
@@ -68,7 +72,7 @@
         <button id="create_annotation" class="menu_button">Annotate</button>
         <div class="image-annotation-wrapper">
           <!-- Persist a single player and build new interface to it -->
-          <div id="canvas-body-wrapper" style="width: 100%; height: 800px;">
+          <div id="canvas-body-wrapper" style="width: 100%; height: 600px;">
             <?php print $anno_img_pane; ?>
             <!--  At least one visible image needed for GData transport -->
             <div class="shared-canvas-logo" style="font-size: 8pt">

@@ -207,7 +207,6 @@ var CustomDelegator = function(writer) {
 	del.validate = function(callback) {
 		var docText = w.converter.getDocumentContent(false);
 		var schemaUrl = w.schemaManager.schemas[w.schemaManager.schemaId].url;
-		
 		$.ajax({
 			url: Drupal.settings.islandora_markup_editor.validate_path,
 			type: 'POST',
@@ -245,14 +244,16 @@ var CustomDelegator = function(writer) {
 	 * @param docName
 	 */
 	del.loadDocument = function(callback) {
+		update_loading_text("Loading Document");
 		$.ajax({
-			url: Drupal.settings.basePath + 'islandora/object/' + PID + '/datastream/CWRC/view',
+			url: Drupal.settings.basePath + 'islandora/object/' + PID + '/datastream/CWRC/view',//w.baseUrl+'editor/documents/'+w.currentDocId,
 			type: 'GET',
 			async: false,
 			success: function(doc, status, xhr) {
 				window.location.hash = '#'+w.currentDocId;
+				update_loading_text("Document Loaded");
 				callback.call(w, doc);
-				if (typeof Drupal.settings.islandora_critical_edition.source_type != 'string') {
+				if (typeof Drupal.settings.islandora_markup_editor.source_type != 'string') {
 			          islandoraCWRCWriter.Writer.Extensions.text_image_linking();
 			    }
 				// Resize the annotation pane when all is said and done.
@@ -289,7 +290,7 @@ var CustomDelegator = function(writer) {
 		var docText = w.converter.getDocumentContent(true);
 		
 		$.ajax({
-			url : window.parent.Drupal.settings.basePath + 'islandora/tei_editor/save_data/' + PID,
+			url : window.parent.Drupal.settings.basePath + 'islandora/cwrcwriter/save_data/' + PID,
 			type: 'PUT',
 			dataType: 'json',
 		    data: {

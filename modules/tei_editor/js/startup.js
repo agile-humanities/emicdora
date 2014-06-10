@@ -1,10 +1,11 @@
 var cwrc_params = {};
 
 function cwrcWriterInit(Writer, Delegator) {
-	
+	update_loading_text("Loading");
 	writer = null;
 	function doInit() {
 		writer = new Writer(config);
+		update_loading_text("Setting up Writer");
 		writer.event('writerInitialized').subscribe(function(writer) {
 			// load modules then do the setup
 			require(['modules/entitiesList', 'modules/relations',
@@ -21,8 +22,9 @@ function cwrcWriterInit(Writer, Delegator) {
 		// Call out to our 'init.js' script, fixes image annotation size.
 		resizeCanvas();
 	}
-	PID = Drupal.settings.islandora_critical_edition.page_pid;
-	//cwrc_params = {};
+	PID = Drupal.settings.islandora_markup_editor.page_pid;
+	console.log(PID);
+	cwrc_params = {};
 	window.location.hash = '#' + PID;
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
@@ -32,11 +34,12 @@ function cwrcWriterInit(Writer, Delegator) {
 	  delegator: Delegator,
 	  cwrcRootUrl: moduleUrl + '/CWRC-Writer/src/',
 	  buttons1: 'schematags,|,addperson,addplace,adddate,addevent,addorg,addcitation,addtitle,addcorrection,addkeyword,addlink,|,editTag,removeTag,|,addtriple,|,viewsource,editsource,|,validate,savebutton,loadbutton',
-	  schemas: Drupal.settings.islandora_critical_edition.schema_object['schemas']
+	  schemas: Drupal.settings.islandora_markup_editor.schema_object['schemas']
 	};
-	
+	console.log(config);
+	update_loading_text("Gathering project info");
 	$.ajax({
-		url: Drupal.settings.basePath + 'islandora/cwrcwriter/setup/' + PID,
+		url: Drupal.settings.basePath + 'islandora/tei_editor/setup/' + PID,
 		async: false,
 		timeout: 3000,
 		success: function(data, status, xhr) {
@@ -44,15 +47,17 @@ function cwrcWriterInit(Writer, Delegator) {
 		        var usr_schema;
 		        config.project = data;
 		        doInit();
-		        if (Drupal.settings.islandora_critical_edition.schema_pref['valid'] == 1) {
-		          usr_schema = get_schema_id_for_pid(Drupal.settings.islandora_critical_edition.schema_pref['schema_pid'], writer);
-		        } else {
+//		        if (Drupal.settings.islandora_markup_editor.schema_pref['valid'] == 1) {
+//		          usr_schema = get_schema_id_for_pid(Drupal.settings.islandora_markup_editor.schema_pref['schema_pid'], writer);
+//		        } else {
 		          usr_schema = new Array();
 		          usr_schema['name'] = "tei";
-		        }
+		        //}
 		        // Initilize additional UI Elements.
+		        update_loading_text("Building display");
 		        init_ui();
 		        resizeCanvas();
+		        update_loading_text("Building Image Viewer");
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
 				$(window).on('resize', doResize);
 				
@@ -337,7 +342,7 @@ function cwrcWriterInit(Writer, Delegator) {
     $('#stroke-width-wrapper').append('<select id="stroke_width" />');
     $('#stroke_width').append(s_options);
     $('#shared-canvas-logo-img').attr('src',Drupal.settings.basePath +
-      Drupal.settings.islandora_critical_edition.image_anno_img + 'small-logo.png');
+      Drupal.settings.islandora_markup_editor.image_anno_img + 'small-logo.png');
   }
 
   // @XXX openColumn and setReturnParams may not be necessary dependent on theme
