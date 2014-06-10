@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * This is the template file for the critical edition object
+ * This is the template file for the tei_editor object
  *
  * Available variables:
  * - $anno_list_pane (html):
