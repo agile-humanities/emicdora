@@ -40,7 +40,7 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
   );
 
   $members = emicdora_get_members($object->id);
-  $versionable_objects = array_keys($members, 'islandora:versionableObjectCModel');
+  $versionable_objects = array_keys($members, 'islandora:versionCModel');
   $transcriptions = array();
   foreach ($versionable_objects as $versionable_object) {
     $vo_members = emicdora_get_members($versionable_object);
