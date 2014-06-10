@@ -14,7 +14,7 @@
  *   The Drupal form state.
  */
 function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $object) {
-  module_load_include('inc', 'collation', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   drupal_set_title($object->label);
