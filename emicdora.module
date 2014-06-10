@@ -156,21 +156,6 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-    'emicdora/contextual-links/collation/%islandora_object' => array(
-      'title' => 'Collations',
-      'page callback' => TRUE,
-      'access callback' => TRUE,
-    ),
-    'emicdora/contextual-links/collation/%islandora_object/add' => array(
-      'title' => 'Add New Collation',
-      'file' => 'includes/add_collation.form.inc',
-      'page callback' => 'emicdora_add_collation_form',
-      'page arguments' => array(3),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'emicdora_workbench',
@@ -327,13 +312,6 @@ function emicdora_block_configure($delta = '') {
       );
       break;
 
-    case 'collations':
-      $form['emicdora_collation_block_count'] = array(
-        '#type' => 'select',
-        '#title' => t('Number of collations to display'),
-        '#default_value' => variable_get('emicdora_collation_block_count', 10),
-        '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
-      );
   }
   return $form;
 }
@@ -494,38 +472,6 @@ function emicdora_block_view($delta = '') {
       );
       break;
 
-    case 'collations':
-      module_load_include('inc', 'emicdora', 'includes/calliope');
-      $mvds = emicdora_calliope_find_mvds($critical_edition);
-      $links = array();
-      // Hardcoded for testing, must be removed.
-      $links[] = array(
-        'title' => 'Imaginary Collation',
-        'href' => "collationtools/compare",
-        'fragment' => strtolower('does not exist'),
-      );
-      foreach ($mvds as $mvd) {
-        $links[] = array(
-          'title' => $mvd['name'],
-          'href' => "collationtools/compare",
-          'fragment' => $mvd['name'],
-        );
-      }
-      $block['subject'] = t('Collations');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-        '#contextual_links' => array(
-          'emicdora' => array(
-            'emicdora/contextual-links/collation',
-            array($critical_edition->id),
-          ),
-        ),
-      );
-      if (empty($mvds)) {
-
-      }
-      break;
   }
   return $block;
 }

@@ -6,6 +6,29 @@
  */
 
 /**
+ * Implements hook_menu().
+ */
+function collation_menu() {
+  return array(
+    'collation/contextual-links/collation/%islandora_object' => array(
+      'title' => 'Collations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'collation/contextual-links/collation/%islandora_object/add' => array(
+      'title' => 'Add New Collation',
+      'file' => 'includes/mvd.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_mvd_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+  );
+}
+
+/**
  * Implements hook_islandora_required_objects().
  */
 function collation_islandora_required_objects(IslandoraTuque $connection) {
@@ -30,4 +53,88 @@ function collation_islandora_required_objects(IslandoraTuque $connection) {
       ),
     ),
   );
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function collation_block_info() {
+  return array(
+    'collations' => array(
+      'info' => t('Collations'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -20,
+      'status' => 1,
+      'region' => 'sidebar_first',
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function collation_block_configure($delta = '') {
+  $form = array();
+  switch ($delta) {
+    case 'collations':
+      $form['emicdora_collation_block_count'] = array(
+        '#type' => 'select',
+        '#title' => t('Number of collations to display'),
+        '#default_value' => variable_get('emicdora_collation_block_count', 10),
+        '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
+      );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function collation_block_view($delta = '') {
+  module_load_include('inc', 'collation', 'includes/utilities');
+  // Check to see if we are on a critical edition object.
+  $critical_edition = menu_get_object('islandora_object', 2);
+  $is_critical_edition = is_object($critical_edition) && emicdora_is_critical_edition($critical_edition);
+  if (!$is_critical_edition) {
+    return array();
+  }
+  // Build the block uses paths relative to our current path.
+  $path = current_path();
+  $block = array();
+  switch ($delta) {
+
+    case 'collations':
+      module_load_include('inc', 'collation', 'includes/calliope');
+      $mvds = emicdora_calliope_find_mvds($critical_edition);
+      $links = array();
+      // Hardcoded for testing, must be removed.
+      $links[] = array(
+        'title' => 'Imaginary Collation',
+        'href' => "collationtools/compare",
+        'fragment' => strtolower('does not exist'),
+      );
+      foreach ($mvds as $mvd) {
+        $links[] = array(
+          'title' => $mvd['name'],
+          'href' => "collationtools/compare",
+          'fragment' => $mvd['name'],
+        );
+      }
+      $block['subject'] = t('Collations');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'collation/contextual-links/collation',
+            array($critical_edition->id),
+          ),
+        ),
+      );
+
+      break;
+  }
+  return $block;
 }
