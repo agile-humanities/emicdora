@@ -19,14 +19,12 @@ function tei_editor_setup(AbstractObject $fedora_object) {
 
   dsm(array(), "hit setup");
   $stroke_width = variable_get('image_annotation_annotation_stroke_width', '1%');
-  $critical_edition_relationships = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageOf');
+  $editor_object_relationships = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageOf');
 
-  dsm($critical_edition_relationships, "relationships");
-
-  $critical_edition = $critical_edition_relationships[0]['object']['value'];
-  $critical_edition_object = islandora_object_load($critical_edition);
-  $title = $critical_edition_object->label;
-  $page_results = islandora_paged_content_get_pages($critical_edition_object);
+  $editor_object_pid = $editor_object_relationships[0]['object']['value'];
+  $editor_object = islandora_object_load($editor_object_pid);
+  $title = $editor_object->label;
+  $page_results = islandora_paged_content_get_pages($editor_object);
   $pages = array();
   foreach ($page_results as $result) {
     $pages[$result['page']] = $result['pid'];
@@ -37,7 +35,7 @@ function tei_editor_setup(AbstractObject $fedora_object) {
   $results['position'] = $position;
   $results['pages'] = $pages;
   $results['title'] = $title;
-  $results['no_edit'] = !islandora_critical_edition_edit_cwrc_access($fedora_object);
+  $results['no_edit'] = 1;
   $results['page_count'] = count($pages);
   $results['islandora_anno_stroke_width'] = $stroke_width;
 

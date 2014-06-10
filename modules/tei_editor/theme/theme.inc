@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_preprocess_islandora_critical_edition().
+ * Implements hook_preprocess_tei_editor_viewer().
  *
  * Prepares variables for the CWRC viewer.
  * $variables['islandora_object']
@@ -22,7 +22,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
 
 
-  // Theme our custom components to the critical_edition_module viewer.
+  // Theme our custom components to the tei_editor viewer.
   $variables['anno_list_pane'] = theme('islandora_anno_list_pane');
   $variables['anno_img_pane'] = theme('islandora_anno_image_pane');
   $variables['images_path'] = url($islandora_markup_editor_path . '/CWRC-Writer/src/img/',
