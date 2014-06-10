@@ -10,15 +10,6 @@
  */
 function collation_menu() {
   return array(
-    'admin/islandora/collation' => array(
-      'title' => 'EMiC (Editing Modernism in Canada)',
-      'description' => 'Configure Editing Modernism in Canada.',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('collation_admin_settings_form'),
-      'access arguments' => array('administer site configuration'),
-      'file' => 'includes/admin.form.inc',
-      'type' => MENU_NORMAL_ITEM,
-    ),
     'collation/contextual-links/collation/%islandora_object' => array(
       'title' => 'Collations',
       'page callback' => TRUE,
@@ -146,4 +137,35 @@ function collation_block_view($delta = '') {
       break;
   }
   return $block;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function collation_form_emicdora_admin_settings_form_alter(&$form, &$form_state) {
+  $form['repository'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Mongo Configuration',
+    '#collapsed' => FALSE,
+    '#collapsible' => TRUE,
+  );
+
+  $form['repository']['emicdora_mongo_port'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Port"),
+    '#description' => t("Mongo Database Port"),
+    '#default_value' => variable_get('emicdora_mongo_port', "27017"),
+  );
+  $form['repository']['emicdora_mongo_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Address"),
+    '#description' => t("Mongo Database server address"),
+    '#default_value' => variable_get('emicdora_mongo_host', "localhost"),
+  );
+  $form['repository']['emicdora_mongo_db'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Database name"),
+    '#description' => t("Mongo Database instance name"),
+    '#default_value' => variable_get('emicdora_mongo_db', "test"),
+  );
 }
