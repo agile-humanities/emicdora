@@ -529,6 +529,8 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $transcription_content_model,
         $editions,
         $coop,
+        $schema_collection,
+        $sample_schema,
       ),
     ),
   );
