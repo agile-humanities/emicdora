@@ -480,7 +480,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
   ));
   $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
 
-    // Schema Collection.~~~~~~~~~~~~~NEW
+  // Schema Collection.
   $schema_collection = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:tei_schema_collection',
     'label' => 'Schema Collection',
