@@ -86,8 +86,13 @@ var islandoraCWRCWriter = {
     },
     Extensions: {
       text_image_linking: function() {
+        console.log("clicked");
+       
         var img_local = Drupal.settings.basePath +
             Drupal.settings.islandora_markup_editor.module_base;
+        if ($('#editor_addtxtimglnk').length != 0) {
+          
+        }
         if ($('#editor_addtxtimglnk').length == 0) {
           // Hack to add the image text linking to the tinymce toolbar.
           $('#editor_toolbar1 tr td:first').after('<td style="position: relative">' +
@@ -152,7 +157,11 @@ var islandoraCWRCWriter = {
             query: query,
             w: writer
           };
-          text_image_anno_dialog(data);
+          if($('#create_annotation_text_box').length != 0) {
+            $('#create_annotation_text_box').remove();
+          }
+          var diag = text_image_anno_dialog(data);
+          diag.show(data);
         }
         else {
           console.log("waaa??");
