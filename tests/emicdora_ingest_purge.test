@@ -50,7 +50,7 @@ class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
     $label = $this->randomName(16);
     $suffix = $this->randomName(16);
     $collection_pid = 'islandora:' . $suffix;
-    $this->createTestCollection($label, 'islandora:criticalEditionCModel', $collection_pid);
+    $this->createTestCollection($label, 'islandora:criticalEditionContainerCModel', $collection_pid);
 
     // @todo Set configuration, when one is defined.
     $edit = array();
@@ -59,7 +59,7 @@ class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
     // Attempts to create the book.
     $path = 'islandora/object/' . $collection_pid . '/manage/overview/ingest';
     $edit = array(
-      'models' => 'islandora:criticalEditionCModel',
+      'models' => 'islandora:criticalEditionContainerCModel',
     );
     $this->drupalPost($path, $edit, t('Ingest'));
     $this->assertText('New Object', 'Critical Edition was created', 'Islandora');

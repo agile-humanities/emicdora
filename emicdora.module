@@ -7,6 +7,10 @@
 
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
+define('EMICDORA_CREATE_EDITION', 'emic create edition');
+define('EMICDORA_READ_EDITION', 'emic read edition');
+define('EMICDORA_MODIFY_EDITION', 'emic modify edition');
+define('EMICDORA_DELETE_EDITION', 'emic delete edition');
 
 /**
  * Implements hook_menu().
@@ -143,7 +147,7 @@ function emicdora_menu() {
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/transcription/%islandora_object/add' => array(
-      'title' => 'Add New',
+      'title' => 'Add New Transcription',
       'file' => 'includes/add_transcription.form.inc',
       'page callback' => 'emicdora_add_transcription_form',
       'page arguments' => array(3),
@@ -185,7 +189,22 @@ function emicdora_menu_alter(array &$items) {
  */
 function emicdora_permission() {
   return array(
-    // @todo Permissions, etc.
+    EMICDORA_CREATE_EDITION => array(
+      'title' => t('Create Emic Editions'),
+      'description' => t('Create EMiC Critical Editions'),
+    ),
+    EMICDORA_READ_EDITION => array(
+      'title' => t('Read Emic Editions'),
+      'description' => t('Read EMiC Critical Editions'),
+    ),
+    EMICDORA_MODIFY_EDITION => array(
+      'title' => t('Modify Emic Editions'),
+      'description' => t('Modify EMiC Critical Editions'),
+    ),
+    EMICDORA_DELETE_EDITION => array(
+      'title' => t('Delete Emic Editions'),
+      'description' => t('Delete EMiC Critical Editions'),
+    ),
   );
 }
 
@@ -194,7 +213,7 @@ function emicdora_permission() {
  */
 function emicdora_theme() {
   return array(
-    // @todo Theme functions, etc.
+      // @todo Theme functions, etc.
   );
 }
 
@@ -218,6 +237,15 @@ function emicdora_block_info() {
       'visibility' => BLOCK_VISIBILITY_LISTED,
       'pages' => 'islandora/object/*',
       'weight' => -30,
+      'status' => 1,
+      'region' => 'sidebar_first',
+    ),
+    'collations' => array(
+      'info' => t('Collations'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
+      'weight' => -20,
       'status' => 1,
       'region' => 'sidebar_first',
     ),
@@ -283,6 +311,7 @@ function emicdora_block_configure($delta = '') {
         '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
       );
       break;
+
   }
   return $form;
 }
@@ -442,6 +471,7 @@ function emicdora_block_view($delta = '') {
         ),
       );
       break;
+
   }
   return $block;
 }
@@ -471,9 +501,9 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
   // Critical Edition Content Model.
-  $critical_edition_content_model = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:criticalEditionCModel',
-    'label' => 'Critical Edition Content Model',
+  $critical_edition_container_content_model = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:criticalEditionContainerCModel',
+    'label' => 'Critical Edition Container Content Model',
     'model' => 'fedora-system:ContentModel-3.0',
     'datastreams' => array(
       'DS-COMPOSITE-MODEL' => array(
@@ -550,7 +580,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     'emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
       'objects' => array(
-        $critical_edition_content_model,
+        $critical_edition_container_content_model,
         $version_content_model,
         $tei_rdf_content_model,
         $transcription_content_model,
@@ -614,7 +644,7 @@ function emicdora_islandora_xml_form_builder_forms() {
 /**
  * Implements hook_CMODEL_islandora_view_object().
  */
-function emicdora_islandora_criticalEditionCModel_islandora_view_object(AbstractObject $object) {
+function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object(AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_critical_edition_breadcrumbs($object);

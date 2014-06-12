@@ -17,5 +17,6 @@
  *   The Drupal form definition.
  */
 function emicdora_admin_settings_form(array $form, array &$form_state) {
+  $form = array();
   return system_settings_form($form);
 }
