@@ -70,6 +70,15 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
+    'islandora/object/%islandora_object/%islandora_object' => array(
+      'title callback' => 'emicdora_drupal_title',
+      'title arguments' => array(2),
+      'page callback' => 'islandora_view_object',
+      'page arguments' => array(2),
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
     'islandora/object/%islandora_object/manage/apparatus' => array(
       'title' => 'Apparatus',
       'file' => 'includes/apparatus.form.inc',
@@ -311,7 +320,6 @@ function emicdora_block_configure($delta = '') {
         '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
       );
       break;
-
   }
   return $form;
 }
@@ -323,6 +331,13 @@ function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   // Check to see if we are on a critical edition object.
   $critical_edition = menu_get_object('islandora_object', 2);
+  $version = menu_get_object('islandora_object', 3);
+  if ($version) {
+    $editors = emicdora_get_members($version->id, 'islandora:tei-rdfCModel');
+    if (!empty($editors)) {
+      $editor = key($editors);
+    }
+  }
   $is_critical_edition = is_object($critical_edition) && emicdora_is_critical_edition($critical_edition);
   if (!$is_critical_edition) {
     return array();
@@ -429,10 +444,10 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      if (module_exists('tei_editor')) {
+      if (module_exists('tei_editor') && isset($editor)) {
         $links[] = array(
           'title' => 'Edit',
-          'href' => $path . '/tei_editor/edit',
+          'href' => "islandora/object/$editor/tei_editor/edit",
         );
       }
       $links[] = array(
@@ -448,10 +463,14 @@ function emicdora_block_view($delta = '') {
         'href' => $path,
       );
       $block['subject'] = t('TEI');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-      );
+      if ($version) {
+        $block['content'] = array(
+          array(
+            '#theme' => 'links',
+            '#links' => $links,
+          ),
+        );
+      }
       break;
 
     case 'transcriptions':
@@ -474,7 +493,6 @@ function emicdora_block_view($delta = '') {
         ),
       );
       break;
-
   }
   return $block;
 }
@@ -725,4 +743,19 @@ function emicdora_critical_edition_versions(AbstractObject $object) {
   $output = islandora_solr('*:*');
   emicdora_set_source_breadcrumbs($object);
   return $output;
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
+ */
+function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
+  $url_parts = explode('/', $_GET['q']);
+  if (isset($url_parts[3]) && $url_parts[3] == 'versions') {
+    $parent_pid = $url_parts[2];
+    $parent_object = islandora_object_load($parent_pid);
+    if ($parent_object && in_array('islandora:criticalEditionContainerCModel', $parent_object->models)) {
+      $version_pid = $search_results['PID'];
+      $search_results['object_url'] = "islandora/object/$parent_pid/$version_pid";
+    }
+  }
 }

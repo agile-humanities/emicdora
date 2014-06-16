@@ -291,16 +291,6 @@ function emicdora_calliope_get_file($pid) {
  *
  * @param AbstractObject $critical_edition_object
  *   Object representing Critical Edition
- *
- * @return array
- *   All values associated with all MVD's attached to this Critical Edition
- */
-
-/**
- * Pulls all MVD metadata from Mongo.
- *
- * @param AbstractObject $critical_edition_object
- *   Object representing Critical Edition
  * @param string $sort
  *   Sort type
  * @param int $limit
