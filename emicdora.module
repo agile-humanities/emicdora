@@ -61,7 +61,7 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    // Versions filtered by critical edition and source.
+    // Versions filtered by critical edition and source. May not be needed.
     'islandora/object/%islandora_object/%islandora_object/versions' => array(
       'title' => 'Sources',
       'context' => MENU_CONTEXT_PAGE,
@@ -330,18 +330,35 @@ function emicdora_block_configure($delta = '') {
 function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   // Check to see if we are on a critical edition object.
-  $critical_edition = menu_get_object('islandora_object', 2);
-  $version = menu_get_object('islandora_object', 3);
-  if ($version) {
-    $editors = emicdora_get_members($version->id, 'islandora:tei-rdfCModel');
-    if (!empty($editors)) {
-      $editor = key($editors);
+  $object = menu_get_object('islandora_object', 2);
+  $versionable_object = NULL;
+  $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
+  if (!$is_critical_edition) {
+    $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
+    if (!$is_versionable_object) {
+      return array();
+    }
+    else {
+      $versionable_object = $object;
+      $critical_editions = array_merge(
+          $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection'), $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf'));
+      if (empty($critical_editions)) {
+        return array();
+      }
+      $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
+      $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
+      if (!empty($editors)) {
+        $editor_pid = key($editors);
+        $editor = islandora_object_load($editor_pid);
+        $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf');
+        $source_object = $source_objects[0]['object']['value'];
+      }
     }
   }
-  $is_critical_edition = is_object($critical_edition) && emicdora_is_critical_edition($critical_edition);
-  if (!$is_critical_edition) {
-    return array();
+  else {
+    $critical_edition = $object;
   }
+
   // Build the block uses paths relative to our current path.
   $path = current_path();
 
@@ -431,7 +448,40 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'operations':
-      $block['subject'] = t('Operations');
+      if ($versionable_object) {
+
+        $links = array();
+        $links[] = array(
+          'title' => 'View',
+          'href' => "islandora/object/{$versionable_object->id}",
+        );
+        $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
+        if ($editor) {
+          $links[] = array(
+            'title' => 'View Source Object',
+            'href' => "islandora/object/$source_object",
+          );
+        }
+        if (user_access(EMICDORA_MODIFY_EDITION)) {
+          $links[] = array(
+            'title' => 'Edit Metatdata',
+            'href' => "islandora/edit_form/{$versionable_object->id}/MODS",
+          );
+        }
+        if (user_access(EMICDORA_DELETE_EDITION)) {
+          $links[] = array(
+            'title' => 'Delete',
+            'href' => "islandora/object/{$versionable_object->id}/delete",
+          );
+        }
+        $block['subject'] = t('Operations');
+        $block['content'] = array(
+          array(
+            '#theme' => 'links',
+            '#links' => $links,
+          ),
+        );
+      }
       break;
 
     case 'tei':
@@ -444,7 +494,7 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      if (module_exists('tei_editor') && isset($editor)) {
+      if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
         $links[] = array(
           'title' => 'Edit',
           'href' => "islandora/object/$editor/tei_editor/edit",
@@ -463,7 +513,7 @@ function emicdora_block_view($delta = '') {
         'href' => $path,
       );
       $block['subject'] = t('TEI');
-      if ($version) {
+      if ($versionable_object) {
         $block['content'] = array(
           array(
             '#theme' => 'links',
@@ -666,9 +716,12 @@ function emicdora_islandora_xml_form_builder_forms() {
  * Implements hook_CMODEL_islandora_view_object().
  */
 function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object(AbstractObject $object) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  $version_object = menu_get_object('islandora_object', 3);
   emicdora_set_critical_edition_breadcrumbs($object);
+
   $datastreams = emicdora_get_apparatus_datastreams($object);
   $content = array(
     'apparatus' => array(
@@ -687,7 +740,15 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       ),
     );
   }
-  return $content;
+  return array('' => $content);
+}
+
+/**
+ * Implements hook_CMODEL_islandora_view_object().
+ */
+function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
+  //placeholder only
+  return array('' => "Morgan's viewer goes here");
 }
 
 /**
@@ -748,7 +809,7 @@ function emicdora_critical_edition_versions(AbstractObject $object) {
 /**
  * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
  */
-function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
+function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter_disabled(&$search_results, $query_processor) {
   $url_parts = explode('/', $_GET['q']);
   if (isset($url_parts[3]) && $url_parts[3] == 'versions') {
     $parent_pid = $url_parts[2];
