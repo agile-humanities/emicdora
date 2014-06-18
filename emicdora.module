@@ -329,6 +329,7 @@ function emicdora_block_view($delta = '') {
   }
   // Build the block uses paths relative to our current path.
   $path = current_path();
+
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
@@ -420,6 +421,7 @@ function emicdora_block_view($delta = '') {
 
     case 'tei':
       $links = array();
+
       $links[] = array(
         'title' => 'Reading Transcription',
         'href' => $path,
@@ -428,10 +430,12 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      $links[] = array(
-        'title' => 'Edit',
-        'href' => $path,
-      );
+      if (module_exists('tei_editor')) {
+        $links[] = array(
+          'title' => 'Edit',
+          'href' => $path . '/tei_editor/edit',
+        );
+      }
       $links[] = array(
         'title' => 'Consolidate',
         'href' => $path,
@@ -448,6 +452,12 @@ function emicdora_block_view($delta = '') {
       $block['content'] = array(
         '#theme' => 'links',
         '#links' => $links,
+      );
+      $block['content']["text_body"] = array(
+        '#type' => 'textfield',
+        '#title' => t('Enter your text here in WYSIWYG format'),
+        '#description' => t('Enter your text here in WYSIWYG format'),
+        '#default_value' => variable_get('text_variable', ""),
       );
       break;
 
@@ -576,6 +586,46 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+
+  // Schema Collection.
+  $schema_collection = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:tei_schema_collection',
+    'label' => 'Schema Collection',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        'file' => "$module_path/data/objects/islandora_critical_edition_schema_collection_policy.xml",
+      ),
+    ),
+  ));
+  $schema_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+
+  // Sample Schema.
+  $sample_schema = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:tei_sample_schema',
+    'label' => 'CWRC_EMiC_TEI_Schema',
+    'model' => 'islandora:criticaleditionschemaCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/schema-icon.png",
+        'mimetype' => 'image/png',
+      ),
+      'RDF-SCHEMA' => array(
+        'file' => "$module_path/modules/tei_editor/schemas/CWRC_EMiC_TEI.rng",
+        'mimetype' => 'application/rdf+xml',
+      ),
+      'RDF-CSS' => array(
+        'file' => "$module_path/modules/tei_editor/schemas/tei.css",
+        'mimetype' => 'text/css',
+      ),
+    ),
+  ));
+  $sample_schema->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:tei_schema_collection');
+
   return array(
     'emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
@@ -586,6 +636,8 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $transcription_content_model,
         $editions,
         $coop,
+        $schema_collection,
+        $sample_schema,
       ),
     ),
   );
