@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function tei_editor_menu() {
+  $items['islandora/object/%islandora_object/tei_editor/edit'] = array(
+    'title' => 'EMiCdora TEI Editor',
+    'page callback' => 'tei_editor_view_editor',
+    'page arguments' => array(2),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['islandora/tei_editor/setup/%islandora_object'] = array(
+    'title' => 'TEI Editor Setup',
+    'page callback' => 'tei_editor_setup',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 3),
+    'file' => 'includes/callbacks.inc',
+  );
+  $items['islandora/tei_editor/save_data/%islandora_object'] = array(
+    'title' => 'Save TEI Data',
+    'page callback' => 'tei_editor_savedata',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/callbacks.inc',
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_ADD_DS, 3),
+  );
+  return $items;
+}
+
+/**
+ * Page callback for the tei_editor.
+ *
+ * @param AbstractObject $islandora_object
+ *   The object the tei editor will operate on.
+ *
+ * @return string
+ *   An HTML string representing the themed output.
+ */
+function tei_editor_view_editor(AbstractObject $islandora_object) {
+  return theme('tei_editor_viewer', array('islandora_object' => $islandora_object));
+}
+
+/**
+ * Implements hook_theme().
+ */
+function tei_editor_theme($existing, $type, $theme, $path) {
+  return array(
+    'tei_editor_viewer' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/tei-editor-viewer',
+      'variables' => array('islandora_object' => NULL),
+    ),
+  );
+}
