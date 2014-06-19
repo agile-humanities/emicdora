@@ -1,0 +1,65 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function versionable_object_viewer_theme($existing, $type, $theme, $path) {
+  return array(
+    'versionable_object_viewer' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/versionable_object_viewer',
+      'variables' => array('islandora_object' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function versionable_object_viewer_library() {
+  $module_path = drupal_get_path('module', 'versionable_object_viewer');
+  $items = array();
+  $items['jq_uilayout'] = array(
+    'title' => t('jQuery UILayout'),
+    'version' => '1.0',
+    'js' => array(
+      "$module_path/js/jquery/jquery.layout-latest.min.js" => array(),
+      "$module_path/js/jquery/jquery.ui.all.js" => array(),
+    ),
+    'css' => array(
+      "$module_path/js/jquery/layout-default-latest.css" => array(),
+    ),
+  );
+
+  $items['jq_latest'] = array(
+    'title' => t('jQuery'),
+    'version' => '1.11.1',
+    'js' => array(
+      "$module_path/js/jquery/jquery-1.11.1.min.js" => array(),
+    ),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_CMODEL_islandora_view_object().
+ */
+function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
+  $module_path = drupal_get_path('module', 'versionable_object_viewer');
+
+  // Add the jQuery UILayout library and latest jQuery.
+  drupal_add_library('versionable_object_viewer', 'jq_latest');
+  drupal_add_library('versionable_object_viewer', 'jq_uilayout');
+
+  // Init script.
+  drupal_add_js("$module_path/js/init.js");
+
+  // Theme our verionable object viewer.
+  return theme('versionable_object_viewer', array('islandora_object' => $object));
+}
