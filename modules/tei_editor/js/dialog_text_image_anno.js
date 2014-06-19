@@ -45,7 +45,8 @@ function text_image_anno_dialog(data) {
     '</div>'+
   '</div>';
   var txt_image_anno_dialog;
-  if(document.getElementById('create_annotation_text_box') == null) {
+  if($('#create_annotation_text_box').length == 0) {
+	  console.log("does not exist, yet");
     $(document.body).append(html_text);
     $('#islandora_classification').addClass("dialog-entity-group");
     txt_image_anno_dialog = $('#create_annotation_text_box');
@@ -117,7 +118,7 @@ function text_image_anno_dialog(data) {
   }
   build_combo();
   return {
-    show: function() {
+    show: function(config) {
       build_combo();
       //config_data = config;
       $('#anno_text1').val(config.query);
@@ -128,11 +129,13 @@ function text_image_anno_dialog(data) {
       $('#img_anno_title').hide();
       
       //txt_image_anno_dialog.dialog();
-      $("#text_image_accordion").accordion('activate', 0 );
+      //$("#text_image_accordion").accordion('activate', 0 );
     },
     hide: function() {
       $("#cbo_image_anno").val('0');
+      
       txt_image_anno_dialog.dialog('close');
+      $('#create_annotation_text_box').remove();
     }
   };
 };

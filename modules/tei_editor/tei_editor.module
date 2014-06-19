@@ -13,7 +13,8 @@ function tei_editor_menu() {
     'title' => 'EMiCdora TEI Editor',
     'page callback' => 'tei_editor_view_editor',
     'page arguments' => array(2),
-    'access callback' => array(EMICDORA_MODIFY_EDITION),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     'type' => MENU_NORMAL_ITEM,
   );
   $items['islandora/tei_editor/setup/%islandora_object'] = array(
@@ -21,8 +22,8 @@ function tei_editor_menu() {
     'page callback' => 'tei_editor_setup',
     'page arguments' => array(3),
     'type' => MENU_CALLBACK,
-    'access callback' => array(EMICDORA_MODIFY_EDITION),
-    'access arguments' => array(3),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 3),
     'file' => 'includes/callbacks.inc',
   );
   $items['islandora/tei_editor/save_data/%islandora_object'] = array(
