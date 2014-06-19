@@ -455,7 +455,6 @@ function emicdora_block_view($delta = '') {
           'title' => 'View',
           'href' => "islandora/object/{$versionable_object->id}",
         );
-        $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
         if ($editor) {
           $links[] = array(
             'title' => 'View Source Object',
@@ -719,7 +718,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
-  $version_object = menu_get_object('islandora_object', 3);
   emicdora_set_critical_edition_breadcrumbs($object);
 
   $datastreams = emicdora_get_apparatus_datastreams($object);
