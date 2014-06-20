@@ -224,6 +224,7 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
  *   Blank TEI
  */
 function emicdora_get_blank_tei($title) {
+  // @codingStandardsIgnoreStart
   $tei = <<<EOD
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
     <teiHeader>
@@ -247,6 +248,6 @@ function emicdora_get_blank_tei($title) {
     </text>
 </TEI>
 EOD;
-
+// @codingStandardsIgnoreEnd
   return $tei;
 }
