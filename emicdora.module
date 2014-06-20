@@ -165,6 +165,21 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+    'emicdora/contextual-links/version/%islandora_object' => array(
+      'title' => 'versions',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/add' => array(
+      'title' => 'Add New Version',
+      'page callback' => 'emicdora_ingest_versionable_object_page',
+      'page arguments' => array(3),
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/ingest_versionable_object.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'emicdora_workbench',
@@ -181,6 +196,31 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access callback' => 'user_access',
       'access arguments' => array(ISLANDORA_INGEST),
+    ),
+    'islandora/object/%islandora_object/manage/edition_container' => array(
+      'title' => 'Critical Edition',
+      'page callback' => 'islandora_critical_edition_management_menu',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_TASK,
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(2, 'manage_container'),
+      'file' => 'includes/container_management.inc',
+      'weight' => 20,
+    ),
+    'islandora/object/%islandora_object/manage/edition_container/ingest' => array(
+      'title' => 'Add New Version',
+      'page callback' => 'emicdora_ingest_versionable_object_page',
+      'page arguments' => array(2),
+      'type' => MENU_LOCAL_ACTION,
+      'access callback' => 'islandora_object_access',
+      'access arguments' => array(ISLANDORA_INGEST, 2),
+      'file' => 'includes/ingest_versionable_object.form.inc',
+    ),
+    'islandora/emicdora_source/autocomplete' => array(
+      'page callback' => 'emicdora_versionable_object_form_source_autocomplete',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+      'file' => 'includes/ingest_versionable_object.form.inc',
+      'type' => MENU_CALLBACK,
     ),
   );
 }
@@ -455,7 +495,7 @@ function emicdora_block_view($delta = '') {
           'title' => 'View',
           'href' => "islandora/object/{$versionable_object->id}",
         );
-        if ($editor) {
+        if (isset($editor)) {
           $links[] = array(
             'title' => 'View Source Object',
             'href' => "islandora/object/$source_object",
@@ -809,4 +849,105 @@ function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter_dis
       $search_results['object_url'] = "islandora/object/$parent_pid/$version_pid";
     }
   }
+}
+
+/**
+ * Controls access to management interface.
+ *
+ * @param AbstractObject $object
+ *   Object to be examined
+ * @param string $context
+ *   Determines origin of function call
+ *
+ * @return bool
+ *   Access to path
+ */
+function emicdora_object_management_access($object, $context) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  if (is_null($object)) {
+    return FALSE;
+  }
+  $content_models = $object->models;
+  $access = FALSE;
+
+  switch ($context) {
+
+    case 'associate_versionable_object':
+      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_MODIFY)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'manage_container':
+      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(EMICDORA_CREATE_EDITION)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'manage_versionable_object':
+      if (in_array('islandora:versionableObjectCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_MANAGE_CONTAINER)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'edit_transcription':
+      if (in_array('islandora:transcriptionCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_MODIFY)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'manage_apparatus':
+      if (in_array('islandora:criticalApparatusCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_MANAGE_CONTAINER)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'display_consolidated_tei':
+      if (in_array('islandora:versionableObjectCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ)) {
+        $tei_rdfs = array_keys(islandora_critical_edition_get_members($object->id, 'islandora:criticalEditionCModel'));
+        if (!empty($tei_rdfs)) {
+          $access = TRUE;
+        }
+      }
+      break;
+
+    case 'view_critical_edition':
+      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'view_versionable_object':
+      module_load_include('inc', 'islandora_emicdora', 'includes/utilities');
+      $members = islandora_critical_edition_get_members($object->id);
+      $transcription = array_search('islandora:transcriptionCModel', $members);
+      $transcription_object = islandora_object_load($transcription);
+      if ($transcription_object && in_array('islandora:versionableObjectCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'manage_apparatus':
+      if (in_array('islandora:criticalApparatusCModel', $content_models) && user_access(ISLANDORA_CRITICAL_EDITION_ADVANCED_MANAGE_CONTAINER)) {
+        $access = TRUE;
+      }
+      break;
+  }
+
+  return $access && islandora_object_access_callback(ISLANDORA_VIEW_OBJECTS, $object);
+}
+
+/**
+ * Implements hook_islandora_ingest_steps().
+ */
+function emicdora_islandora_versionCModel_islandora_ingest_steps(array $form_state) {
+  return array(
+    'emicdora_versionable_object' => array(
+      'weight' => -10,
+      'type' => 'form',
+      'form_id' => 'emicdora_versionable_object_form',
+      'module' => 'emicdora',
+      'file' => 'includes/ingest_versionable_object.form.inc',
+    ),
+  );
 }
