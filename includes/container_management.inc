@@ -22,7 +22,7 @@ function islandora_critical_edition_attach_versionable(array $form, array &$form
   module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   $empty_message = t("There are no versionable objects in this Fedora Repository.");
   $objects = islandora_get_versionable_objects();
-  $chosen = array_keys(islandora_critical_edition_get_members($object->id, 'islandora:versionableObjectCModel'));
+  $chosen = array_keys(islandora_critical_edition_get_members($object->id, 'islandora:versionCModel'));
   $comparator = function ($a, $b) use ($chosen) {
     $a_val = $b_val = 0;
     if (in_array($a, $chosen)) {
@@ -82,12 +82,12 @@ function islandora_critical_edition_attach_versionable(array $form, array &$form
  *   returns if nothing chosen.
  */
 function islandora_critical_edition_attach_versionable_submit($form, $form_state) {
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   if (!isset($form_state['values']['versionable_objects'])) {
     return;
   }
   $desired_objects = array_filter(array_values($form_state['values']['versionable_objects']));
-  $attached = islandora_critical_edition_get_members($form_state['values']['pid'], "islandora:versionableObjectCModel");
+  $attached = islandora_critical_edition_get_members($form_state['values']['pid'], "islandora:versionCModel");
   $existing_objects = array_keys($attached);
   $to_add = array_diff($desired_objects, $existing_objects);
   $to_remove = array_diff($existing_objects, $desired_objects);
@@ -117,7 +117,7 @@ function islandora_get_versionable_objects() {
   $query = "PREFIX fm: <info:fedora/fedora-system:def/model#>
                 SELECT DISTINCT ?subject ?label FROM <#ri>
                 WHERE {
-                        {?subject fm:hasModel <info:fedora/islandora:versionableObjectCModel>;
+                        {?subject fm:hasModel <info:fedora/islandora:versionCModel>;
                        }
                  OPTIONAL{
                            ?subject fm:label  ?label;
@@ -147,12 +147,12 @@ function islandora_get_associated_versionable_objects($critical_edition_pid) {
             SELECT ?subject
             FROM <#ri>
             WHERE {
-              {?subject fm:hasModel <info:fedora/islandora:versionableObjectCModel>;
+              {?subject fm:hasModel <info:fedora/islandora:versionCModel>;
                             fm:state fm:Active;
                             fr:isMemberOfCollection <info:fedora/$critical_edition_pid>;
               }
             UNION
-              {?subject fm:hasModel <info:fedora/islandora:versionableObjectCModel>;
+              {?subject fm:hasModel <info:fedora/islandora:islandora:versionCModel>;
                         fm:state fm:Active;
                         fr:isMemberOf <info:fedora/$critical_edition_pid>;
               }
@@ -179,15 +179,15 @@ function islandora_get_associated_versionable_objects($critical_edition_pid) {
  */
 function islandora_critical_edition_management_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/critical_apparatus');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/manage_rdf_tei_attachment.form');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/transcriptions');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/mvd');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/versionable_object_creation.form');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/audio.form');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/video.form');
-  drupal_add_css(drupal_get_path('module', 'islandora_critical_edition_advanced') . "/css/fix_textfield_width.css");
+  module_load_include('inc', 'emicdora', 'includes/critical_apparatus');
+  module_load_include('inc', 'emicdora', 'includes/manage_rdf_tei_attachment.form');
+  module_load_include('inc', 'emicdora', 'includes/transcriptions');
+  module_load_include('inc', 'emicdora', 'includes/mvd');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/versionable_object_creation.form');
+  module_load_include('inc', 'emicdora', 'includes/audio.form');
+  module_load_include('inc', 'emicdora', 'includes/video.form');
+  drupal_add_css(drupal_get_path('module', 'emicdora') . "/css/fix_textfield_width.css");
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   drupal_set_title($object->label);
   $members = islandora_critical_edition_get_members($object->id);

@@ -32,6 +32,10 @@ function emicdora_valid_source_types() {
 function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
   global $user;
   if (isset($_GET['destination'])) {
+    $url_parts = explode('/', $_GET['destination']);
+    $form_state['values']['source'] = $url_parts[4];
+    $form_state['values']['limit_page_range'] = TRUE;
+    $_POST['source'] = $url_parts[4];
     unset($_GET['destination']);
   }
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
@@ -41,7 +45,7 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
   $version = $edition->repository->constructObject(islandora_get_namespace($edition->id));
   $version->owner = $user->name;
   $version->label = 'New Version';
-  $version->models = 'islandora:versionableObjectCModel';
+  $version->models = 'islandora:versionCModel';
   $version->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $edition);
   drupal_set_title(t('Add Versionable Object to @edition', array('@edition' => $edition->label)));
   return drupal_get_form('islandora_ingest_form', array(
@@ -99,6 +103,9 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = &$form_state['values'];
+  if (isset($_POST['source'])) {
+    $values['source'] = filter_xss($_POST['source']);
+  }
   $source = isset($values['source']) ? islandora_object_load($values['source']) : NULL;
   // Build the list rows for the TEI-RDF tableselect, and count the number.
   $page_count = 0;
@@ -116,7 +123,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   // Can only select page ranges for books, and if the islandora_paged_content
   // module is enabled.
   $can_limit_page_range = $source && in_array('islandora:bookCModel', $source->models);
-  $limit_page_range = $can_limit_page_range && $values['limit_page_range'];
+  $limit_page_range = $can_limit_page_range && isset($values['limit_page_range']);
   // Upload Transcription.
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $extensions = array('txt');
@@ -132,29 +139,15 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
         ),
       ),
     ),
+    'source' => array(
+      '#type' => 'hidden',
+      '#value' => $source->id,
+      '#access' => isset($source),
+    ),
     'source_ajax_wrapper' => array(
       '#type' => 'container',
       '#prefix' => '<div id="source-ajax-container-wrapper">',
       '#suffix' => '</div>',
-      'source_type' => array(
-        '#type' => 'select',
-        '#title' => t('Limit Source Results to type'),
-        '#options' => array('*' => t('Any')) + emicdora_valid_source_types(),
-      ),
-      'source' => array(
-        '#type' => 'textfield',
-        '#title' => t('Select Source Object'),
-        '#size' => 30,
-        '#maxlength' => 60,
-        '#required' => TRUE,
-        '#autocomplete_path' => 'islandora/emicdora_source/autocomplete',
-        '#ajax' => array(
-          'callback' => 'emicdora_source_ajax_container',
-          'wrapper' => 'source-ajax-container-wrapper',
-          'method' => 'replace',
-          'effect' => 'fade',
-        ),
-      ),
       'page_range' => array(
         '#access' => $can_limit_page_range,
         '#type' => 'fieldset',
@@ -363,7 +356,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
 /**
  * Submit form for ingest Versionable Object form.
  *
- * Creates a single Versionable Object (islandora:versionableObjectCModel) and
+ * Creates a single Versionable Object (islandora:versionCModel) and
  * either creates or links an existing TEI-RDF Object
  * (islandora:criticalEditionCModel) with the Verisonable Object. Also generates
  * a Transcription Object (islandora:transcriptionCModel) from the TEI-RDF
@@ -389,7 +382,18 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $source = islandora_object_load($shared_storage['source']);
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
+  if (in_array('islandora:bookCModel', $source->models)) {
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
+  }
+  if (in_array('islandora:audioCModel', $source->models)) {
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
+  }
+  if (in_array('islandora:videoCModel', $source->models)) {
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
+  }
+
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
+
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
   // Link to an existing TEI-RDF Object.

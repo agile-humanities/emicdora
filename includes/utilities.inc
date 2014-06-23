@@ -251,3 +251,34 @@ EOD;
 // @codingStandardsIgnoreEnd
   return $tei;
 }
+
+/**
+ * Returns apparatus for display.
+ *
+ * @param AbstractObject $object
+ *   Object representing Critical Edition
+ *
+ * @return array
+ *   array of form elements
+ */
+function emicdora_get_apparatus_as_content($object) {
+  $datastreams = emicdora_get_apparatus_datastreams($object);
+  $content = array(
+    'apparatus' => array(
+      '#type' => 'vertical_tabs',
+    ),
+  );
+  foreach ($datastreams as $dsid => $datastream) {
+    $content['apparatus'][$dsid] = array(
+      '#title' => $datastream->label,
+      '#type' => 'fieldset',
+      '#id' => strtolower($dsid),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      'markup' => array(
+        '#markup' => filter_xss($datastream->content),
+      ),
+    );
+  }
+  return $content;
+}
