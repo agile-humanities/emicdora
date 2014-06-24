@@ -380,8 +380,13 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   // steps and alters.
   $shared_storage['source'] = $form_state['values']['source'];
   $source = islandora_object_load($shared_storage['source']);
+  $tn = $source['TN'] ? $source['TN']->content : NULL;
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
+  $tn_datastream = $versionable_object->constructDatastream('TN', 'M');
+  $tn_datastream->setContentFromString($tn);
+  $tn = '';
+  $versionable_object->ingestDatastream($tn_datastream);
   if (in_array('islandora:bookCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
   }

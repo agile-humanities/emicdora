@@ -184,19 +184,9 @@ function emicdora_menu() {
       'title' => 'Add this source object to Critical Edition',
       'page callback' => 'emicdora_ingest_versionable_object_page',
       'page arguments' => array(3),
-      'access callback' => 'islandora_object_access',
+      'access callback' => 'emicdora_show_version_context_menu',
       'access arguments' => array(ISLANDORA_INGEST, 3),
       'file' => 'includes/ingest_versionable_object.form.inc',
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
-    'emicdora/contextual-links/version/%islandora_object/associate' => array(
-      'title' => 'Associate Existing Version',
-      'page callback' => 'emicdora_context_processor',
-      'page arguments' => array(3),
-      'access callback' => 'islandora_object_access',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
-      'file' => 'includes/version_context.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -482,7 +472,7 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'versions':
-      if (!$source_selected) {
+      if (!$is_critical_edition && !$is_versionable_object) {
         break;
       }
       // @todo Make this list not hard-coded.
@@ -992,4 +982,30 @@ function emicdora_islandora_solr_object_result_alter(&$search_results, $query_pr
       $search_results['object_url'] = "islandora/object/$critical_edition_pid/source/$source_pid";
     }
   }
+}
+
+/**
+ * Determines whether to add version in context menu.
+ *
+ * @param string $permission
+ *   Base fedora permission
+ * @param AbstractObject $object
+ *   Object represneting Critical Edition
+ *
+ * @return bool
+ *   Access allowed
+ */
+function emicdora_show_version_context_menu($permission, $object) {
+  $access = FALSE;
+  $url = isset($_GET['destination']) ? $_GET['destination'] : $_GET['q'];
+  if (islandora_object_access($permission, $object)) {
+    $url_parts = explode('/', $url);
+    if (isset($url_parts[3]) && $url_parts[3] == 'source') {
+      $access = TRUE;
+    }
+    if (isset($url_parts[4]) && $url_parts[4] == 'create' && $url_parts[1] == 'contextual-links' && $url_parts[2] == 'version') {
+      $access = TRUE;
+    }
+  }
+  return $access;
 }
