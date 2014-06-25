@@ -140,7 +140,7 @@ function emicdora_get_versionable_objects() {
  * @return array
  *   PIDs of currently associated versionable objects
  */
-function islandora_get_associated_versionable_objects($critical_edition_pid) {
+function emicdora_get_associated_versionable_objects($critical_edition_pid) {
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
             PREFIX fr: <" . FEDORA_RELS_EXT_URI . ">
