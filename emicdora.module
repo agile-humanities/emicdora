@@ -61,12 +61,21 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    // Versions filtered by critical edition and source.
+    // Versions filtered by critical edition and source. May not be needed.
     'islandora/object/%islandora_object/%islandora_object/versions' => array(
       'title' => 'Sources',
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_critical_edition_versions',
       'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
+    'islandora/object/%islandora_object/%islandora_object' => array(
+      'title callback' => 'emicdora_drupal_title',
+      'title arguments' => array(2),
+      'page callback' => 'islandora_view_object',
+      'page arguments' => array(2),
+      'type' => MENU_NORMAL_ITEM,
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
@@ -311,7 +320,6 @@ function emicdora_block_configure($delta = '') {
         '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
       );
       break;
-
   }
   return $form;
 }
@@ -322,11 +330,35 @@ function emicdora_block_configure($delta = '') {
 function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   // Check to see if we are on a critical edition object.
-  $critical_edition = menu_get_object('islandora_object', 2);
-  $is_critical_edition = is_object($critical_edition) && emicdora_is_critical_edition($critical_edition);
+  $object = menu_get_object('islandora_object', 2);
+  $versionable_object = NULL;
+  $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   if (!$is_critical_edition) {
-    return array();
+    $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
+    if (!$is_versionable_object) {
+      return array();
+    }
+    else {
+      $versionable_object = $object;
+      $critical_editions = array_merge(
+          $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection'), $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf'));
+      if (empty($critical_editions)) {
+        return array();
+      }
+      $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
+      $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
+      if (!empty($editors)) {
+        $editor_pid = key($editors);
+        $editor = islandora_object_load($editor_pid);
+        $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf');
+        $source_object = $source_objects[0]['object']['value'];
+      }
+    }
   }
+  else {
+    $critical_edition = $object;
+  }
+
   // Build the block uses paths relative to our current path.
   $path = current_path();
 
@@ -416,12 +448,43 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'operations':
-      $block['subject'] = t('Operations');
+      if ($versionable_object) {
+
+        $links = array();
+        $links[] = array(
+          'title' => 'View',
+          'href' => "islandora/object/{$versionable_object->id}",
+        );
+        if ($editor) {
+          $links[] = array(
+            'title' => 'View Source Object',
+            'href' => "islandora/object/$source_object",
+          );
+        }
+        if (user_access(EMICDORA_MODIFY_EDITION)) {
+          $links[] = array(
+            'title' => 'Edit Metatdata',
+            'href' => "islandora/edit_form/{$versionable_object->id}/MODS",
+          );
+        }
+        if (user_access(EMICDORA_DELETE_EDITION)) {
+          $links[] = array(
+            'title' => 'Delete',
+            'href' => "islandora/object/{$versionable_object->id}/delete",
+          );
+        }
+        $block['subject'] = t('Operations');
+        $block['content'] = array(
+          array(
+            '#theme' => 'links',
+            '#links' => $links,
+          ),
+        );
+      }
       break;
 
     case 'tei':
       $links = array();
-
       $links[] = array(
         'title' => 'Reading Transcription',
         'href' => $path,
@@ -430,10 +493,10 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      if (module_exists('tei_editor')) {
+      if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
         $links[] = array(
           'title' => 'Edit',
-          'href' => $path . '/tei_editor/edit',
+          'href' => "islandora/object/$editor/tei_editor/edit",
         );
       }
       $links[] = array(
@@ -449,16 +512,14 @@ function emicdora_block_view($delta = '') {
         'href' => $path,
       );
       $block['subject'] = t('TEI');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-      );
-      $block['content']["text_body"] = array(
-        '#type' => 'textfield',
-        '#title' => t('Enter your text here in WYSIWYG format'),
-        '#description' => t('Enter your text here in WYSIWYG format'),
-        '#default_value' => variable_get('text_variable', ""),
-      );
+      if ($versionable_object) {
+        $block['content'] = array(
+          array(
+            '#theme' => 'links',
+            '#links' => $links,
+          ),
+        );
+      }
       break;
 
     case 'transcriptions':
@@ -481,7 +542,6 @@ function emicdora_block_view($delta = '') {
         ),
       );
       break;
-
   }
   return $block;
 }
@@ -586,46 +646,6 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
-
-  // Schema Collection.
-  $schema_collection = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:tei_schema_collection',
-    'label' => 'Schema Collection',
-    'model' => 'islandora:collectionCModel',
-    'datastreams' => array(
-      'TN' => array(
-        'file' => "$module_path/images/folder.png",
-        'mimetype' => 'image/png',
-      ),
-      'COLLECTION_POLICY' => array(
-        'file' => "$module_path/data/objects/islandora_critical_edition_schema_collection_policy.xml",
-      ),
-    ),
-  ));
-  $schema_collection->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
-
-  // Sample Schema.
-  $sample_schema = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:tei_sample_schema',
-    'label' => 'CWRC_EMiC_TEI_Schema',
-    'model' => 'islandora:criticaleditionschemaCModel',
-    'datastreams' => array(
-      'TN' => array(
-        'file' => "$module_path/images/schema-icon.png",
-        'mimetype' => 'image/png',
-      ),
-      'RDF-SCHEMA' => array(
-        'file' => "$module_path/modules/tei_editor/schemas/CWRC_EMiC_TEI.rng",
-        'mimetype' => 'application/rdf+xml',
-      ),
-      'RDF-CSS' => array(
-        'file' => "$module_path/modules/tei_editor/schemas/tei.css",
-        'mimetype' => 'text/css',
-      ),
-    ),
-  ));
-  $sample_schema->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:tei_schema_collection');
-
   return array(
     'emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
@@ -636,8 +656,6 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $transcription_content_model,
         $editions,
         $coop,
-        $schema_collection,
-        $sample_schema,
       ),
     ),
   );
@@ -697,9 +715,11 @@ function emicdora_islandora_xml_form_builder_forms() {
  * Implements hook_CMODEL_islandora_view_object().
  */
 function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object(AbstractObject $object) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_critical_edition_breadcrumbs($object);
+
   $datastreams = emicdora_get_apparatus_datastreams($object);
   $content = array(
     'apparatus' => array(
@@ -718,7 +738,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       ),
     );
   }
-  return $content;
+  return array('' => $content);
 }
 
 /**
@@ -774,4 +794,19 @@ function emicdora_critical_edition_versions(AbstractObject $object) {
   $output = islandora_solr('*:*');
   emicdora_set_source_breadcrumbs($object);
   return $output;
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
+ */
+function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter_disabled(&$search_results, $query_processor) {
+  $url_parts = explode('/', $_GET['q']);
+  if (isset($url_parts[3]) && $url_parts[3] == 'versions') {
+    $parent_pid = $url_parts[2];
+    $parent_object = islandora_object_load($parent_pid);
+    if ($parent_object && in_array('islandora:criticalEditionContainerCModel', $parent_object->models)) {
+      $version_pid = $search_results['PID'];
+      $search_results['object_url'] = "islandora/object/$parent_pid/$version_pid";
+    }
+  }
 }

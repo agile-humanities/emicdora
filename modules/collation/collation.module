@@ -25,6 +25,14 @@ function collation_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+    'islandora/emic/collation' => array(
+      'title' => 'Collation',
+      'page callback' => 'emicdora_mvd_crud',
+      'type' => MENU_CALLBACK,
+      'access callback' => 'user_access',
+      'access arguments' => array(EMICDORA_READ_EDITION),
+      'file' => 'includes/mvd.inc',
+    ),
   );
 }
 
@@ -96,7 +104,7 @@ function collation_block_view($delta = '') {
   module_load_include('inc', 'collation', 'includes/utilities');
   // Check to see if we are on a critical edition object.
   $critical_edition = menu_get_object('islandora_object', 2);
-  $is_critical_edition = is_object($critical_edition) && emicdora_is_critical_edition($critical_edition);
+  $is_critical_edition = is_object($critical_edition) && emicdora_has_content_model($critical_edition, 'islandora:criticalEditionContainerCModel');
   if (!$is_critical_edition) {
     return array();
   }
@@ -119,7 +127,7 @@ function collation_block_view($delta = '') {
         $links[] = array(
           'title' => $mvd['name'],
           'href' => "collationtools/compare",
-          'fragment' => $mvd['name'],
+          'fragment' => $mvd['name'] . "/" . $critical_edition->id,
         );
       }
       $block['subject'] = t('Collations');

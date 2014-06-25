@@ -56,16 +56,18 @@ function emicdora_is_source(AbstractObject $object) {
 }
 
 /**
- * Checks if the given object is a critical edition object.
+ * Checks if the given object has content model.
  *
  * @param AbstractObject $object
  *   The object to check.
+ * @param string $content_model
+ *   PID of content model
  *
  * @return bool
  *   TRUE if it is a critical edition, FALSE otherwise.
  */
-function emicdora_is_critical_edition(AbstractObject $object) {
-  return in_array('islandora:criticalEditionContainerCModel', $object->models);
+function emicdora_has_content_model(AbstractObject $object, $content_model) {
+  return in_array($content_model, $object->models);
 }
 
 /**

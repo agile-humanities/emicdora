@@ -21,7 +21,7 @@ function emicdora_add_version_form(AbstractObject $critical_edition, AbstractObj
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   global $user;
-  if (!emicdora_is_critical_edition($critical_edition) || !emicdora_is_source($critical_edition)) {
+  if (!emicdora_has_content_model($critical_edition, 'islandora:criticalEditionContainerCModel') || !emicdora_is_source($critical_edition)) {
     drupal_not_found();
   }
   $tuque = islandora_get_tuque_connection();
