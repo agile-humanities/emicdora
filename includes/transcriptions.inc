@@ -131,7 +131,7 @@ function emicdora_create_transcription_form(array $form, array &$form_state, Abs
  */
 function emicdora_create_transcription_form_validate($form, $form_state) {
   $versionable_object_pid = $form_state['values']['versionable_object_pid'];
-  $current_transcriptions = islandora_critical_get_related_transcriptions($versionable_object_pid);
+  $current_transcriptions = emicdora_get_related_transcriptions($versionable_object_pid);
   $page_count = $form_state['values']['page_count'];
   if (in_array($form_state['values']['transcription'], $current_transcriptions)) {
     form_set_error('transcription', t('A transcription with this name is already associated with this versionable object.'));
@@ -182,7 +182,7 @@ function emicdora_create_transcription_form_submit(array $form, array &$form_sta
       $end_page = $form_state['values']['last_page'];
     }
     $tei_rdf = islandora_object_load($form_state['values']['cwrcwriter']);
-    add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
+    emicdora_add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
   }
 
   if ($content_source == 'file') {
@@ -213,7 +213,7 @@ function emicdora_manage_transcriptions_form(array $form, array &$form_state, Ab
   $form = array();
   $rows = array();
   $versionable_object_pid = $object->id;
-  $transcriptions = islandora_critical_get_related_transcriptions($versionable_object_pid);
+  $transcriptions = emicdora_get_related_transcriptions($versionable_object_pid);
   $members = emicdora_get_members($object->id);
   $cwrcwriter = array_search('islandora:criticalEditionCModel', $members);
   foreach ($transcriptions as $pid => $label) {
@@ -323,7 +323,7 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
  * @param abstractObject $transcription
  *   transcription object
  */
-function islandora_critical_transcription_edit_form($form, $form_state, $transcription) {
+function emicdora_transcription_edit_form($form, $form_state, $transcription) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($transcription));
   drupal_set_title($transcription->label);
@@ -359,7 +359,7 @@ function islandora_critical_transcription_edit_form($form, $form_state, $transcr
  * @param array $form_state
  *   Drupal form
  */
-function islandora_critical_transcription_edit_form_submit($form, $form_state) {
+function emicdora_transcription_edit_form_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;
@@ -400,7 +400,7 @@ function islandora_critical_transcription_edit_form_submit($form, $form_state) {
  * @param IslandoraFedoraDatastream $transcription_datastream
  *   Datastream object to be updated
  */
-function add_derived_transcription($tei_rdf_object, $versionable_object_pid, $transcription, $transcription_datastream, $start_page = NULL, $end_page = NULL) {
+function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object_pid, $transcription, $transcription_datastream, $start_page = NULL, $end_page = NULL) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $pages = array_keys(islandora_paged_content_get_pages($tei_rdf_object));
