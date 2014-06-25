@@ -62,15 +62,7 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    // Versions filtered by critical edition and source. May not be needed.
-    'islandora/object/%islandora_object/%islandora_object/versions' => array(
-      'title' => 'Sources',
-      'context' => MENU_CONTEXT_PAGE,
-      'page callback' => 'emicdora_critical_edition_versions',
-      'page arguments' => array(2),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
-    ),
+    // May not be needed.
     'islandora/object/%islandora_object/%islandora_object' => array(
       'title callback' => 'emicdora_drupal_title',
       'title arguments' => array(2),
@@ -231,6 +223,13 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
       'file' => 'includes/ingest_versionable_object.form.inc',
       'type' => MENU_CALLBACK,
+    ),
+     'emicdora/editions' => array(
+      'title' => 'Show all Editions',
+      'page callback' => 'emicdora_show_all_editions',
+      'type' => MENU_NORMAL_ITEM,
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+      'file' => 'includes/utilities.inc',
     ),
   );
 }
@@ -799,10 +798,10 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 }
 
 /**
- * Implements hook_CMODEL_islandora_view_object().
- */
+* Implements hook_CMODEL_islandora_view_object().
+*/
 function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
-  //placeholder only
+  // Placeholder only.
   return array('' => "Morgan's viewer goes here");
 }
 
