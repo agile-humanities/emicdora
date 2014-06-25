@@ -18,11 +18,11 @@
  * @return array
  *   Drupal form.
  */
-function islandora_critical_edition_attach_versionable(array $form, array &$form_state, AbstractObject $object) {
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+function emicdora_attach_versionable(array $form, array &$form_state, AbstractObject $object) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $empty_message = t("There are no versionable objects in this Fedora Repository.");
-  $objects = islandora_get_versionable_objects();
-  $chosen = array_keys(islandora_critical_edition_get_members($object->id, 'islandora:versionCModel'));
+  $objects = emicdora_get_versionable_objects();
+  $chosen = array_keys(emicdora_get_members($object->id, 'islandora:versionCModel'));
   $comparator = function ($a, $b) use ($chosen) {
     $a_val = $b_val = 0;
     if (in_array($a, $chosen)) {
@@ -71,7 +71,7 @@ function islandora_critical_edition_attach_versionable(array $form, array &$form
 }
 
 /**
- * Submit handler for islandora_critical_edition_attach_versionable().
+ * Submit handler for emicdora_attach_versionable().
  *
  * @param array $form
  *   Drupal form
@@ -81,13 +81,13 @@ function islandora_critical_edition_attach_versionable(array $form, array &$form
  * @return NULL
  *   returns if nothing chosen.
  */
-function islandora_critical_edition_attach_versionable_submit($form, $form_state) {
+function emicdora_attach_versionable_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   if (!isset($form_state['values']['versionable_objects'])) {
     return;
   }
   $desired_objects = array_filter(array_values($form_state['values']['versionable_objects']));
-  $attached = islandora_critical_edition_get_members($form_state['values']['pid'], "islandora:versionCModel");
+  $attached = emicdora_get_members($form_state['values']['pid'], "islandora:versionCModel");
   $existing_objects = array_keys($attached);
   $to_add = array_diff($desired_objects, $existing_objects);
   $to_remove = array_diff($existing_objects, $desired_objects);
@@ -111,7 +111,7 @@ function islandora_critical_edition_attach_versionable_submit($form, $form_state
  * @return array
  *   array of PID => Label pairs
  */
-function islandora_get_versionable_objects() {
+function emicdora_get_versionable_objects() {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fm: <info:fedora/fedora-system:def/model#>
@@ -177,7 +177,7 @@ function islandora_get_associated_versionable_objects($critical_edition_pid) {
  *   A renderable array containing all the management forms related to
  *   versionable objects.
  */
-function islandora_critical_edition_management_menu(AbstractObject $object) {
+function emicdora_management_menu(AbstractObject $object) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   module_load_include('inc', 'emicdora', 'includes/critical_apparatus');
   module_load_include('inc', 'emicdora', 'includes/manage_rdf_tei_attachment.form');
@@ -190,12 +190,12 @@ function islandora_critical_edition_management_menu(AbstractObject $object) {
   drupal_add_css(drupal_get_path('module', 'emicdora') . "/css/fix_textfield_width.css");
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   drupal_set_title($object->label);
-  $members = islandora_critical_edition_get_members($object->id);
+  $members = emicdora_get_members($object->id);
   $tei_rdf = array_search('islandora:criticalEditionCModel', $members);
   $versionable_objects = array_keys($members, 'islandora:versionCModel');
   $transcriptions = array();
   foreach ($versionable_objects as $versionable_object) {
-    $vo_members = islandora_critical_edition_get_members($versionable_object);
+    $vo_members = emicdora_get_members($versionable_object);
     $transcriptions = array_merge($transcriptions, array_keys($vo_members, 'islandora:transcriptionCModel'));
   }
   $apparatus = array_keys($members, 'islandora:criticalApparatusCModel');
@@ -208,7 +208,7 @@ function islandora_critical_edition_management_menu(AbstractObject $object) {
     '#title' => t('Create Apparatus'),
     '#description' => t('Creates blank Critical Apparatus'),
     '#type' => 'fieldset',
-    'form' => drupal_get_form('islandora_critical_edition_replace_apparatus', $object),
+    'form' => drupal_get_form('emicdora_replace_apparatus', $object),
     '#group' => 'manage_critical_edition',
   );
   $output['manage_critical_edition']['attach_vo'] = array(
@@ -217,7 +217,7 @@ function islandora_critical_edition_management_menu(AbstractObject $object) {
     '#title' => t('Associate existing Versionable Object'),
     '#description' => t('Manage Versionable Object associations'),
     '#type' => 'fieldset',
-    'form' => drupal_get_form('islandora_critical_edition_attach_versionable', $object),
+    'form' => drupal_get_form('emicdora_attach_versionable', $object),
     '#group' => 'manage_critical_edition',
   );
 
@@ -226,7 +226,7 @@ function islandora_critical_edition_management_menu(AbstractObject $object) {
     '#access' => user_access(ISLANDORA_ADD_DS) && $transcriptions,
     '#title' => t('Create Collation'),
     '#type' => 'fieldset',
-    'form' => drupal_get_form('islandora_critical_edition_mvd_form', $object),
+    'form' => drupal_get_form('emicdora_mvd_form', $object),
     '#group' => 'manage_critical_edition',
   );
   return $output;

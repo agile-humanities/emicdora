@@ -308,7 +308,7 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
 
     case 'cwrc_update':
       $cwrcwriter = $form_state['values']['cwrcwriter'];
-      islandora_update_from_tei_rdf_object($cwrcwriter, $transcription_pid);
+      emicdora_update_from_tei_rdf_object_file_add($cwrcwriter, $transcription_pid);
       break;
   }
 }
@@ -423,7 +423,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
         'page_object' => islandora_object_load($page),
         'filename' => $filename));
   }
-  $batch['operations'][] = array('islandora_transcription_file_add',
+  $batch['operations'][] = array('emicdora_transcription_file_add',
     array(
       'transcription' => $transcription,
       'transcription_datastream' => $transcription_datastream,
@@ -458,7 +458,7 @@ function emicdora_build_text_file($object, $filename) {
  * @param string $filename
  *   file to be added
  */
-function islandora_transcription_file_add($transcription, $transcription_datastream, $filename) {
+function emicdora_transcription_file_add($transcription, $transcription_datastream, $filename) {
   module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_datastream->setContentFromFile($filename);
   $transcription->ingestDatastream($transcription_datastream);
@@ -474,7 +474,7 @@ function islandora_transcription_file_add($transcription, $transcription_datastr
  * @param string $transcription_pid
  *   PID of Transcription Object being updated
  */
-function islandora_update_from_tei_rdf_object($tei_rdf_object_pid, $transcription_pid) {
+function emicdora_update_from_tei_rdf_object_file_add($tei_rdf_object_pid, $transcription_pid) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $tei_rdf_object = islandora_object_load($tei_rdf_object_pid);
@@ -494,7 +494,7 @@ function islandora_update_from_tei_rdf_object($tei_rdf_object_pid, $transcriptio
         'page_object' => islandora_object_load($page),
         'filename' => $filename));
   }
-  $batch['operations'][] = array('islandora_transcription_file_update',
+  $batch['operations'][] = array('emicdora_transcription_file_update',
     array(
       'transcription' => $transcription,
       'filename' => $filename));
@@ -510,7 +510,7 @@ function islandora_update_from_tei_rdf_object($tei_rdf_object_pid, $transcriptio
  * @param string $filename
  *   file to be added
  */
-function islandora_transcription_file_update($transcription, $filename) {
+function emicdora_transcription_file_update($transcription, $filename) {
   $transcription['TRANSCRIPTION']->setContentFromFile($filename);
   unlink($filename);
 }
