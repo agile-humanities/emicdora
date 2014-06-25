@@ -47,6 +47,7 @@
       
     }
   }
+  
 })(jQuery);
 
 // Adapted from sc_init of the shared canvas project.
@@ -140,7 +141,7 @@ function initCanvas(nCanvas) {
 
 function init_ui() {
 
-
+	
     //$('.dragBox').draggable().resizable();
     $('.dragBox').hide();
 
