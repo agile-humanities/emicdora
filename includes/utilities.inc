@@ -282,3 +282,8 @@ function emicdora_get_apparatus_as_content($object) {
   }
   return $content;
 }
+
+function emicdora_show_all_editions() {
+
+  drupal_goto("islandora/search/RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel)");
+}
