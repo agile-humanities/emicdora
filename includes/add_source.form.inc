@@ -117,30 +117,24 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
   }
   if (!empty($form_state['values']['content_wrapper']['content'])) {
     $file = file_load($form_state['values']['content_wrapper']['content']);
-    if ($form_state['values']['content_model'] == 'islandora:bookCModel') {
-      $uri = drupal_realpath($file->uri);
-      emicdora_add_zipped_pages($uri, $object->id);
-    }
-    else {
-      switch ($form_state['values']['content_model']) {
-        case 'islandora:sp-audioCModel':
-          module_load_include('inc', 'islandora_audio', 'includes/derivatives');
-          emicdora_ingest_add_file($file, 'OBJ', $object);
-          islandora_audio_create_mp3($object);
-          break;
 
-        case 'islandora:sp_videoCModel':
-          module_load_include('inc', 'islandora_video', 'includes/derivatives');
-          emicdora_ingest_add_file($file, 'OBJ', $object);
-          islandora_video_create_all_derivatives($object);
-          break;
+    switch ($form_state['values']['content_model']) {
+      case 'islandora:bookCModel':
+        $uri = drupal_realpath($file->uri);
+        emicdora_add_zipped_pages($uri, $object->id);
+        break;
 
-        case 'islandora:sp_large_image_cmodel':
-          module_load_include('inc', 'islandora_video', 'includes/derivatives');
-          emicdora_ingest_add_file($file, 'OBJ', $object);
-          $mime = $object['OBJ']->mimeType;
-          break;
-      }
+      case 'islandora:sp-audioCModel':
+        emicdora_ingest_add_file($file, 'OBJ', $object);
+        break;
+
+      case 'islandora:sp_videoCModel':
+        emicdora_ingest_add_file($file, 'OBJ', $object);
+        break;
+
+      case 'islandora:sp_large_image_cmodel':
+        emicdora_ingest_add_file($file, 'OBJ', $object);
+        break;
     }
   }
 }
