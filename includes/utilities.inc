@@ -172,3 +172,113 @@ function emicdora_get_members($object_pid, $content_model = NULL) {
   }
   return $objects;
 }
+
+/**
+ * Append the given TEI-RDF documents text to the given TEI Document.
+ *
+ * This function is used to generate a consolidated TEI document from the
+ * TEI-RDF page objects.
+ *
+ * @param string $tei
+ *   The TEI document to append the TEI-RDF document to.
+ * @param string $tei_rdf
+ *   The TEI-RDF document to append.
+ *
+ * @return string
+ *   The given TEI document with the appended TEI-RDF document.
+ */
+function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
+  define('TEI_NAMESPACE', 'http://www.tei-c.org/ns/1.0');
+  $tei_document = new DOMDocument();
+  $tei_document->formatOutput = TRUE;
+  $tei_document->preserveWhiteSpace = TRUE;
+  $tei_document->loadXML($tei);
+  $front = $tei_document->getElementsByTagName('front')->item(0);
+  $body = $tei_document->getElementsByTagName('body')->item(0);
+  $back = $tei_document->getElementsByTagName('back')->item(0);
+  $tei_rdf_document = new DOMDocument();
+  $tei_rdf_document->formatOutput = TRUE;
+  $tei_rdf_document->preserveWhiteSpace = TRUE;
+  $tei_rdf_document->loadXML($tei_rdf);
+  $tei_rdf_text_node = $tei_rdf_document->getElementsByTagNameNS(TEI_NAMESPACE, 'text')->item(0);
+  foreach ($tei_rdf_text_node->childNodes as $tei_rdf_content_node) {
+    if (isset(${$tei_rdf_content_node->nodeName})) {
+      $tei_rdf_fragment = $tei_document->createDocumentFragment();
+      foreach ($tei_rdf_content_node->childNodes as $tei_rdf_content_node_child) {
+        $tei_rdf_fragment->appendXML($tei_rdf_document->saveXML($tei_rdf_content_node_child));
+      }
+      ${$tei_rdf_content_node->nodeName}->appendChild($tei_rdf_fragment);
+    }
+  }
+  $my_doc = $tei_document->saveHTML();
+  return $tei_document->saveXML();
+}
+
+/**
+ * Returns empty TEI form.
+ *
+ * @param string $title
+ *   Title for TEI
+ *
+ * @return string
+ *   Blank TEI
+ */
+function emicdora_get_blank_tei($title) {
+  // @codingStandardsIgnoreStart
+  $tei = <<<EOD
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <teiHeader>
+        <fileDesc>
+            <titleStmt>
+                <title>$title</title>
+            </titleStmt>
+            <publicationStmt>
+                <p/>
+            </publicationStmt>
+            <sourceDesc>
+                <p>Created from islandora book ingest unless otherwise noted.</p>
+            </sourceDesc>
+        </fileDesc>
+    </teiHeader>
+
+    <text>
+        <front></front>
+        <body></body>
+        <back></back>
+    </text>
+</TEI>
+EOD;
+// @codingStandardsIgnoreEnd
+  return $tei;
+}
+
+/**
+ * Returns apparatus for display.
+ *
+ * @param AbstractObject $object
+ *   Object representing Critical Edition
+ *
+ * @return array
+ *   array of form elements
+ */
+function emicdora_get_apparatus_as_content($object) {
+  $datastreams = emicdora_get_apparatus_datastreams($object);
+  $content = array(
+    'apparatus' => array(
+      '#type' => 'vertical_tabs',
+    ),
+  );
+  foreach ($datastreams as $dsid => $datastream) {
+    $content['apparatus'][$dsid] = array(
+      '#title' => $datastream->label,
+      '#type' => 'fieldset',
+      '#id' => strtolower($dsid),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      'markup' => array(
+        '#markup' => filter_xss($datastream->content),
+      ),
+    );
+  }
+  return $content;
+}

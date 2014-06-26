@@ -117,12 +117,6 @@ function collation_block_view($delta = '') {
       module_load_include('inc', 'collation', 'includes/calliope');
       $mvds = emicdora_calliope_find_mvds($critical_edition);
       $links = array();
-      // Hardcoded for testing, must be removed.
-      $links[] = array(
-        'title' => 'Imaginary Collation',
-        'href' => "collationtools/compare",
-        'fragment' => strtolower('does not exist'),
-      );
       foreach ($mvds as $mvd) {
         $links[] = array(
           'title' => $mvd['name'],
