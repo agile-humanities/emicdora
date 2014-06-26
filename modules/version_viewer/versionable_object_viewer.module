@@ -32,16 +32,16 @@ function versionable_object_viewer_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/utilities.inc',
     'access callback' => 'user_access',
-    'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
+    'access arguments' => array(TRUE),
   );
-  $items['islandora/cwrc_viewer/transformed_page/%islandora_object'] = array(
+  $items['islandora/version_viewer/transformed_page/%islandora_object'] = array(
     'title' => 'Prepare Page consolidated TEI',
     'page callback' => 'versionable_object_viewer_prepare_page_tei_consolidated',
-    'file' => 'includes/utilities',
+    'file' => 'includes/utilities.inc',
     'page arguments' => array(3),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
-    'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
+    'access arguments' => array(TRUE),
   );
 //   $items['islandora/cwrc_viewer/detail_meta_data'] = array(
 //     'title' => 'Prepare Metadata view',
@@ -83,6 +83,7 @@ function versionable_object_viewer_theme($existing, $type, $theme, $path) {
         'tree_source' => NULL,
         'transcription_source' => NULL,
         'meta_source' => NULL,
+        'islandora_content' => NULL,
       ),
     ),
   );
@@ -122,12 +123,13 @@ function versionable_object_viewer_library() {
     'title' => t('jQuery EasyUI'),
     'version' => '1.3.6',
     'js' => array(
-      //"$module_path/js/jquery/jquery-easyui/jquery.min.js" => array(),
+      "$module_path/js/jquery/jquery-easyui/jquery.min.js" => array(),
       "$module_path/js/jquery/jquery-easyui/jquery.easyui.min.js" => array(),
     ),
     'css' => array(
       "$module_path/js/jquery/jquery-easyui/themes/default/easyui.css" => array(),
       "$module_path/js/jquery/jquery-easyui/themes/icon.css" => array(),
+      //"$module_path/js/jquery/jquery-easyui/demo/demo.css" => array(),
     ),
   );
 
@@ -141,73 +143,67 @@ function versionable_object_viewer_islandora_versionCModel_islandora_view_object
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
 
-  //islandora%3A9   ---image for annotations
+  // Some custom css.
+  //drupal_add_css("$module_path/css/viewer.css");
 
-  drupal_add_css("$module_path/css/viewer.css");
   // Add the jQuery EasyUI library.
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   drupal_add_js("$module_path/js/init.js");
-  //drupal_add_library('versionable_object_viewer', 'jq_latest');
+dsm($object->id, "obj id");
 
-
-  $versionable_object = islandora_object_load($object->id);
-  //dsm($object->id, "vid");
-  $version_data = versionable_object_viewer_get_transcription_text($versionable_object);
-  //dsm($version_data, "vdata");
-  $anno_pids = islandora_image_annotation_shared_get_annotation_pids('islandora:9', FALSE);
-  //dsm($anno_pids, "get anno pids");
-  $ret_data = islandora_image_annotation_shared_get_annotation('islandora:96', NULL, FALSE);
-  //dsm($ret_data, "ret data");
-  //drupal_add_library('versionable_object_viewer', 'jq_uilayout');
-
-  // Init script.
-  //drupal_add_js("$module_path/js/init.js");
-
+  $transcriptions = versionable_object_viewer_get_transcription_text($object);
   // Theme our verionable object viewer.
-  return theme('versionable_object_viewer', array(
-    'islandora_object' => $object,
-    'version_data' => $version_data)
+  return theme('versionable_object_viewer',
+    array(
+      'islandora_object' => $object,
+      'version_data' => $transcriptions
+    )
   );
 }
 
 function versionable_object_viewer_preprocess_versionable_object_viewer(&$variables) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
+  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
+
+
+
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/consolidate_tei');
+  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
+
 
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
-  $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
-  $obj_id = $variables['islandora_object']->id;
-  $variables['anno_img_pane'] = theme('islandora_anno_image_pane');
-  $variables['tree_source'] = url("islandora/object/islandora:9/get_tree_data");//"go get the source";
-  $variables['transcription_source'] = url("islandora/object/$obj_id/get_transcription_data");
+  $version_object = $variables['islandora_object'];
+  dsm($variables['islandora_object']->id, "obj id");
+
+  $source = versionable_object_viewer_process_version_object_source($version_object);
+  $source_object = islandora_object_load($source[0]['obj']['value']);
+  dsm($source, "source Data");
+  $variables['version_source'] = $source;
+  $variables['content_model'] = str_replace("info:fedora/", "", $source[0]['type']['uri']);
+  $variables['transcription_source'] = url("islandora/object/$version_object->id/get_transcription_data");
   $variables['meta_source'] = url("islandora/cwrc_viewer/detail_meta_data");
-  //dsm($variables['tree_source'], "tree source");
-  drupal_add_js(array('islandora_image_annotation' => array('PID' => 'islandora:9')), 'setting');
+
+
+  $critical_edition = $version_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  dsm($critical_edition, "crit rels");
+  $tei_rdfs = array_keys(islandora_critical_edition_get_members($critical_edition[0]['object']['value']));
+  dsm($tei_rdfs, "tei rdfs");
+
+
+
+
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
-  // This is gross. We cant rely on the image_annotation module to
-  // add the required js at the correct time. It needs to be abstracted.
-  drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
-  drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-1.7.js');
 
-
-  islandora_image_annotation_include_common_js();
-  islandora_image_annotation_include_common_css();
-
-  drupal_add_js($module_path . '/js/islandora_image_annotation_init.js');
-
-  //$versionable_object = islandora_object_load($variables['islandora_object']->id);
-  //versionable_object_viewer_get_transcription_text($versionable_object);
-
-
-
+  versionable_object_viewer_build_version_media_view($source_object, $variables);
 }
 
 function versionable_object_viewer_get_transcription_text($object) {
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
+  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
 
   // Gather all transcriptions for this versionable object.
-  $transcriptions_data = islandora_critical_get_related_transcriptions($object->id);
-  //dsm($transcriptions_data, "trans data");
+  $transcriptions_data = versionable_object_viewer_get_related_transcriptions($object->id);
   $transcriptions = array();
   foreach ($transcriptions_data as $key => $value) {
     $trans = islandora_object_load($key);
@@ -215,7 +211,6 @@ function versionable_object_viewer_get_transcription_text($object) {
     $transcription_details['text'] = $trans['TRANSCRIPTION']->content;
     array_push($transcriptions, $transcription_details);
   }
-  //dsm($transcriptions, "transcriptions final array");
   return $transcriptions;
 }
 

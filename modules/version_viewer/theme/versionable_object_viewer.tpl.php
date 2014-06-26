@@ -5,8 +5,7 @@
  * viewer.<pre><?php print $version_data[0]['text']; ?></pre>
  */
 ?>
-<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>
- <div style="margin:20px 0;"></div>
+<div style="margin:20px 0;"></div>
     <div id="eui_window" class="easyui-layout" style="width:700px;height:550px;">
         <div data-options="region:'north'" style="height:50px">
             <div id="critical-edition-viewer">
@@ -36,8 +35,8 @@
           <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
           </div>
         </div>
-        <div id="easy-ui-east" data-options="region:'east',split:true" title="Source" style="width:200px;maxWidth:700px">
-          <?php print $anno_img_pane; ?>
+        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true" title="Source" style="width:200px;maxWidth:700px">
+          <?php print $islandora_content; ?>
         </div>
         <div data-options="region:'west',split:true" title="Annotations" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" style="width:auto;height:auto;">
@@ -45,7 +44,12 @@
               </ul>
           </div>
         </div>
-        <div id="center_data" class="easyui-panel" data-options="region:'center',title:'<?php print $version_data[0]['title']; ?>',iconCls:'icon-ok',href:'<?php print $transcription_source; ?>?page=1'">
-
+        <div id="center_data" class="easyui-panel" data-options="region:'center',iconCls:'icon-ok'">
+          <div id="versions_tabs" data-options="fit:true" class="easyui-tabs" style="width:auto;height:auto">
+            <div title="<?php print $version_data[0]['title']; ?>" style="padding:0px;width:auto;height:auto" data-options="fit:true,closable:true">
+              <div id="transcription_panel" class="easyui-panel" data-options="noheader:true,fit:true,region:'east',split:true,region:'center',href:'<?php print $transcription_source; ?>?page=1'" title="Source" style="height:500px;width:500px;">
+              </div>
+            </div>
+          </div>
         </div>
     </div>

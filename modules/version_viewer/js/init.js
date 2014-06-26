@@ -68,8 +68,8 @@
 		async: false,
 		timeout: 3000,
 		success: function(data, status, xhr) {
-		        $('#center_data').empty();
-		        $('#center_data').append(data);
+		        $('#transcription_panel').empty();
+		        $('#transcription_panel').append(data);
 					
 		},
 		error: function() {
@@ -105,80 +105,82 @@
     		$(this).addClass('img_selected');
     		is_selected = true;
     	}
+    	console.log($(this).attr('id'));
     	switch($(this).attr('id')) {
 	        case 'wb_meta':
-	            toggle_click(is_selected, 'south');
+	        	console.log("a");
+	        	toggle_layout(is_selected, 'south');
 	            break;
 	        case 'wb_dt':
-	            diplomatic_transcriptions();
+	        	console.log("b");
+	        	add_tab(wb_dt);
 	            break;
 	        case 'wb_image':
-	        	console.log("image");
-	        	toggle_click(is_selected, 'east');
+	        	console.log("c");
+	        	//console.log("image");
+	        	toggle_layout(!is_selected, 'east');
+	        	break;
 	        case 'wb_reading':
+	        	console.log("d");
+	        	add_tab(wb_reading);
 	            break;
 	        case 'wb_tei_markup':
+	        	console.log("e");
+	        	add_tab(wb_tei_markup);
 	            break;
 	        case 'wb_show_annos':
+	        	console.log("f");
+	        	toggle_layout(!is_selected, 'west');
 	            break;
 	        case 'wb_show_til':
+	        	console.log("g");
+	        	toggle_layout(!is_selected, 'west');
 	            break;
 	    }
     });
     
-    function diplomatic_transcriptions() {
+    function add_tab(type) {
     	var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     	console.log(pageNumber);
     	var pid = $('#ui-easy-paginator').attr('data-pid');
     	$('#center_data').append('<div id="d_trans" style="padding:10px;"></div>');
-		$('#d_trans').panel({
-		    width:500,
-		    height:150,
-		    title:'Diplomatic Transcriptions',
-		    tools:[{
-		        iconCls:'icon-add',
-		        handler:function(){alert('new')}
-		    },{
-		        iconCls:'icon-save',
-		        handler:function(){alert('save')}
-		    }]
-		}); 
-		
-//    	$.ajax({
-//    		type: 'GET',
-//    		async: false,
-//    		url: Drupal.settings.basePath + 'islandora/cwrc_viewer/transformed_page/' + pid + "?page=" + pageNumber,
-//    		success: function(data, status, xhr) {
-//    			
-//    			
-//    			$('#center_data').append('<div id="d_trans" style="padding:10px;"></div>');
-//    			$('#d_trans').panel({
-//    			    width:500,
-//    			    height:150,
-//    			    title:'Diplomatic Transcriptions',
-//    			    tools:[{
-//    			        iconCls:'icon-add',
-//    			        handler:function(){alert('new')}
-//    			    },{
-//    			        iconCls:'icon-save',
-//    			        handler:function(){alert('save')}
-//    			    }]
-//    			}); 
-//    			console.log(data);
-//    		},
-//    		error: function(xhRequest, ErrorText, thrownError) {
-//    			console.log(ErrorText + ":" + thrownError);
-//    		},
-//    	});
+    	pid = "islandora:14";
+    	//construct_easy_ui_panel();
+		console.log(Drupal.settings.basePath + 'islandora/version_viewer/transformed_page/' + pid);
+    	$.ajax({
+    		type: 'GET',
+    		async: false,
+    		url: Drupal.settings.basePath + 'islandora/version_viewer/transformed_page/' + pid,
+    		success: function(data, status, xhr) {
+    			//$('#versions_tabs').append('<div id="d_trans" style="padding:10px;"></div>');
+    			console.log("construct panel");
+    			$('#versions_tabs').tabs('add',{
+    				id: type,
+    				title: data['title'],
+    				content:data['body'],
+    				closable:true,
+    			});
+    			console.log(data['title']);
+    		},
+    		error: function(xhRequest, ErrorText, thrownError) {
+    			console.log(ErrorText + ":" + thrownError);
+    		},
+    	});
     }
     
-    function toggle_click(selected, region) {
-      if (selected) {
-        $('#eui_window').layout('expand', region);
+    $('#easy-ui-east').panel({
+        onResize:function(w,h){
+            resizeCanvas();
+        }
+    });
+    
+    function toggle_layout(selected, region) {
+      if (!selected) {
+        $('#eui_window').layout('collapse', region);
         console.log('show');
       }
       else {
-        $('#eui_window').layout('collapse', region);
+        $('#eui_window').layout('expand', region);
         console.log('hide');
       }
     }
