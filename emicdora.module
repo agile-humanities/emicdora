@@ -26,8 +26,11 @@ function emicdora_menu() {
     $add_source_contextual_links[$url] = array(
       'title' => $title,
       'file' => 'includes/add_source.form.inc',
-      'page callback' => 'emicdora_add_source_form',
-      'page arguments' => array($content_model, 3),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array(
+        'islandora_emicdora_add_source_form',
+        $content_model,
+        3),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_INGEST, 3),
       'type' => MENU_LOCAL_TASK,
