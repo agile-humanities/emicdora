@@ -448,19 +448,24 @@ function emicdora_block_view($delta = '') {
 
     case 'source_material':
       // @todo Make this list not hard-coded.
-      $links = array();
-      $links[] = array(
-        'title' => 'All',
+      module_load_include('inc', 'emicdora', 'includes/utilities');
+      $raw_data = emicdora_get_raw_sources($object);
+      $content_types = emicdora_source_content_models();
+      $full_count = 0;
+      foreach ($content_types as $content_model => $label) {
+        if (isset($raw_data[$content_model])) {
+          $count = count($raw_data[$content_model]);
+          $full_count += $count;
+          $links[] = array(
+            'title' => $label . " ($count)",
+            'href' => "islandora/object/{$critical_edition->id}/sources/$content_model",
+          );
+        }
+      }
+      array_unshift($links, array(
+        'title' => t("All") . " ($full_count)",
         'href' => "islandora/object/{$critical_edition->id}/sources/",
-      );
-      $links[] = array(
-        'title' => 'Books',
-        'href' => "islandora/object/{$critical_edition->id}/sources",
-      );
-      $links[] = array(
-        'title' => 'Audio',
-        'href' => "islandora/object/{$critical_edition->id}/sources",
-      );
+      ));
       $block['subject'] = t('Source Material');
       $block['content'] = array(
         '#theme' => 'links',
@@ -817,7 +822,7 @@ function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $
  * @return string
  *   HTML displaying the SOLR search results containing the related sources.
  */
-function emicdora_critical_edition_sources(AbstractObject $object) {
+function emicdora_critical_edition_sources(AbstractObject $object, $content_model = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   // Only show members of the given critical edition.
@@ -825,9 +830,9 @@ function emicdora_critical_edition_sources(AbstractObject $object) {
     '!pid' => $object->id,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
   // Only show source objects.
-  $source_content_models = emicdora_source_content_models();
   $sources = array();
-  foreach (array_keys($source_content_models) as $content_model) {
+  $source_content_models = isset($content_model) ? array($content_model) : array_keys(emicdora_source_content_models());
+  foreach ($source_content_models as $content_model) {
     $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
   }
   $filters[] = format_string('!model:(!sources)', array(
