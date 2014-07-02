@@ -37,7 +37,6 @@ function tei_editor_setup(AbstractObject $fedora_object) {
   $results['no_edit'] = 1;
   $results['page_count'] = count($pages);
   $results['islandora_anno_stroke_width'] = $stroke_width;
-
   $place_entity_collection = variable_get('islandora_entities_places_collection', 'islandora:entity_collection');
   $results['create_entity_callbacks']['places'] = url('islandora/object/' . $place_entity_collection . '/manage/overview/ingest');
   $event_entity_collection = variable_get('islandora_entities_events_collection', 'islandora:entity_collection');

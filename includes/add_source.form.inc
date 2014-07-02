@@ -23,7 +23,7 @@ function emicdora_add_source_form($content_model, $critical_edition) {
   global $user;
   $source_content_models = emicdora_source_content_models();
   $ingestible = in_array($content_model, array_keys($source_content_models));
-  if (!$ingestible || !emicdora_is_critical_edition($critical_edition)) {
+  if (!$ingestible || !emicdora_has_content_model($critical_edition, 'islandora:criticalEditionContainerCModel')) {
     drupal_not_found();
   }
   $label = $source_content_models[$content_model];
