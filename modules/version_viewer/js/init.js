@@ -1,30 +1,54 @@
 (function ($) {
   $(document).ready(function () {
+	  
+	  
+	  
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
     $("#easyui_tree").tree({
       onClick: function(node) {
-        //console.log(node);
       },
       onCheck: function(node, checked) {
-        if (node['attributes']['urn']) {
+    	  console.log(node);
+    	  $type = "ent";//(node.text == "Entities" ? "ent" : "anno");
+    	  console.log($type);
+        //if (node['attributes']['urn']) {
 	      if (checked) {
-	        show_annotations([node]);
+	        show_annotations(node);
 	      }
 	      else {
-	        hide_annotations([node]);
+	        hide_annotations(node);
 	      }
-        }
-        else {
-          if (checked) {
-              show_annotations(node.children);
-          }
-          else {
-            hide_annotations(node.children);
-          }
-        }
+       // }
+//        else {
+//          if (checked) {
+//              show_annotations(node);
+//          }
+//          else {
+//            hide_annotations(node);
+//          }
+//        }
       }
     });
+    
+    function update_tree_data() {
+      var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
+	  var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
+	  var pid = Drupal.settings.versionable_object_viewer.pids[pageNumber - 1];
+	  $.ajax({
+          url: Drupal.settings.basePath + 'islandora/object/' + pid + '/get_tree_data/' + dpid,
+          async:false,
+          success: function(data, status, xhr) {
+        	  $('#easyui_tree').tree({
+        			data: data,
+        		});
+          },
+          error: function(data, status, xhd) {
+              alert("Please Login to site");
+          },
+          dataType: 'json'
+      });
+    }
     
     $('#ui-easy-paginator').pagination({
     	onSelectPage:function(pageNumber, pageSize){
@@ -32,20 +56,97 @@
     	}
     });
     
-    function show_annotations(anno_array) {
-      for (var i = 0; i < anno_array.length; i++) {
-        console.log(anno_array[i]);
-        var anno_id = anno_array[i]['attributes']['urn'].replace("urn:uuid:", "");
-        paint_commentAnnoTargets(null, 'canvas_0', anno_id, anno_array[i]['attributes']['type']);
-      }
+    function show_annotations(node) {
+    	console.log(node);
+    	
+    	if (node.children) {
+    		// Show all children for node.
+    		for(var i = 0;i<node.children.length;i++) {
+	    	  var ent_id = node.children[i]['attributes']['annotationId'];
+	    	  console.log("should show entities");
+	    	  $("span[data-annotationid='" + ent_id + "']").css('background-color', 'yellow');
+	    	  show_entity_tooltip(node.children[i]['attributes'], ent_id);
+    		}
+    	}
+    	else {
+    	  var ent_id = node['attributes']['annotationId'];
+    	  console.log("should show entities");
+    	  $("span[data-annotationid='" + ent_id + "']").css('background-color', 'yellow');
+    	  show_entity_tooltip(node['attributes'], ent_id);
+    	}
+//      if (type !== 'ent') {
+//	    for (var i = 0; i < anno_array.length; i++) {
+//	      console.log(anno_array[i]);
+//	      var anno_id = anno_array[i]['attributes']['urn'].replace("urn:uuid:", "");
+//	      paint_commentAnnoTargets(null, 'canvas_0', anno_id, anno_array[i]['attributes']['type']);
+//	    }
+//      }
+//      else {
+//    	  for (var i = 0; i < anno_array.length; i++) {
+//    	      console.log(anno_array[i]);
+//	    	  var ent_id = anno_array[i]['attributes']['annotationId'];
+//	    	  console.log("should show entities");
+//	    	  $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+//	    	  show_entity_tooltip(anno_array[i]['attributes'], ent_id);
+//    	    }
+//    	  console.log(anno_array + "anno array show");
+//    	  // Show entities.
+//    	 // $('#' + anno_array[i]['attributes'])
+//      }
+      
     }
     
-    function hide_annotations(anno_array) {
-      for (var i = 0; i < anno_array.length; i++) {
-        console.log(anno_array[i]);
-        var anno_id = anno_array[i]['attributes']['urn'].replace("urn:uuid:", "");
-        $('.svg_' + anno_id).remove();
-      }
+    function hide_annotations(node, type) {
+//		if (type !== 'ent') {
+//		  for (var i = 0; i < anno_array.length; i++) {
+//	        console.log(anno_array[i]);
+//	        var anno_id = anno_array[i]['attributes']['urn'].replace("urn:uuid:", "");
+//	        $('.svg_' + anno_id).remove();
+//	      }
+//		}
+//		else {
+			// Hide Entities.
+			console.log("should hide entities");
+//			for (var i = 0; i < anno_array.length; i++) {
+//	    	  console.log(anno_array[i]);
+//		      var ent_id = anno_array[i]['attributes']['annotationId'];
+//		      console.log("should show entities");
+//		      $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+//	    	}
+			
+			if (node.children) {
+	    		// Show all children for node.
+	    		for(var i = 0;i<node.children.length;i++) {
+		    	  var ent_id = node.children[i]['attributes']['annotationId'];
+		    	  console.log("should hide entities");
+		    	  $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+	    		}
+	    	}
+	    	else {
+	    	  var ent_id = node['attributes']['annotationId'];
+	    	  console.log("should show entities");
+	    	  $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+	    	  $("span[data-annotationid='" + ent_id + "']").tooltip().destroy();
+	    	}
+      
+    }
+    
+    function show_entity_tooltip(data, ent_id) {
+      $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+      $("span[data-annotationid='" + ent_id + "']").tooltip({
+    	    position: 'top',
+    	    hideEvent: 'none',
+    	    content: function(){
+    	      // Hidden in the dom.
+    	      return $('#toolbar');
+    	    },
+    	    onShow: function(){
+    	      var t = $(this);
+    	      t.tooltip('tip').focus().unbind().bind('blur',function(){
+    	      t.tooltip('hide');
+    	      });
+    	    }
+      }).show();
     }
     
     function show_transcription(page) {
@@ -189,5 +290,6 @@
 	// Show our first tab.
 	add_tab("wb_reading_tab", url, "reading_tei");
 	toggle_layout(false, 'west');
+	update_tree_data();
   });
 })(jQuery);

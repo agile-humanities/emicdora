@@ -9,7 +9,7 @@ function versionable_object_viewer_prepare_page_tei_consolidated($object) {
   module_load_include('inc', 'php_lib', 'DOMHelpers');
 
   try {
-    versionable_object_viewer_read_rdf($object);
+    //versionable_object_viewer_read_rdf($object);
     $transformed_tei = versionable_object_viewer_display_page_tei($object);
 
     $doc = new DOMDocument();
@@ -92,15 +92,16 @@ function versionable_object_viewer_build_transcription_data($object) {
   echo json_encode($return);
 }
 
-function versionable_object_viewer_build_tree($object) {
+function versionable_object_viewer_build_tree($object, $derivation_object) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
 
   $tree_data = array();
   $count = 1;
 
+  // Construct our image annotations.
   if (isset($anno_pids['types'])) {
-    // Populate our different types of annotations.
+    // Populate our different types of annotations (Image Annotations, TextImageLinks, etc.
     foreach ($anno_pids['types'] as $anno_type) {
 
       $tree_data[$count - 1] = array(
@@ -129,50 +130,66 @@ function versionable_object_viewer_build_tree($object) {
       $count++;
     }
   }
+//   dsm($tree_data, "tree data");
+//   dsm($object->id, "obj id");
+//   dsm($derivation_object->id, "derivation id in tree");
+  $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
 
+
+  $tree_data[$count - 1] = array(
+    "id" => 'tree_entities',
+    "text" => "Entities",
+    "state" => "closed",
+    "attributes" => array(),
+    "children" => array(),
+  );
+  //$count = 0;
+  // Now, build a tree entry for each entity type (Person, place, etc).
+  foreach ($rdf_annotations as $rdf_anno) {
+    dsm($rdf_anno, "rdf anno");
+
+    array_push(
+      $tree_data[$count - 1]['children'],
+      array(
+        "id" => $rdf_anno->annotationId,
+        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+        "state" => "open",
+        "attributes" => $rdf_anno,
+      )
+    );
+    dsm(array(), "pushed");
+    $count++;
+  }
+dsm($tree_data, "tree data");
   echo drupal_json_encode($tree_data);
 }
 
-function versionable_object_viewer_read_rdf($object) {
-  dsm($object->id, "hit read rdf");
+function versionable_object_viewer_read_rdf($object, $dsid = 'TEI_RDF') {
   $dom = new DomDocument;
-  $dom->loadXml($object['TEI_RDF']->content);
+  $dom->loadXml($object[$dsid]->content);
+
+  $xml = simplexml_load_string($dom->saveXML());
 
   $destinations = $dom->getElementsByTagName("Description");
-  dsm($destinations, "destinations");
+  $entities = array();
+  $json_anno;
   foreach ($destinations as $destination) {
-    dsm($destination, "destination");
     foreach($destination->childNodes as $child) {
       // Read the CDATA section for annotation specifics.
       if ($child->nodeType == XML_CDATA_SECTION_NODE) {
-        dsm($child->textContent, "text content");
         $json_anno = json_decode($child->textContent);
-        dsm($json_anno, "json anno");
-          //echo $child->textContent . "<br/>";
+        $labels = $xml->xpath('//*[@annotationId]');
+          foreach($labels as $label) {
+            if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
+              $json_anno->{'annotationId'} = (string) $label['annotationId'];
+            }
+          }
+        array_push($entities, $json_anno);
       }
     }
   }
-
-//   $xph = new DOMXPath($dom);
-//   $xph->registerNamespace('rdf', "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-//   $xph->registerNamespace('w', "http://cwrctc.artsrn.ualberta.ca/#");
-//   $rdf_array = array();
-//   foreach($xph->query('//rdf:Description') as $attribute) {
-//       dsm($attribute->nodeValue, "rdf att val");
-//       array_push($rdf_array, $attribute->nodeValue);
-//   }
-//   dsm($rdf_array, "rdf array");
-//   $obj = json_decode($rdf_array[1]);
-//   $herbe = $obj->hasTarget->hasSelector->{'rdf:value'};
-//   dsm($herbe, "herbe");
-//   dsm($obj, "obj");
-
-
-//   $more_results = $xph->query('//rdf:Description/persName[@annotationId="ent_9"]');
-//   foreach ($more_results as $node) {
-//     dsm($node->nodeValue, "my more results");
-//   }
-
+dsm($entities, "final entities");
+  return $entities;
 }
 
 function versionable_object_viewer_svg_data($anno_svg) {
@@ -293,7 +310,8 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
 
     $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data");
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
-
+    dsm($pids, "pids");
+    dsm($derivation_pids, "dpids");
     drupal_add_js(array('islandora_image_annotation' => array('PID' => $derivation_pids[0])), 'setting');
     islandora_image_annotation_include_common_js();
     islandora_image_annotation_include_common_css();

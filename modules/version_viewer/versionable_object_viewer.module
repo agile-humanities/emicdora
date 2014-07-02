@@ -8,11 +8,11 @@
 function versionable_object_viewer_menu() {
 
   $items = array();
-  $items['islandora/object/%islandora_object/get_tree_data'] = array(
+  $items['islandora/object/%islandora_object/get_tree_data/%islandora_object'] = array(
     'title' => 'Prepare advanced viewer',
     'page callback' => 'versionable_object_viewer_build_tree',
     'file' => 'includes/utilities.inc',
-    'page arguments' => array(2),
+    'page arguments' => array(2, 4),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
     'access arguments' => array(TRUE),

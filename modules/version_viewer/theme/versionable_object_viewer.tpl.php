@@ -40,7 +40,7 @@
         </div>
         <div data-options="region:'west',split:true,minimized:<?php print $hide_components['w']; ?>" title="Annotations" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" style="width:auto;height:auto;">
-              <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true" url="<?php print $tree_source; ?>">
+              <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true">
               </ul>
           </div>
         </div>
@@ -48,4 +48,13 @@
           <div id="versions_tabs" data-options="fit:true" class="easyui-tabs" style="width:auto;height:auto">
           </div>
         </div>
+    </div>
+    <div style="display:none">
+      <div id="toolbar">
+        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Add" data-options="iconCls:'icon-add',plain:true"></a>
+        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Cut" data-options="iconCls:'icon-cut',plain:true"></a>
+        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Remove" data-options="iconCls:'icon-remove',plain:true"></a>
+        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Undo" data-options="iconCls:'icon-undo',plain:true"></a>
+        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Redo" data-options="iconCls:'icon-redo',plain:true"></a>
+      </div>
     </div>
