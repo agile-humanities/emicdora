@@ -799,6 +799,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   $content_models = array_keys(emicdora_source_content_models());
   if (!$source_object) {
     $content = emicdora_get_apparatus_as_content($object);
+    return array('emicdora' => $content);
   }
 
   foreach ($content_models as $content_model) {
@@ -817,6 +818,11 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
     case 'islandora:sp-audioCModel':
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content = theme('islandora_audio', array('islandora_object' => $source_object));
+      break;
+
+    case 'islandora:sp_videoCModel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content = theme('islandora_video', array('islandora_object' => $source_object));
       break;
   }
   return array('emicdora' => $content);
