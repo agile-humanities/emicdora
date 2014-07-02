@@ -5,33 +5,26 @@
  * Defines all the utility functions this module implements.
  */
 
-/**
- * Prepares consolidated tei info.
- *
- * @param AbstractObject $object
- *   The object to prepare transformed TEI on.
- */
 function versionable_object_viewer_prepare_page_tei_consolidated($object) {
   module_load_include('inc', 'php_lib', 'DOMHelpers');
-  // $object is our versionable object.
-  // $pageNumber is our current page
-  //$pageNumber = urldecode($_GET['page']);
 
-  // TODO: Use the '$pageNumber' and versionable object to find
-  // the source, and return the matching page as display tei.
-  // Return page level consolidated TEI.
+  try {
+    versionable_object_viewer_read_rdf($object);
+    $transformed_tei = versionable_object_viewer_display_page_tei($object);
 
-//   $transformed_tei = versionable_object_viewer_display_page_tei($object, 'TEI');
+    $doc = new DOMDocument();
+    $doc->loadXML($transformed_tei);
 
-//   $doc = new DOMDocument();
-//   $doc->loadHTML($transformed_tei);
+    $pretty_printed = dom_document_pretty_print($doc, TRUE);
 
-//   $return['transformed'] = $transformed_tei;
-//   $return['pretty_print'] = dom_document_pretty_print($doc, TRUE);
-dsm($object->id, "pid");
-  $return['title'] = $object->label;
-  $return['body'] = "This is body text to be updated.";
-  return  drupal_json_output($return);
+    $return['body'] = $pretty_printed;
+    $return['title'] = $object->label;
+
+    return drupal_json_output($return);
+  } catch (Exception $e) {
+    return drupal_json_output($e);
+  }
+
 }
 
 /**
@@ -47,7 +40,7 @@ dsm($object->id, "pid");
  * @return string
  *   transformed xml
  */
-function versionable_object_viewer_display_page_tei($object, $dsid = 'CWRC') {
+function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') {
   module_load_include('inc', 'islandora', 'includes/authtokens');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
@@ -57,7 +50,7 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'CWRC') {
   $tomcat_url = str_replace('/fedora', '', $islandora_url);
   $pid = $object->id;
 
-  $path = drupal_get_path('module', 'islandora_critical_edition_advanced');
+  $path = drupal_get_path('module', 'versionable_object_viewer');
   $xml_path = url("islandora/object/$pid/datastream/$dsid/view", array(
     'absolute' => TRUE,
     'query' => array(
@@ -65,7 +58,8 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'CWRC') {
     ),
   ));
   $xslt_path = "$base_url/$path/xml/EMiC_test_XSLTv2.xsl";
-  return file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path");
+  $data = file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path");
+  return $data;
 }
 
 /**
@@ -76,15 +70,26 @@ function versionable_object_viewer_prepare_detail_meta_data() {
   $pid = html_entity_decode(stripslashes($_GET['pid']), ENT_QUOTES, 'UTF-8');
   $versionable_object = islandora_object_load($pid);
   $data = islandora_retrieve_metadata_markup($versionable_object, TRUE);
-  echo $data;//drupal_json_output();
+  echo $data;
 }
 
 
 function versionable_object_viewer_build_transcription_data($object) {
   $page = urldecode($_GET['page']);
-  $versionable_object = islandora_object_load($object->id);
-  $version_data = versionable_object_viewer_get_transcription_text($versionable_object);
-  echo $version_data[$page - 1]['text'];
+
+  $members = versionable_object_viewer_get_members($object);
+  $pids = array();
+  // Ensure page pids have a 'TEI_RDF' datastream.
+  foreach ($members as $member) {
+    array_push($pids, $member['obj']['value']);
+  }
+
+  $derivation_object = islandora_object_load($pids[$page -1]);
+
+  $return['body'] = versionable_object_viewer_display_page_tei($derivation_object);//$derivation_object['TEI_RDF']->content;
+  $return['title'] = $derivation_object->label . " (page $page)";
+  $return['transcriptions'] = versionable_object_viewer_get_transcription_text($object);
+  echo json_encode($return);
 }
 
 function versionable_object_viewer_build_tree($object) {
@@ -126,6 +131,32 @@ function versionable_object_viewer_build_tree($object) {
   }
 
   echo drupal_json_encode($tree_data);
+}
+
+function versionable_object_viewer_read_rdf($object) {
+  dsm($object->id, "hit read rdf");
+  $dom = new DomDocument;
+  $dom->loadXml($object['TEI_RDF']->content);
+  $xph = new DOMXPath($dom);
+  $xph->registerNamespace('rdf', "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+  $xph->registerNamespace('w', "http://cwrctc.artsrn.ualberta.ca/#");
+  $rdf_array = array();
+  foreach($xph->query('//rdf:Description') as $attribute) {
+      dsm($attribute->nodeValue, "rdf att val");
+      array_push($rdf_array, $attribute->nodeValue);
+  }
+  dsm($rdf_array, "rdf array");
+  $obj = json_decode($rdf_array[1]);
+  $herbe = $obj->hasTarget->hasSelector->{'rdf:value'};
+  dsm($herbe, "herbe");
+  dsm($obj, "obj");
+
+
+  $more_results = $xph->query('//persName[@annotationId="ent_9"]');
+  foreach ($more_results as $node) {
+    dsm($node->nodeValue, "my more results");
+  }
+
 }
 
 function versionable_object_viewer_svg_data($anno_svg) {
@@ -170,7 +201,17 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
   module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
+  // Use this to determine what to show by default
+  $variables['hide_components'] = array(
+    'n' => 'false',
+    's' => 'false',
+    'e' => 'false',
+    'w' => 'false',
+  );
   if ($variables['content_model'] == 'islandora:sp-audioCModel') {
+
+    $variables['show_components']['w'] = 'true';
+
     if (isset($reference_object['PROXY_MP3'])) {
       $audio_params = versionable_object_viewer_get_audio_params($reference_object);
     }
@@ -184,7 +225,7 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
       $variables['islandora_thumbnail_img'] = theme('image', $params);
       $audio_params['tn'] = $tn_url;
     }
-    //drupal_add_css("$critical_edition_module_path/css/islandora_critical_edition.css");
+
     $viewer = islandora_get_viewer($audio_params, 'islandora_audio_viewers', $reference_object);
     $variables['params'] = $audio_params;
     if ($viewer) {
@@ -200,6 +241,8 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     }
   }
   if ($variables['content_model'] == 'islandora:sp_videoCModel') {
+    $variables['show_components']['w'] = 'true';
+
     $video_params = versionable_object_viewer_get_video_params($reference_object);
     $viewer = islandora_get_viewer($video_params, 'islandora_video_viewers', $reference_object);
     $variables['params'] = $video_params;
@@ -211,30 +254,51 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
 
     $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
-    $pages = islandora_paged_content_get_pages($reference_object);
-    $pids = array_keys($pages);
-
-    // Ensure page pids have a 'CWRC' datastream.
-    foreach ($pids as $pid) {
-      $obj = islandora_object_load($pid);
-      if (!isset($obj['CWRC'])) {
-        //dsm($pid, "no cwrc data stream");
-      }
+    $members = versionable_object_viewer_get_members($variables['islandora_object']);
+    $pids = array();
+    // Ensure page pids have a 'TEI_RDF' datastream.
+    foreach ($members as $member) {
+      array_push($pids, $member['obj']['value']);
+      $obj = islandora_object_load($member['obj']['value']);
     }
-    dsm($pids, "pids");
-    $variables['page_pids'] = $pids;
 
+    $derivation_pids = array();
+    foreach ($pids as $pid) {
+      $page_derivation = islandora_object_load($pid);
+      $page_derivation_source = $page_derivation->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+      $pg_derivation_pid = $page_derivation_source[0]['object']['value'];
+      array_push($derivation_pids, $pg_derivation_pid);
+
+    }
+    $variables['page_pids'] = $pids;
+    drupal_add_js(array('versionable_object_viewer' => array('tei_rdf_pids' => $pids)), 'setting');
+    drupal_add_js(array('versionable_object_viewer' => array('pids' => $derivation_pids)), 'setting');
     $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
 
-    $variables['tree_source'] = url("islandora/object/$pids[0]/get_tree_data");
+    $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data");
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
 
-    drupal_add_js(array('islandora_image_annotation' => array('PID' => $pids[0])), 'setting');
+    drupal_add_js(array('islandora_image_annotation' => array('PID' => $derivation_pids[0])), 'setting');
     islandora_image_annotation_include_common_js();
     islandora_image_annotation_include_common_css();
     drupal_add_js($module_path . '/js/islandora_image_annotation_init.js');
   }
   return $variables;
+}
+
+function versionable_object_viewer_get_members(AbstractObject $object, $content_model = 'islandora:tei-rdfCModel') {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $tuque = islandora_get_tuque_connection();
+  $query = "PREFIX fedora-model: <info:fedora/fedora-system:def/model#>
+            PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
+            SELECT ?obj FROM <#ri> WHERE {
+              ?obj <fedora-rels-ext:isMemberOf> <info:fedora/$object->id> .
+              ?obj <fedora-model:hasModel> <info:fedora/$content_model>.
+            }";
+  $objects = array();
+  $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
+ // dsm($results, "results of query");
+  return $results;
 }
 
 function versionable_object_viewer_process_version_object_source(AbstractObject $versionable_object) {
@@ -264,19 +328,11 @@ function versionable_object_viewer_prepare_advanced($object) {
   module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
 
   $module_path = drupal_get_path('module', 'islandora_critical_edition_advanced');
-
   $data = $object->id;
-
+  dsm(array(), "hit prepare advanced.");
   // Gather all transcriptions for this versionable object.
   $transcriptions_data = islandora_critical_get_related_transcriptions($data);
 
-//   $transcriptions = array();
-//   foreach ($transcriptions_data as $key => $value) {
-//     $trans = islandora_object_load($key);
-//     $transcription_details['title'] = $transcriptions_data[$key];
-//     $transcription_details['text'] = $trans['TRANSCRIPTION']->content;
-//     array_push($transcriptions, $transcription_details);
-//   }
   $reference_object;
 
   module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/consolidate_tei');

@@ -1,18 +1,5 @@
 (function ($) {
   $(document).ready(function () {
-    // Manually set up the draggable.
-  //  $('.ui-resizable').draggable().resizable();
-
-    // TODO: jQuery resizeable handles need to be set up manually..
-    // @ see: http://api.jqueryui.com/resizable/#option-handles
-   // $('#easy-ui-east').resizable( "option", "handles", "n, e, s, w" );
-    
-    $('#easy-ui-east').resizable({
-        maxWidth:800,
-        maxHeight:600
-    });
-    
-
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
     $("#easyui_tree").tree({
@@ -62,20 +49,26 @@
     }
     
     function show_transcription(page) {
-      //var pid = $('#ui-easy-paginator').attr('data-pid');
-	  $.ajax({
-		url: Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page,
-		async: false,
-		timeout: 3000,
-		success: function(data, status, xhr) {
-		        $('#transcription_panel').empty();
-		        $('#transcription_panel').append(data);
-					
-		},
-		error: function() {
-			console.log("failure");
-		}
-	  });
+      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=rd';
+      add_tab("wb_reading_tab", url, 'reading_tei');
+      advance_shared_canvas_page(page);
+    }
+    
+    function advance_shared_canvas_page(page) {
+    	console.log(Drupal.settings.versionable_object_viewer.pids);
+      $.ajax({
+          url: Drupal.settings.basePath + 'islandora/anno/setup/'
+            + Drupal.settings.versionable_object_viewer.pids[page - 1],
+          async:false,
+          success: function(data, status, xhr) {
+              islandora_canvas_params = data;
+              continueSetup();
+          },
+          error: function(data, status, xhd) {
+              alert("Please Login to site");
+          },
+          dataType: 'json'
+      });
     }
     
     function show_tei() {
@@ -105,67 +98,72 @@
     		$(this).addClass('img_selected');
     		is_selected = true;
     	}
-    	console.log($(this).attr('id'));
+    	var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     	switch($(this).attr('id')) {
 	        case 'wb_meta':
-	        	console.log("a");
 	        	toggle_layout(is_selected, 'south');
 	            break;
 	        case 'wb_dt':
-	        	console.log("b");
-	        	add_tab(wb_dt);
+	        	var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=dt';
+	        	add_tab("wb_dt_tab", url, 'diplomatic_tei');
+	        	console.log("dip tei");
+	        	//$('#wb_dt_tab').addClass('diplomatic_tei');
 	            break;
 	        case 'wb_image':
-	        	console.log("c");
-	        	//console.log("image");
-	        	toggle_layout(!is_selected, 'east');
+	        	toggle_layout(is_selected, 'east');
 	        	break;
 	        case 'wb_reading':
-	        	console.log("d");
-	        	add_tab(wb_reading);
+	        	var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=rd';
+	        	add_tab("wb_reading_tab", url, 'reading_tei');
+	        	//$('#wb_dt_tab').addClass('reading_tei');
 	            break;
 	        case 'wb_tei_markup':
-	        	console.log("e");
-	        	add_tab(wb_tei_markup);
+	        	var pid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];//Drupal.settings.versionable_object_viewer.pids[pageNumber - 1];
+	        	console.log(pid);
+	        	var url = Drupal.settings.basePath + 'islandora/version_viewer/tei_markup/page/' + pid;
+	        	add_tab("wb_tei_markup_tab", url, "", "json", true);
 	            break;
 	        case 'wb_show_annos':
-	        	console.log("f");
 	        	toggle_layout(!is_selected, 'west');
 	            break;
 	        case 'wb_show_til':
-	        	console.log("g");
 	        	toggle_layout(!is_selected, 'west');
 	            break;
 	    }
     });
     
-    function add_tab(type) {
-    	var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
-    	console.log(pageNumber);
-    	var pid = $('#ui-easy-paginator').attr('data-pid');
-    	$('#center_data').append('<div id="d_trans" style="padding:10px;"></div>');
-    	pid = "islandora:14";
-    	//construct_easy_ui_panel();
-		console.log(Drupal.settings.basePath + 'islandora/version_viewer/transformed_page/' + pid);
+    function add_tab(type, endpoint, add_class = "", data_type = "json") {
+    	console.log(endpoint);
     	$.ajax({
     		type: 'GET',
     		async: false,
-    		url: Drupal.settings.basePath + 'islandora/version_viewer/transformed_page/' + pid,
+    		dataType: data_type,
+    		url: endpoint,
     		success: function(data, status, xhr) {
-    			//$('#versions_tabs').append('<div id="d_trans" style="padding:10px;"></div>');
-    			console.log("construct panel");
-    			$('#versions_tabs').tabs('add',{
-    				id: type,
-    				title: data['title'],
-    				content:data['body'],
-    				closable:true,
-    			});
-    			console.log(data['title']);
+    			construct_tab(data, type);
+    			
+    			if (add_class != "") {
+    				$('#' + type).addClass(add_class);
+    			}
     		},
     		error: function(xhRequest, ErrorText, thrownError) {
     			console.log(ErrorText + ":" + thrownError);
     		},
     	});
+    }
+    
+    function construct_tab(data, type) {
+    	var nfo = decodeURIComponent(data['body']);
+    	var ddt = decodeURIComponent(nfo);
+    	console.log(ddt);
+    	$('#versions_tabs').tabs('add',{
+			id: type,
+			title: data['title'],
+			content:data['body'],
+			closable:true,
+    	});
+    	
+    	prettyPrint();
     }
     
     $('#easy-ui-east').panel({
@@ -184,5 +182,12 @@
         console.log('hide');
       }
     }
+    
+    var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
+	var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
+	
+	// Show our first tab.
+	add_tab("wb_reading_tab", url, "reading_tei");
+	toggle_layout(false, 'west');
   });
 })(jQuery);

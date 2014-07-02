@@ -22,7 +22,7 @@
                 </div>
                   <div id="ui-easy-paginator" class="easyui-pagination"
                     data-options="
-                      total: '<?php print sizeof($version_data); ?>',
+                      total: '<?php print sizeof($page_pids); ?>',
                       pageSize:1,
                       showPageList: false,
                       showRefresh: false,
@@ -38,7 +38,7 @@
         <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true" title="Source" style="width:200px;maxWidth:700px">
           <?php print $islandora_content; ?>
         </div>
-        <div data-options="region:'west',split:true" title="Annotations" style="width:150px;height:500px;">
+        <div data-options="region:'west',split:true,minimized:<?php print $hide_components['w']; ?>" title="Annotations" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" style="width:auto;height:auto;">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true" url="<?php print $tree_source; ?>">
               </ul>
@@ -46,10 +46,6 @@
         </div>
         <div id="center_data" class="easyui-panel" data-options="region:'center',iconCls:'icon-ok'">
           <div id="versions_tabs" data-options="fit:true" class="easyui-tabs" style="width:auto;height:auto">
-            <div title="<?php print $version_data[0]['title']; ?>" style="padding:0px;width:auto;height:auto" data-options="fit:true,closable:true">
-              <div id="transcription_panel" class="easyui-panel" data-options="noheader:true,fit:true,region:'east',split:true,region:'center',href:'<?php print $transcription_source; ?>?page=1'" title="Source" style="height:500px;width:500px;">
-              </div>
-            </div>
           </div>
         </div>
     </div>

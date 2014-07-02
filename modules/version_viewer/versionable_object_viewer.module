@@ -34,15 +34,23 @@ function versionable_object_viewer_menu() {
     'access callback' => 'user_access',
     'access arguments' => array(TRUE),
   );
-  $items['islandora/version_viewer/transformed_page/%islandora_object'] = array(
+  $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
     'title' => 'Prepare Page consolidated TEI',
     'page callback' => 'versionable_object_viewer_prepare_page_tei_consolidated',
     'file' => 'includes/utilities.inc',
-    'page arguments' => array(3),
+    'page arguments' => array(4),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
     'access arguments' => array(TRUE),
   );
+//   $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
+//     'title' => 'Prepare Page TEI Markup',
+//     'page callback' => 'versionable_object_viewer_display_page_tei',
+//     'page arguments' => array(3),
+//     'type' => MENU_CALLBACK,
+//     'access callback' => 'user_access',
+//     'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
+//   );
 //   $items['islandora/cwrc_viewer/detail_meta_data'] = array(
 //     'title' => 'Prepare Metadata view',
 //     'page callback' => 'islandora_critical_edition_advanced_prepare_detail_meta_data',
@@ -143,15 +151,12 @@ function versionable_object_viewer_islandora_versionCModel_islandora_view_object
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
 
-  // Some custom css.
-  //drupal_add_css("$module_path/css/viewer.css");
-
   // Add the jQuery EasyUI library.
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   drupal_add_js("$module_path/js/init.js");
-dsm($object->id, "obj id");
 
   $transcriptions = versionable_object_viewer_get_transcription_text($object);
+
   // Theme our verionable object viewer.
   return theme('versionable_object_viewer',
     array(
@@ -164,37 +169,27 @@ dsm($object->id, "obj id");
 function versionable_object_viewer_preprocess_versionable_object_viewer(&$variables) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
-
-
-
-  module_load_include('inc', 'islandora', 'includes/solution_packs');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/consolidate_tei');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
-
-
+  module_load_include('inc', 'php_lib', 'DOMHelpers');
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
+  dom_document_pretty_print_include_files();
+
   $version_object = $variables['islandora_object'];
-  dsm($variables['islandora_object']->id, "obj id");
+  drupal_add_css("$module_path/css/islandora_critical_edition_diplomatic_tei.css");
+  drupal_add_css("$module_path/css/islandora_critical_edition_reading_tei.css");
+
 
   $source = versionable_object_viewer_process_version_object_source($version_object);
   $source_object = islandora_object_load($source[0]['obj']['value']);
-  dsm($source, "source Data");
+
   $variables['version_source'] = $source;
   $variables['content_model'] = str_replace("info:fedora/", "", $source[0]['type']['uri']);
   $variables['transcription_source'] = url("islandora/object/$version_object->id/get_transcription_data");
   $variables['meta_source'] = url("islandora/cwrc_viewer/detail_meta_data");
 
 
-  $critical_edition = $version_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-  dsm($critical_edition, "crit rels");
-  $tei_rdfs = array_keys(islandora_critical_edition_get_members($critical_edition[0]['object']['value']));
-  dsm($tei_rdfs, "tei rdfs");
-
-
-
-
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
+
 
   versionable_object_viewer_build_version_media_view($source_object, $variables);
 }
@@ -213,149 +208,3 @@ function versionable_object_viewer_get_transcription_text($object) {
   }
   return $transcriptions;
 }
-
-/**
- * Implements hook_preprocess().
- */
-// function versionable_object_viewer_preprocess_islandora_critical_edition_publish_view(&$variables) {
-//   global $base_url;
-//   module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
-//   module_load_include('inc', 'php_lib', 'DOMHelpers');
-//   $module_path = drupal_get_path('module', 'islandora_critical_edition_advanced');
-
-//   drupal_add_js(array(
-//     'islandora_critical_edition_advanced' => array(
-//       'diplomatic_tei' => url("$module_path/css/islandora_critical_edition_diplomatic_tei.css"))), 'setting');
-
-//   drupal_add_js(array(
-//     'islandora_critical_edition_advanced' => array(
-//       'common_tei_css' => url("$module_path/css/islandora_critical_edition_common_tei.css"))), 'setting');
-
-//   dom_document_pretty_print_include_files();
-
-//   $islandora_critical_edition = drupal_get_path('module', 'islandora_critical_edition');
-
-//   drupal_add_css("$module_path/css/jquery-ui.css");
-//   drupal_add_css("$module_path/css/theme_override.css");
-//   drupal_add_js("$module_path/js/jquery-ui.js");
-//   drupal_add_js("$module_path/js/startup.js");
-//   drupal_add_css("$module_path/css/zoom_wrapper.css");
-
-//   // Include the pagenation script/styles on the advanced detail viewer.
-//   drupal_add_css("$module_path/js/jqPagination/css/jqpagination.css");
-//   drupal_add_js("$module_path/js/jqPagination/js/jquery.jqpagination.js");
-//   drupal_add_js("$module_path/js/jqPagination/js/scripts.js");
-
-//   drupal_add_js("$module_path/js/zoom-master/jquery.zoom.js");
-//   drupal_add_css("$module_path/js/jQuery-switchButton/jquery.switchButton.css");
-//   drupal_add_js(array('islandora_critical_edition_advanced' => array('module_base' => $module_path)), 'setting');
-//   // Include the jstree dependancies.
-//   $obj = islandora_object_load($variables['islandora_object']);
-//   $associated_objects = islandora_critical_edition_get_members($variables['islandora_object']);
-//   $associated_object_keys = array_keys($associated_objects);
-//   $islandora_critical_edition = drupal_get_path('module', 'islandora_critical_edition');
-
-//   // Add the required jwplayer js.
-//   drupal_add_js("$base_url/sites/all/libraries/jwplayer/jwplayer.js");
-
-//   $crit_app_key = islandora_critical_edition_get_members($variables['islandora_object'], 'islandora:criticalApparatusCModel');
-
-//   $critical_aparatus = islandora_object_load(array_search('islandora:criticalApparatusCModel', $crit_app_key));
-//   $to_construct;
-//   foreach ($critical_aparatus as $datastream) {
-//     // Access individual datastreams and its content.
-//     if ($datastream->id != "DC" && $datastream->id != "TN" && $datastream->id != "RELS-EXT") {
-//       $to_construct[$datastream->id] = $datastream->content;
-//     }
-//   }
-
-//   $to_construct['versions'] = t('Viewer');
-//   $to_construct['collation_view'] = t('Collations');
-//   $tn_array = array();
-//   // Build the TN array for the elastislide viewer.
-//   foreach (array_keys($associated_object_keys) as $element) {
-//     $tn_array[$associated_object_keys[$element]] = array(
-//       'TN' => url("islandora/object/$associated_object_keys[$element]/datastream/TN/view"),
-//       'link' => url("islandora/object/$associated_object_keys[$element]"),
-//       'pid' => $associated_object_keys[$element],
-//     );
-//   }
-//   $variables['scroll_list'] = NULL;
-//   $aparatus_datastreams = islandora_critical_apparatus_get_datastreams();
-//   $form_state['publish_viewer']['#type'] = 'vertical_tabs';
-
-//   $aparatus_datastreams['versions'] = 'Viewer';
-//   $aparatus_datastreams['collation_view'] = 'Collations';
-//   // Build the aparatus content.
-//   $all_keys = array_keys($aparatus_datastreams);
-//   $construct_keys = array_keys($to_construct);
-//   $show_all = FALSE;
-//   foreach (array_keys($aparatus_datastreams) as $element) {
-//     if (isset($to_construct[$element]) || $show_all == TRUE) {
-//       $entry = (array_search($element, $construct_keys, TRUE) - 1);
-
-//       $form_state['publish_viewer']["{$element}_tab"] = array(
-//         '#id' => "{$element}-tab",
-//         '#group' => "{$element}_viewer",
-//         '#access' => TRUE,
-//         '#type' => 'fieldset',
-//         '#title' => $aparatus_datastreams[$element],
-//         '#form' => theme('islandora_critical_edition_advanced_critical_aparatus', array('islandora_objects' => $variables['islandora_object'])),
-//       );
-//       if ($element == 'appendix' || $element == 'versions' || $element == 'collations' || $element == 'collation_view') {
-//         $body = theme("islandora_critical_edition_container_{$element}_table", array(
-//           'object' => $variables['islandora_object'],
-//           'columns' => array(
-//             'version_name' => TRUE,
-//             'object_type' => TRUE,
-//             'genre' => TRUE,
-//             'content' => TRUE,
-//             'context' => TRUE,
-//           )));
-//         $markup = $body;
-//         if ($element != 'versions') {
-//           $pager = theme("islandora_critical_edition_advanced_aparatus_pager", array(
-//             'islandora_object' => $variables['islandora_object'],
-//             'tab_previous' => (isset($construct_keys[$entry]) ? substr($aparatus_datastreams[$construct_keys[$entry]], 0, 16) : "_blank_"),
-//             'tab_next' => (isset($construct_keys[$entry + 2]) ? substr($aparatus_datastreams[$construct_keys[$entry + 2]], 0, 16) : "_blank_"),
-//           ));
-//           $markup = theme('islandora_critical_edition_advanced_critical_aparatus', array(
-//             'islandora_object' => $variables['islandora_object'],
-//             'text_body' => $body,
-//             'text_header' => $aparatus_datastreams[$element],
-//             'text_pager' => $pager,
-//           ));
-//         }
-//         $form_state['publish_viewer']["{$element}_tab"]['body'] = array(
-//           '#id' => "{$element}-tab",
-//           '#group' => "{$element}_viewer",
-//           '#access' => TRUE,
-//           '#type' => 'markup',
-//           '#title' => $aparatus_datastreams[$element],
-//           '#markup' => $markup,
-//         );
-//       }
-//       else {
-//         $form_state['publish_viewer']["{$element}_tab"]['body'] = array(
-//           '#id' => "{$element}-tab",
-//           '#group' => "{$element}_viewer",
-//           '#access' => TRUE,
-//           '#type' => 'markup',
-//           '#title' => $aparatus_datastreams[$element],
-//           '#markup' => theme(
-//               'islandora_critical_edition_advanced_critical_aparatus', array(
-//                 'islandora_object' => $variables['islandora_object'],
-//                 'text_body' => (isset($to_construct[$element]) ? $to_construct[$element] : ""),
-//                 'text_header' => $aparatus_datastreams[$element],
-//                 'text_pager' => theme("islandora_critical_edition_advanced_aparatus_pager", array(
-//               'islandora_object' => $variables['islandora_object'],
-//               'tab_previous' => (isset($construct_keys[$entry]) ? substr($aparatus_datastreams[$construct_keys[$entry]], 0, 16) : "_blank_"),
-//               'tab_next' => (isset($construct_keys[$entry + 2]) ? substr($aparatus_datastreams[$construct_keys[$entry + 2]], 0, 16) : "_blank_"),
-//             )),
-//               )),
-//         );
-//       }
-//     }
-//   }
-//   $variables['publish_form'] = drupal_render($form_state);
-// }

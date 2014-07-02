@@ -232,7 +232,193 @@ function maybeResize() {
       $('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
     }
 }
+   function continueSetup() {
+	   //establish color-picker if allowed
+	    if(islandora_canvas_params.can_choose){
+	        $('#color-picker-wrapper').click(function(){
+	            $('#anno_color_activated').attr('value', 'active');
+	        });
+	        $('.color-picker').miniColors();
+	    }
+	    else{
+	        $('#color-picker-wrapper').empty();
+	    }
 
+	    if(islandora_canvas_params.no_edit == true){
+	        $('#create_annotation').hide();
+	    }
+	    else{
+	        $(function(){
+	            $.contextMenu({
+	                selector : '.comment_title',
+	                callback : function(key, options) {
+	                    var urn = $(this).attr('id');
+	                    urn = urn.substring(5,100);
+	                    var title = $(this).text().substring(2,100);
+	                    title = title.trim();
+
+	                    var comment_text = $(this).next('.comment_text');
+	                    var anno_type = comment_text.find('.comment_type').text();
+
+	                    if(key == 'delete'){
+	                        if (confirm("Permananently Delete Annotation '" + title + "'")) {
+	                            islandora_deleteAnno(urn);
+	                        }
+	                    }
+
+	                    if(key == 'edit'){
+	                        $(this).addClass('annotation-opened').next().show();
+	                        var annotation = comment_text.find('.comment_content').text();
+	                        var pm = $(this).find('.comment_showhide');
+	                        if (pm.text() == '+ ') {
+	                            pm.empty().append('- ');
+	                            var id = $(this).attr('id').substring(5,100);
+	                            var canvas = $(this).attr('canvas');
+	                            paint_commentAnnoTargets(this, canvas, id);
+	                        }
+	                        $('#hidden_annotation_type').attr('anno_type','Update Annotation');
+	                        $('#hidden_annotation_type').attr('urn',urn);
+	                        startEditting(title, annotation, anno_type, urn)
+	                    }
+	                },
+	                items: {
+	                    "edit": {
+	                        name : "Edit",
+	                        icon : "edit",
+	                        accesskey : "e"
+	                    },
+	                    "delete" : {
+	                        name : "Delete annotation",
+	                        icon : "delete"
+	                    }
+	                }
+	            });
+	        });
+	    }
+	    opts.base = islandora_canvas_params.object_base;
+	    console.log("setup canvass");
+	    if(islandora_canvas_params.use_dropdown == 1){
+	        $('#islandora_classification').empty();
+	        $('<label for="anno_classification">Type:</label>').appendTo('#islandora_classification');
+	        var sel = $('<select  id="anno_classification">').appendTo('#islandora_classification');
+	    
+	        $(islandora_canvas_params.categories).each(function() {
+	            value = this.toString();
+	            sel.append($("<option>").attr('value',value).text(value));
+	        });
+	    }
+	    else{
+//	        $( "#anno_classification" ).autocomplete({
+//	            source : islandora_canvas_params.categories
+//	        });
+	    }
+	    if(islandora_canvas_params.islandora_anno_use_title_vocab == 1){
+	        $('#islandora_titles').empty();
+	        $('<label for="anno_title">Title:</label>').appendTo('#islandora_titles');
+	        var titles = $('<select  id="anno_title">').appendTo('#islandora_titles');
+	        titles.append($("<option>").attr('value','--Choose a type--').text('--Choose a type above to populate--'));
+	    }
+
+	    $("#anno_classification").change(function()
+	    {
+	        if(islandora_canvas_params.islandora_anno_use_title_vocab == 1){
+	            var id=$(this).val();
+	            var base_url = islandora_canvas_params.islandora_base_url + 'islandora/anno/solr/title/terms/';
+	            $.getJSON(base_url + id,{
+	                id : $(this).val(),
+	                ajax : 'true'
+	            }, function(j){
+	                var options = '<option value="nothing">--Select from ' + id + '--</option>';
+	                for (var i = 0; i < j.length; i++){
+	                    var fieldName, objectPid;
+	                    $.each(j[i], function (key, val){
+	                        if(key =='PID'){
+	                            objectPid = val;
+	                        } else {
+	                            fieldName = val;
+	                        }
+	                    });
+	                    options += '<option value="' + objectPid + '">' + fieldName + '</option>';
+	                }
+	                if(j.length == 0){
+	                    $('#islandora_titles').empty();
+	                    $('#islandora_titles').append('<label for"anno_title">Title:</label>');
+	                    $('#islandora_titles').append('<input id="anno_title" type="text" size="28"/>');
+	                }
+	                else {
+	                    $('#islandora_titles').empty();
+	                    $('<label for="anno_title">Title:</label>').appendTo('#islandora_titles');
+	                    var titles = $('<select  id="anno_title">').appendTo('#islandora_titles');
+	                    titles.append($("<option>").attr('value','--Choose a type--').text('--Choose a type above to populate--'));
+	                    $('#anno_title').html(options);
+	                    $("#anno_title").change(function()
+	                    {
+	                        var id = $(this).val();
+	                        var mads_url = islandora_canvas_params.islandora_base_url + 'islandora/anno/mads/';
+	                        $.getJSON(mads_url+id,{
+	                            id : $(this).val(),
+	                            ajax : 'true'
+	                        }, function(mads){
+	                            var mads_text = "";
+	                            $.each(mads, function(i, val) {
+	                                mads_text += i +': ' +val + '\n\n';
+	                            });
+	                            $('#anno_text').val(mads_text);
+	                        });
+	                    });
+	                }
+	            });
+	        }
+	    });
+	    
+	    var stroke_widths = islandora_canvas_params.islandora_anno_stroke_widths.split(" ");
+	    var s_options = "";
+	    for (var i = 0; i < stroke_widths.length; i++) {
+	      s_options += '<option value="'+ stroke_widths[i] + '">' + stroke_widths[i] + '</option>';
+	    }
+	    $('#stroke-width-wrapper').empty();
+	    $('#stroke-width-wrapper').append('<label for"stroke_width">Stroke Width:</label>');
+	    $('#stroke-width-wrapper').append('<select id="stroke_width" />');
+	    $('#stroke_width').append(s_options);
+	    
+	    // RDF Initializationc
+	    var rdfbase = $.rdf(opts);
+	    topinfo['query'] = rdfbase;
+
+	    var l = $(location).attr('hash');
+	    var uriparams = {};
+	    var nCanvas = 1;
+	    var start = 0;
+	    if (l[0] == '#' && l[1] == '!') {
+	        // Process initialization
+	        var params = l.substr(2,l.length).split('&');
+	        for (var p=0,prm;prm=params[p];p++) {
+	            var tup = prm.split('=');
+	            var key = tup[0];
+	            var val = tup[1];
+	            if (key == 's') {
+	                start = parseInt(val);
+	                uriparams['s'] = start;
+	            }
+	            else if (key == 'n') {
+	                nCanvas = parseInt(val);
+	                uriparams['n'] = nCanvas;
+	            }
+	        }
+	    }
+	    topinfo['uriParams'] = uriparams
+	    // Initialize UI
+	    init_ui();
+	    // Setup a basic Canvas with explicit width to scale to from browser width
+	    initCanvas(nCanvas);
+
+	    // Manifest initialization.
+	    fetchTriples(islandora_canvas_params.manifest_url,
+	                 rdfbase,
+	                 cb_process_manifest);
+	    resizeCanvas();
+   }
+   
 // Let's start it up!
 $(document).ready(function(){
     // gets setup information from Islandora
@@ -242,6 +428,7 @@ $(document).ready(function(){
         async:false,
         success: function(data, status, xhr) {
             islandora_canvas_params = data;
+            continueSetup();
         },
         error: function(data, status, xhd) {
             alert("Please Login to site");
@@ -249,188 +436,5 @@ $(document).ready(function(){
         dataType: 'json'
     });
 
-    //establish color-picker if allowed
-    if(islandora_canvas_params.can_choose){
-        $('#color-picker-wrapper').click(function(){
-            $('#anno_color_activated').attr('value', 'active');
-        });
-        $('.color-picker').miniColors();
-    }
-    else{
-        $('#color-picker-wrapper').empty();
-    }
 
-    if(islandora_canvas_params.no_edit == true){
-        $('#create_annotation').hide();
-    }
-    else{
-        $(function(){
-            $.contextMenu({
-                selector : '.comment_title',
-                callback : function(key, options) {
-                    var urn = $(this).attr('id');
-                    urn = urn.substring(5,100);
-                    var title = $(this).text().substring(2,100);
-                    title = title.trim();
-
-                    var comment_text = $(this).next('.comment_text');
-                    var anno_type = comment_text.find('.comment_type').text();
-
-                    if(key == 'delete'){
-                        if (confirm("Permananently Delete Annotation '" + title + "'")) {
-                            islandora_deleteAnno(urn);
-                        }
-                    }
-
-                    if(key == 'edit'){
-                        $(this).addClass('annotation-opened').next().show();
-                        var annotation = comment_text.find('.comment_content').text();
-                        var pm = $(this).find('.comment_showhide');
-                        if (pm.text() == '+ ') {
-                            pm.empty().append('- ');
-                            var id = $(this).attr('id').substring(5,100);
-                            var canvas = $(this).attr('canvas');
-                            paint_commentAnnoTargets(this, canvas, id);
-                        }
-                        $('#hidden_annotation_type').attr('anno_type','Update Annotation');
-                        $('#hidden_annotation_type').attr('urn',urn);
-                        startEditting(title, annotation, anno_type, urn)
-                    }
-                },
-                items: {
-                    "edit": {
-                        name : "Edit",
-                        icon : "edit",
-                        accesskey : "e"
-                    },
-                    "delete" : {
-                        name : "Delete annotation",
-                        icon : "delete"
-                    }
-                }
-            });
-        });
-    }
-    opts.base = islandora_canvas_params.object_base;
-
-    if(islandora_canvas_params.use_dropdown == 1){
-        $('#islandora_classification').empty();
-        $('<label for="anno_classification">Type:</label>').appendTo('#islandora_classification');
-        var sel = $('<select  id="anno_classification">').appendTo('#islandora_classification');
-    
-        $(islandora_canvas_params.categories).each(function() {
-            value = this.toString();
-            sel.append($("<option>").attr('value',value).text(value));
-        });
-    }
-    else{
-//        $( "#anno_classification" ).autocomplete({
-//            source : islandora_canvas_params.categories
-//        });
-    }
-    if(islandora_canvas_params.islandora_anno_use_title_vocab == 1){
-        $('#islandora_titles').empty();
-        $('<label for="anno_title">Title:</label>').appendTo('#islandora_titles');
-        var titles = $('<select  id="anno_title">').appendTo('#islandora_titles');
-        titles.append($("<option>").attr('value','--Choose a type--').text('--Choose a type above to populate--'));
-    }
-
-    $("#anno_classification").change(function()
-    {
-        if(islandora_canvas_params.islandora_anno_use_title_vocab == 1){
-            var id=$(this).val();
-            var base_url = islandora_canvas_params.islandora_base_url + 'islandora/anno/solr/title/terms/';
-            $.getJSON(base_url + id,{
-                id : $(this).val(),
-                ajax : 'true'
-            }, function(j){
-                var options = '<option value="nothing">--Select from ' + id + '--</option>';
-                for (var i = 0; i < j.length; i++){
-                    var fieldName, objectPid;
-                    $.each(j[i], function (key, val){
-                        if(key =='PID'){
-                            objectPid = val;
-                        } else {
-                            fieldName = val;
-                        }
-                    });
-                    options += '<option value="' + objectPid + '">' + fieldName + '</option>';
-                }
-                if(j.length == 0){
-                    $('#islandora_titles').empty();
-                    $('#islandora_titles').append('<label for"anno_title">Title:</label>');
-                    $('#islandora_titles').append('<input id="anno_title" type="text" size="28"/>');
-                }
-                else {
-                    $('#islandora_titles').empty();
-                    $('<label for="anno_title">Title:</label>').appendTo('#islandora_titles');
-                    var titles = $('<select  id="anno_title">').appendTo('#islandora_titles');
-                    titles.append($("<option>").attr('value','--Choose a type--').text('--Choose a type above to populate--'));
-                    $('#anno_title').html(options);
-                    $("#anno_title").change(function()
-                    {
-                        var id = $(this).val();
-                        var mads_url = islandora_canvas_params.islandora_base_url + 'islandora/anno/mads/';
-                        $.getJSON(mads_url+id,{
-                            id : $(this).val(),
-                            ajax : 'true'
-                        }, function(mads){
-                            var mads_text = "";
-                            $.each(mads, function(i, val) {
-                                mads_text += i +': ' +val + '\n\n';
-                            });
-                            $('#anno_text').val(mads_text);
-                        });
-                    });
-                }
-            });
-        }
-    });
-    
-    var stroke_widths = islandora_canvas_params.islandora_anno_stroke_widths.split(" ");
-    var s_options = "";
-    for (var i = 0; i < stroke_widths.length; i++) {
-      s_options += '<option value="'+ stroke_widths[i] + '">' + stroke_widths[i] + '</option>';
-    }
-    $('#stroke-width-wrapper').empty();
-    $('#stroke-width-wrapper').append('<label for"stroke_width">Stroke Width:</label>');
-    $('#stroke-width-wrapper').append('<select id="stroke_width" />');
-    $('#stroke_width').append(s_options);
-    
-    // RDF Initializationc
-    var rdfbase = $.rdf(opts);
-    topinfo['query'] = rdfbase;
-
-    var l = $(location).attr('hash');
-    var uriparams = {};
-    var nCanvas = 1;
-    var start = 0;
-    if (l[0] == '#' && l[1] == '!') {
-        // Process initialization
-        var params = l.substr(2,l.length).split('&');
-        for (var p=0,prm;prm=params[p];p++) {
-            var tup = prm.split('=');
-            var key = tup[0];
-            var val = tup[1];
-            if (key == 's') {
-                start = parseInt(val);
-                uriparams['s'] = start;
-            }
-            else if (key == 'n') {
-                nCanvas = parseInt(val);
-                uriparams['n'] = nCanvas;
-            }
-        }
-    }
-    topinfo['uriParams'] = uriparams
-    // Initialize UI
-    init_ui();
-    // Setup a basic Canvas with explicit width to scale to from browser width
-    initCanvas(nCanvas);
-
-    // Manifest initialization.
-    fetchTriples(islandora_canvas_params.manifest_url,
-                 rdfbase,
-                 cb_process_manifest);
-    resizeCanvas();
 });
