@@ -137,25 +137,41 @@ function versionable_object_viewer_read_rdf($object) {
   dsm($object->id, "hit read rdf");
   $dom = new DomDocument;
   $dom->loadXml($object['TEI_RDF']->content);
-  $xph = new DOMXPath($dom);
-  $xph->registerNamespace('rdf', "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-  $xph->registerNamespace('w', "http://cwrctc.artsrn.ualberta.ca/#");
-  $rdf_array = array();
-  foreach($xph->query('//rdf:Description') as $attribute) {
-      dsm($attribute->nodeValue, "rdf att val");
-      array_push($rdf_array, $attribute->nodeValue);
+
+  $destinations = $dom->getElementsByTagName("Description");
+  dsm($destinations, "destinations");
+  foreach ($destinations as $destination) {
+    dsm($destination, "destination");
+    foreach($destination->childNodes as $child) {
+      // Read the CDATA section for annotation specifics.
+      if ($child->nodeType == XML_CDATA_SECTION_NODE) {
+        dsm($child->textContent, "text content");
+        $json_anno = json_decode($child->textContent);
+        dsm($json_anno, "json anno");
+          //echo $child->textContent . "<br/>";
+      }
+    }
   }
-  dsm($rdf_array, "rdf array");
-  $obj = json_decode($rdf_array[1]);
-  $herbe = $obj->hasTarget->hasSelector->{'rdf:value'};
-  dsm($herbe, "herbe");
-  dsm($obj, "obj");
+
+//   $xph = new DOMXPath($dom);
+//   $xph->registerNamespace('rdf', "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+//   $xph->registerNamespace('w', "http://cwrctc.artsrn.ualberta.ca/#");
+//   $rdf_array = array();
+//   foreach($xph->query('//rdf:Description') as $attribute) {
+//       dsm($attribute->nodeValue, "rdf att val");
+//       array_push($rdf_array, $attribute->nodeValue);
+//   }
+//   dsm($rdf_array, "rdf array");
+//   $obj = json_decode($rdf_array[1]);
+//   $herbe = $obj->hasTarget->hasSelector->{'rdf:value'};
+//   dsm($herbe, "herbe");
+//   dsm($obj, "obj");
 
 
-  $more_results = $xph->query('//persName[@annotationId="ent_9"]');
-  foreach ($more_results as $node) {
-    dsm($node->nodeValue, "my more results");
-  }
+//   $more_results = $xph->query('//rdf:Description/persName[@annotationId="ent_9"]');
+//   foreach ($more_results as $node) {
+//     dsm($node->nodeValue, "my more results");
+//   }
 
 }
 
