@@ -292,13 +292,20 @@ function emicdora_get_apparatus_as_content($object) {
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_sources($object, $offset = 0, $limit = 25) {
+function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit = 25) {
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
-  // Only show source objects.
-  $source_content_models = emicdora_source_content_models();
+  switch ($type) {
+    case 'source':
+      $source_content_models = emicdora_source_content_models();
+      break;
+
+    case 'versions':
+      $source_content_models = array('islandora:versionCModel' => 0);
+  }
+
   $sources = array();
   foreach (array_keys($source_content_models) as $content_model) {
     $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
@@ -317,11 +324,21 @@ function emicdora_get_raw_sources($object, $offset = 0, $limit = 25) {
   catch (Exception $e) {
     watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
   }
-  $sorted = array();
-  foreach ($json['response']['docs'] as $source) {
-    $content_model_parts = explode('/', $source['RELS_EXT_hasModel_uri_t']);
-    $content_model = $content_model_parts[1];
-    $sorted_results[$content_model][] = $source['PID'];
+  $sorted_results = array();
+  foreach ($json['response']['docs'] as $candidate) {
+    if ($type == 'source') {
+      $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
+      $content_model = $content_model_parts[1];
+      $sorted_results[$content_model][] = $candidate['PID'];
+    }
+    if ($type == 'versions') {
+      $type_parts = array();
+      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+      }
+      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+      $sorted_results[$type_part][] = $candidate['PID'];
+    }
   }
   return $sorted_results;
 }

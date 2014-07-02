@@ -105,7 +105,9 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = &$form_state['values'];
   if (isset($_POST['source'])) {
-    $values['source'] = filter_xss($_POST['source']);
+    $raw_source = filter_xss($_POST['source']);
+    $source = preg_replace('/\?.*/', '', $raw_source);
+    $values['source'] = $source;
   }
   $source = isset($values['source']) ? islandora_object_load($values['source']) : NULL;
   // Build the list rows for the TEI-RDF tableselect, and count the number.
@@ -391,15 +393,16 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   if (in_array('islandora:bookCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
   }
-  if (in_array('islandora:audioCModel', $source->models)) {
+  if (in_array('islandora:sp-audioCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
   }
-  if (in_array('islandora:videoCModel', $source->models)) {
+  if (in_array('islandora:sp_videoCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
   }
-
+  if (in_array('islandora:sp_large_image_cmodel', $source->models)) {
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'image');
+  }
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
-
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
   // Link to an existing TEI-RDF Object.

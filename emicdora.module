@@ -447,11 +447,11 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'source_material':
-      // @todo Make this list not hard-coded.
       module_load_include('inc', 'emicdora', 'includes/utilities');
       $raw_data = emicdora_get_raw_sources($object);
       $content_types = emicdora_source_content_models();
       $full_count = 0;
+      $links = array();
       foreach ($content_types as $content_model => $label) {
         if (isset($raw_data[$content_model])) {
           $count = count($raw_data[$content_model]);
@@ -483,24 +483,28 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
         break;
       }
-      // @todo Make this list not hard-coded.
+      $versions = emicdora_get_raw_sources($critical_edition, $type = 'versions');
+      $total = 0;
+      foreach ($versions as $key => $value) {
+        $total += count($versions[$key]);
+      }
+
       $links = array();
+      foreach (array_keys($versions) as $key) {
+        if ($key == 'unclassified') {
+          continue;
+        }
+        $count = count($versions[$key]);
+        $links[] = array(
+          'title' => ucfirst($key) . " ($count)",
+          'href' => "islandora/object/{$critical_edition->id}/versions/$key",
+        );
+      }
       $links[] = array(
-        'title' => 'All',
+        'title' => t('All') . " ($total)",
         'href' => "islandora/object/{$critical_edition->id}/versions",
       );
-      $links[] = array(
-        'title' => 'Books',
-        'href' => "islandora/object/{$critical_edition->id}/versions/text",
-      );
-      $links[] = array(
-        'title' => 'Audio',
-        'href' => "islandora/object/{$critical_edition->id}/versions/audio",
-      );
-      $links[] = array(
-        'title' => 'Video',
-        'href' => "islandora/object/{$critical_edition->id}/versions/video",
-      );
+
       $block['subject'] = t('Versions');
       $block['content'] = array(
         '#theme' => 'links',
@@ -792,15 +796,28 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   emicdora_set_critical_edition_breadcrumbs($object);
   $content = t("unknown content type");
   $source_object = menu_get_object('islandora_object', 4);
+  $content_models = array_keys(emicdora_source_content_models());
   if (!$source_object) {
     $content = emicdora_get_apparatus_as_content($object);
   }
-  else {
-    if (in_array('islandora:bookCModel', $source_object->models)) {
+
+  foreach ($content_models as $content_model) {
+    if (in_array($content_model, $source_object->models)) {
+      $model = $content_model;
+    }
+  }
+
+  switch ($model) {
+    case 'islandora:bookCModel':
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content = theme('islandora_book_book', array('object' => $source_object));
       $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
-    }
+      break;
+
+    case 'islandora:sp-audioCModel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content = theme('islandora_audio', array('islandora_object' => $source_object));
+      break;
   }
   return array('emicdora' => $content);
 }
