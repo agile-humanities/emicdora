@@ -446,13 +446,13 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
     // at least one child islandora:criticalEditionCModelPage so that the users
     // can edit TEI with the cwrc.
     else {
-      $namespace = islandora_get_namespace($tei_rdf->id);
-      $page = $tei_rdf->repository->constructObject($namespace);
-      $page->label = $tei_rdf->label;
+      $namespace = islandora_get_namespace($versionable_object->id);
+      $page = $versionable_object->repository->constructObject($namespace);
+      $page->label = $versionable_object->label;
       // Add all relationships.
       $page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:criticalEditionCModelPage');
-      $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $tei_rdf->id);
-      $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $tei_rdf->id);
+      $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+      $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', 1, RELS_TYPE_PLAIN_LITERAL);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', 1, RELS_TYPE_PLAIN_LITERAL);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', 1, RELS_TYPE_PLAIN_LITERAL);

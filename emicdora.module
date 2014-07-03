@@ -448,7 +448,7 @@ function emicdora_block_view($delta = '') {
 
     case 'source_material':
       module_load_include('inc', 'emicdora', 'includes/utilities');
-      $raw_data = emicdora_get_raw_sources($object);
+      $raw_data = emicdora_get_raw_sources($critical_edition);
       $content_types = emicdora_source_content_models();
       $full_count = 0;
       $links = array();
@@ -810,19 +810,19 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 
   switch ($model) {
     case 'islandora:bookCModel':
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content = theme('islandora_book_book', array('object' => $source_object));
+      $content .= '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_book_book', array('object' => $source_object));
       $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
       break;
 
     case 'islandora:sp-audioCModel':
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content = theme('islandora_audio', array('islandora_object' => $source_object));
+      $content .= theme('islandora_audio', array('islandora_object' => $source_object));
       break;
 
     case 'islandora:sp_videoCModel':
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content = theme('islandora_video', array('islandora_object' => $source_object));
+      $content .= theme('islandora_video', array('islandora_object' => $source_object));
       break;
   }
   return array('emicdora' => $content);
