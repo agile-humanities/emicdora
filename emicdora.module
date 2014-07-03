@@ -810,7 +810,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 
   switch ($model) {
     case 'islandora:bookCModel':
-      $content .= '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content .= theme('islandora_book_book', array('object' => $source_object));
       $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
       break;

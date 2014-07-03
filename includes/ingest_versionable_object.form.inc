@@ -478,7 +478,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
         // If there is already a batch in place we need to append to it,
         // otherwise run from the existing object.
         $batch = array(
-          'title' => t('Creating Transcription from TEI-RDF Object: @tei_rdf', array('@tei_rdf' => $tei_rdf->label)),
+          'title' => t('Creating Transcription from TEI-RDF Object: @tei_rdf', array('@tei_rdf' => $versionable_object->label)),
           'file' => drupal_get_path('module', 'emicdora') . '/includes/ingest_versionable_object.form.inc',
           'progress_message' => t('@current of @total pages processed.', array('@total' => count($pages))),
           'finished' => 'emicdora_ingest_versionable_object_transcription_batch_finished',
@@ -528,7 +528,7 @@ function emicdora_versionable_object_form_undo_submit(array $form, array &$form_
   $versionable_object = islandora_ingest_form_get_object($form_state);
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
   // Forget all generated objects except the default object.
-  $ingest_objects = array(0 => $versionable_object);
+  $ingest_objects = array('versionable_object' => $versionable_object);
 }
 
 /**
@@ -663,7 +663,7 @@ function emicdora_ingest_versionable_object_tei_rdf_tei_datastream_batch_operati
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $batch = &batch_get();
   $ingest_objects = &islandora_ingest_form_get_objects($batch['form_state']);
-  $tei_rdf = &$ingest_objects['tei-rdf'];
+  $tei_rdf = &$ingest_objects[0];
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['total'] = count($context['results']['pages']);
