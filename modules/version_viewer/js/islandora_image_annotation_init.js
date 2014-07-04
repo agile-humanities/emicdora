@@ -296,7 +296,6 @@ function maybeResize() {
 	        });
 	    }
 	    opts.base = islandora_canvas_params.object_base;
-	    console.log("setup canvass");
 	    if(islandora_canvas_params.use_dropdown == 1){
 	        $('#islandora_classification').empty();
 	        $('<label for="anno_classification">Type:</label>').appendTo('#islandora_classification');
@@ -306,11 +305,6 @@ function maybeResize() {
 	            value = this.toString();
 	            sel.append($("<option>").attr('value',value).text(value));
 	        });
-	    }
-	    else{
-//	        $( "#anno_classification" ).autocomplete({
-//	            source : islandora_canvas_params.categories
-//	        });
 	    }
 	    if(islandora_canvas_params.islandora_anno_use_title_vocab == 1){
 	        $('#islandora_titles').empty();
@@ -427,14 +421,12 @@ $(document).ready(function(){
           + Drupal.settings.islandora_image_annotation.PID,
         async:false,
         success: function(data, status, xhr) {
-            islandora_canvas_params = data;
-            continueSetup();
+          islandora_canvas_params = data;
+          continueSetup();
         },
         error: function(data, status, xhd) {
-            alert("Please Login to site");
+          alert("Please Login to site");
         },
         dataType: 'json'
     });
-
-
 });

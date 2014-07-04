@@ -395,12 +395,15 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   }
   if (in_array('islandora:sp-audioCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
   if (in_array('islandora:sp_videoCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
   if (in_array('islandora:sp_large_image_cmodel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'image');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
@@ -663,7 +666,7 @@ function emicdora_ingest_versionable_object_tei_rdf_tei_datastream_batch_operati
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $batch = &batch_get();
   $ingest_objects = &islandora_ingest_form_get_objects($batch['form_state']);
-  $tei_rdf = &$ingest_objects['tei-rdf'];
+  $tei_rdf = &$ingest_objects['tei_rdf'];
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['total'] = count($context['results']['pages']);

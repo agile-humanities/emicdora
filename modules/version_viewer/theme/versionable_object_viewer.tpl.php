@@ -22,7 +22,7 @@
                 </div>
                   <div id="ui-easy-paginator" class="easyui-pagination"
                     data-options="
-                      total: '<?php print sizeof($page_pids); ?>',
+                      total: '<?php print sizeof($pager_data); ?>',
                       pageSize:1,
                       showPageList: false,
                       showRefresh: false,
@@ -38,9 +38,9 @@
         <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true" title="Source" style="width:200px;maxWidth:700px">
           <?php print $islandora_content; ?>
         </div>
-        <div data-options="region:'west',split:true,minimized:<?php print $hide_components['w']; ?>" title="Annotations" style="width:150px;height:500px;">
-          <div id="uitree-wrapper" class="easyui-panel" style="width:auto;height:auto;">
-              <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true">
+        <div data-options="region:'west',split:true,minimized:<?php print $hide_components['w']; ?>,border:false" title="Annotations" style="width:150px;height:500px;">
+          <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;">
+              <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>
           </div>
         </div>
@@ -58,3 +58,4 @@
         <a href="#" class="easyui-linkbutton easyui-tooltip" title="Redo" data-options="iconCls:'icon-redo',plain:true"></a>
       </div>
     </div>
+<?php print $islandora_content; ?>

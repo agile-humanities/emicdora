@@ -5,13 +5,15 @@
  * Defines all the hooks this module implements.
  */
 
+/**
+ * Implements hook_menu().
+ */
 function versionable_object_viewer_menu() {
-
   $items = array();
   $items['islandora/object/%islandora_object/get_tree_data/%islandora_object'] = array(
     'title' => 'Prepare advanced viewer',
     'page callback' => 'versionable_object_viewer_build_tree',
-    'file' => 'includes/utilities.inc',
+    'file' => 'includes/callbacks.inc',
     'page arguments' => array(2, 4),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
@@ -20,7 +22,7 @@ function versionable_object_viewer_menu() {
   $items['islandora/object/%islandora_object/get_transcription_data'] = array(
     'title' => 'Prepare transcription data',
     'page callback' => 'versionable_object_viewer_build_transcription_data',
-    'file' => 'includes/utilities.inc',
+    'file' => 'includes/callbacks.inc',
     'page arguments' => array(2),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
@@ -30,49 +32,19 @@ function versionable_object_viewer_menu() {
     'title' => 'Prepare Metadata view',
     'page callback' => 'versionable_object_viewer_prepare_detail_meta_data',
     'type' => MENU_CALLBACK,
-    'file' => 'includes/utilities.inc',
+    'file' => 'includes/callbacks.inc',
     'access callback' => 'user_access',
     'access arguments' => array(TRUE),
   );
   $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
     'title' => 'Prepare Page consolidated TEI',
     'page callback' => 'versionable_object_viewer_prepare_page_tei_consolidated',
-    'file' => 'includes/utilities.inc',
+    'file' => 'includes/callbacks.inc',
     'page arguments' => array(4),
     'type' => MENU_CALLBACK,
     'access callback' => 'user_access',
     'access arguments' => array(TRUE),
   );
-//   $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
-//     'title' => 'Prepare Page TEI Markup',
-//     'page callback' => 'versionable_object_viewer_display_page_tei',
-//     'page arguments' => array(3),
-//     'type' => MENU_CALLBACK,
-//     'access callback' => 'user_access',
-//     'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
-//   );
-//   $items['islandora/cwrc_viewer/detail_meta_data'] = array(
-//     'title' => 'Prepare Metadata view',
-//     'page callback' => 'islandora_critical_edition_advanced_prepare_detail_meta_data',
-//     'type' => MENU_CALLBACK,
-//     'access callback' => 'user_access',
-//     'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
-//   );
-//   $items['islandora/cwrc_viewer/detail_transcription'] = array(
-//     'title' => 'Prepare Metadata view',
-//     'page callback' => 'islandora_critical_edition_advanced_prepare_detail_transcription',
-//     'type' => MENU_CALLBACK,
-//     'access callback' => 'user_access',
-//     'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
-//   );
-//   $items['islandora/cwrc_viewer/transformed_page/%islandora_object'] = array(
-//     'title' => 'Prepare Page consolidated TEI',
-//     'page callback' => 'islandora_critical_edition_advanced_prepare_page_tei_consolidated',
-//     'page arguments' => array(3),
-//     'type' => MENU_CALLBACK,
-//     'access callback' => 'user_access',
-//     'access arguments' => array(ISLANDORA_CRITICAL_EDITION_ADVANCED_READ),
-//   );
   return $items;
 }
 
@@ -137,7 +109,6 @@ function versionable_object_viewer_library() {
     'css' => array(
       "$module_path/js/jquery/jquery-easyui/themes/default/easyui.css" => array(),
       "$module_path/js/jquery/jquery-easyui/themes/icon.css" => array(),
-      //"$module_path/js/jquery/jquery-easyui/demo/demo.css" => array(),
     ),
   );
 
@@ -148,63 +119,22 @@ function versionable_object_viewer_library() {
  * Implements hook_CMODEL_islandora_view_object().
  */
 function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
-  $module_path = drupal_get_path('module', 'versionable_object_viewer');
-  module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
-
   // Add the jQuery EasyUI library.
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
+
+  // Drop in our initilization script.
+  $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
 
-  $transcriptions = versionable_object_viewer_get_transcription_text($object);
+  // This the Shared Canvas prefered jQuery.
+  $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
+  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-1.7.js');
+  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
 
   // Theme our verionable object viewer.
   return theme('versionable_object_viewer',
     array(
       'islandora_object' => $object,
-      'version_data' => $transcriptions
     )
   );
-}
-
-function versionable_object_viewer_preprocess_versionable_object_viewer(&$variables) {
-  module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
-  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
-  module_load_include('inc', 'php_lib', 'DOMHelpers');
-  $module_path = drupal_get_path('module', 'versionable_object_viewer');
-
-  dom_document_pretty_print_include_files();
-
-  $version_object = $variables['islandora_object'];
-  drupal_add_css("$module_path/css/islandora_critical_edition_diplomatic_tei.css");
-  drupal_add_css("$module_path/css/islandora_critical_edition_reading_tei.css");
-
-
-  $source = versionable_object_viewer_process_version_object_source($version_object);
-  $source_object = islandora_object_load($source[0]['obj']['value']);
-
-  $variables['version_source'] = $source;
-  $variables['content_model'] = str_replace("info:fedora/", "", $source[0]['type']['uri']);
-  $variables['transcription_source'] = url("islandora/object/$version_object->id/get_transcription_data");
-  $variables['meta_source'] = url("islandora/cwrc_viewer/detail_meta_data");
-
-
-  drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
-
-
-  versionable_object_viewer_build_version_media_view($source_object, $variables);
-}
-
-function versionable_object_viewer_get_transcription_text($object) {
-  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
-
-  // Gather all transcriptions for this versionable object.
-  $transcriptions_data = versionable_object_viewer_get_related_transcriptions($object->id);
-  $transcriptions = array();
-  foreach ($transcriptions_data as $key => $value) {
-    $trans = islandora_object_load($key);
-    $transcription_details['title'] = $transcriptions_data[$key];
-    $transcription_details['text'] = $trans['TRANSCRIPTION']->content;
-    array_push($transcriptions, $transcription_details);
-  }
-  return $transcriptions;
 }

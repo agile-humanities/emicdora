@@ -5,28 +5,6 @@
  * Defines all the utility functions this module implements.
  */
 
-function versionable_object_viewer_prepare_page_tei_consolidated($object) {
-  module_load_include('inc', 'php_lib', 'DOMHelpers');
-
-  try {
-    //versionable_object_viewer_read_rdf($object);
-    $transformed_tei = versionable_object_viewer_display_page_tei($object);
-
-    $doc = new DOMDocument();
-    $doc->loadXML($transformed_tei);
-
-    $pretty_printed = dom_document_pretty_print($doc, TRUE);
-
-    $return['body'] = $pretty_printed;
-    $return['title'] = $object->label;
-
-    return drupal_json_output($return);
-  } catch (Exception $e) {
-    return drupal_json_output($e);
-  }
-
-}
-
 /**
  * Returns transformed from CWRC datatstream.
  *
@@ -63,135 +41,52 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
 }
 
 /**
- * Returns detail meta data for a posted pid object.
+ * Retrieve rdf entity data.
+ *
+ * @param AbstractObject $object
+ *   Fedora object with rdf datastream(s).
+ * @param string $dsid
+ *   The datastream id, defaults to 'CWRC'.
+ *
+ * @return array
+ *   The array of rdf data entries.
  */
-function versionable_object_viewer_prepare_detail_meta_data() {
-  module_load_include('inc', 'islandora', 'includes/metadata');
-  $pid = html_entity_decode(stripslashes($_GET['pid']), ENT_QUOTES, 'UTF-8');
-  $versionable_object = islandora_object_load($pid);
-  $data = islandora_retrieve_metadata_markup($versionable_object, TRUE);
-  echo $data;
-}
+function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
+  $dom = new DomDocument();
+  @$dom->loadXml($object[$dsid]->content);
 
-
-function versionable_object_viewer_build_transcription_data($object) {
-  $page = urldecode($_GET['page']);
-
-  $members = versionable_object_viewer_get_members($object);
-  $pids = array();
-  // Ensure page pids have a 'TEI_RDF' datastream.
-  foreach ($members as $member) {
-    array_push($pids, $member['obj']['value']);
-  }
-
-  $derivation_object = islandora_object_load($pids[$page -1]);
-
-  $return['body'] = versionable_object_viewer_display_page_tei($derivation_object);//$derivation_object['TEI_RDF']->content;
-  $return['title'] = $derivation_object->label . " (page $page)";
-  $return['transcriptions'] = versionable_object_viewer_get_transcription_text($object);
-  echo json_encode($return);
-}
-
-function versionable_object_viewer_build_tree($object, $derivation_object) {
-  module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
-  $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
-
-  $tree_data = array();
-  $count = 1;
-
-  // Construct our image annotations.
-  if (isset($anno_pids['types'])) {
-    // Populate our different types of annotations (Image Annotations, TextImageLinks, etc.
-    foreach ($anno_pids['types'] as $anno_type) {
-
-      $tree_data[$count - 1] = array(
-        "id" => $count,
-        "text" => $anno_type,
-        "state" => "closed",
-        "attributes" => array(),
-        "children" => array(),
-      );
-
-      foreach ($anno_pids['pids'] as $anno) {
-        if ($tree_data[$count - 1]['text'] == $anno['type']) {
-          $anno['svg_data'] = islandora_image_annotation_shared_get_annotation($anno['id'], NULL, FALSE);
-          $svg_data = versionable_object_viewer_svg_data($anno['svg_data']);
-          array_push(
-            $tree_data[$count - 1]['children'],
-            array(
-              "id" => $anno['id'],
-              "text" => $svg_data['label'],
-              "state" => "open",
-              "attributes" => $anno,
-            )
-          );
-        }
-      }
-      $count++;
-    }
-  }
-//   dsm($tree_data, "tree data");
-//   dsm($object->id, "obj id");
-//   dsm($derivation_object->id, "derivation id in tree");
-  $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
-
-
-  $tree_data[$count - 1] = array(
-    "id" => 'tree_entities',
-    "text" => "Entities",
-    "state" => "closed",
-    "attributes" => array(),
-    "children" => array(),
-  );
-  //$count = 0;
-  // Now, build a tree entry for each entity type (Person, place, etc).
-  foreach ($rdf_annotations as $rdf_anno) {
-    dsm($rdf_anno, "rdf anno");
-
-    array_push(
-      $tree_data[$count - 1]['children'],
-      array(
-        "id" => $rdf_anno->annotationId,
-        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
-        "state" => "open",
-        "attributes" => $rdf_anno,
-      )
-    );
-    dsm(array(), "pushed");
-    $count++;
-  }
-dsm($tree_data, "tree data");
-  echo drupal_json_encode($tree_data);
-}
-
-function versionable_object_viewer_read_rdf($object, $dsid = 'TEI_RDF') {
-  $dom = new DomDocument;
-  $dom->loadXml($object[$dsid]->content);
-
-  $xml = simplexml_load_string($dom->saveXML());
+  @$xml = simplexml_load_string($dom->saveXML());
 
   $destinations = $dom->getElementsByTagName("Description");
   $entities = array();
   $json_anno;
   foreach ($destinations as $destination) {
-    foreach($destination->childNodes as $child) {
+    foreach ($destination->childNodes as $child) {
       // Read the CDATA section for annotation specifics.
       if ($child->nodeType == XML_CDATA_SECTION_NODE) {
         $json_anno = json_decode($child->textContent);
         $labels = $xml->xpath('//*[@annotationId]');
-          foreach($labels as $label) {
-            if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
-              $json_anno->{'annotationId'} = (string) $label['annotationId'];
-            }
+        foreach ($labels as $label) {
+          if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
+            $json_anno->{'annotationId'} = (string) $label['annotationId'];
           }
+        }
         array_push($entities, $json_anno);
       }
     }
   }
-dsm($entities, "final entities");
   return $entities;
 }
 
+/**
+ * Extract svg data for a given svg datastreams content.
+ *
+ * @param string $anno_svg
+ *   The svg annotaton data to parse
+ *
+ * @return array
+ *   The svg data as 'type', 'label' and 'text' (in array).
+ */
 function versionable_object_viewer_svg_data($anno_svg) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
 
@@ -234,59 +129,79 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
   module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
-  // Use this to determine what to show by default
+  // Use this to determine what to show by default.
   $variables['hide_components'] = array(
     'n' => 'false',
     's' => 'false',
     'e' => 'false',
     'w' => 'false',
   );
-  if ($variables['content_model'] == 'islandora:sp-audioCModel') {
-
+  drupal_add_js(array('versionable_object_viewer' => array('mode' => $variables['content_model_type'])), 'setting');
+  if ($variables['content_model_type'] == 'audio') {
+    $data = $reference_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+    $source = islandora_object_load($data[0]['object']['value']);
     $variables['show_components']['w'] = 'true';
-
-    if (isset($reference_object['PROXY_MP3'])) {
-      $audio_params = versionable_object_viewer_get_audio_params($reference_object);
+    if (isset($source['PROXY_MP3'])) {
+      $audio_params = versionable_object_viewer_get_audio_params($source);
     }
     // Thumbnail.
-    if (isset($reference_object['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $reference_object['TN'])) {
-      $tn_url = url("islandora/object/{$reference_object->id}/datastream/TN/view");
+    if (isset($source['TN']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['TN'])) {
+      $tn_url = url("islandora/object/{$source->id}/datastream/TN/view");
       $params = array(
-        'title' => $reference_object->label,
+        'title' => $source->label,
         'path' => $tn_url,
       );
       $variables['islandora_thumbnail_img'] = theme('image', $params);
       $audio_params['tn'] = $tn_url;
     }
 
-    $viewer = islandora_get_viewer($audio_params, 'islandora_audio_viewers', $reference_object);
+    $viewer = islandora_get_viewer($audio_params, 'islandora_audio_viewers', $source);
     $variables['params'] = $audio_params;
     if ($viewer) {
       $variables['islandora_content'] = $viewer;
     }
-    elseif (isset($variables['islandora_thumbnail_img']) && isset($islandora_object['PROXY_MP3']) &&
-        islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $islandora_object['PROXY_MP3'])) {
+    elseif (isset($variables['islandora_thumbnail_img']) && isset($source['PROXY_MP3']) &&
+        islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['PROXY_MP3'])) {
 
       $variables['islandora_content'] = l($variables['islandora_thumbnail_img'], $audio_url, array('html' => TRUE));
     }
-    elseif (isset($islandora_object['PROXY_MP3']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $islandora_object['PROXY_MP3'])) {
-      $variables['islandora_content'] = l($islandora_object->label, $audio_url);
+    elseif (isset($source['PROXY_MP3']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['PROXY_MP3'])) {
+      $variables['islandora_content'] = l($source->label, $audio_url);
     }
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
   }
-  if ($variables['content_model'] == 'islandora:sp_videoCModel') {
+  if ($variables['content_model_type'] == 'video') {
     $variables['show_components']['w'] = 'true';
+    $data = $reference_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+    $source = islandora_object_load($data[0]['object']['value']);
 
-    $video_params = versionable_object_viewer_get_video_params($reference_object);
-    $viewer = islandora_get_viewer($video_params, 'islandora_video_viewers', $reference_object);
+    $video_params = versionable_object_viewer_get_video_params($source);
+    $viewer = islandora_get_viewer($video_params, 'islandora_video_viewers', $source);
     $variables['params'] = $video_params;
     if ($viewer) {
       $variables['islandora_content'] = $viewer;
     }
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
   }
-  if ($variables['content_model'] == 'islandora:bookCModel') {
+  if ($variables['content_model_type'] == 'image') {
 
+    $variables['show_components']['w'] = 'true';
     $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
+    $data = $reference_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+    $source = islandora_object_load($data[0]['object']['value']);
+    $variables['islandora_content'] = theme('islandora_anno_image_pane');
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
+    drupal_add_js(array('islandora_image_annotation' => array('PID' => $source->id)), 'setting');
+
+    islandora_image_annotation_include_common_js();
+    islandora_image_annotation_include_common_css();
+
+    drupal_add_js($module_path . '/js/islandora_image_annotation_init.js');
+  }
+  if ($variables['content_model_type'] == 'text') {
+
+    $module_path = drupal_get_path('module', 'versionable_object_viewer');
     $members = versionable_object_viewer_get_members($variables['islandora_object']);
     $pids = array();
     // Ensure page pids have a 'TEI_RDF' datastream.
@@ -298,20 +213,15 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     $derivation_pids = array();
     foreach ($pids as $pid) {
       $page_derivation = islandora_object_load($pid);
-      $page_derivation_source = $page_derivation->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+      $page_derivation_source = $page_derivation->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
       $pg_derivation_pid = $page_derivation_source[0]['object']['value'];
       array_push($derivation_pids, $pg_derivation_pid);
-
     }
-    $variables['page_pids'] = $pids;
+    $variables['pager_data'] = $pids;
     drupal_add_js(array('versionable_object_viewer' => array('tei_rdf_pids' => $pids)), 'setting');
     drupal_add_js(array('versionable_object_viewer' => array('pids' => $derivation_pids)), 'setting');
-    $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
-
     $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data");
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
-    dsm($pids, "pids");
-    dsm($derivation_pids, "dpids");
     drupal_add_js(array('islandora_image_annotation' => array('PID' => $derivation_pids[0])), 'setting');
     islandora_image_annotation_include_common_js();
     islandora_image_annotation_include_common_css();
@@ -320,6 +230,17 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
   return $variables;
 }
 
+/**
+ * Find all 'isMemberOf' relationships for the given object.
+ *
+ * @param AbstractObject $object
+ *   Fedora object instance.
+ * @param string $content_model
+ *   OPTIONAL, defaults to 'islandora:tei-rdfCModel'.
+ *
+ * @return array
+ *   The query results as an array.
+ */
 function versionable_object_viewer_get_members(AbstractObject $object, $content_model = 'islandora:tei-rdfCModel') {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $tuque = islandora_get_tuque_connection();
@@ -331,97 +252,30 @@ function versionable_object_viewer_get_members(AbstractObject $object, $content_
             }";
   $objects = array();
   $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
- // dsm($results, "results of query");
   return $results;
 }
 
+/**
+ * Find all 'isDerivationOf' relations for a given versionable object.
+ *
+ * @param AbstractObject $versionable_object
+ *   An instance of a versionable object.
+ *
+ * @return array
+ *   Query results in an array.
+ */
 function versionable_object_viewer_process_version_object_source(AbstractObject $versionable_object) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fedora-model: <info:fedora/fedora-system:def/model#>
             PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
               SELECT ?obj ?type FROM <#ri> WHERE {
-                <info:fedora/$versionable_object->id> <fedora-rels-ext:isDerivationOf> ?obj . ?obj <fedora-model:hasModel> ?type
+              <info:fedora/$versionable_object->id> <fedora-rels-ext:isDerivationOf> ?obj . ?obj <fedora-model:hasModel> ?type
               FILTER (?type != <info:fedora/fedora-system:FedoraObject-3.0>)
               }";
   $objects = array();
   $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
   return $results;
-}
-
-/**
- * Prepare the advanced view.
- *
- * @param unknown $object
- *   Fedora object to prepare the advanced view.
- */
-function versionable_object_viewer_prepare_advanced($object) {
-  global $base_url;
-  module_load_include('inc', 'islandora', 'includes/solution_packs');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/consolidate_tei');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
-
-  $module_path = drupal_get_path('module', 'islandora_critical_edition_advanced');
-  $data = $object->id;
-  dsm(array(), "hit prepare advanced.");
-  // Gather all transcriptions for this versionable object.
-  $transcriptions_data = islandora_critical_get_related_transcriptions($data);
-
-  $reference_object;
-
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/consolidate_tei');
-
-  $tei_rdfs = array_keys(islandora_critical_edition_get_members($data));
-  // $player_params;
-  if (!empty($tei_rdfs)) {
-    $media_cmodels = array(
-      'islandora:sp_videoCModel',
-      'islandora:sp-audioCModel',
-    );
-    $tei_rdf = islandora_object_load($tei_rdfs[0]);
-    $output;
-    $rels = $tei_rdf->relationships->get(ISLANDORA_RELS_EXT_URI, ISLANDORA_CRITICAL_EDITION_IS_CRITICAL_EDITION_OF);
-    if (is_array($rels)) {
-      $reference_object = islandora_object_load($rels[0]['object']['value']);
-      if ($reference_object) {
-        $content_models = $reference_object->relationships->get(FEDORA_MODEL_URI, 'hasModel');
-        $content_model = $content_models[0]['object']['value'];
-        if ($content_model == 'islandora:bookCModel') {
-          // This is a ....sigh.. iFrame.
-          $output = drupal_json_output(theme("islandora_critical_edition_advanced_detail_viewer", array(
-            'islandora_object' => $tei_rdf,
-            'media_viewer' => NULL,
-            'player_params' => NULL,
-            //'transcription_text' => $transcriptions,
-            'module_base' => url($module_path),
-          )));
-          drupal_json_output($output);
-          drupal_exit();
-        }
-        else {
-          $variables['content_model'] = $content_model;
-          $viewer = versionable_object_viewer_build_version_media_view($reference_object, $variables);
-          drupal_json_output(theme("islandora_critical_edition_advanced_detail_viewer", array(
-            'islandora_object' => $data,
-            'media_viewer' => $viewer['islandora_content'],
-            'player_params' => $viewer['params'],
-            //'transcription_text' => $transcriptions,
-            'module_base' => url($module_path),
-          )));
-          drupal_exit();
-        }
-      }
-    }
-  }
-  // This is a catch all, to handle anything else with a basic TN.
-  drupal_json_output(theme("islandora_critical_edition_advanced_detail_viewer", array(
-    'islandora_object' => $data,
-    'media_viewer' => url("islandora/object/$data/datastream/TN/view"),
-    'player_params' => NULL,
-    //'transcription_text' => $transcriptions,
-    'module_base' => url($module_path),
-    'player_ready' => FALSE,
-  )));
 }
 
 /**
@@ -513,4 +367,28 @@ function versionable_object_viewer_get_related_transcriptions($versionable_objec
     $objects[$result['subject']['value']] = $result['label']['value'];
   }
   return $objects;
+}
+
+/**
+ * Get all transcriptions for a given versionable object.
+ *
+ * @param AbstractObject $object
+ *   A versionable object.
+ *
+ * @return array
+ *   An array of transcriptions, with 'title' and 'text' transcription keys.
+ */
+function versionable_object_viewer_get_transcription_text($object) {
+  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
+
+  // Gather all transcriptions for this versionable object.
+  $transcriptions_data = versionable_object_viewer_get_related_transcriptions($object->id);
+  $transcriptions = array();
+  foreach ($transcriptions_data as $key => $value) {
+    $trans = islandora_object_load($key);
+    $transcription_details['title'] = $transcriptions_data[$key];
+    $transcription_details['text'] = $trans['TRANSCRIPTION']->content;
+    array_push($transcriptions, $transcription_details);
+  }
+  return $transcriptions;
 }
