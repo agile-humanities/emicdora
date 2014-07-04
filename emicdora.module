@@ -26,8 +26,11 @@ function emicdora_menu() {
     $add_source_contextual_links[$url] = array(
       'title' => $title,
       'file' => 'includes/add_source.form.inc',
-      'page callback' => 'emicdora_add_source_form',
-      'page arguments' => array($content_model, 3),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array(
+        'islandora_emicdora_add_source_form',
+        $content_model,
+        3),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_INGEST, 3),
       'type' => MENU_LOCAL_TASK,
@@ -444,20 +447,25 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'source_material':
-      // @todo Make this list not hard-coded.
+      module_load_include('inc', 'emicdora', 'includes/utilities');
+      $raw_data = emicdora_get_raw_sources($critical_edition);
+      $content_types = emicdora_source_content_models();
+      $full_count = 0;
       $links = array();
-      $links[] = array(
-        'title' => 'All',
+      foreach ($content_types as $content_model => $label) {
+        if (isset($raw_data[$content_model])) {
+          $count = count($raw_data[$content_model]);
+          $full_count += $count;
+          $links[] = array(
+            'title' => $label . " ($count)",
+            'href' => "islandora/object/{$critical_edition->id}/sources/$content_model",
+          );
+        }
+      }
+      array_unshift($links, array(
+        'title' => t("All") . " ($full_count)",
         'href' => "islandora/object/{$critical_edition->id}/sources/",
-      );
-      $links[] = array(
-        'title' => 'Books',
-        'href' => "islandora/object/{$critical_edition->id}/sources",
-      );
-      $links[] = array(
-        'title' => 'Audio',
-        'href' => "islandora/object/{$critical_edition->id}/sources",
-      );
+      ));
       $block['subject'] = t('Source Material');
       $block['content'] = array(
         '#theme' => 'links',
@@ -475,24 +483,28 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
         break;
       }
-      // @todo Make this list not hard-coded.
+      $versions = emicdora_get_raw_sources($critical_edition, $type = 'versions');
+      $total = 0;
+      foreach ($versions as $key => $value) {
+        $total += count($versions[$key]);
+      }
+
       $links = array();
+      foreach (array_keys($versions) as $key) {
+        if ($key == 'unclassified') {
+          continue;
+        }
+        $count = count($versions[$key]);
+        $links[] = array(
+          'title' => ucfirst($key) . " ($count)",
+          'href' => "islandora/object/{$critical_edition->id}/versions/$key",
+        );
+      }
       $links[] = array(
-        'title' => 'All',
+        'title' => t('All') . " ($total)",
         'href' => "islandora/object/{$critical_edition->id}/versions",
       );
-      $links[] = array(
-        'title' => 'Books',
-        'href' => "islandora/object/{$critical_edition->id}/versions/text",
-      );
-      $links[] = array(
-        'title' => 'Audio',
-        'href' => "islandora/object/{$critical_edition->id}/versions/audio",
-      );
-      $links[] = array(
-        'title' => 'Video',
-        'href' => "islandora/object/{$critical_edition->id}/versions/video",
-      );
+
       $block['subject'] = t('Versions');
       $block['content'] = array(
         '#theme' => 'links',
@@ -784,15 +796,40 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   emicdora_set_critical_edition_breadcrumbs($object);
   $content = t("unknown content type");
   $source_object = menu_get_object('islandora_object', 4);
+  $content_models = array_keys(emicdora_source_content_models());
   if (!$source_object) {
     $content = emicdora_get_apparatus_as_content($object);
+    return array('emicdora' => $content);
   }
-  else {
-    if (in_array('islandora:bookCModel', $source_object->models)) {
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content = theme('islandora_book_book', array('object' => $source_object));
-      $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
+
+  foreach ($content_models as $content_model) {
+    if (in_array($content_model, $source_object->models)) {
+      $model = $content_model;
     }
+  }
+
+  switch ($model) {
+    case 'islandora:bookCModel':
+      $content .= '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_book_book', array('object' => $source_object));
+      $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
+      break;
+
+    case 'islandora:sp-audioCModel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_audio', array('islandora_object' => $source_object));
+      break;
+
+    case 'islandora:sp_videoCModel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_video', array('islandora_object' => $source_object));
+      break;
+
+    case 'islandora:sp_large_image_cmodel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_large_image', array('islandora_object' => $source_object));
+      break;
+
   }
   return array('emicdora' => $content);
 }
@@ -802,7 +839,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
  */
 function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
   // Placeholder only.
-  return array('' => "Morgan's viewer goes here");
+  // NOTE: the version_veiwer module implements this hook.
 }
 
 /**
@@ -814,7 +851,7 @@ function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $
  * @return string
  *   HTML displaying the SOLR search results containing the related sources.
  */
-function emicdora_critical_edition_sources(AbstractObject $object) {
+function emicdora_critical_edition_sources(AbstractObject $object, $content_model = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   // Only show members of the given critical edition.
@@ -822,9 +859,9 @@ function emicdora_critical_edition_sources(AbstractObject $object) {
     '!pid' => $object->id,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
   // Only show source objects.
-  $source_content_models = emicdora_source_content_models();
   $sources = array();
-  foreach (array_keys($source_content_models) as $content_model) {
+  $source_content_models = isset($content_model) ? array($content_model) : array_keys(emicdora_source_content_models());
+  foreach ($source_content_models as $content_model) {
     $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
   }
   $filters[] = format_string('!model:(!sources)', array(

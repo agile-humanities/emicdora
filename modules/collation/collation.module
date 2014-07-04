@@ -102,6 +102,7 @@ function collation_block_configure($delta = '') {
  */
 function collation_block_view($delta = '') {
   module_load_include('inc', 'collation', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   // Check to see if we are on a critical edition object.
   $critical_edition = menu_get_object('islandora_object', 2);
   $is_critical_edition = is_object($critical_edition) && emicdora_has_content_model($critical_edition, 'islandora:criticalEditionContainerCModel');

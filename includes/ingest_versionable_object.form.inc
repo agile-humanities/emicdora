@@ -57,9 +57,10 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
  * Autocomplete menu callback for source objects.
  */
 function emicdora_versionable_object_form_source_autocomplete($type = NULL, $search = NULL) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $type = trim(urldecode($type));
   // List of approved source content model types.
-  $models = array_keys(emicdora_valid_source_types());
+  $models = array_keys(emicdora_source_content_models());
   $models = in_array($type, $models) ? array($type) : $models;
   $where_clause = '';
   foreach ($models as $model) {
@@ -104,7 +105,9 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = &$form_state['values'];
   if (isset($_POST['source'])) {
-    $values['source'] = filter_xss($_POST['source']);
+    $raw_source = filter_xss($_POST['source']);
+    $source = preg_replace('/\?.*/', '', $raw_source);
+    $values['source'] = $source;
   }
   $source = isset($values['source']) ? islandora_object_load($values['source']) : NULL;
   // Build the list rows for the TEI-RDF tableselect, and count the number.
@@ -390,15 +393,19 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   if (in_array('islandora:bookCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
   }
-  if (in_array('islandora:audioCModel', $source->models)) {
+  if (in_array('islandora:sp-audioCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
-  if (in_array('islandora:videoCModel', $source->models)) {
+  if (in_array('islandora:sp_videoCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
-
+  if (in_array('islandora:sp_large_image_cmodel', $source->models)) {
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'image');
+    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
+  }
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
-
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
   // Link to an existing TEI-RDF Object.
@@ -409,16 +416,11 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   // Create a new TEI-RDF object.
   else {
     $pages = islandora_paged_content_get_pages($source);
-    $namespace = islandora_get_namespace($versionable_object->id);
-    $tei_rdf = $versionable_object->repository->constructObject($namespace);
-    $tei_rdf->models = 'islandora:criticalEditionCModel';
-    $tei_rdf->label = $values['tei_rdf_label'];
-    $tei_rdf->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+
     // @todo We need to migrate the existing data at some point in the future
     // The following property should not be a literal value, but we must make
     // it so for backwards compatibility.
-    $tei_rdf->relationships->add(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf', $source->id, RELS_TYPE_PLAIN_LITERAL);
-    $ingest_objects['tei-rdf'] = $tei_rdf;
+
     // TEI-RDF objects associated with books require a batch process to be
     // created, all the files created in the batch will be added to the
     // $form_state, to be ingested when islandora_ingest_form is submited.
@@ -434,7 +436,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       foreach ($pages as $page) {
         $batch['operations'][] = array(
           'emicdora_ingest_versionable_object_tei_rdf_page_batch_operation',
-          array($page, $tei_rdf->id),
+          array($page, $versionable_object->id),
         );
       }
       $batch['operations'][] = array(
@@ -447,13 +449,13 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
     // at least one child islandora:criticalEditionCModelPage so that the users
     // can edit TEI with the cwrc.
     else {
-      $namespace = islandora_get_namespace($tei_rdf->id);
-      $page = $tei_rdf->repository->constructObject($namespace);
-      $page->label = $tei_rdf->label;
+      $namespace = islandora_get_namespace($versionable_object->id);
+      $page = $versionable_object->repository->constructObject($namespace);
+      $page->label = $versionable_object->label;
       // Add all relationships.
       $page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:criticalEditionCModelPage');
-      $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $tei_rdf->id);
-      $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $tei_rdf->id);
+      $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+      $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', 1, RELS_TYPE_PLAIN_LITERAL);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', 1, RELS_TYPE_PLAIN_LITERAL);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', 1, RELS_TYPE_PLAIN_LITERAL);
@@ -610,32 +612,32 @@ function emicdora_tei_rdf_ajax_container(array $form, array &$form_state) {
  *
  * @param array $page
  *   A page from an array create by islandora_paged_content_get_pages.
- * @param string $tei_rdf
+ * @param string $versionable_object
  *   The parent TEI-RDF objects PID.
  * @param array $context
  *   The Drupal Batch context.
  */
-function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $page, $tei_rdf, array &$context) {
+function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $page, $versionable_object, array &$context) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   $namespace = islandora_get_namespace($tei_rdf);
-  $edition = islandora_get_tuque_connection()->repository->constructObject($namespace);
-  $edition->label = $page['label'];
+  $tei_rdf_page = islandora_get_tuque_connection()->repository->constructObject($namespace);
+  $tei_rdf_page->label = $page['label'];
 
   // Add all relationships.
-  $edition->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:criticalEditionCModelPage');
-  $edition->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $tei_rdf);
-  $edition->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $tei_rdf);
-  $edition->relationships->add(ISLANDORA_RELS_EXT_URI, 'isEditionOf', $page['pid']);
-  $edition->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
-  $edition->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
-  $edition->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
+  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $page['pid']);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);
   // Add a minimal set of datastreams from original page object.
   $page = islandora_object_load($page['pid']);
   $dsids = array('OCR', 'TN', 'CWRC');
   foreach ($dsids as $dsid) {
     if (isset($page[$dsid])) {
-      $datastream = $edition->constructDatastream($dsid, 'M');
+      $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
       $unique_id = uniqid();
       $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
       $filename = drupal_realpath($file->uri);
@@ -643,17 +645,16 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
       // delete it, until it has successfully been ingested.
       $page[$dsid]->getContent($filename);
       $datastream->setContentFromFile($filename, FALSE);
-      $edition->ingestDatastream($datastream);
+      $tei_rdf_page->ingestDatastream($datastream);
     }
   }
   // Create new CWRC datastream if there is none.
-  if (!isset($edition['CWRC']) && isset($edition['OCR'])) {
-    islandora_critical_edition_add_cwrc_datastream($edition);
+  if (!isset($tei_rdf_page['CWRC']) && isset($tei_rdf_page['OCR'])) {
+    islandora_critical_edition_add_cwrc_datastream($tei_rdf_page);
   }
-  $context['results']['pages'][] = $edition;
-  $context['results']['objects'][$edition->id] = $edition;
+  $context['results']['pages'][] = $tei_rdf_page;
+  $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
 }
-
 /**
  * Creates the TEI datastream on the TEI-RDF object.
  *
@@ -665,7 +666,7 @@ function emicdora_ingest_versionable_object_tei_rdf_tei_datastream_batch_operati
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $batch = &batch_get();
   $ingest_objects = &islandora_ingest_form_get_objects($batch['form_state']);
-  $tei_rdf = &$ingest_objects['tei-rdf'];
+  $tei_rdf = &$ingest_objects['tei_rdf'];
   if (!isset($context['sandbox']['progress'])) {
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['total'] = count($context['results']['pages']);
