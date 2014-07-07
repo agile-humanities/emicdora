@@ -404,9 +404,11 @@ function emicdora_block_view($delta = '') {
       $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
       if (!empty($editors)) {
         $editor_pid = key($editors);
+        dsm($editor_pid, "editor pid");
         $editor = islandora_object_load($editor_pid);
         $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf');
         $source_object = $source_objects[0]['object']['value'];
+        dsm($source_object, "source object");
       }
     }
   }
@@ -565,9 +567,10 @@ function emicdora_block_view($delta = '') {
         'href' => $path,
       );
       if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
+        dsm($versionable_object->id,  "vo id");
         $links[] = array(
           'title' => 'Edit',
-          'href' => "islandora/object/$editor/tei_editor/edit",
+          'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
         );
       }
       $links[] = array(

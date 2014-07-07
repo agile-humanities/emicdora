@@ -27,7 +27,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $variables['images_path'] = url($islandora_markup_editor_path . '/CWRC-Writer/src/img/',
     array('absolute' => TRUE));
   // Use this flag to include your own init .js scripts.
-  $variables['custom_js'] = TRUE;
+  $variables['custom_js'] =  "$islandora_markup_editor_path/js";//TRUE;
   $variables['cwrc_lib_path'] = $islandora_markup_editor_path;
 
   // Theme the default markup editor.
@@ -43,13 +43,13 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
 
   // This is where we add our own init scripts, since we indicated we would with
   // the vars flag '$variables['custom_js'] = TRUE'.
-  drupal_add_css($tei_editor_module_path . "/css/tei_editor.css");
-  drupal_add_css($tei_editor_module_path . "/css/tei_editor_markup.css");
-  drupal_add_js($tei_editor_module_path . "/js/custom_delegate.js");
-  drupal_add_js($tei_editor_module_path . '/js/writer_wrapper.js');
-  drupal_add_js($tei_editor_module_path . "/js/dialog_text_image_anno.js");
-  drupal_add_js($tei_editor_module_path . "/js/startup.js");
-  drupal_add_js($tei_editor_module_path . "/js/init.js");
+//   drupal_add_css($tei_editor_module_path . "/css/tei_editor.css");
+//   drupal_add_css($tei_editor_module_path . "/css/tei_editor_markup.css");
+//   drupal_add_js($tei_editor_module_path . "/js/custom_delegate.js");
+//   drupal_add_js($tei_editor_module_path . '/js/writer_wrapper.js');
+//   drupal_add_js($tei_editor_module_path . "/js/dialog_text_image_anno.js");
+//   drupal_add_js($tei_editor_module_path . "/js/startup.js");
+//   drupal_add_js($tei_editor_module_path . "/js/init.js");
 
   // Include common JS/CSS for critical editions and shared canvas.
   islandora_image_annotation_include_common_js();
@@ -84,13 +84,17 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
   // Islandora Image Annotation base path, required module.
   $image_annotation_module_path = drupal_get_path('module', 'islandora_image_annotation');
   $islandora_markup_editor_module_path = drupal_get_path('module', 'islandora_markup_editor');
+
   $pages = islandora_paged_content_get_pages($variables['islandora_object']);
+  dsm($pages, "pages");
   $pids = array_keys($pages);
   $schema_object = array();
   $page_obj = islandora_object_load($pids[0]);
   $doc_process_instructions = islandora_markup_editor_fetch_tei_processing_instruction($page_obj, 'CWRC');
   $image_anno_images = $image_annotation_module_path . '/shared_canvas/imgs/';
   $validate_path = variable_get('islandora_critical_edition_validate_url', '/validator/validate.html');
+  dsm($variables['islandora_object']->id, "obj id");
+
   $bp = tei_editor_get_object_of_tei_rdf($variables['islandora_object']);
 
   // This is silly. We need to override the default tei schema with our own.

@@ -52,6 +52,7 @@
             });
           },
           error: function(data, status, xhd) {
+        	  console.log("oops");
               alert("Please Login to site");
           },
           dataType: 'json'
