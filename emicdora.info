@@ -2,6 +2,7 @@ name = "EMiC (Editing Modernism in Canada)"
 description = "Create critical editions of various source material."
 package = EMiC
 dependencies[] = islandora
+dependencies[] = islandora_solr
 version = 7.x-dev
 core = 7.x
 files[] = tests/emicdora_ingest_purge.test
