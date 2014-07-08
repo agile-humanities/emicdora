@@ -49,13 +49,6 @@
           </div>
         </div>
     </div>
-    <div style="display:none">
-      <div id="toolbar">
-        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Add" data-options="iconCls:'icon-add',plain:true"></a>
-        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Cut" data-options="iconCls:'icon-cut',plain:true"></a>
-        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Remove" data-options="iconCls:'icon-remove',plain:true"></a>
-        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Undo" data-options="iconCls:'icon-undo',plain:true"></a>
-        <a href="#" class="easyui-linkbutton easyui-tooltip" title="Redo" data-options="iconCls:'icon-redo',plain:true"></a>
-      </div>
+    <div id="ui-tool-tips" style="display:none">
+      <div id="ui_p" class="easyui-panel" style="width:100px;height:75px;padding:10px;"></div>
     </div>
-<?php print $islandora_content; ?>

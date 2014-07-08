@@ -105,14 +105,14 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
 
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
+  $count = 0;
   $tree_data = array();
-  $count = 1;
   // Construct our image annotations.
   if (isset($anno_pids['types'])) {
     // Populate our different types of annotations.
     foreach ($anno_pids['types'] as $anno_type) {
       if (count($anno_pids['pids']) > 0) {
-        $tree_data[$count - 1] = array(
+        $tree_data[$count] = array(
           "id" => $count,
           "text" => $anno_type,
           "state" => "closed",
@@ -122,11 +122,11 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
           "children" => array(),
         );
         foreach ($anno_pids['pids'] as $anno) {
-          if ($tree_data[$count - 1]['text'] == $anno['type']) {
+          if ($tree_data[$count]['text'] == $anno['type']) {
             $anno['svg_data'] = islandora_image_annotation_shared_get_annotation($anno['id'], NULL, FALSE);
             $svg_data = versionable_object_viewer_svg_data($anno['svg_data']);
             array_push(
-              $tree_data[$count - 1]['children'],
+              $tree_data[$count]['children'],
               array(
                 "id" => $anno['id'],
                 "text" => $svg_data['label'],
@@ -136,14 +136,15 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
             );
           }
         }
+        $count++;
       }
-      $count++;
     }
   }
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
   if (count($rdf_annotations) > 0) {
-    $tree_data[$count - 1] = array(
-      "id" => 'tree_entities',
+    $size = count($tree_data);
+    $tree_data[$size] = array(
+      "id" => "tree_entities",
       "text" => "Entities",
       "state" => "closed",
       "attributes" => array(
@@ -151,10 +152,10 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       ),
       "children" => array(),
     );
-
     foreach ($rdf_annotations as $rdf_anno) {
+
       array_push(
-        $tree_data[$count - 1]['children'],
+        $tree_data[$size]["children"],
         array(
           "id" => $rdf_anno->annotationId,
           "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
@@ -162,8 +163,8 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
           "attributes" => $rdf_anno,
         )
       );
-      $count++;
     }
   }
-  echo drupal_json_encode($tree_data);
+  drupal_json_output($tree_data);
+  drupal_exit();
 }

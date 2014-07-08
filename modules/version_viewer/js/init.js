@@ -41,9 +41,9 @@
     
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
-    var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
-    var pid = Drupal.settings.versionable_object_viewer.pids[pageNumber - 1];
-    $.ajax({
+      var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
+      var pid = Drupal.settings.versionable_object_viewer.pids[pageNumber - 1];
+      $.ajax({
           url: Drupal.settings.basePath + 'islandora/object/' + pid + '/get_tree_data/' + dpid,
           async:false,
           success: function(data, status, xhr) {
@@ -52,10 +52,12 @@
             });
           },
           error: function(data, status, xhd) {
-        	  console.log("oops");
-              alert("Please Login to site");
+        	  console.log(data);
+        	  console.log(status);
+        	  console.log(xhd);
+              //alert("Please Login to site");
           },
-          dataType: 'json'
+          //dataType: 'json'
       });
     }
     
@@ -98,13 +100,18 @@
     }
     
     function show_entity_tooltip(data, ent_id) {
+    	console.log(data);
       $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
       $("span[data-annotationid='" + ent_id + "']").tooltip({
         position: 'top',
         hideEvent: 'none',
         content: function(){
           // Hidden in the dom.
-          return $('#toolbar');
+          return $("#ui_p").panel({
+            width:150,
+            height:100,
+            content: "<div>" + data['cwrcAttributes']['cwrcInfo']['name'] +"</div>",
+          });
         },
         onShow: function(){
           var t = $(this);

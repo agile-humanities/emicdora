@@ -16,8 +16,8 @@ function versionable_object_viewer_menu() {
     'file' => 'includes/callbacks.inc',
     'page arguments' => array(2, 4),
     'type' => MENU_CALLBACK,
-    'access callback' => 'user_access',
-    'access arguments' => array(TRUE),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
   );
   $items['islandora/object/%islandora_object/get_transcription_data'] = array(
     'title' => 'Prepare transcription data',
@@ -25,8 +25,8 @@ function versionable_object_viewer_menu() {
     'file' => 'includes/callbacks.inc',
     'page arguments' => array(2),
     'type' => MENU_CALLBACK,
-    'access callback' => 'user_access',
-    'access arguments' => array(TRUE),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
   );
   $items['islandora/cwrc_viewer/detail_meta_data'] = array(
     'title' => 'Prepare Metadata view',
@@ -42,8 +42,8 @@ function versionable_object_viewer_menu() {
     'file' => 'includes/callbacks.inc',
     'page arguments' => array(4),
     'type' => MENU_CALLBACK,
-    'access callback' => 'user_access',
-    'access arguments' => array(TRUE),
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
   );
   return $items;
 }

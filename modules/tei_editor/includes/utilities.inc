@@ -14,7 +14,7 @@
  */
 function tei_editor_get_object_of_tei_rdf(AbstractObject $fedora_object, $ontology = 'isCriticalEditionOf') {
   $relationships = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, $ontology);
-  if (in_array("islandora:versionCModel", $fedora_object->models)){
+  if (in_array("islandora:versionCModel", $fedora_object->models)) {
     $relationships = $fedora_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   }
   return $relationships[0]['object']['value'];

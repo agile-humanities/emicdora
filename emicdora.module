@@ -404,11 +404,9 @@ function emicdora_block_view($delta = '') {
       $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
       if (!empty($editors)) {
         $editor_pid = key($editors);
-        dsm($editor_pid, "editor pid");
         $editor = islandora_object_load($editor_pid);
         $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf');
         $source_object = $source_objects[0]['object']['value'];
-        dsm($source_object, "source object");
       }
     }
   }
@@ -567,7 +565,6 @@ function emicdora_block_view($delta = '') {
         'href' => $path,
       );
       if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
-        dsm($versionable_object->id,  "vo id");
         $links[] = array(
           'title' => 'Edit',
           'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
@@ -813,7 +810,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 
   switch ($model) {
     case 'islandora:bookCModel':
-      $content .= '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content .= theme('islandora_book_book', array('object' => $source_object));
       $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
       break;

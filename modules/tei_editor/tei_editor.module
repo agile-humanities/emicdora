@@ -57,7 +57,6 @@ function tei_editor_menu() {
  *   An HTML string representing the themed output.
  */
 function tei_editor_view_editor(AbstractObject $islandora_object) {
-  dsm($islandora_object->id, "object id");
   return theme('tei_editor_viewer', array('islandora_object' => $islandora_object));
 }
 
