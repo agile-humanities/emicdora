@@ -564,7 +564,7 @@ function emicdora_block_view($delta = '') {
       if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
         $links[] = array(
           'title' => 'Edit',
-          'href' => "islandora/object/$editor/tei_editor/edit",
+          'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
         );
       }
       $links[] = array(
@@ -840,6 +840,12 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content .= theme('islandora_video', array('islandora_object' => $source_object));
       break;
+
+    case 'islandora:sp_large_image_cmodel':
+      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
+      $content .= theme('islandora_large_image', array('islandora_object' => $source_object));
+      break;
+
   }
   return array('emicdora' => $content);
 }
@@ -849,7 +855,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
  */
 function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
   // Placeholder only.
-  return array('' => "Morgan's viewer goes here");
+  // NOTE: the version_veiwer module implements this hook.
 }
 
 /**

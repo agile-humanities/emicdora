@@ -35,6 +35,15 @@ function tei_editor_menu() {
     'access callback' => 'islandora_object_access_callback',
     'access arguments' => array(ISLANDORA_ADD_DS, 3),
   );
+  $items['islandora/tei_editor/setup_canvas/%islandora_object'] = array(
+    'title' => 'Shared Canvas Setup',
+    'page callback' => 'tei_editor_canvas_setup',
+    'page arguments' => array(3),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 3),
+    'file' => 'includes/callbacks.inc',
+  );
   return $items;
 }
 

@@ -55,7 +55,7 @@ var islandoraCWRCWriter = {
     },
     setup_canvas: function(pagePid, callback) {
       $.ajax({
-        url: Drupal.settings.basePath + 'islandora/cwrcwriter/setup_canvas/' + pagePid,
+        url: Drupal.settings.basePath + 'islandora/tei_editor/setup_canvas/' + pagePid,
         async: false,
         success: function(data, status, xhr) {
           islandora_canvas_params = data;

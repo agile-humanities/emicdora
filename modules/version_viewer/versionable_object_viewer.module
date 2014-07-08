@@ -1,0 +1,140 @@
+<?php
+
+/**
+ * @file
+ * Defines all the hooks this module implements.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function versionable_object_viewer_menu() {
+  $items = array();
+  $items['islandora/object/%islandora_object/get_tree_data/%islandora_object'] = array(
+    'title' => 'Prepare advanced viewer',
+    'page callback' => 'versionable_object_viewer_build_tree',
+    'file' => 'includes/callbacks.inc',
+    'page arguments' => array(2, 4),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+  );
+  $items['islandora/object/%islandora_object/get_transcription_data'] = array(
+    'title' => 'Prepare transcription data',
+    'page callback' => 'versionable_object_viewer_build_transcription_data',
+    'file' => 'includes/callbacks.inc',
+    'page arguments' => array(2),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+  );
+  $items['islandora/cwrc_viewer/detail_meta_data'] = array(
+    'title' => 'Prepare Metadata view',
+    'page callback' => 'versionable_object_viewer_prepare_detail_meta_data',
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/callbacks.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array(TRUE),
+  );
+  $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
+    'title' => 'Prepare Page consolidated TEI',
+    'page callback' => 'versionable_object_viewer_prepare_page_tei_consolidated',
+    'file' => 'includes/callbacks.inc',
+    'page arguments' => array(4),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function versionable_object_viewer_theme($existing, $type, $theme, $path) {
+  return array(
+    'versionable_object_viewer' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/versionable_object_viewer',
+      'variables' => array(
+        'islandora_object' => NULL,
+        'anno_img_pane' => NULL,
+        'version_data' => NULL,
+        'tree_source' => NULL,
+        'transcription_source' => NULL,
+        'meta_source' => NULL,
+        'islandora_content' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_library().
+ */
+function versionable_object_viewer_library() {
+  $module_path = drupal_get_path('module', 'versionable_object_viewer');
+  $items = array();
+
+  $items['jq_uilayout'] = array(
+    'title' => t('jQuery UILayout'),
+    'version' => '1.0',
+    'js' => array(
+      "$module_path/js/jquery/jquery.layout-latest.min.js" => array(),
+      "$module_path/js/jquery/jquery.ui.all.js" => array(),
+    ),
+    'css' => array(
+      "$module_path/js/jquery/layout-default-latest.css" => array(),
+    ),
+  );
+
+  $items['jq_latest'] = array(
+    'title' => t('jQuery'),
+    'version' => '1.11.1',
+    'js' => array(
+      "$module_path/js/jquery/jquery-1.11.1.min.js" => array(),
+    ),
+    'css' => array(
+      "$module_path/js/jquery/layout-default-latest.css" => array(),
+    ),
+  );
+
+  $items['jquery_easy_ui'] = array(
+    'title' => t('jQuery EasyUI'),
+    'version' => '1.3.6',
+    'js' => array(
+      "$module_path/js/jquery/jquery-easyui/jquery.min.js" => array(),
+      "$module_path/js/jquery/jquery-easyui/jquery.easyui.min.js" => array(),
+    ),
+    'css' => array(
+      "$module_path/js/jquery/jquery-easyui/themes/default/easyui.css" => array(),
+      "$module_path/js/jquery/jquery-easyui/themes/icon.css" => array(),
+    ),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_CMODEL_islandora_view_object().
+ */
+function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
+  // Add the jQuery EasyUI library.
+  drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
+
+  // Drop in our initilization script.
+  $module_path = drupal_get_path('module', 'versionable_object_viewer');
+  drupal_add_js("$module_path/js/init.js");
+
+  // This the Shared Canvas prefered jQuery.
+  $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
+  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-1.7.js');
+  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
+
+  // Theme our verionable object viewer.
+  return theme('versionable_object_viewer',
+    array(
+      'islandora_object' => $object,
+    )
+  );
+}

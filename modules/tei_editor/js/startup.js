@@ -33,6 +33,7 @@ function cwrcWriterInit(Writer, Delegator) {
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
 	Delegator = CustomDelegator;
+	console.log(moduleUrl);
 	var config = {
 	  id: 'editor',
 	  delegator: Delegator,
