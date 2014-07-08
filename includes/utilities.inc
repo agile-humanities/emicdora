@@ -292,7 +292,7 @@ function emicdora_get_apparatus_as_content($object) {
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit = 25) {
+function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit = 25) {
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -304,6 +304,11 @@ function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit
 
     case 'versions':
       $source_content_models = array('islandora:versionCModel' => 0);
+      break;
+
+    case 'transcriptions':
+      $source_content_models = array('islandora:transcriptionCModel' => 0);
+      break;
   }
 
   $sources = array();
@@ -338,6 +343,14 @@ function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit
       }
       $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
       $sorted_results[$type_part][] = $candidate['PID'];
+    }
+    if ($type == 'transcriptions') {
+      $type_parts = array();
+      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+      }
+      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+      $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
     }
   }
   return $sorted_results;
