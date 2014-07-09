@@ -59,7 +59,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
 
   $destinations = $dom->getElementsByTagName("Description");
   $entities = array();
-  $json_anno;
+
   foreach ($destinations as $destination) {
     foreach ($destination->childNodes as $child) {
       // Read the CDATA section for annotation specifics.
@@ -95,7 +95,6 @@ function versionable_object_viewer_svg_data($anno_svg) {
 
   $labels = $xml->xpath('//dc:title');
   $type = $xml->xpath('//dc:type');
-  $entity = $xml->xpath('//dcterms:relation');
   $text = $xml->xpath('//cnt:chars');
 
   $anno_type = dom_import_simplexml($type[0])->textContent;
@@ -163,10 +162,10 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     elseif (isset($variables['islandora_thumbnail_img']) && isset($source['PROXY_MP3']) &&
         islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['PROXY_MP3'])) {
 
-      $variables['islandora_content'] = l($variables['islandora_thumbnail_img'], $audio_url, array('html' => TRUE));
+      $variables['islandora_content'] = l($variables['islandora_thumbnail_img'], $audio_params['url'], array('html' => TRUE));
     }
     elseif (isset($source['PROXY_MP3']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['PROXY_MP3'])) {
-      $variables['islandora_content'] = l($source->label, $audio_url);
+      $variables['islandora_content'] = l($source->label, $audio_params['url']);
     }
     $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
   }
@@ -207,7 +206,6 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     // Ensure page pids have a 'TEI_RDF' datastream.
     foreach ($members as $member) {
       array_push($pids, $member['obj']['value']);
-      $obj = islandora_object_load($member['obj']['value']);
     }
 
     $derivation_pids = array();
@@ -250,7 +248,6 @@ function versionable_object_viewer_get_members(AbstractObject $object, $content_
               ?obj <fedora-rels-ext:isMemberOf> <info:fedora/$object->id> .
               ?obj <fedora-model:hasModel> <info:fedora/$content_model>.
             }";
-  $objects = array();
   $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
   return $results;
 }
@@ -273,7 +270,6 @@ function versionable_object_viewer_process_version_object_source(AbstractObject 
               <info:fedora/$versionable_object->id> <fedora-rels-ext:isDerivationOf> ?obj . ?obj <fedora-model:hasModel> ?type
               FILTER (?type != <info:fedora/fedora-system:FedoraObject-3.0>)
               }";
-  $objects = array();
   $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
   return $results;
 }

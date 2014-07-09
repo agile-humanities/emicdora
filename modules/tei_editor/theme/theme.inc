@@ -29,7 +29,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   // Use this flag to include your own init .js scripts.
   $variables['custom_js'] = "$islandora_markup_editor_path/js";
   $variables['cwrc_lib_path'] = $islandora_markup_editor_path;
-
+  $variables['sc_img_path'] = url("$islandora_image_anno_path/shared_canvas/imgs/small-logo.png");
   // Theme the default markup editor.
   theme('islandora_markup_editor', $variables);
 

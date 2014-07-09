@@ -21,6 +21,7 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
 
   drupal_add_css("$module_path/css/islandora_critical_edition_diplomatic_tei.css");
   drupal_add_css("$module_path/css/islandora_critical_edition_reading_tei.css");
+  drupal_add_css("$module_path/css/viewer.css");
 
   $type = $version_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
   $variables['content_model_type'] = $type[0]['object']['value'];
