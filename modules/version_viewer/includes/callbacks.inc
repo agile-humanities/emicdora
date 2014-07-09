@@ -101,12 +101,17 @@ function versionable_object_viewer_build_transcription_data($object) {
  *   The versionable objects source object to use.
  */
 function versionable_object_viewer_build_tree($object, $derivation_object) {
+  module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
 
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
+  foreach ($anno_pids['pids'] as $annos) {
+    $anno_data = islandora_image_annotation_shared_get_annotation_data($annos['id'], NULL);
+  }
+
   // Construct our image annotations.
   if (isset($anno_pids['types'])) {
     // Populate our different types of annotations.
@@ -123,7 +128,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
         );
         foreach ($anno_pids['pids'] as $anno) {
           if ($tree_data[$count]['text'] == $anno['type']) {
-            $anno['svg_data'] = islandora_image_annotation_shared_get_annotation($anno['id'], NULL, FALSE);
+            $anno['svg_data'] = islandora_image_annotation_shared_get_annotation_data($anno['id'], NULL);
             $svg_data = versionable_object_viewer_svg_data($anno['svg_data']);
             array_push(
               $tree_data[$count]['children'],

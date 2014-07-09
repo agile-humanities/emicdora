@@ -69,6 +69,7 @@
     });
     
     function show_annotations(nodes) {
+    	console.log(nodes[0]);
       if (nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");

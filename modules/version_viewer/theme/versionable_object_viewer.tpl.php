@@ -5,8 +5,7 @@
  * viewer.<pre><?php print $version_data[0]['text']; ?></pre>
  */
 ?>
-<div style="margin:20px 0;"></div>
-    <div id="eui_window" class="easyui-layout" style="width:700px;height:550px;">
+    <div id="eui_window" class="easyui-layout" style="width:100%;height:550px;">
         <div data-options="region:'north'" style="height:50px">
             <div id="critical-edition-viewer">
                 <div style="float:left;">
