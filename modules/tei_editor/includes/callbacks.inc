@@ -62,11 +62,9 @@ function tei_editor_canvas_setup(AbstractObject $fedora_object) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
   $stroke_width = variable_get('image_annotation_annotation_stroke_width', '1%');
-  $relationships = $fedora_object->relationships->get();
 
   $page_object_rels = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, "isDerivationOf");
   $page_object = islandora_object_load($page_object_rels[0]['object']['value']);
-  $page_relationships = $page_object->relationships->get();
   $page_object_of_relationship = $page_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageOf');
   $book_object = islandora_object_load($page_object_of_relationship[0]['object']['value']);
   $pages = array_keys(islandora_paged_content_get_pages($book_object));
