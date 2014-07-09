@@ -201,7 +201,9 @@
       }
     });
     
-    function add_tab(type, endpoint, add_class = "", data_type = "json") {
+    function add_tab(type, endpoint, add_class, data_type) {
+      add_class = typeof add_class !== 'undefined' ? add_class : '';
+      data_type = typeof data_type !== 'undefined' ? data_type : "json";
       $.ajax({
         type: 'GET',
         async: false,
