@@ -83,6 +83,7 @@ function text_image_anno_dialog(data) {
           var activeAccordionIndex = $( "#text_image_accordion" ).accordion( "option", "active");
           if(activeAccordionIndex == 0) {
             save_result = saveAndEndAnnotating();
+            console.log(save_result);
             if(save_result == 0) {
                 $("#cbo_image_anno").val('0');
                 // TODO: Return saveAnnotation() result (data) so it can be used as
@@ -103,22 +104,25 @@ function text_image_anno_dialog(data) {
             currentData.cwrcInfo.id = "CWRCID_RDM";
             currentData.cwrcInfo.name = "super test name stuff";
             currentData.cwrcInfo.repository = "cwrc";
-            currentData.attributes = {};
-            currentData.attributes.type = "textImgLink";
+            currentData.attributes = save_result;
             for (var key in currentData) {
               if (currentData[key] == undefined || currentData[key] == '') {
-                //config_data.w.tagger.finalizeEntity('person', currentData);
                 delete currentData[key];
               }
             }
+            
+            config_data.w.tagger.finalizeEntity('textimagelink', currentData);
+//            config_data.w.fileManager.saveDocument();
+            
+            txt_image_anno_dialog.dialog('close');
+            
+            
             currentId = null;
             currentData = null;
             
           // OLD METHOD:::::
-          //txt_image_anno_dialog.dialog('close');
-          //config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
-          //config_data.w.fileManager.saveDocument()d
-          //config_data.w.removeHighlights();
+          //
+          //
         },
       'Cancel': function() {
          $("#cbo_image_anno").val('0');
@@ -135,6 +139,7 @@ function text_image_anno_dialog(data) {
   build_combo();
   return {
     show: function(config) {
+      console.log(config);
       build_combo();
       config_data = config;
       $('#anno_text1').val(config.query);

@@ -64,7 +64,6 @@
     });
     
     function show_annotations(nodes) {
-    	console.log(nodes[0]);
       if (nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -73,24 +72,32 @@
       }
       else {
         for (var i = 0; i < nodes.length; i++) {
-        var ent_id = nodes[i]['attributes']['annotationId'];
-        $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
-        show_entity_tooltip(nodes[i]['attributes'], ent_id);
+          var ent_id = nodes[i]['attributes']['annotationId'];
+          $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+          show_entity_tooltip(nodes[i]['attributes'], ent_id);
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          }
         }
       }
     }
     function hide_annotations(nodes) {
       if (nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
-            var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
-            $('.svg_' + anno_id).remove();
-          }
+          var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
+          $('.svg_' + anno_id).remove();
+        }
       }
       else {
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
           $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            $('.svg_' + anno_id).remove();
+          }
         }
       }
     }

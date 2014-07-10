@@ -16,15 +16,36 @@ function cwrcWriterInit(Writer, Delegator) {
 			});
 		});
 		writer.event('entityFocused').subscribe(function(entityId) {
-			console.log("haraksdfndf " + entityId);
+			if (writer.entities[entityId] !== 'undefined') {
+				var entity_type = writer.entities[entityId]['props']['type'];
+				//console.log(entity_type);
+				if (entity_type === "textimagelink") {
+			      paint_commentAnnoTargets(null, 'canvas_0', writer.entities[entityId]['info']['attributes']['uuid'], "comment");
+				}
+			}
+			
 		});
+		writer.event('entityUnfocused').subscribe(function(entityId) {
+//			console.log(entityId);
+//			console.log(writer.entities);
+			if (writer.entities[entityId] !== 'undefined') {
+				var entity_type = writer.entities[entityId]['props']['type'];
+				console.log(entity_type);
+				if (entity_type === "textimagelink") {
+		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+				}
+			}
+			
+		});
+		console.log(writer);
+		
+		
 	}
 	function doResize() {
 		var uiHeight = $('#'+writer.editor.id+'_tbl tr.mceFirst').outerHeight() + 2;
 		writer.editor.theme.resizeTo($(window).width(), $(window).height() - uiHeight);
 		// Call out to our 'init.js' script, fixes image annotation size.
 		resizeCanvas();
-		
 	}
 	PID = Drupal.settings.islandora_markup_editor.page_pid;
 	console.log(PID);
@@ -64,9 +85,6 @@ function cwrcWriterInit(Writer, Delegator) {
 		        resizeCanvas();
 		        update_loading_text("Building Image Viewer");
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
-				$(window).on('resize', doResize);
-				
-				
 			},
 			error: function() {
 				console.log("failure");
