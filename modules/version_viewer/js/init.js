@@ -48,7 +48,7 @@
           async:false,
           success: function(data, status, xhr) {
             $('#easyui_tree').tree({
-              data: data,
+              data: data
             });
           },
           error: function(data, status, xhd) {
