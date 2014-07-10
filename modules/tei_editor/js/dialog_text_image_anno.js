@@ -85,6 +85,9 @@ function text_image_anno_dialog(data) {
             save_result = saveAndEndAnnotating();
             if(save_result == 0) {
                 $("#cbo_image_anno").val('0');
+                // TODO: Return saveAnnotation() result (data) so it can be used as
+                // an attribute in the 'currentData' obj later. This makes text image linking
+                // possible without using UUID's.
                 closeAndEndAnnotating();
                 txt_image_anno_dialog.dialog('close');
                 return;
@@ -95,14 +98,27 @@ function text_image_anno_dialog(data) {
             }
             save_result = construct_result();
           }
-          
-          txt_image_anno_dialog.dialog('close');
-          console.log(config_data.w);
-          console.log("save result");
-          console.log(save_result);
-          config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
-          config_data.w.fileManager.saveDocument();
-          config_data.w.removeHighlights();
+            var currentData = {};
+            currentData.cwrcInfo = {};
+            currentData.cwrcInfo.id = "CWRCID_RDM";
+            currentData.cwrcInfo.name = "super test name stuff";
+            currentData.cwrcInfo.repository = "cwrc";
+            currentData.attributes = {};
+            currentData.attributes.type = "textImgLink";
+            for (var key in currentData) {
+              if (currentData[key] == undefined || currentData[key] == '') {
+                //config_data.w.tagger.finalizeEntity('person', currentData);
+                delete currentData[key];
+              }
+            }
+            currentId = null;
+            currentData = null;
+            
+          // OLD METHOD:::::
+          //txt_image_anno_dialog.dialog('close');
+          //config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
+          //config_data.w.fileManager.saveDocument()d
+          //config_data.w.removeHighlights();
         },
       'Cancel': function() {
          $("#cbo_image_anno").val('0');
@@ -120,7 +136,7 @@ function text_image_anno_dialog(data) {
   return {
     show: function(config) {
       build_combo();
-      //config_data = config;
+      config_data = config;
       $('#anno_text1').val(config.query);
       $('#anno_title1').val("Text image annotation");
       $('#anno_classification1').val("TextImageLink");

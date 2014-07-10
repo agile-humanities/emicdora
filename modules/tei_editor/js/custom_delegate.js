@@ -3,6 +3,12 @@ var CustomDelegator = function(writer) {
 	
 	var del = {};
 	
+	w.event('entityAdded').subscribe(
+	  function(entityId) {
+		  
+      }
+	);
+	
 	/**
 	 * @memberOf del
 	 * @param params

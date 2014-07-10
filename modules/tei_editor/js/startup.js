@@ -33,6 +33,7 @@ function cwrcWriterInit(Writer, Delegator) {
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
 	Delegator = CustomDelegator;
+	console.log(moduleUrl);
 	var config = {
 	  id: 'editor',
 	  delegator: Delegator,
@@ -277,7 +278,7 @@ function cwrcWriterInit(Writer, Delegator) {
   
   var init_canvas_div = function(islandora_canvas_params) {
     if (islandora_canvas_params.no_edit == true) {
-      $('#create_annotation').hide();
+      //$('#create_annotation').hide();
     }
     opts.base = islandora_canvas_params.object_base;
     // build and populate page choice dropdown

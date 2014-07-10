@@ -76,7 +76,7 @@
             <?php print $anno_img_pane; ?>
             <!--  At least one visible image needed for GData transport -->
             <div class="shared-canvas-logo" style="font-size: 8pt">
-              <img id="shared-canvas-logo-img" src="../imgs/small-logo.png"
+              <img id="shared-canvas-logo-img" src="<?php print $sc_img_path; ?>"
                    style="padding: 0px; margin: 0px; border: 0px; border-top: 2px;" />
               Powered by SharedCanvas
             </div>

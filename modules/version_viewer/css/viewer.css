@@ -1,0 +1,12 @@
+#uitree-wrapper{
+  width:auto !important;
+  overflow:auto !important;
+}
+
+.tabs{
+  width:100% !important;
+}
+
+.canvas{
+  background: !important;
+}
