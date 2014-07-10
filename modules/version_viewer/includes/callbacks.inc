@@ -108,42 +108,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
-
-  // Construct our image annotations.
-//   if (isset($anno_pids['types'])) {
-//     // Populate our different types of annotations.
-//     foreach ($anno_pids['types'] as $anno_type) {
-//       if (count($anno_pids['pids']) > 0) {
-//         $tree_data[$count] = array(
-//           "id" => $count,
-//           "text" => $anno_type,
-//           "state" => "closed",
-//           "attributes" => array(
-//             "root" => "true",
-//           ),
-//           "children" => array(),
-//         );
-//         foreach ($anno_pids['pids'] as $anno) {
-//           if ($tree_data[$count]['text'] == $anno['type']) {
-//             $anno['svg_data'] = islandora_image_annotation_shared_get_annotation_data($anno['id'], NULL);
-//             $svg_data = versionable_object_viewer_svg_data($anno['svg_data']);
-//             array_push(
-//               $tree_data[$count]['children'],
-//               array(
-//                 "id" => $anno['id'],
-//                 "text" => $svg_data['label'],
-//                 "state" => "open",
-//                 "attributes" => $anno,
-//               )
-//             );
-//           }
-//         }
-//         $count++;
-//       }
-//     }
-//   }
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
-  dsm($rdf_annotations, "rdf anos");
   if (count($rdf_annotations) > 0) {
     $size = count($tree_data);
     $tree_data[$size] = array(
@@ -195,7 +160,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       }
     }
   }
-  dsm($tree_data, "tree data");
   drupal_json_output($tree_data);
   drupal_exit();
 }

@@ -103,7 +103,6 @@
     }
     
     function show_entity_tooltip(data, ent_id) {
-    	console.log(data);
       $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
       $("span[data-annotationid='" + ent_id + "']").tooltip({
         position: 'top',
@@ -204,7 +203,7 @@
     });
     
     function add_tab(type, endpoint, add_class, data_type) {
-      add_class = typeof add_class !== 'undefined' ? add_class : '';
+      add_class = typeof add_class !== 'undefined' ? add_class : "";
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
       $.ajax({
         type: 'GET',
@@ -224,23 +223,10 @@
     }
     
     function construct_tab(data, type) {
-      $('#versions_tabs').tabs('add',{
-      id: type,
-      title: data['title'],
-      content:data['body'],
-      closable:true
-      });
+      $('#content_data').empty();
+      $('#content_data').append(data['body']);
       prettyPrint();
     }
-    
-    $('#easy-ui-east').panel({
-        onResize:function(w,h){
-          var mode = Drupal.settings.versionable_object_viewer.mode;
-       if ( mode == "text" || mode == "image") {
-         resizeCanvas();
-       }
-        }
-    });
     
     function toggle_layout(selected, region) {
       if (!selected) {
@@ -252,11 +238,21 @@
     }
     
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
-  var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
+    var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
   
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
   
   toggle_layout(false, 'west');
+  
+  $('#easy-ui-east').panel({
+      onResize:function(w,h){
+        var mode = Drupal.settings.versionable_object_viewer.mode;
+     if ( mode == "text" || mode == "image") {
+       resizeCanvas();
+     }
+      }
+  });
+  
   });
 })(jQuery);
