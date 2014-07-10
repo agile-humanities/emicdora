@@ -98,32 +98,22 @@ function text_image_anno_dialog(data) {
             }
             save_result = construct_result();
           }
+            var currentData = {};
+            currentData.cwrcInfo = {};
+            currentData.cwrcInfo.id = "CWRCID_RDM";
+            currentData.cwrcInfo.name = "super test name stuff";
+            currentData.cwrcInfo.repository = "cwrc";
+            currentData.attributes = {};
+            currentData.attributes.type = "textImgLink";
+            for (var key in currentData) {
+              if (currentData[key] == undefined || currentData[key] == '') {
+                //config_data.w.tagger.finalizeEntity('person', currentData);
+                delete currentData[key];
+              }
+            }
+            currentId = null;
+            currentData = null;
             
-    	
-    		console.log("onsaveclick");
-    		var currentData = {};
-    		currentData.cwrcInfo = {};
-    		currentData.cwrcInfo.id = "CWRCID_RDM";
-    		currentData.cwrcInfo.name = "super test name stuff";
-    		currentData.cwrcInfo.repository = "cwrc";
-    		currentData.attributes = {};
-    		currentData.attributes.type = "textImgLink";
-    		for (var key in currentData) {
-    			if (currentData[key] == undefined || currentData[key] == '') {
-    				delete currentData[key];
-    			}
-    		}
-    		
-    		console.log(topinfo);
-    		//config_data.w.tagger.finalizeEntity('person', currentData);
-    		
-    		
-    		console.log("current data");
-    		console.log(currentData);
-    		currentId = null;
-    		currentData = null;
-    	
-          
           // OLD METHOD:::::
           //txt_image_anno_dialog.dialog('close');
           //config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
@@ -146,8 +136,7 @@ function text_image_anno_dialog(data) {
   return {
     show: function(config) {
       build_combo();
-      console.log(config);
-      //config_data = config;
+      config_data = config;
       $('#anno_text1').val(config.query);
       $('#anno_title1').val("Text image annotation");
       $('#anno_classification1').val("TextImageLink");

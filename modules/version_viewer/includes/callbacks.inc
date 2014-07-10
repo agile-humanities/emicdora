@@ -71,7 +71,6 @@ function versionable_object_viewer_build_transcription_data($object) {
       }
       $derivation_object = islandora_object_load($pids[$page - 1]);
       $tran_data = versionable_object_viewer_display_page_tei($derivation_object, 'CWRC');
-      //dsm($tran_data, "tran data");
       $return['body'] = $tran_data;
       $return['title'] = $derivation_object->label . " (page $page)";
       $return['transcriptions'] = $transcriptions;

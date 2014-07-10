@@ -204,16 +204,13 @@
     function add_tab(type, endpoint, add_class, data_type) {
       add_class = typeof add_class !== 'undefined' ? add_class : '';
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
-      console.log(endpoint);
       $.ajax({
         type: 'GET',
         async: false,
         dataType: data_type,
         url: endpoint,
         success: function(data, status, xhr) {
-        	console.log(data);
           construct_tab(data, type);
-          
           if (add_class != "") {
             $('#' + type).addClass(add_class);
           }
