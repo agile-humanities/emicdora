@@ -67,9 +67,13 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         $json_anno = json_decode($child->textContent);
         $labels = $xml->xpath('//*[@annotationId]');
         foreach ($labels as $label) {
-          if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
-            $json_anno->{'annotationId'} = (string) $label['annotationId'];
+          // For non TextImgLink annotations.
+          if (isset($json_anno->hasTarget)) {
+            if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
+              $json_anno->{'annotationId'} = (string) $label['annotationId'];
+            }
           }
+
         }
         array_push($entities, $json_anno);
       }

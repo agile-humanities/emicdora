@@ -55,7 +55,6 @@ function versionable_object_viewer_build_transcription_data($object) {
   $page = urldecode($_GET['page']);
   $type = $object->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
   $transcriptions = versionable_object_viewer_get_transcription_text($object);
-
   switch ($type[0]['object']['value']) {
     case "audio":
       $return['body'] = $transcriptions[$page - 1]['text'];
@@ -71,7 +70,8 @@ function versionable_object_viewer_build_transcription_data($object) {
         array_push($pids, $member['obj']['value']);
       }
       $derivation_object = islandora_object_load($pids[$page - 1]);
-      $return['body'] = versionable_object_viewer_display_page_tei($derivation_object, 'CWRC');
+      $tran_data = versionable_object_viewer_display_page_tei($derivation_object, 'CWRC');
+      $return['body'] = $tran_data;
       $return['title'] = $derivation_object->label . " (page $page)";
       $return['transcriptions'] = $transcriptions;
       echo json_encode($return);
@@ -108,9 +108,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
-  foreach ($anno_pids['pids'] as $annos) {
-    $anno_data = islandora_image_annotation_shared_get_annotation_data($annos['id'], NULL);
-  }
 
   // Construct our image annotations.
   if (isset($anno_pids['types'])) {
@@ -158,16 +155,19 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       "children" => array(),
     );
     foreach ($rdf_annotations as $rdf_anno) {
+      // For non TextImgLink annotations.
+      if (isset($rdf_anno->annotationId)) {
+        array_push(
+          $tree_data[$size]["children"],
+          array(
+            "id" => $rdf_anno->annotationId,
+            "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+            "state" => "open",
+            "attributes" => $rdf_anno,
+          )
+        );
+      }
 
-      array_push(
-        $tree_data[$size]["children"],
-        array(
-          "id" => $rdf_anno->annotationId,
-          "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
-          "state" => "open",
-          "attributes" => $rdf_anno,
-        )
-      );
     }
   }
   drupal_json_output($tree_data);

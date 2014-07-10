@@ -36,7 +36,7 @@
                 $('.message_cont').remove();
               });
           }, 3000);
-      })
+      });
     }
     else {
       $('#full-window-button').html(Drupal.t('Full Window'));
@@ -125,7 +125,7 @@ function initCanvas(nCanvas) {
     $('#top_menu_bar').width(w - 5);
 
     for (var x = 0; x < nCanvas; x++) {
-        $('#canvases').append('<div id="canvas_' + x + '" class="canvas"></div>')
+        $('#canvases').append('<div id="canvas_' + x + '" class="canvas"></div>');
         $('#canvas_' + x).width(w);
         $('#canvas_' + x).height(h);
     }
@@ -173,15 +173,15 @@ function init_ui() {
     $('.menu_head').click(function () {
         // First find our id, and then use to find our menu
         var id = $(this).attr('id');
-        var menubody = $('#' + id + '_body')
+        var menubody = $('#' + id + '_body');
         menubody.slideToggle('medium');
         menubody.position({
-            'of' : '#' + id,
-            'my' : 'top left',
-            'at' : 'bottom left',
-            'collision' : 'fit',
-            'offset' : '0 8'
-        })
+          'of' : '#' + id,
+          'my' : 'top left',
+          'at' : 'bottom left',
+          'collision' : 'fit',
+          'offset' : '0 8'
+        });
     });
 
     try {
@@ -278,7 +278,7 @@ function maybeResize() {
 	                        }
 	                        $('#hidden_annotation_type').attr('anno_type','Update Annotation');
 	                        $('#hidden_annotation_type').attr('urn',urn);
-	                        startEditting(title, annotation, anno_type, urn)
+	                        startEditting(title, annotation, anno_type, urn);
 	                    }
 	                },
 	                items: {
@@ -400,7 +400,7 @@ function maybeResize() {
 	            }
 	        }
 	    }
-	    topinfo['uriParams'] = uriparams
+	    topinfo['uriParams'] = uriparams;
 	    // Initialize UI
 	    init_ui();
 	    // Setup a basic Canvas with explicit width to scale to from browser width
