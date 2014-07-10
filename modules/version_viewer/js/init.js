@@ -52,12 +52,7 @@
             });
           },
           error: function(data, status, xhd) {
-        	  console.log(data);
-        	  console.log(status);
-        	  console.log(xhd);
-              //alert("Please Login to site");
-          },
-          //dataType: 'json'
+          }
       });
     }
     
@@ -111,7 +106,7 @@
           return $("#ui_p").panel({
             width:150,
             height:100,
-            content: "<div>" + data['cwrcAttributes']['cwrcInfo']['name'] +"</div>",
+            content: "<div>" + data['cwrcAttributes']['cwrcInfo']['name'] +"</div>"
           });
         },
         onShow: function(){
@@ -165,7 +160,7 @@
     $('.work_action_img').click(function() {
       var is_selected = false;
       if ($(this).hasClass('img_selected')) {
-        $(this).removeClass('img_selected')
+        $(this).removeClass('img_selected');
       }
       else {
         $(this).addClass('img_selected');
@@ -217,7 +212,7 @@
         },
         error: function(xhRequest, ErrorText, thrownError) {
           console.log(ErrorText + ":" + thrownError);
-        },
+        }
       });
     }
     
@@ -226,7 +221,7 @@
       id: type,
       title: data['title'],
       content:data['body'],
-      closable:true,
+      closable:true
       });
       prettyPrint();
     }

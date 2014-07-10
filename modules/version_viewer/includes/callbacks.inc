@@ -108,11 +108,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
-  if (isset($anno_pids['pids'])) {
-    foreach ($anno_pids['pids'] as $annos) {
-      $anno_data = islandora_image_annotation_shared_get_annotation_data($annos['id'], NULL);
-    }
-  }
 
   // Construct our image annotations.
   if (isset($anno_pids['types'])) {
