@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_CREATE_EDITION', 'emic create edition');
@@ -516,9 +515,8 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'operations':
+      $links = array();
       if ($versionable_object) {
-
-        $links = array();
         $links[] = array(
           'title' => 'View',
           'href' => "islandora/object/{$versionable_object->id}",
@@ -541,6 +539,23 @@ function emicdora_block_view($delta = '') {
             'href' => "islandora/object/{$versionable_object->id}/delete",
           );
         }
+      }
+      if ($source_selected) {
+        $source_pid = $path_parts[4];
+        $links[] = array(
+          'title' => 'View',
+          'href' => "islandora/object/$source_pid",
+        );
+        $links[] = array(
+          'title' => 'Edit Metadata',
+          'href' => "islandora/edit_form/$source_pid/MODS",
+        );
+        $links[] = array(
+          'title' => 'Delete Source Object',
+          'href' => "islandora/object/$source_pid/delete",
+        );
+      }
+      if (!empty($links)) {
         $block['subject'] = t('Operations');
         $block['content'] = array(
           array(
@@ -593,7 +608,7 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
+      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $source_selected) {
         break;
       }
       module_load_include('inc', 'emicdora', 'includes/utilities');
@@ -845,7 +860,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content .= theme('islandora_large_image', array('islandora_object' => $source_object));
       break;
-
   }
   return array('emicdora' => $content);
 }
