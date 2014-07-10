@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_CREATE_EDITION', 'emic create edition');
@@ -175,7 +176,27 @@ function emicdora_menu() {
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/version/%islandora_object/create' => array(
-      'title' => 'Add this source object to Critical Edition',
+      'title' => 'Add new version',
+      'page callback' => 'emicdora_ingest_versionable_object_page',
+      'page arguments' => array(3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/ingest_versionable_object.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/link' => array(
+      'title' => 'Add existing version',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_link_version_form', 3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/link_version.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/configure' => array(
+      'title' => 'Configure Links',
       'page callback' => 'emicdora_ingest_versionable_object_page',
       'page arguments' => array(3),
       'access callback' => 'emicdora_show_version_context_menu',
@@ -516,45 +537,41 @@ function emicdora_block_view($delta = '') {
 
     case 'operations':
       $links = array();
+      if ($is_critical_edition) {
+        $id = $critical_edition->id;
+      }
       if ($versionable_object) {
-        $links[] = array(
-          'title' => 'View',
-          'href' => "islandora/object/{$versionable_object->id}",
-        );
-        if (isset($editor)) {
-          $links[] = array(
-            'title' => 'View Source Object',
-            'href' => "islandora/object/$source_object",
-          );
-        }
-        if (user_access(EMICDORA_MODIFY_EDITION)) {
-          $links[] = array(
-            'title' => 'Edit Metatdata',
-            'href' => "islandora/edit_form/{$versionable_object->id}/MODS",
-          );
-        }
-        if (user_access(EMICDORA_DELETE_EDITION)) {
-          $links[] = array(
-            'title' => 'Delete',
-            'href' => "islandora/object/{$versionable_object->id}/delete",
-          );
-        }
+        $id = $versionable_object->id;
       }
       if ($source_selected) {
-        $source_pid = $path_parts[4];
+        $id = $path_parts[4];
+      }
+
+      $links[] = array(
+        'title' => 'View',
+        'href' => "islandora/object/$id",
+      );
+
+      if ($source_selected) {
         $links[] = array(
-          'title' => 'View',
-          'href' => "islandora/object/$source_pid",
-        );
-        $links[] = array(
-          'title' => 'Edit Metadata',
-          'href' => "islandora/edit_form/$source_pid/MODS",
-        );
-        $links[] = array(
-          'title' => 'Delete Source Object',
-          'href' => "islandora/object/$source_pid/delete",
+          'title' => 'View Source Object',
+          'href' => "islandora/object/{$path_parts[4]}",
         );
       }
+
+      if (user_access(EMICDORA_MODIFY_EDITION)) {
+        $links[] = array(
+          'title' => 'Edit Metatdata',
+          'href' => "islandora/edit_form/$id/MODS",
+        );
+      }
+      if (user_access(EMICDORA_DELETE_EDITION)) {
+        $links[] = array(
+          'title' => 'Delete',
+          'href' => "islandora/object/$id/delete",
+        );
+      }
+
       if (!empty($links)) {
         $block['subject'] = t('Operations');
         $block['content'] = array(

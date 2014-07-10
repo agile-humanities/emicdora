@@ -284,7 +284,7 @@ function emicdora_get_apparatus_as_content($object) {
 }
 
 /**
- * Retrieves all source objects.
+ * Retrieves all member objects.
  *
  * @param AbstractObject $object
  *   Critical Edition object
@@ -357,7 +357,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit
 }
 
 /**
- * Gets all versionable objects assicated with critical edition.
+ * Gets all versionable objects associated with critical edition.
  *
  * @return array
  *   PIDs of currently associated versionable objects
@@ -371,6 +371,32 @@ function emicdora_get_source_autocomplete() {
             WHERE {
               {?subject     fm:state fm:Active;
                             fr:isMemberOfCollection <info:fedora/islandora:co-op>;
+              }
+              OPTIONAL{?subject fm:label ?label}
+             }";
+  $objects = array();
+  $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
+  foreach ($results as $result) {
+    $objects[$result['label']['value']] = $result['subject']['value'];
+  }
+  return $objects;
+}
+
+/**
+ * Gets all versionable objects associated with source object.
+ *
+ * @return array
+ *   PIDs of currently associated versionable objects
+ */
+function emicdora_get_versions($source_id) {
+  $tuque = islandora_get_tuque_connection();
+  $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
+            PREFIX fr: <" . ISLANDORA_RELS_EXT_URI . ">
+            SELECT ?subject ?label
+            FROM <#ri>
+            WHERE {
+              {?subject     fm:state fm:Active;
+                            fr:isDerivationOf <info:fedora/$source_id>;
               }
               OPTIONAL{?subject fm:label ?label}
              }";
