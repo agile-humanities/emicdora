@@ -102,7 +102,7 @@ function text_image_anno_dialog(data) {
             var currentData = {};
             currentData.cwrcInfo = {};
             currentData.cwrcInfo.id = "CWRCID_RDM";
-            currentData.cwrcInfo.name = "super test name stuff";
+            currentData.cwrcInfo.name = config_data.query;
             currentData.cwrcInfo.repository = "cwrc";
             currentData.attributes = save_result;
             for (var key in currentData) {

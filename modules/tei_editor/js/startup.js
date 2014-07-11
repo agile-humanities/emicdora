@@ -18,16 +18,12 @@ function cwrcWriterInit(Writer, Delegator) {
 		writer.event('entityFocused').subscribe(function(entityId) {
 			if (writer.entities[entityId] !== 'undefined') {
 				var entity_type = writer.entities[entityId]['props']['type'];
-				//console.log(entity_type);
 				if (entity_type === "textimagelink") {
 			      paint_commentAnnoTargets(null, 'canvas_0', writer.entities[entityId]['info']['attributes']['uuid'], "comment");
 				}
 			}
-			
 		});
 		writer.event('entityUnfocused').subscribe(function(entityId) {
-//			console.log(entityId);
-//			console.log(writer.entities);
 			if (writer.entities[entityId] !== 'undefined') {
 				var entity_type = writer.entities[entityId]['props']['type'];
 				console.log(entity_type);
@@ -35,11 +31,8 @@ function cwrcWriterInit(Writer, Delegator) {
 		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
 				}
 			}
-			
 		});
 		console.log(writer);
-		
-		
 	}
 	function doResize() {
 		var uiHeight = $('#'+writer.editor.id+'_tbl tr.mceFirst').outerHeight() + 2;

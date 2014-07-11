@@ -103,17 +103,21 @@
     }
     
     function show_entity_tooltip(data, ent_id) {
-      $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+    	console.log(data);
+      var colour = "red";
+      if (data['cwrcAttributes']['attributes']['Colour']) {
+        colour = data['cwrcAttributes']['attributes']['Colour'];
+      }
+      $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
       $("span[data-annotationid='" + ent_id + "']").tooltip({
         position: 'top',
+        width: 100,
+        height: 100,
         hideEvent: 'none',
         content: function(){
-          // Hidden in the dom.
-          return $("#ui_p").panel({
-            width:150,
-            height:100,
-            content: "<div>" + data['cwrcAttributes']['cwrcInfo']['name'] +"</div>"
-          });
+          return '<div class="easyui-panel" title="Basic Panel" style="width:100px;height:100px;padding:10px;">' + 
+          data['cwrcAttributes']['cwrcInfo']['name'] +
+          '</div>';
         },
         onShow: function(){
           var t = $(this);
@@ -152,8 +156,8 @@
         async: false,
         timeout: 3000,
         success: function(data, status, xhr) {
-          $('#center_data').empty();
-          $('#center_data').append('<pre>' + data + '</pre>');
+          $('#content_data').empty();
+          $('#content_data').append('<pre>' + data + '</pre>');
         },
         error: function() {
           console.log("failure");
