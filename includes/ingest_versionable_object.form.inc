@@ -202,26 +202,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
           'effect' => 'fade',
         ),
       ),
-      'tei_rdf_ajax_wrapper' => array(
-        '#access' => $valid_source_selected,
-        '#type' => 'container',
-        '#prefix' => '<div id="tei-rdf-ajax-container-wrapper">',
-        '#suffix' => '</div>',
-        'tei_rdf' => array(
-          '#access' => $tei_rdf_source == 'existing',
-          '#type' => 'tableselect',
-          '#multiple' => FALSE,
-          '#header' => array('PID', 'Label'),
-          '#options' => $tei_rdf_objects,
-          '#empty' => t('No TEI-RDF objects available. Please select "Create New"'),
-        ),
-        'tei_rdf_label' => array(
-          '#access' => $tei_rdf_source == 'new',
-          '#required' => TRUE,
-          '#type' => 'textfield',
-          '#title' => t('TEI-RDF Label'),
-        ),
-      ),
+
       'transcription_label' => array(
         '#access' => $valid_source_selected,
         '#type' => 'textfield',

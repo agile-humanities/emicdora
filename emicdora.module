@@ -186,7 +186,7 @@ function emicdora_menu() {
       'context' => MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/version/%islandora_object/link' => array(
-      'title' => 'Add existing version',
+      'title' => 'Link existing version',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_link_version_form', 3),
       'access callback' => 'emicdora_show_version_context_menu',
@@ -448,19 +448,19 @@ function emicdora_block_view($delta = '') {
           );
         }
       }
-      if (!empty($links)) {
-        $block['subject'] = t('Apparatus');
-        $block['content'] = array(
-          '#theme' => 'links',
-          '#links' => $links,
-          '#contextual_links' => array(
-            'emicdora' => array(
-              'emicdora/contextual-links/apparatus',
-              array($critical_edition->id),
-            ),
+
+      $block['subject'] = t('Apparatus');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'emicdora/contextual-links/apparatus',
+            array($critical_edition->id),
           ),
-        );
-      }
+        ),
+      );
+
       break;
 
     case 'source_material':
@@ -593,7 +593,7 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
+      if (module_exists('tei_editor') && $is_versionable_object && user_access(EMICDORA_MODIFY_EDITION)) {
         $links[] = array(
           'title' => 'Edit',
           'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
@@ -901,6 +901,7 @@ function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $
 function emicdora_critical_edition_sources(AbstractObject $object, $content_model = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  drupal_set_title(t("@edition - Source Objects", array('@edition' => $object->label)));
   // Only show members of the given critical edition.
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,

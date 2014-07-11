@@ -67,7 +67,7 @@ function emicdora_link_version_form($form, $form_state, $critical_edition) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t("Link version to critical edition"),
+    '#value' => t("Link version to @crit", array('@crit' => $critical_edition->label)),
   );
   return $form;
 }
