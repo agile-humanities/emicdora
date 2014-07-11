@@ -2,6 +2,7 @@ var cwrc_params = {};
 
 function cwrcWriterInit(Writer, Delegator) {
 	update_loading_text("Loading");
+	$('#image_annotation_wrapper').toggle();
 	writer = null;
 	function doInit() {
 		writer = new Writer(config);
@@ -16,7 +17,23 @@ function cwrcWriterInit(Writer, Delegator) {
 			});
 		});
 		writer.event('entityFocused').subscribe(function(entityId) {
-			console.log("haraksdfndf " + entityId);
+			if (writer.entities[entityId] !== 'undefined') {
+				var entity_type = writer.entities[entityId]['props']['type'];
+				if (entity_type === "textimagelink") {
+			      paint_commentAnnoTargets(null, 'canvas_0', writer.entities[entityId]['info']['attributes']['uuid'], "comment");
+				}
+			}
+		});
+		writer.event('entityUnfocused').subscribe(function(entityId) {
+			if (writer.entities[entityId] !== 'undefined') {
+				var entity_type = writer.entities[entityId]['props']['type'];
+				if (entity_type === "textimagelink") {
+		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+				}
+			}
+		});
+		writer.event('documentLoaded').subscribe(function() {
+			hide_loading_bar();
 		});
 	}
 	function doResize() {
@@ -24,16 +41,13 @@ function cwrcWriterInit(Writer, Delegator) {
 		writer.editor.theme.resizeTo($(window).width(), $(window).height() - uiHeight);
 		// Call out to our 'init.js' script, fixes image annotation size.
 		resizeCanvas();
-		
 	}
 	PID = Drupal.settings.islandora_markup_editor.page_pid;
-	console.log(PID);
 	cwrc_params = {};
 	window.location.hash = '#' + PID;
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
 	Delegator = CustomDelegator;
-	console.log(moduleUrl);
 	var config = {
 	  id: 'editor',
 	  delegator: Delegator,
@@ -41,7 +55,6 @@ function cwrcWriterInit(Writer, Delegator) {
 	  buttons1: 'schematags,|,addperson,addplace,adddate,addevent,addorg,addcitation,addtitle,addcorrection,addkeyword,addlink,|,editTag,removeTag,|,addtriple,|,viewsource,editsource,|,validate,savebutton,loadbutton',
 	  schemas: Drupal.settings.islandora_markup_editor.schema_object['schemas']
 	};
-	console.log(config);
 	update_loading_text("Gathering project info");
 	$.ajax({
 		url: Drupal.settings.basePath + 'islandora/tei_editor/setup/' + PID,
@@ -52,24 +65,16 @@ function cwrcWriterInit(Writer, Delegator) {
 		        var usr_schema;
 		        config.project = data;
 		        doInit();
-//		        if (Drupal.settings.islandora_markup_editor.schema_pref['valid'] == 1) {
-//		          usr_schema = get_schema_id_for_pid(Drupal.settings.islandora_markup_editor.schema_pref['schema_pid'], writer);
-//		        } else {
-		          usr_schema = new Array();
-		          usr_schema['name'] = "tei";
-		        //}
+		        usr_schema = new Array();
+		        usr_schema['name'] = "tei";
 		        // Initilize additional UI Elements.
 		        update_loading_text("Building display");
 		        init_ui();
 		        resizeCanvas();
 		        update_loading_text("Building Image Viewer");
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
-				$(window).on('resize', doResize);
-				
-				
 			},
 			error: function() {
-				console.log("failure");
 				config.cwrcRootUrl = baseUrl+'/cwrc/src/';
 				config.schemas = {
 					tei: {

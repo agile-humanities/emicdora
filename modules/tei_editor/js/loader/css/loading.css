@@ -10,10 +10,3 @@
   z-index: 998;
   text-align: center;
 }
-
-#loading-image {
-  position: absolute;
-  top: 100px;
-  left: 140px;
-  z-index: 999;
-}

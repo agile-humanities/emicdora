@@ -60,6 +60,7 @@ var islandoraCWRCWriter = {
         success: function(data, status, xhr) {
           islandora_canvas_params = data;
           callback(data);
+          
           // Callback for text image linking.
           $('.canvas_annotation').mouseup(function() {
             var anno_urn = $(this).attr('urn');
@@ -77,6 +78,8 @@ var islandoraCWRCWriter = {
               }
             }
           });
+          $('#image_annotation_wrapper').toggle();
+          
         },
         error: function() {
           //alert("Please log in to host site.");
