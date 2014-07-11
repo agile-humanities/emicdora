@@ -64,7 +64,6 @@
     });
     
     function show_annotations(nodes) {
-    	console.log(nodes[0]);
       if (nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -73,41 +72,52 @@
       }
       else {
         for (var i = 0; i < nodes.length; i++) {
-        var ent_id = nodes[i]['attributes']['annotationId'];
-        $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
-        show_entity_tooltip(nodes[i]['attributes'], ent_id);
+          var ent_id = nodes[i]['attributes']['annotationId'];
+          $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+          show_entity_tooltip(nodes[i]['attributes'], ent_id);
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          }
         }
       }
     }
     function hide_annotations(nodes) {
       if (nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
-            var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
-            $('.svg_' + anno_id).remove();
-          }
+          var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
+          $('.svg_' + anno_id).remove();
+        }
       }
       else {
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
           $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            $('.svg_' + anno_id).remove();
+          }
         }
       }
     }
     
     function show_entity_tooltip(data, ent_id) {
     	console.log(data);
-      $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+      var colour = "red";
+      if (data['cwrcAttributes']['attributes']['Colour']) {
+        colour = data['cwrcAttributes']['attributes']['Colour'];
+      }
+      $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
       $("span[data-annotationid='" + ent_id + "']").tooltip({
         position: 'top',
+        width: 100,
+        height: 100,
         hideEvent: 'none',
         content: function(){
-          // Hidden in the dom.
-          return $("#ui_p").panel({
-            width:150,
-            height:100,
-            content: "<div>" + data['cwrcAttributes']['cwrcInfo']['name'] +"</div>"
-          });
+          return '<div class="easyui-panel" title="Basic Panel" style="width:100px;height:100px;padding:10px;">' + 
+          data['cwrcAttributes']['cwrcInfo']['name'] +
+          '</div>';
         },
         onShow: function(){
           var t = $(this);
@@ -146,8 +156,8 @@
         async: false,
         timeout: 3000,
         success: function(data, status, xhr) {
-          $('#center_data').empty();
-          $('#center_data').append('<pre>' + data + '</pre>');
+          $('#content_data').empty();
+          $('#content_data').append('<pre>' + data + '</pre>');
         },
         error: function() {
           console.log("failure");
@@ -197,7 +207,7 @@
     });
     
     function add_tab(type, endpoint, add_class, data_type) {
-      add_class = typeof add_class !== 'undefined' ? add_class : '';
+      add_class = typeof add_class !== 'undefined' ? add_class : "";
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
       $.ajax({
         type: 'GET',
@@ -217,23 +227,10 @@
     }
     
     function construct_tab(data, type) {
-      $('#versions_tabs').tabs('add',{
-      id: type,
-      title: data['title'],
-      content:data['body'],
-      closable:true
-      });
+      $('#content_data').empty();
+      $('#content_data').append(data['body']);
       prettyPrint();
     }
-    
-    $('#easy-ui-east').panel({
-        onResize:function(w,h){
-          var mode = Drupal.settings.versionable_object_viewer.mode;
-       if ( mode == "text" || mode == "image") {
-         resizeCanvas();
-       }
-        }
-    });
     
     function toggle_layout(selected, region) {
       if (!selected) {
@@ -245,11 +242,21 @@
     }
     
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
-  var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
+    var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
   
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
   
   toggle_layout(false, 'west');
+  
+  $('#easy-ui-east').panel({
+      onResize:function(w,h){
+        var mode = Drupal.settings.versionable_object_viewer.mode;
+     if ( mode == "text" || mode == "image") {
+       resizeCanvas();
+     }
+      }
+  });
+  
   });
 })(jQuery);

@@ -46,7 +46,6 @@ function text_image_anno_dialog(data) {
   '</div>';
   var txt_image_anno_dialog;
   if($('#create_annotation_text_box').length == 0) {
-	  console.log("does not exist, yet");
     $(document.body).append(html_text);
     $('#islandora_classification').addClass("dialog-entity-group");
     txt_image_anno_dialog = $('#create_annotation_text_box');
@@ -85,9 +84,6 @@ function text_image_anno_dialog(data) {
             save_result = saveAndEndAnnotating();
             if(save_result == 0) {
                 $("#cbo_image_anno").val('0');
-                // TODO: Return saveAnnotation() result (data) so it can be used as
-                // an attribute in the 'currentData' obj later. This makes text image linking
-                // possible without using UUID's.
                 closeAndEndAnnotating();
                 txt_image_anno_dialog.dialog('close');
                 return;
@@ -101,24 +97,17 @@ function text_image_anno_dialog(data) {
             var currentData = {};
             currentData.cwrcInfo = {};
             currentData.cwrcInfo.id = "CWRCID_RDM";
-            currentData.cwrcInfo.name = "super test name stuff";
+            currentData.cwrcInfo.name = config_data.query;
             currentData.cwrcInfo.repository = "cwrc";
-            currentData.attributes = {};
-            currentData.attributes.type = "textImgLink";
+            currentData.attributes = save_result;
             for (var key in currentData) {
               if (currentData[key] == undefined || currentData[key] == '') {
-                //config_data.w.tagger.finalizeEntity('person', currentData);
                 delete currentData[key];
               }
             }
-            currentId = null;
-            currentData = null;
             
-          // OLD METHOD:::::
-          //txt_image_anno_dialog.dialog('close');
-          //config_data.w.tagger.finalizeEntity('txtimglnk', save_result);
-          //config_data.w.fileManager.saveDocument()d
-          //config_data.w.removeHighlights();
+            config_data.w.tagger.finalizeEntity('textimagelink', currentData);
+            txt_image_anno_dialog.dialog('close');
         },
       'Cancel': function() {
          $("#cbo_image_anno").val('0');
@@ -143,9 +132,6 @@ function text_image_anno_dialog(data) {
       
       $('#img_anno_text').hide();
       $('#img_anno_title').hide();
-      
-      //txt_image_anno_dialog.dialog();
-      //$("#text_image_accordion").accordion('activate', 0 );
     },
     hide: function() {
       $("#cbo_image_anno").val('0');

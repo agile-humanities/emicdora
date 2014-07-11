@@ -108,40 +108,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
-
-  // Construct our image annotations.
-  if (isset($anno_pids['types'])) {
-    // Populate our different types of annotations.
-    foreach ($anno_pids['types'] as $anno_type) {
-      if (count($anno_pids['pids']) > 0) {
-        $tree_data[$count] = array(
-          "id" => $count,
-          "text" => $anno_type,
-          "state" => "closed",
-          "attributes" => array(
-            "root" => "true",
-          ),
-          "children" => array(),
-        );
-        foreach ($anno_pids['pids'] as $anno) {
-          if ($tree_data[$count]['text'] == $anno['type']) {
-            $anno['svg_data'] = islandora_image_annotation_shared_get_annotation_data($anno['id'], NULL);
-            $svg_data = versionable_object_viewer_svg_data($anno['svg_data']);
-            array_push(
-              $tree_data[$count]['children'],
-              array(
-                "id" => $anno['id'],
-                "text" => $svg_data['label'],
-                "state" => "open",
-                "attributes" => $anno,
-              )
-            );
-          }
-        }
-        $count++;
-      }
-    }
-  }
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
   if (count($rdf_annotations) > 0) {
     $size = count($tree_data);
@@ -154,20 +120,44 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       ),
       "children" => array(),
     );
+    $tree_data[$size + 1] = array(
+      "id" => "tree_textimagelinks",
+      "text" => "Text Image Annotations",
+      "state" => "closed",
+      "attributes" => array(
+        "root" => "true",
+      ),
+      "children" => array(),
+    );
     foreach ($rdf_annotations as $rdf_anno) {
       // For non TextImgLink annotations.
+      $child_type = $size;
       if (isset($rdf_anno->annotationId)) {
-        array_push(
-          $tree_data[$size]["children"],
-          array(
+        $child;
+        // Entities can now be text image links.
+        if ($rdf_anno->cwrcType == "textimagelink") {
+          $child_type = $size + 1;
+          $child = array(
             "id" => $rdf_anno->annotationId,
             "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
             "state" => "open",
             "attributes" => $rdf_anno,
-          )
+          );
+        }
+        else {
+          $child_type = $size;
+          $child = array(
+            "id" => $rdf_anno->annotationId,
+            "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+            "state" => "open",
+            "attributes" => $rdf_anno,
+          );
+        }
+        array_push(
+          $tree_data[$child_type]["children"],
+          $child
         );
       }
-
     }
   }
   drupal_json_output($tree_data);

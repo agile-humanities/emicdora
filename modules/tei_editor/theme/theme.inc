@@ -26,10 +26,12 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $variables['anno_img_pane'] = theme('islandora_anno_image_pane');
   $variables['images_path'] = url($islandora_markup_editor_path . '/CWRC-Writer/src/img/',
     array('absolute' => TRUE));
+
   // Use this flag to include your own init .js scripts.
   $variables['custom_js'] = "$islandora_markup_editor_path/js";
   $variables['cwrc_lib_path'] = $islandora_markup_editor_path;
   $variables['sc_img_path'] = url("$islandora_image_anno_path/shared_canvas/imgs/small-logo.png");
+
   // Theme the default markup editor.
   theme('islandora_markup_editor', $variables);
 
@@ -40,6 +42,10 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   // add the required js at the correct time. It needs to be abstracted.
   drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
   drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-1.7.js');
+
+  // Drop our loader in first.
+  drupal_add_js("$tei_editor_module_path/js/loader/js/loading.js");
+  drupal_add_css("$tei_editor_module_path/js/loader/css/loading.css");
 
   // This is where we add our own init scripts, since we indicated we would with
   // the vars flag '$variables['custom_js'] = TRUE'.
@@ -56,9 +62,6 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   islandora_image_annotation_include_common_css();
 
   drupal_add_js($islandora_markup_editor_path . '/CWRC-Writer/src/js/lib/jquery/jquery-ui-1.10.3.custom.js');
-
-  drupal_add_js("$tei_editor_module_path/js/loader/js/loading.js");
-  drupal_add_css("$tei_editor_module_path/js/loader/css/loading.css");
 }
 
 /**
