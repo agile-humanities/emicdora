@@ -2,6 +2,7 @@ var cwrc_params = {};
 
 function cwrcWriterInit(Writer, Delegator) {
 	update_loading_text("Loading");
+	$('#image_annotation_wrapper').toggle();
 	writer = null;
 	function doInit() {
 		writer = new Writer(config);
@@ -30,6 +31,9 @@ function cwrcWriterInit(Writer, Delegator) {
 		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
 				}
 			}
+		});
+		writer.event('documentLoaded').subscribe(function() {
+			hide_loading_bar();
 		});
 	}
 	function doResize() {

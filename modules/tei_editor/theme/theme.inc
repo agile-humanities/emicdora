@@ -21,6 +21,8 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $islandora_markup_editor_path = drupal_get_path('module', 'islandora_markup_editor');
   $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
 
+
+
   // Theme our custom components to the tei_editor viewer.
   $variables['anno_list_pane'] = theme('islandora_anno_list_pane');
   $variables['anno_img_pane'] = theme('islandora_anno_image_pane');
@@ -41,6 +43,10 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
   drupal_add_js($islandora_image_anno_path . '/shared_canvas/js/jquery/jquery-1.7.js');
 
+  // Drop our loader in first.
+  drupal_add_js("$tei_editor_module_path/js/loader/js/loading.js");
+  drupal_add_css("$tei_editor_module_path/js/loader/css/loading.css");
+
   // This is where we add our own init scripts, since we indicated we would with
   // the vars flag '$variables['custom_js'] = TRUE'.
   drupal_add_css($tei_editor_module_path . "/css/tei_editor.css");
@@ -56,9 +62,6 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   islandora_image_annotation_include_common_css();
 
   drupal_add_js($islandora_markup_editor_path . '/CWRC-Writer/src/js/lib/jquery/jquery-ui-1.10.3.custom.js');
-
-  drupal_add_js("$tei_editor_module_path/js/loader/js/loading.js");
-  drupal_add_css("$tei_editor_module_path/js/loader/css/loading.css");
 }
 
 /**

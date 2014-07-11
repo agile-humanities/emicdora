@@ -12,9 +12,7 @@
 ?>
 
 <div id="islandora-crited-wrapper-id" class="islandora-crited-wrapper">
-  <div id="iframe_replacement" class=".iframe_replacement" style="height: 100%">
-
-
+  <div id="iframe_replacement" class=".iframe_replacement" style="height: 100%;position:relative;">
     <input id="full-window-button" type="button" value="<?php print t('Full Window'); ?>" />
     <?php if (!isset($suppress_button)): ?>
     <?php $label = t('Return to Book View'); ?>
@@ -70,7 +68,7 @@
       <div id="east_div" class="ui-layout-east">
         <!-- Image annotation -->
         <button id="create_annotation" class="menu_button">Annotate</button>
-        <div class="image-annotation-wrapper">
+        <div id="image_annotation_wrapper" class="image-annotation-wrapper">
           <!-- Persist a single player and build new interface to it -->
           <div id="canvas-body-wrapper" style="width: 100%; height: 600px;">
             <?php print $anno_img_pane; ?>
