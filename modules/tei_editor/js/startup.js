@@ -26,13 +26,11 @@ function cwrcWriterInit(Writer, Delegator) {
 		writer.event('entityUnfocused').subscribe(function(entityId) {
 			if (writer.entities[entityId] !== 'undefined') {
 				var entity_type = writer.entities[entityId]['props']['type'];
-				console.log(entity_type);
 				if (entity_type === "textimagelink") {
 		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
 				}
 			}
 		});
-		console.log(writer);
 	}
 	function doResize() {
 		var uiHeight = $('#'+writer.editor.id+'_tbl tr.mceFirst').outerHeight() + 2;
@@ -41,13 +39,11 @@ function cwrcWriterInit(Writer, Delegator) {
 		resizeCanvas();
 	}
 	PID = Drupal.settings.islandora_markup_editor.page_pid;
-	console.log(PID);
 	cwrc_params = {};
 	window.location.hash = '#' + PID;
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
 	Delegator = CustomDelegator;
-	console.log(moduleUrl);
 	var config = {
 	  id: 'editor',
 	  delegator: Delegator,
@@ -55,7 +51,6 @@ function cwrcWriterInit(Writer, Delegator) {
 	  buttons1: 'schematags,|,addperson,addplace,adddate,addevent,addorg,addcitation,addtitle,addcorrection,addkeyword,addlink,|,editTag,removeTag,|,addtriple,|,viewsource,editsource,|,validate,savebutton,loadbutton',
 	  schemas: Drupal.settings.islandora_markup_editor.schema_object['schemas']
 	};
-	console.log(config);
 	update_loading_text("Gathering project info");
 	$.ajax({
 		url: Drupal.settings.basePath + 'islandora/tei_editor/setup/' + PID,
@@ -66,12 +61,8 @@ function cwrcWriterInit(Writer, Delegator) {
 		        var usr_schema;
 		        config.project = data;
 		        doInit();
-//		        if (Drupal.settings.islandora_markup_editor.schema_pref['valid'] == 1) {
-//		          usr_schema = get_schema_id_for_pid(Drupal.settings.islandora_markup_editor.schema_pref['schema_pid'], writer);
-//		        } else {
-		          usr_schema = new Array();
-		          usr_schema['name'] = "tei";
-		        //}
+		        usr_schema = new Array();
+		        usr_schema['name'] = "tei";
 		        // Initilize additional UI Elements.
 		        update_loading_text("Building display");
 		        init_ui();
@@ -80,7 +71,6 @@ function cwrcWriterInit(Writer, Delegator) {
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
 			},
 			error: function() {
-				console.log("failure");
 				config.cwrcRootUrl = baseUrl+'/cwrc/src/';
 				config.schemas = {
 					tei: {
