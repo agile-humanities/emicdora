@@ -10,3 +10,25 @@
 .canvas{
   background: !important;
 }
+
+#critical-edition-viewer {
+  border:none !important;
+  margin: 0em !important;
+}
+
+#critical-edition-viewer {
+  margin-top: 0.5em !important;
+}
+
+#ui-easy-paginator table{
+  margin-bottom: 0.0em !important;
+  margin-top: 0.0em !important;
+}
+
+#ui-easy-paginator table tbody tr td {
+  padding: 0px 0px 0px 0px !important;
+}
+
+#ui-easy-paginator {
+  margin-top: 0.0em !important;
+}
