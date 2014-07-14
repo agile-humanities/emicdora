@@ -292,7 +292,7 @@ function emicdora_get_apparatus_as_content($object) {
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit = 25) {
+function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -303,6 +303,10 @@ function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit
       break;
 
     case 'versions':
+      $source_content_models = array('islandora:versionCModel' => 0);
+      break;
+
+    case 'source_versions':
       $source_content_models = array('islandora:versionCModel' => 0);
       break;
 
@@ -331,26 +335,41 @@ function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit
   }
   $sorted_results = array();
   foreach ($json['response']['docs'] as $candidate) {
-    if ($type == 'source') {
-      $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-      $content_model = $content_model_parts[1];
-      $sorted_results[$content_model][] = $candidate['PID'];
-    }
-    if ($type == 'versions') {
-      $type_parts = array();
-      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-      }
-      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-      $sorted_results[$type_part][] = $candidate['PID'];
-    }
-    if ($type == 'transcriptions') {
-      $type_parts = array();
-      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-      }
-      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-      $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
+
+    switch ($type) {
+      case 'source':
+        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
+        $content_model = $content_model_parts[1];
+        $sorted_results[$content_model][] = $candidate['PID'];
+        break;
+
+      case 'versions':
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        $sorted_results[$type_part][] = $candidate['PID'];
+        break;
+
+      case 'source_versions':
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
+          $sorted_results[$type_part][] = $candidate['PID'];
+        }
+        break;
+
+      case 'transcriptions':
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
     }
   }
   return $sorted_results;

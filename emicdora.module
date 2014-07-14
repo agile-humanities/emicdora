@@ -197,11 +197,11 @@ function emicdora_menu() {
     ),
     'emicdora/contextual-links/version/%islandora_object/configure' => array(
       'title' => 'Configure Links',
-      'page callback' => 'emicdora_ingest_versionable_object_page',
-      'page arguments' => array(3),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
       'access arguments' => array(ISLANDORA_INGEST, 3),
-      'file' => 'includes/ingest_versionable_object.form.inc',
+      'file' => 'includes/configure_version_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -402,7 +402,7 @@ function emicdora_block_configure($delta = '') {
 function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $path_parts = explode('/', $_GET['q']);
-  $source_selected = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
+  $is_source = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
   $is_sources_page = (isset($path_parts[3]) && $path_parts[3] == 'sources') ? TRUE : FALSE;
   // Check to see if we are on a critical edition object.
   $object = menu_get_object('islandora_object', 2);
@@ -500,7 +500,15 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
         break;
       }
-      $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+      switch ($is_source) {
+        case TRUE:
+        $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
+          break;
+
+        case FALSE:
+          $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+          break;
+      }
       $total = 0;
       foreach ($versions as $key => $value) {
         $total += count($versions[$key]);
@@ -543,7 +551,7 @@ function emicdora_block_view($delta = '') {
       if ($versionable_object) {
         $id = $versionable_object->id;
       }
-      if ($source_selected) {
+      if ($is_source) {
         $id = $path_parts[4];
       }
 
@@ -552,7 +560,7 @@ function emicdora_block_view($delta = '') {
         'href' => "islandora/object/$id",
       );
 
-      if ($source_selected) {
+      if ($is_source) {
         $links[] = array(
           'title' => 'View Source Object',
           'href' => "islandora/object/{$path_parts[4]}",
@@ -625,7 +633,7 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $source_selected) {
+      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source) {
         break;
       }
       module_load_include('inc', 'emicdora', 'includes/utilities');
