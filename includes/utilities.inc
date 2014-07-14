@@ -368,3 +368,103 @@ function emicdora_get_source_autocomplete() {
   }
   return $objects;
 }
+
+/**
+ * Returns PID and title of all critical editions associated with an object.
+ *
+ * @param AbstractObject $fedora_object
+ *   The base object to check for related critical editions.
+ *
+ * @return array
+ *   The list of critical editions.
+ */
+function emicdora_get_critical_editions(AbstractObject $fedora_object) {
+  $edition_pids = array();
+
+  $query = "
+select \$subject \$title from <#ri>
+where (\$subject <" . ISLANDORA_RELS_EXT_URI . EMICDORA_ISDERIVATIONOF . ">'" . $fedora_object->id . "'
+and \$subject <" . FEDORA_MODEL_URI . "state> <" . FEDORA_MODEL_URI . "Active>
+and \$subject <dc:title> \$title)
+";
+
+  $objects = $fedora_object->repository->ri->itqlQuery($query, 'unlimited');
+  if (!empty($objects)) {
+    foreach ($objects as $object) {
+      $edition_pids[$object['subject']['value']] = $object['title']['value'];
+    }
+  }
+
+  return $edition_pids;
+}
+/**
+ * Constructs CWRC datastream on an object if none exists.
+ *
+ * @param AbstractObject $object
+ *   The object to create the CWRC datastream for. It should have an OCR
+ *   datastream.
+ */
+function emicdora_add_cwrc_datastream(AbstractObject $object) {
+  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  try {
+    $cwrc_stream = islandora_critical_edition_wrap_plain_text_in_tei($object['OCR']->content);
+    if (!$object['CWRC']) {
+      $cwrc_datastream = $object->constructDatastream('CWRC');
+    }
+    else {
+      $cwrc_datastream = $object['CWRC'];
+    }
+    if ($cwrc_datastream->label != 'CWRC') {
+      $cwrc_datastream->label = 'CWRC';
+    }
+    if ($cwrc_datastream->mimetype != 'text/plain') {
+      $cwrc_datastream->mimetype = 'text/plain';
+    }
+    $cwrc_datastream->setContentFromString($cwrc_stream);
+    $object->ingestDatastream($cwrc_datastream);
+  }
+  catch (Exception $e) {
+    drupal_set_message(t(
+        'An error occured while creating the CWRC datastream on @pid with message: "@message"',
+        array(
+          '@pid' => $object->id,
+          "@message" => $e->getMessage(),
+        )
+      ),
+      'error'
+    );
+    watchdog(
+      'islandora_critical_edition',
+      'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace',
+      array(
+        '@pid' => $object->id,
+        '@message' => $e->getMessage(),
+        '@trace' => $e->getTraceAsString(),
+      ),
+      WATCHDOG_ERROR
+    );
+  }
+}
+/**
+ * Converts the given TEI xml document to plain text.
+ *
+ * @param string $tei
+ *   A document containing TEI xml.
+ */
+function emicdora_convert_tei_to_plain_text($tei) {
+  // @codingStandardsIgnoreStart
+  $replace_candidates = array(
+    '<br>',
+    '<br />',
+    '<lb></lb>',
+    '<lb/>',
+    '</l>',
+    '</lg>',
+  );
+  // @codingStandardsIgnoreEnd
+  $text = simplexml_load_string($tei)->text[0]->asXML();
+  foreach ($replace_candidates as $candidate) {
+    $text = str_replace($candidate, "$candidate\n", $text);
+  }
+  return strip_tags($text);
+}

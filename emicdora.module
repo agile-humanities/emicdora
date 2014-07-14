@@ -12,7 +12,7 @@ define('EMICDORA_READ_EDITION', 'emic read edition');
 define('EMICDORA_MODIFY_EDITION', 'emic modify edition');
 define('EMICDORA_DELETE_EDITION', 'emic delete edition');
 define('EMICDORA_MANAGE_EDITION', 'emic manage edition');
-
+define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 /**
  * Implements hook_menu().
  */
