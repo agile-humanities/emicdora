@@ -94,7 +94,7 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
   $page_obj = islandora_object_load($pids[0]);
   $doc_process_instructions = islandora_markup_editor_fetch_tei_processing_instruction($page_obj, 'CWRC');
   $image_anno_images = $image_annotation_module_path . '/shared_canvas/imgs/';
-  $validate_path = variable_get('islandora_critical_edition_validate_url', '/validator/validate.html');
+  $validate_path = variable_get('islandora_markup_editor_validate_url', '/validator/validate.html');
 
   $bp = tei_editor_get_object_of_tei_rdf($variables['islandora_object']);
 

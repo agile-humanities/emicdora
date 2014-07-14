@@ -74,7 +74,7 @@ function tei_editor_canvas_setup(AbstractObject $fedora_object) {
   $results['islandora_anno_stroke_width'] = $stroke_width;
   $results['position'] = $position;
   $results['pages'] = $pages;
-  $results['no_edit'] = !islandora_critical_edition_edit_cwrc_access($fedora_object);
+  $results['no_edit'] = !islandora_object_access_callback(ISLANDORA_VIEW_OBJECTS, $fedora_object);
   $results['entities_search_callback'] = url('islandora/entities/search');
   drupal_json_output($results);
 }
