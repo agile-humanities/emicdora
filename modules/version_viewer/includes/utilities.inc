@@ -21,7 +21,6 @@
 function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') {
   module_load_include('inc', 'islandora', 'includes/authtokens');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  module_load_include('inc', 'islandora_critical_edition_advanced', 'includes/utilities');
 
   global $base_url;
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
@@ -128,8 +127,6 @@ function versionable_object_viewer_svg_data($anno_svg) {
 function versionable_object_viewer_build_version_media_view($reference_object, &$variables) {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
-  module_load_include('inc', 'islandora_critical_edition', 'theme/theme');
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
 
   // Use this to determine what to show by default.

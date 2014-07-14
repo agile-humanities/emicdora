@@ -204,7 +204,7 @@ function emicdora_menu() {
     ),
     'islandora/object/%islandora_object/manage/edition_container' => array(
       'title' => 'Critical Edition',
-      'page callback' => 'islandora_critical_edition_management_menu',
+      'page callback' => 'emicdora_management_menu',
       'page arguments' => array(2),
       'type' => MENU_LOCAL_TASK,
       'access callback' => 'emicdora_object_management_access',
@@ -969,7 +969,7 @@ function emicdora_object_management_access($object, $context) {
 
     case 'display_consolidated_tei':
       if (in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_READ)) {
-        $tei_rdfs = array_keys(islandora_critical_edition_get_members($object->id, 'islandora:criticalEditionCModel'));
+        $tei_rdfs = array_keys(emicdora_get_members($object->id, 'islandora:criticalEditionCModel'));
         if (!empty($tei_rdfs)) {
           $access = TRUE;
         }
@@ -984,7 +984,7 @@ function emicdora_object_management_access($object, $context) {
 
     case 'view_versionable_object':
       module_load_include('inc', 'islandora_emicdora', 'includes/utilities');
-      $members = islandora_critical_edition_get_members($object->id);
+      $members = emicdora_get_members($object->id);
       $transcription = array_search('islandora:transcriptionCModel', $members);
       $transcription_object = islandora_object_load($transcription);
       if ($transcription_object && in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_READ)) {
