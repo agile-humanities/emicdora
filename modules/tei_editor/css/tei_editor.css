@@ -84,3 +84,8 @@
 .islandora_crited_list * {
   text-decoration: none;
 }
+
+.cwrc .ui-tabs .ui-tabs-nav {
+  padding: 0 !important;
+}
+
