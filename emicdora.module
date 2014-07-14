@@ -405,7 +405,7 @@ function emicdora_block_view($delta = '') {
       if (!empty($editors)) {
         $editor_pid = key($editors);
         $editor = islandora_object_load($editor_pid);
-        $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isCriticalEditionOf');
+        $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
         $source_object = $source_objects[0]['object']['value'];
       }
     }
