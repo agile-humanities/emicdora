@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_CREATE_EDITION', 'emic create edition');
@@ -293,8 +292,14 @@ function emicdora_permission() {
  * Implements hook_theme().
  */
 function emicdora_theme() {
+  $path = drupal_get_path('module', 'emicdora');
   return array(
-      // @todo Theme functions, etc.
+    // Theme admin form fields.
+    'emicdora_fields' => array(
+      'path' => $path,
+      'file' => 'includes/configure_version_links.inc',
+      'render element' => 'form',
+    ),
   );
 }
 
@@ -502,7 +507,7 @@ function emicdora_block_view($delta = '') {
       }
       switch ($is_source) {
         case TRUE:
-        $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
+          $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
           break;
 
         case FALSE:
@@ -1118,4 +1123,25 @@ function emicdora_show_version_context_menu($permission, $object) {
     }
   }
   return $access;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function emicdora_forms($form_id, $args) {
+  $forms = array();
+  if (strpos($form_id, 'islandora_solr_admin') === 0) {
+    module_load_include('inc', 'islandora_solr', 'includes/admin');
+
+    // Handle two form using the same building function, but allowing each to
+    // be altered separately.
+    if (in_array($form_id, array(
+          'islandora_solr_admin_settings_search_fields',
+          'islandora_solr_admin_settings_sort_fields',
+        ))) {
+      $forms[$form_id] = array(
+        'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
+      );
+    }
+  }
 }

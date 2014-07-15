@@ -50,14 +50,14 @@ function emicdora_schema() {
         'not null' => FALSE,
         'description' => 'version or source.',
       ),
-      'values' => array(
+      'terms' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
         'description' => 'serialized array of Label => Solr field pairs.',
       ),
     ),
-    'primary key' => array('lid'),
+    'primary key' => array('fid'),
   );
   return $schema;
 }
