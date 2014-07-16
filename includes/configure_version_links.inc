@@ -1,5 +1,12 @@
 <?php
+/**
+ * @file
+ * Contains term selection functionality
+ */
 
+/**
+ * Emicdora Terms form.
+ */
 function emicdora_configure_version_links($form, $form_state, $critical_edition) {
   module_load_include('inc', 'islandora_solr', 'includes/admin');
   module_load_include('inc', 'emicdora', 'includes/db');
@@ -82,14 +89,17 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
 }
 
 /**
- * Populates Sortable fields
+ * Populates fields.
  *
- * @param type $form_state
- * @param type $terms
- * @param type $field_type
+ * @param array $form_state
+ *   Drupal form state
+ * @param array $terms
+ *   Terms for sorting
+ * @param string $field_type
+ *   Type of field
  */
 function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_edition) {
-module_load_include('inc', 'emicdora', 'includes/db');
+  module_load_include('inc', 'emicdora', 'includes/db');
   // Set variables.
   $field_type_class = str_replace('_', '-', $field_type);
 
@@ -172,7 +182,6 @@ module_load_include('inc', 'emicdora', 'includes/db');
       if (isset($form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field])) {
         $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
       }
-
       $values = array_merge_recursive($values, $solr_field_settings);
       // Prepare dialog values.
       $dialog_id = 'edit-emicdora-' . $field_type_class . '-terms-' . $field . '-dialog-button';
@@ -182,6 +191,17 @@ module_load_include('inc', 'emicdora', 'includes/db');
         'dialog_id' => $dialog_id,
         'values' => $values,
       );
+    }
+    // 2.d. Dialog submit.
+    if ($form_state['triggering_element']['#value'] == t('Dialog')) {
+      // Triggered field #.
+      $field = $form_state['triggering_element']['#field'];
+      // Get $solr_field.
+      $solr_field = $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'];
+      // Get dialog values from recent dialog submit.
+      $dialog_values = $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
+      // Save the dialog values in the form state.
+      $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field] = _emicdora_handle_solr_field_settings($dialog_values, $field_type);
     }
   }
 
@@ -219,8 +239,8 @@ module_load_include('inc', 'emicdora', 'includes/db');
       $solr_field_settings = NULL;
       if (isset($form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'])) {
         $solr_field_settings = function_exists('i18n_string') ?
-          i18n_string("islandora_solr:field_settings:$field_type:label:$solr_field", $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label']) :
-          $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'];
+            i18n_string("islandora_solr:field_settings:$field_type:label:$solr_field", $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label']) :
+            $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'];
       }
       $term['solr_field_settings'] = array(
         '#markup' => $solr_field_settings ? t('Label: @label', array('@label' => $solr_field_settings)) : '',
@@ -277,6 +297,23 @@ module_load_include('inc', 'emicdora', 'includes/db');
           'progress' => array('message' => '', 'type' => 'throbber'),
         ),
       );
+      $term['dialog_button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Dialog'),
+        '#field' => $key,
+        '#field_type' => $field_type,
+        '#attributes' => array('class' => array('emicdora-dialog-submit')),
+        '#submit' => array('_emicdora_update_fields_submit'),
+        '#name' => $field_type . '_dialog_' . $key,
+        '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-dialog-button',
+        '#ajax' => array(
+          'callback' => '_emicdora_update_fields',
+          'wrapper' => 'emicdora-' . $field_type_class . '-wrapper',
+          'effect' => 'none',
+          'event' => 'click',
+          'progress' => array('message' => '', 'type' => 'throbber'),
+        ),
+      );
 
       $terms['terms'][] = $term;
     }
@@ -309,6 +346,7 @@ module_load_include('inc', 'emicdora', 'includes/db');
     ),
   );
 }
+
 /**
  * Ajax callback function for fields.
  *
@@ -328,17 +366,9 @@ function _emicdora_update_fields($form, &$form_state) {
   switch ($form_state['triggering_element']['#field_type']) {
     case 'result_fields':
       return $form['emicdora_tabs']['default_display_settings']['emicdora_result_fields'];
-
-    case 'sort_fields':
-      return $form['emicdora_tabs']['sort']['emicdora_sort_fields'];
-
-    case 'facet_fields':
-      return $form['emicdora_tabs']['facet_settings']['emicdora_facet_fields'];
-
-    case 'search_fields':
-      return $form['emicdora_tabs']['advanced_search_block']['emicdora_search_fields'];
   }
 }
+
 /**
  * Submit callback function for fields.
  *
@@ -353,7 +383,6 @@ function _emicdora_update_fields_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
-
 /**
  * AJAX callback function for the modal dialog submit button.
  *
@@ -367,7 +396,7 @@ function _emicdora_update_fields_submit($form, &$form_state) {
  * @return array
  *   An array of AJAX commands.
  */
-function _emicdora_dialog($form, &$form_state) {
+function _emicdora_settings_dialog($form, &$form_state) {
 
   $dialog_id = $form_state['dialog']['dialog_id'];
 
@@ -386,7 +415,6 @@ function _emicdora_dialog($form, &$form_state) {
   $commands[] = ajax_command_invoke(NULL, 'emicdoraTermsDialogValues', array($data));
   // Trigger dialog button.
   $commands[] = ajax_command_invoke('#' . $dialog_id, 'trigger', array('click'));
-  $form_state['rebuild'] = TRUE;
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
@@ -399,6 +427,7 @@ function _emicdora_dialog($form, &$form_state) {
 function emicdora_settings_result_fields($form, &$form_state, $variables) {
   form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
   module_load_include('inc', 'islandora_solr', 'includes/admin');
+  form_load_include($form_state, 'inc', 'emicdora', 'includes/configure_version_links');
   $form_state['dialog'] = $variables;
 
   $solr_field = $variables['solr_field'];
@@ -417,7 +446,7 @@ function emicdora_settings_result_fields($form, &$form_state, $variables) {
   $form['options']['label'] = array(
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#default_value' => isset($values['label']) ? $values['label']: '',
+    '#default_value' => isset($values['label']) ? $values['label'] : '',
     '#description' => t('A human-readable name.'),
   );
   $luke_result = islandora_solr_get_luke(NULL, $solr_field);
@@ -439,15 +468,14 @@ function emicdora_settings_result_fields($form, &$form_state, $variables) {
   $path = drupal_get_path('module', 'emicdora');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Apply'),
+    '#value' => t('Apply this change'),
     '#weight' => 5,
     '#field' => 'dialog_submit',
     '#field_type' => 'result_fields',
     '#name' => 'result-fields-dialog-submit',
     '#submit' => array('_emicdora_update_fields_submit'),
-    '#file' => "$path/includes/configure_version_links.inc",
     '#ajax' => array(
-      'callback' => '_emicdora_dialog',
+      'callback' => '_emicdora_settings_dialog',
       'wrapper' => 'emicdora-admin-dialog-form',
       'effect' => 'none',
       'event' => 'click',
@@ -514,9 +542,9 @@ function emicdora_sort_fields($form, &$form_state, $variables) {
     '#field' => 'dialog_submit',
     '#field_type' => 'result_fields',
     '#name' => 'result-fields-dialog-submit',
-   // '#submit' => array('_emicdora_update_fields_submit'),
+    '#submit' => array('_emicdora_update_fields_submit'),
     '#ajax' => array(
-      'callback' => '_emicdora_dialog',
+      'callback' => '_emicdora_settings_dialog',
       'wrapper' => 'emicdora-admin-dialog-form',
       'effect' => 'none',
       'event' => 'click',
@@ -692,4 +720,29 @@ function _emicdora_get_form_function($field_type = NULL) {
     return $form_callback;
   }
   return FALSE;
+}
+
+/**
+ * Select the fields from the raw input values the modal form.
+ *
+ * AJAX call fun.
+ *
+ * @todo This should probably be removed and values we don't need maybe should
+ *   be filtered out before sending it back to the main form.
+ */
+function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
+  $to_return = FALSE;
+
+  if (!empty($solr_field_settings) && !empty($field_type)) {
+    switch ($field_type) {
+      case 'result_fields':
+        $to_return = array(
+          'label' => trim($solr_field_settings['label']),
+          'permissions' => $solr_field_settings['permissions'],
+        );
+        break;
+    }
+  }
+
+  return $to_return;
 }

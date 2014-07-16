@@ -154,7 +154,8 @@
   $.fn.emicdoraTermsDialogValues = function(data) {
     // dialog ajax id
     var dialogAjaxId = data.id;
-    console.log(data.id);
+    console.log("emicdora " + data.id);
+   // Drupal.ajax[dialogAjaxId] ={options:{data:{}}};
     // add values as JSON, so we can pass multi dimensional arrays
     Drupal.ajax[dialogAjaxId].options.data._dialog_values = JSON.stringify(data.values);
 	};

@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_CREATE_EDITION', 'emic create edition');
