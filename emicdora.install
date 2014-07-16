@@ -52,7 +52,7 @@ function emicdora_schema() {
       ),
       'terms' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 2047,
         'not null' => FALSE,
         'description' => 'serialized array of Label => Solr field pairs.',
       ),

@@ -22,6 +22,7 @@ function emicdora_get_terms($critical_edition, $type) {
       ->condition('critical_edition', $critical_edition)
       ->condition('type', $type)
       ->execute();
+  $to_return = array();
   while ($data = $list->fetchObject()) {
     $to_return[] = unserialize($data->terms);
   }

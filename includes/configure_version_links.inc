@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Contains term selection functionality
@@ -19,6 +20,10 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
 
   // Create form.
   $form = array();
+  $form['critical_edition_pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $critical_edition->id,
+  );
   $form['emicdora_tabs'] = array(
     '#type' => 'vertical_tabs',
     '#weight' => 5,
@@ -48,6 +53,9 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
 
   // Result fields.
   $form['emicdora_tabs']['default_display_settings']['emicdora_result_fields'] = $terms;
+  if (isset($terms['terms'])) {
+    $form_state['source_terms'] = $terms['terms'];
+  }
 
   // The content of the popup dialog.
   $form['emicdora_dialog'] = array(
@@ -73,7 +81,6 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#value' => t('Save configuration'),
     '#weight' => 0,
     '#submit' => array('_emicdora_admin_settings_submit'),
-    '#validate' => array('_emicdora_admin_settings_validate'),
   );
   $form['actions']['reset'] = array(
     '#type' => 'submit',
@@ -136,7 +143,9 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
   if (isset($form_state['triggering_element']) &&
       $form_state['triggering_element']['#field_type'] == $field_type) {
     // Unset terms from input array.
-    $form_state['values']['emicdora_' . $field_type]['terms'] = $form_state['input']['emicdora_' . $field_type]['terms'];
+    if (isset($form_state['input']['emicdora_' . $field_type]['terms'])) {
+      $form_state['values']['emicdora_' . $field_type]['terms'] = $form_state['input']['emicdora_' . $field_type]['terms'];
+    }
     unset($form_state['input']['emicdora_' . $field_type]);
 
     // 2.a add field.
@@ -149,11 +158,14 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
         $solr_field_error = t('Field cannot be empty.');
       }
       // Check if value is already added.
-      $check_terms = $form_state['values']['emicdora_' . $field_type]['terms'];
-
-      foreach ($check_terms as $key => $term) {
-        if ($term['solr_field'] == $add_solr_field) {
-          $solr_field_error = t('Solr term can only be added once.');
+      if (isset($form_state['values']['emicdora_' . $field_type]['terms'])) {
+        $check_terms = $form_state['values']['emicdora_' . $field_type]['terms'];
+      }
+      if (isset($check_terms)) {
+        foreach ($check_terms as $key => $term) {
+          if (isset($term['solr_field']) && $term['solr_field'] == $add_solr_field) {
+            $solr_field_error = t('Solr term can only be added once.');
+          }
         }
       }
       // Add new field to values.
@@ -176,8 +188,8 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
       // Triggered field #.
       $field = $form_state['triggering_element']['#field'];
       // Get field + dialog values and merge.
-      $values = $form_state['values']['emicdora_' . $field_type]['terms'][$field];
-      $solr_field = $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'];
+      $values = isset($form_state['values']['emicdora_' . $field_type]['terms'][$field]) ? $form_state['values']['emicdora_' . $field_type]['terms'] : array();
+      $solr_field = isset($form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field']) ? $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'] : '';
       $solr_field_settings = array();
       if (isset($form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field])) {
         $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
@@ -222,6 +234,9 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
     $count = count($fields);
 
     foreach ($fields as $key => $value) {
+      if (!isset($value['solr_field'])) {
+        continue;
+      }
       $solr_field = $value['solr_field'];
 
       $term['draggable_handler'] = array(
@@ -555,6 +570,36 @@ function emicdora_sort_fields($form, &$form_state, $variables) {
 }
 
 /**
+ * Submit handler for term selection.
+ *
+ * @param array $form
+ *   Drupal form
+ * @param array $form_state
+ *   Drupal Form State
+ */
+function _emicdora_admin_settings_submit($form, $form_state) {
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $terms = $form_state['source_terms'];
+  $critical_edition = $form_state['values']['critical_edition_pid'];
+  emicdora_delete_terms($critical_edition);
+  $type = 'version';
+  foreach ($terms as $counter => $term) {
+    $label = str_replace('Label:', '', $term['solr_field_settings']['#markup']);
+    $solr_field_settings = array(
+      'label' => $label,
+      'permissions' => array(1, 2, 3),
+    );
+    $fields = array(
+      'solr_field' => $term['solr_field']['#value'],
+      'field_type' => 'unused',
+      'weight' => $term['weight']['#default_value']['#default_value'],
+      'solr_field_settings' => $solr_field_settings,
+    );
+    emicdora_insert_terms($critical_edition, $type, $fields);
+  }
+}
+
+/**
  * Theme function to create an admin table for result fields.
  *
  * @param array $variables
@@ -702,18 +747,6 @@ function _emicdora_get_form_function($field_type = NULL) {
         $form_callback = 'emicdora_settings_result_fields';
         break;
 
-      case 'sort_fields':
-        $form_callback = 'emicdora_admin_settings_sort_fields';
-        break;
-
-      case 'facet_fields':
-        $form_callback = 'emicdora_admin_settings_facet_fields';
-        break;
-
-      case 'search_fields':
-        $form_callback = 'emicdora_admin_settings_search_fields';
-        break;
-
       default:
         return FALSE;
     }
@@ -745,4 +778,22 @@ function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $fiel
   }
 
   return $to_return;
+}
+
+function create_sample_terms($critical_edition = "islandora:47") {
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $critical_edition = 'islandora:47';
+  $type = 'version';
+
+  $solr_field_settings = array(
+    'label' => "some label",
+    'permissions' => array(1, 2, 3),
+  );
+  $fields = array(
+    'solr_field' => 'dc.coverage',
+    'field_type' => 'unused',
+    'weight' => 0,
+    'solr_field_settings' => $solr_field_settings,
+  );
+  emicdora_insert_terms($critical_edition, $type, $fields);
 }
