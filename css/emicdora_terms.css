@@ -281,3 +281,6 @@ html.js .emicdora-fields-table .emicdora-solr-field-weight.tabledrag-hide
 {
 /*   display: none; */
 }
+.solr-weight-result-fields{
+  display: none;
+}

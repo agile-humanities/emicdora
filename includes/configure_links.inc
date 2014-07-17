@@ -44,7 +44,7 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#tree' => TRUE,
     '#prefix' => '<div id="emicdora-version-wrapper">',
     '#suffix' => '</div>',
-    '#field_type' => 'result_fields',
+    '#field_type' => 'version_fields',
     '#theme' => 'emicdora_fields',
   );
 
@@ -52,7 +52,7 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
   emicdora_settings_fields($form_state, $version_terms, 'version', $critical_edition->id);
 
   // Result fields.
-  $form['emicdora_tabs']['version_settings']['emicdora_result_fields'] = $version_terms;
+  $form['emicdora_tabs']['version_settings']['emicdora_version_fields'] = $version_terms;
   if (isset($version_terms['terms'])) {
     $form_state['source_terms'] = $version_terms['terms'];
   }
@@ -108,7 +108,7 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
 function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $critical_edition) {
   module_load_include('inc', 'emicdora', 'includes/db');
   // Set variables.
-  $field_type = 'result_fields';
+  $field_type = 'version_fields';
   $field_type_class = 'result-fields';
 
   // Ways to populate the fields table:
@@ -380,8 +380,8 @@ function _emicdora_update_fields($form, &$form_state) {
 
   // Check what section the call is from.
   switch ($form_state['triggering_element']['#field_type']) {
-    case 'result_fields':
-      return $form['emicdora_tabs']['version_settings']['emicdora_result_fields'];
+    case 'version_fields':
+      return $form['emicdora_tabs']['version_settings']['emicdora_version_fields'];
   }
 }
 
@@ -440,10 +440,10 @@ function _emicdora_settings_dialog($form, &$form_state) {
  * @params array $variables
  *   This parameter contains default values to be passed from the main form.
  */
-function emicdora_settings_result_fields($form, &$form_state, $variables) {
+function emicdora_settings_version_fields($form, &$form_state, $variables) {
   form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
   module_load_include('inc', 'islandora_solr', 'includes/admin');
-  form_load_include($form_state, 'inc', 'emicdora', 'includes/configure_version_links');
+  form_load_include($form_state, 'inc', 'emicdora', 'includes/configure_links');
   $form_state['dialog'] = $variables;
 
   $solr_field = $variables['solr_field'];
@@ -487,7 +487,7 @@ function emicdora_settings_result_fields($form, &$form_state, $variables) {
     '#value' => t('Apply this change'),
     '#weight' => 5,
     '#field' => 'dialog_submit',
-    '#field_type' => 'result_fields',
+    '#field_type' => 'version_fields',
     '#name' => 'result-fields-dialog-submit',
     '#submit' => array('_emicdora_update_fields_submit'),
     '#ajax' => array(
@@ -556,7 +556,7 @@ function emicdora_sort_fields($form, &$form_state, $variables) {
     '#value' => t('Apply'),
     '#weight' => 5,
     '#field' => 'dialog_submit',
-    '#field_type' => 'result_fields',
+    '#field_type' => 'version_fields',
     '#name' => 'result-fields-dialog-submit',
     '#submit' => array('_emicdora_update_fields_submit'),
     '#ajax' => array(
@@ -744,8 +744,8 @@ function _emicdora_field_configure($form, &$form_state) {
 function _emicdora_get_form_function($field_type = NULL) {
   if (!empty($field_type)) {
     switch ($field_type) {
-      case 'result_fields':
-        $form_callback = 'emicdora_settings_result_fields';
+      case 'version_fields':
+        $form_callback = 'emicdora_settings_version_fields';
         break;
 
       default:
@@ -769,7 +769,7 @@ function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $fiel
 
   if (!empty($solr_field_settings) && !empty($field_type)) {
     switch ($field_type) {
-      case 'result_fields':
+      case 'version_fields':
         $to_return = array(
           'label' => trim($solr_field_settings['label']),
           'permissions' => $solr_field_settings['permissions'],

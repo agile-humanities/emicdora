@@ -201,7 +201,7 @@ function emicdora_menu() {
       'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
       'access arguments' => array(ISLANDORA_INGEST, 3),
-      'file' => 'includes/configure_version_links.inc',
+      'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -298,7 +298,7 @@ function emicdora_theme() {
     // Theme admin form fields.
     'emicdora_fields' => array(
       'path' => $path,
-      'file' => 'includes/configure_version_links.inc',
+      'file' => 'includes/configure_links.inc',
       'render element' => 'form',
     ),
   );
