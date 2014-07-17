@@ -105,7 +105,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
 
-  $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $count = 0;
   $tree_data = array();
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
@@ -116,7 +115,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       "text" => "Entities",
       "state" => "closed",
       "attributes" => array(
-        "root" => "true",
+        "root" => TRUE,
       ),
       "children" => array(),
     );
@@ -125,7 +124,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       "text" => "Text Image Annotations",
       "state" => "closed",
       "attributes" => array(
-        "root" => "true",
+        "root" => TRUE,
       ),
       "children" => array(),
     );
@@ -158,6 +157,64 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
           $child
         );
       }
+    }
+  }
+  $size = count($tree_data);
+  $tree_data[$size] = array(
+    "id" => "tree_imageannotations",
+    "text" => "Image Annotations",
+    "state" => "closed",
+    "attributes" => array(
+      "root" => TRUE,
+    ),
+    "children" => array(),
+  );
+  $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
+  foreach ($anno_pids['pids'] as $plain_annotation) {
+    if ($plain_annotation['type'] != "TextImageLink") {
+      $ds_content = islandora_image_annotation_get_annotation_data($plain_annotation['id']);
+      $xml = simplexml_load_string($ds_content);
+      $body_urn_array = $xml->xpath("//oa:hasBody");
+      $body_urn = (string) $body_urn_array[0]->attributes('rdf', 'about');
+      $content_node = $xml->xpath("//rdf:Description[@rdf:about = '$body_urn']//cnt:chars");
+      // Description.
+      $description = (string) $content_node[0][0];
+      $real_target = $xml->xpath("//rdf:Description");
+      // UUID.
+      $uuid = (string) $real_target[0]->attributes('rdf', 'about');
+      $uuid = str_replace("urn:uuid:", "", $uuid);
+      $created_array = $xml->xpath("//dcterms:created");
+      // Created.
+      $created = (string) $created_array[0];
+      $title_array = $xml->xpath("//dc:title");
+      // Title.
+      $title = (string) $title_array[0];
+      $type_array = $xml->xpath("//dc:type");
+      // Type.
+      $type = (string) $type_array[0];
+      $target_array = $xml->xpath("//oa:hasTarget");
+      // target.
+      $target = (string) $target_array[0]->attributes('rdf', 'about');
+      // Build the child image annotation.
+      $child = array(
+        "id" => $uuid,
+        "text" => $title,
+        "state" => "open",
+        "attributes" => array(
+          'uuid' => $uuid,
+          'created' => $created,
+          'title' => $title,
+          'type' => $type,
+          'cwrcInfo' => array(
+            'description' => $description,
+          ),
+          'cwrcType' => 'imageannotation',
+        ),
+      );
+      array_push(
+        $tree_data[$size]["children"],
+        $child
+      );
     }
   }
   drupal_json_output($tree_data);

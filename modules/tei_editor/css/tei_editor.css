@@ -84,3 +84,15 @@
 .islandora_crited_list * {
   text-decoration: none;
 }
+
+/* .cwrc .ui-tabs .ui-tabs-nav { */
+/*   padding: 0 !important; */
+/* } */
+
+.cwrc .ui-tabs .ui-tabs-nav .ui-tabs-anchor {
+  padding: 0.15em !important;
+}
+
+.cwrc .ui-widget-header {
+  font-size: 85% !important;
+}

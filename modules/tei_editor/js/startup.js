@@ -48,11 +48,12 @@ function cwrcWriterInit(Writer, Delegator) {
 	moduleUrl = Drupal.settings.basePath +
       Drupal.settings.islandora_markup_editor.module_edit_base;
 	Delegator = CustomDelegator;
+	// TODO: addcitation and addtitle are not included dialog's as that functionality is not complete (CWRC side).
 	var config = {
 	  id: 'editor',
 	  delegator: Delegator,
 	  cwrcRootUrl: moduleUrl + '/CWRC-Writer/src/',
-	  buttons1: 'schematags,|,addperson,addplace,adddate,addevent,addorg,addcitation,addtitle,addcorrection,addkeyword,addlink,|,editTag,removeTag,|,addtriple,|,viewsource,editsource,|,validate,savebutton,loadbutton',
+	  buttons1: 'schematags,|,addperson,addplace,adddate,addevent,addorg,addcorrection,addkeyword,addlink,|,editTag,removeTag,|,addtriple,|,viewsource,editsource,|,validate,savebutton,loadbutton',
 	  schemas: Drupal.settings.islandora_markup_editor.schema_object['schemas']
 	};
 	update_loading_text("Gathering project info");

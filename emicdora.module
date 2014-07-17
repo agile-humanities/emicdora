@@ -12,7 +12,7 @@ define('EMICDORA_READ_EDITION', 'emic read edition');
 define('EMICDORA_MODIFY_EDITION', 'emic modify edition');
 define('EMICDORA_DELETE_EDITION', 'emic delete edition');
 define('EMICDORA_MANAGE_EDITION', 'emic manage edition');
-
+define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 /**
  * Implements hook_menu().
  */
@@ -429,6 +429,7 @@ function emicdora_block_view($delta = '') {
       $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
       $source_objects = $versionable_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
       if (!empty($source_objects)) {
+
         $source_object = $source_objects[0]['object']['value'];
       }
     }

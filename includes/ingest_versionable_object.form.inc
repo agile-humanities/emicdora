@@ -101,7 +101,7 @@ EOT;
  *   The Drupal form definition.
  */
 function emicdora_versionable_object_form(array $form, array &$form_state) {
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = &$form_state['values'];
   if (isset($_POST['source'])) {
@@ -117,7 +117,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
     // Not efficent we should create a seperate function in
     // islandora_paged_content to compute the number of pages.
     $page_count = count(islandora_paged_content_get_pages($source));
-    foreach (islandora_critical_edition_get_critical_editions($source) as $pid => $label) {
+    foreach (emicdora_get_critical_editions($source) as $pid => $label) {
       $tei_rdf_objects[$pid] = array($pid, $label);
     }
   }
@@ -356,7 +356,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
  */
 function emicdora_versionable_object_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/transcriptions');
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = $form_state['values'];
   $shared_storage = &islandora_ingest_form_get_shared_storage($form_state);
@@ -444,7 +444,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $datastream->label = "Default Transcription";
       $datastream->setContentFromString(t("Transcription"));
       $page->ingestDatastream($datastream);
-      islandora_critical_edition_add_cwrc_datastream($page);
+      emicdora_add_cwrc_datastream($page);
       $ingest_objects['page'] = $page;
     }
   }
@@ -598,7 +598,7 @@ function emicdora_tei_rdf_ajax_container(array $form, array &$form_state) {
  */
 function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $page, $versionable_object, array &$context) {
   module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $namespace = islandora_get_namespace($tei_rdf);
   $tei_rdf_page = islandora_get_tuque_connection()->repository->constructObject($namespace);
   $tei_rdf_page->label = $page['label'];
@@ -629,7 +629,7 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
   }
   // Create new CWRC datastream if there is none.
   if (!isset($tei_rdf_page['CWRC']) && isset($tei_rdf_page['OCR'])) {
-    islandora_critical_edition_add_cwrc_datastream($tei_rdf_page);
+    emicdora_add_cwrc_datastream($tei_rdf_page);
   }
   $context['results']['pages'][] = $tei_rdf_page;
   $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
@@ -709,7 +709,6 @@ function emicdora_ingest_versionable_object_tei_rdf_batch_finished($success, arr
  *   The Drupal Batch context.
  */
 function emicdora_ingest_versionable_object_transcription_batch_operation($page, array &$context) {
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   // Even though this include is not needed by this function it must be included
   // here the Batch API won't be able to Find the submit handler:
@@ -723,7 +722,7 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   $page = islandora_object_load($page);
   $filename = $context['results']['filename'];
   if (isset($page['CWRC'])) {
-    $text = islandora_critical_edition_convert_tei_to_plain_text($page['CWRC']->content);
+    $text = emicdora_convert_tei_to_plain_text($page['CWRC']->content);
   }
   elseif (isset($page['OCR'])) {
     $text = $page['OCR']->content;

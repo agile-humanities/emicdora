@@ -14,6 +14,10 @@ function text_image_anno_dialog(data) {
  '<div id="create_annotation_text_box">'+
  '<div id="hidden_annotation_type" type="hidden"></div>'+
     '<div id="create_annos_block" class="dragBlock">'+
+    '<div id="text_anno_describeAs">'+
+		'<p>Description:</p>'+
+		'<span class="tagAs"><input id="anno_desc" type="text" style="resize:none;" value=""></input></span>'+
+	'</div>'+
       '<div class="element-wrap">'+
         '<div id="text_image_accordion">'+
           '<h3>Create New</h3>'+
@@ -96,9 +100,16 @@ function text_image_anno_dialog(data) {
           }
             var currentData = {};
             currentData.cwrcInfo = {};
-            currentData.cwrcInfo.id = "CWRCID_RDM";
-            currentData.cwrcInfo.name = config_data.query;
             currentData.cwrcInfo.repository = "cwrc";
+            // Name.
+            currentData.cwrcInfo.name = config_data.query;
+            // id.
+            currentData.cwrcInfo.id = "cwrc_" + save_result['uuid'];
+            // Description.
+            currentData.cwrcInfo.description = $('#anno_desc').attr('value');
+            // User.
+            
+            // Annotation data.
             currentData.attributes = save_result;
             for (var key in currentData) {
               if (currentData[key] == undefined || currentData[key] == '') {

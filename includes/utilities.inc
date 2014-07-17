@@ -284,7 +284,7 @@ function emicdora_get_apparatus_as_content($object) {
 }
 
 /**
- * Retrieves all member objects.
+ * Retrieves all source objects.
  *
  * @param AbstractObject $object
  *   Critical Edition object
@@ -292,7 +292,7 @@ function emicdora_get_apparatus_as_content($object) {
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
+function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit = 25) {
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -304,15 +304,6 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
 
     case 'versions':
       $source_content_models = array('islandora:versionCModel' => 0);
-      break;
-
-    case 'source_versions':
-      $source_content_models = array('islandora:versionCModel' => 0);
-      break;
-
-    case 'transcriptions':
-      $source_content_models = array('islandora:transcriptionCModel' => 0);
-      break;
   }
 
   $sources = array();
@@ -335,48 +326,25 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
   }
   $sorted_results = array();
   foreach ($json['response']['docs'] as $candidate) {
-
-    switch ($type) {
-      case 'source':
-        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-        $content_model = $content_model_parts[1];
-        $sorted_results[$content_model][] = $candidate['PID'];
-        break;
-
-      case 'versions':
-        $type_parts = array();
-        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-        }
-        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-        $sorted_results[$type_part][] = $candidate['PID'];
-        break;
-
-      case 'source_versions':
-        $type_parts = array();
-        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-        }
-        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-        if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
-          $sorted_results[$type_part][] = $candidate['PID'];
-        }
-        break;
-
-      case 'transcriptions':
-        $type_parts = array();
-        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-        }
-        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-        $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
+    if ($type == 'source') {
+      $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
+      $content_model = $content_model_parts[1];
+      $sorted_results[$content_model][] = $candidate['PID'];
+    }
+    if ($type == 'versions') {
+      $type_parts = array();
+      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+      }
+      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+      $sorted_results[$type_part][] = $candidate['PID'];
     }
   }
   return $sorted_results;
 }
 
 /**
- * Gets all versionable objects associated with critical edition.
+ * Gets all versionable objects assicated with critical edition.
  *
  * @return array
  *   PIDs of currently associated versionable objects
@@ -402,27 +370,101 @@ function emicdora_get_source_autocomplete() {
 }
 
 /**
- * Gets all versionable objects associated with source object.
+ * Returns PID and title of all critical editions associated with an object.
+ *
+ * @param AbstractObject $fedora_object
+ *   The base object to check for related critical editions.
  *
  * @return array
- *   PIDs of currently associated versionable objects
+ *   The list of critical editions.
  */
-function emicdora_get_versions($source_id) {
-  $tuque = islandora_get_tuque_connection();
-  $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
-            PREFIX fr: <" . ISLANDORA_RELS_EXT_URI . ">
-            SELECT ?subject ?label
-            FROM <#ri>
-            WHERE {
-              {?subject     fm:state fm:Active;
-                            fr:isDerivationOf <info:fedora/$source_id>;
-              }
-              OPTIONAL{?subject fm:label ?label}
-             }";
-  $objects = array();
-  $results = $tuque->repository->ri->sparqlQuery($query, 'unlimited');
-  foreach ($results as $result) {
-    $objects[$result['label']['value']] = $result['subject']['value'];
+function emicdora_get_critical_editions(AbstractObject $fedora_object) {
+  $edition_pids = array();
+
+  $query = "
+select \$subject \$title from <#ri>
+where (\$subject <" . ISLANDORA_RELS_EXT_URI . EMICDORA_ISDERIVATIONOF . ">'" . $fedora_object->id . "'
+and \$subject <" . FEDORA_MODEL_URI . "state> <" . FEDORA_MODEL_URI . "Active>
+and \$subject <dc:title> \$title)
+";
+
+  $objects = $fedora_object->repository->ri->itqlQuery($query, 'unlimited');
+  if (!empty($objects)) {
+    foreach ($objects as $object) {
+      $edition_pids[$object['subject']['value']] = $object['title']['value'];
+    }
   }
-  return $objects;
+
+  return $edition_pids;
+}
+/**
+ * Constructs CWRC datastream on an object if none exists.
+ *
+ * @param AbstractObject $object
+ *   The object to create the CWRC datastream for. It should have an OCR
+ *   datastream.
+ */
+function emicdora_add_cwrc_datastream(AbstractObject $object) {
+  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  try {
+    $cwrc_stream = islandora_critical_edition_wrap_plain_text_in_tei($object['OCR']->content);
+    if (!$object['CWRC']) {
+      $cwrc_datastream = $object->constructDatastream('CWRC');
+    }
+    else {
+      $cwrc_datastream = $object['CWRC'];
+    }
+    if ($cwrc_datastream->label != 'CWRC') {
+      $cwrc_datastream->label = 'CWRC';
+    }
+    if ($cwrc_datastream->mimetype != 'text/plain') {
+      $cwrc_datastream->mimetype = 'text/plain';
+    }
+    $cwrc_datastream->setContentFromString($cwrc_stream);
+    $object->ingestDatastream($cwrc_datastream);
+  }
+  catch (Exception $e) {
+    drupal_set_message(t(
+        'An error occured while creating the CWRC datastream on @pid with message: "@message"',
+        array(
+          '@pid' => $object->id,
+          "@message" => $e->getMessage(),
+        )
+      ),
+      'error'
+    );
+    watchdog(
+      'islandora_critical_edition',
+      'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace',
+      array(
+        '@pid' => $object->id,
+        '@message' => $e->getMessage(),
+        '@trace' => $e->getTraceAsString(),
+      ),
+      WATCHDOG_ERROR
+    );
+  }
+}
+/**
+ * Converts the given TEI xml document to plain text.
+ *
+ * @param string $tei
+ *   A document containing TEI xml.
+ */
+function emicdora_convert_tei_to_plain_text($tei) {
+  // @codingStandardsIgnoreStart
+  $replace_candidates = array(
+    '<br>',
+    '<br />',
+    '<lb></lb>',
+    '<lb/>',
+    '</l>',
+    '</lg>',
+  );
+  // @codingStandardsIgnoreEnd
+  $text = simplexml_load_string($tei)->text[0]->asXML();
+  foreach ($replace_candidates as $candidate) {
+    $text = str_replace($candidate, "$candidate\n", $text);
+  }
+  return strip_tags($text);
 }

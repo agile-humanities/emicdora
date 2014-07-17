@@ -21,7 +21,17 @@
       $('#wb_show_til').hide();
       break;
   }
-    
+  var is_toggled = false;
+  // Setup the initial menu 'look'.
+  var btn_background_color = 'red';
+  $('#wb_show_til').css('background-color', btn_background_color);
+  $('#wb_show_til').addClass('annos');
+  $('#wb_show_annos').css('background-color', btn_background_color);
+  $('#wb_show_annos').addClass('annos');
+  
+  $('#wb_image').css('background-color', btn_background_color);
+  $('#wb_reading').css('background-color', btn_background_color);
+  
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
     $("#easyui_tree").tree({
@@ -79,6 +89,10 @@
             var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
             paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
           }
+          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+        	  var anno_id = nodes[i]['attributes']['uuid'];
+        	  paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          }
         }
       }
     }
@@ -98,34 +112,80 @@
             var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
             $('.svg_' + anno_id).remove();
           }
+          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+            var anno_id = nodes[i]['attributes']['uuid'];
+            $('.svg_' + anno_id).remove();
+          }
         }
       }
     }
     
     function show_entity_tooltip(data, ent_id) {
-    	console.log(data);
-      var colour = "red";
-      if (data['cwrcAttributes']['attributes']['Colour']) {
-        colour = data['cwrcAttributes']['attributes']['Colour'];
+      if (data.hasOwnProperty('cwrcAttributes')) {
+	   var colour = "red";
+	    if (data['cwrcAttributes']['attributes']['Colour']) {
+	      colour = data['cwrcAttributes']['attributes']['Colour'];
+	    }
+	    $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
+	    
+	    $("span[data-annotationid='" + ent_id + "']").tooltip({
+	      position: 'top',
+	      width: 100,
+	      height: 100,
+	      hideEvent: 'none',
+	      content: function(){
+	        var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
+	        if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description') ) {
+	          tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
+	        }
+	        return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' + 
+	        tool_tip_content +
+	        '</div>';
+	      },
+	      onShow: function(){
+	        var t = $(this);
+	        t.tooltip('tip').focus().unbind().bind('blur',function(){
+	        t.tooltip('hide');
+	        });
+	      }
+	    }).show();
+	    $("span[data-annotationid='" + ent_id + "']").on('click', function(){
+	      if ($('#ent_dialog_' + ent_id).length == 0) {
+	        $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+	      }
+	      $('#ent_dialog_' + ent_id).dialog({
+	        title: data['cwrcAttributes']['cwrcInfo']['name'],
+	        width: 400,
+	        height: 200,
+	        closed: false,
+	        cache: false,
+	        resizeable: true,
+	        collapsible: true,
+	        modal: false
+	      });
+	    });
       }
-      $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
-      $("span[data-annotationid='" + ent_id + "']").tooltip({
-        position: 'top',
-        width: 100,
-        height: 100,
-        hideEvent: 'none',
-        content: function(){
-          return '<div class="easyui-panel" title="Basic Panel" style="width:100px;height:100px;padding:10px;">' + 
-          data['cwrcAttributes']['cwrcInfo']['name'] +
-          '</div>';
-        },
-        onShow: function(){
-          var t = $(this);
-          t.tooltip('tip').focus().unbind().bind('blur',function(){
-          t.tooltip('hide');
-          });
+      else {
+        // In this case, we are dealing with a plain image annotation.
+        // Wireframes dont well me what to show in this case.
+      }
+    }
+    
+    function build_dialog_content(data) {
+      var content = "";
+      for (var key in data["cwrcAttributes"]) {
+        if (typeof data["cwrcAttributes"][key] !== "object") {
+          content += key + ": " + data["cwrcAttributes"][key] + '&#13;&#10;';
         }
-      }).show();
+        else {
+          var obj_key_string = "";
+          for (var obj_key in data["cwrcAttributes"][key]) {
+            obj_key_string += obj_key + ": " + data["cwrcAttributes"][key][obj_key] + '&#13;&#10;';
+          }
+          content += obj_key_string;
+        }
+      }
+      return  '<textarea style="width:100%;height:100%;resize:none">' + content + '</textarea>';
     }
     
     function show_transcription(page) {
@@ -176,35 +236,116 @@
         $(this).addClass('img_selected');
         is_selected = true;
       }
+      
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       switch($(this).attr('id')) {
           case 'wb_meta':
-            toggle_layout(is_selected, 'south');
+            $('#wb_meta').css('background-color', 'initial');
+            
+            $('#wb_meta').css('background-color', btn_background_color);
+            toggle_layout(is_selected, 'south', 'wb_meta');
             break;
           case 'wb_dt':
+        	  $('#wb_reading').css('background-color', 'initial');
+              $('#wb_tei_markup').css('background-color', 'initial');
+        	  $('#wb_dt').css('background-color', 'initial');
+        	  $('#wb_tei_markup').css('background-color', 'initial');
+        	  
+        	  $('#wb_dt').css('background-color', btn_background_color);
             var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=dt';
             add_tab("wb_dt_tab", url, 'diplomatic_tei');
             break;
           case 'wb_image':
-            toggle_layout(!is_selected, 'east');
+        	  $('#wb_image').css('background-color', 'initial');
+        	  $('#wb_image').css('background-color', btn_background_color);
+            toggle_layout(!is_selected, 'east', 'wb_image');
             break;
           case 'wb_reading':
+        	  $('#wb_dt').css('background-color', 'initial');
+              $('#wb_tei_markup').css('background-color', 'initial');
+        	  $('#wb_reading').css('background-color', 'initial');
+        	  
+        	  $('#wb_reading').css('background-color', btn_background_color);
             var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=rd';
             add_tab("wb_reading_tab", url, 'reading_tei');
             break;
           case 'wb_tei_markup':
+        	  $('#wb_reading').css('background-color', 'initial');
+        	  $('#wb_meta').css('background-color', 'initial');
+        	  $('#wb_dt').css('background-color', 'initial');
+        	  $('#wb_tei_markup').css('background-color', 'initial');
+        	  $('#wb_tei_markup').css('background-color', btn_background_color);
             var pid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
             var url = Drupal.settings.basePath + 'islandora/version_viewer/tei_markup/page/' + pid;
             add_tab("wb_tei_markup_tab", url, "", "json", true);
             break;
           case 'wb_show_annos':
-            toggle_layout(is_selected, 'west');
+            var ddt = $("#easyui_tree").tree('find', 'tree_imageannotations');
+            var dda = $("#easyui_tree").tree('find', 'tree_entities');
+        	  if ($(this).hasClass('annos')) {
+    	        $(this).removeClass('annos');
+    	        $(this).css('background-color', 'initial');
+    	        $('#' + ddt.domId).hide();
+    	        $('#' + dda.domId).hide();
+    	        hide_tree_children(ddt['children']);
+    	        hide_tree_children(dda['children']);
+    	      }
+    	      else {
+    	        $(this).addClass('annos');
+    	        $('#wb_show_annos').css('background-color', btn_background_color);
+    	        $('#' + ddt.domId).show();
+    	        $('#' + dda.domId).show();
+    	        show_tree_children(ddt['children']);
+    	        show_tree_children(dda['children']);
+    	      }
             break;
           case 'wb_show_til':
-            toggle_layout(is_selected, 'west');
+        	  var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+        	  if ($(this).hasClass('annos')) {
+      	        $(this).removeClass('annos');
+      	        $(this).css('background-color', 'initial');
+      	        hide_tree_children(ddt['children']);
+      	        $('#' + ddt.domId).hide();
+      	      }
+      	      else {
+      	        $(this).addClass('annos');
+      	        $('#wb_show_til').css('background-color', btn_background_color);
+      	        show_tree_children(ddt['children']);
+      	        $('#' + ddt.domId).show();
+      	      }
             break;
       }
+      // This crazy bit of logic opens/closes the annotations window, given the correct conditions.
+      if ($('#wb_show_til').hasClass('annos') == false && $('#wb_show_annos').hasClass('annos') == false) {
+        $('#eui_window').layout('collapse', 'west');
+        is_toggled = true;
+      }
+      else {
+	    if (is_toggled == true) {
+	      is_toggled = false;
+	      $('#eui_window').layout('expand', 'west');
+	    }
+      }
     });
+    
+    function hide_tree_children(children) {
+      hide_annotations(children);
+      for (var i = 0; i< children.length; i++) {
+        $("#" + children[i].domId).hide();
+      }
+    }
+    
+    function show_tree_children(children) {
+      show_annotations(children);
+      for (var i = 0; i< children.length; i++) {
+        $("#" + children[i].domId).show();
+      }
+    }
+    
+    function hide_all_imageannotations() {
+      var node = $("#easyui_tree").tree('find', 'tree_imageannotations');
+      hide_annotations($(node).children());
+    }
     
     function add_tab(type, endpoint, add_class, data_type) {
       add_class = typeof add_class !== 'undefined' ? add_class : "";
@@ -232,12 +373,22 @@
       prettyPrint();
     }
     
-    function toggle_layout(selected, region) {
+    function toggle_layout(selected, region, selector) {
       if (!selected) {
         $('#eui_window').layout('collapse', region);
+        $('#' + selector).css('background-color', 'initial');
+        if (selector == "wb_show_annos") {
+          var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+          $('#' + ddt.domId).show();
+        }
       }
       else {
         $('#eui_window').layout('expand', region);
+        $('#' + selector).css('background-color', btn_background_color);
+        if (selector == "wb_show_annos") {
+          var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+          $('#' + ddt.domId).hide();
+        }
       }
     }
     
@@ -247,8 +398,6 @@
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
   
-  toggle_layout(false, 'west');
-  
   $('#easy-ui-east').panel({
       onResize:function(w,h){
         var mode = Drupal.settings.versionable_object_viewer.mode;
@@ -257,6 +406,7 @@
      }
       }
   });
+  
   
   });
 })(jQuery);

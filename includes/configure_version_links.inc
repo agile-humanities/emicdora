@@ -30,31 +30,31 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
   );
 
   // Default display settings.
-  $form['emicdora_tabs']['default_display_settings'] = array(
+  $form['emicdora_tabs']['version_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
   // Display fields.
-  $terms = array(
+  $version_terms = array(
     '#type' => 'item',
     '#title' => t('Display fields'),
     '#description' => t('Set labels for Solr fields to be included in the search results.'),
     '#tree' => TRUE,
-    '#prefix' => '<div id="emicdora-result-fields-wrapper">',
+    '#prefix' => '<div id="emicdora-version-wrapper">',
     '#suffix' => '</div>',
     '#field_type' => 'result_fields',
     '#theme' => 'emicdora_fields',
   );
 
   // Create terms/fields.
-  emicdora_settings_fields($form_state, $terms, 'result_fields', $critical_edition->id);
+  emicdora_settings_fields($form_state, $version_terms, 'version', $critical_edition->id);
 
   // Result fields.
-  $form['emicdora_tabs']['default_display_settings']['emicdora_result_fields'] = $terms;
-  if (isset($terms['terms'])) {
-    $form_state['source_terms'] = $terms['terms'];
+  $form['emicdora_tabs']['version_settings']['emicdora_result_fields'] = $version_terms;
+  if (isset($version_terms['terms'])) {
+    $form_state['source_terms'] = $version_terms['terms'];
   }
 
   // The content of the popup dialog.
@@ -100,15 +100,16 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
  *
  * @param array $form_state
  *   Drupal form state
- * @param array $terms
+ * @param array $version_terms
  *   Terms for sorting
- * @param string $field_type
+ * @param string $result_type
  *   Type of field
  */
-function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_edition) {
+function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $critical_edition) {
   module_load_include('inc', 'emicdora', 'includes/db');
   // Set variables.
-  $field_type_class = str_replace('_', '-', $field_type);
+  $field_type = 'result_fields';
+  $field_type_class = 'result-fields';
 
   // Ways to populate the fields table:
   // 1. Saved values from the DB
@@ -121,7 +122,7 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
   if ($form_state['rebuild'] == FALSE) {
 
     // Get values from DB unfiltered, not simplified and incremental keys.
-    $records = emicdora_get_terms($critical_edition, 'version');
+    $records = emicdora_get_terms($critical_edition, $result_type);
     // Set fields to populate the admin table.
     $fields = array();
     foreach ($records as $key => $record) {
@@ -224,7 +225,7 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
 
   // If no fields available set string.
   if (empty($fields)) {
-    $terms['no_fields'] = array(
+    $version_terms['no_fields'] = array(
       '#markup' => t('No fields defined'),
     );
   }
@@ -283,7 +284,7 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-configure-button',
         '#ajax' => array(
           'callback' => '_emicdora_field_configure',
-          'wrapper' => 'emicdora-' . $field_type_class . '-wrapper',
+          'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
           'progress' => array('message' => '', 'type' => 'throbber'),
@@ -306,7 +307,7 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-remove-button',
         '#ajax' => array(
           'callback' => '_emicdora_update_fields',
-          'wrapper' => 'emicdora-' . $field_type_class . '-wrapper',
+          'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
           'progress' => array('message' => '', 'type' => 'throbber'),
@@ -323,17 +324,17 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-dialog-button',
         '#ajax' => array(
           'callback' => '_emicdora_update_fields',
-          'wrapper' => 'emicdora-' . $field_type_class . '-wrapper',
+          'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
           'progress' => array('message' => '', 'type' => 'throbber'),
         ),
       );
 
-      $terms['terms'][] = $term;
+      $version_terms['terms'][] = $term;
     }
   }
-  $terms['add_solr_field'] = array(
+  $version_terms['add_solr_field'] = array(
     '#type' => 'textfield',
     '#title' => t('Add another item'),
     '#size' => 45,
@@ -341,11 +342,11 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
     '#default_value' => '',
   );
   if (isset($solr_field_error) && !empty($solr_field_error)) {
-    $terms['add_solr_field']['#title'] .= '<br /><span class="solr-admin-error">' . $solr_field_error . '</span>';
-    $terms['add_solr_field']['#attributes'] = array('class' => array('error'));
+    $version_terms['add_solr_field']['#title'] .= '<br /><span class="solr-admin-error">' . $solr_field_error . '</span>';
+    $version_terms['add_solr_field']['#attributes'] = array('class' => array('error'));
   }
 
-  $terms['add_more'] = array(
+  $version_terms['add_more'] = array(
     '#type' => 'button',
     '#value' => t('Add'),
     '#attributes' => array('class' => array('emicdora-add-more-submit')),
@@ -355,7 +356,7 @@ function emicdora_settings_fields(&$form_state, &$terms, $field_type, $critical_
     '#id' => 'edit-emicdora-' . $field_type_class . '-add-more',
     '#ajax' => array(
       'callback' => '_emicdora_update_fields',
-      'wrapper' => 'emicdora-' . $field_type_class . '-wrapper',
+      'wrapper' => 'emicdora-' . $result_type . '-wrapper',
       'event' => 'click',
       'effect' => 'none',
     ),
@@ -380,7 +381,7 @@ function _emicdora_update_fields($form, &$form_state) {
   // Check what section the call is from.
   switch ($form_state['triggering_element']['#field_type']) {
     case 'result_fields':
-      return $form['emicdora_tabs']['default_display_settings']['emicdora_result_fields'];
+      return $form['emicdora_tabs']['version_settings']['emicdora_result_fields'];
   }
 }
 
@@ -579,11 +580,11 @@ function emicdora_sort_fields($form, &$form_state, $variables) {
  */
 function _emicdora_admin_settings_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
-  $terms = $form_state['source_terms'];
+  $version_terms = $form_state['source_terms'];
   $critical_edition = $form_state['values']['critical_edition_pid'];
   emicdora_delete_terms($critical_edition);
   $type = 'version';
-  foreach ($terms as $counter => $term) {
+  foreach ($version_terms as $counter => $term) {
     $label = str_replace('Label:', '', $term['solr_field_settings']['#markup']);
     $solr_field_settings = array(
       'label' => $label,
@@ -778,22 +779,4 @@ function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $fiel
   }
 
   return $to_return;
-}
-
-function create_sample_terms($critical_edition = "islandora:47") {
-  module_load_include('inc', 'emicdora', 'includes/db');
-  $critical_edition = 'islandora:47';
-  $type = 'version';
-
-  $solr_field_settings = array(
-    'label' => "some label",
-    'permissions' => array(1, 2, 3),
-  );
-  $fields = array(
-    'solr_field' => 'dc.coverage',
-    'field_type' => 'unused',
-    'weight' => 0,
-    'solr_field_settings' => $solr_field_settings,
-  );
-  emicdora_insert_terms($critical_edition, $type, $fields);
 }
