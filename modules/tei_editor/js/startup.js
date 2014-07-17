@@ -42,7 +42,6 @@ function cwrcWriterInit(Writer, Delegator) {
 		// Call out to our 'init.js' script, fixes image annotation size.
 		resizeCanvas();
 	}
-	console.log(Drupal.settings.current_user);
 	PID = Drupal.settings.islandora_markup_editor.page_pid;
 	cwrc_params = {};
 	window.location.hash = '#' + PID;

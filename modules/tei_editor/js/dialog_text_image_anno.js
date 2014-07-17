@@ -98,7 +98,6 @@ function text_image_anno_dialog(data) {
             }
             save_result = construct_result();
           }
-          console.log(save_result);
             var currentData = {};
             currentData.cwrcInfo = {};
             currentData.cwrcInfo.repository = "cwrc";

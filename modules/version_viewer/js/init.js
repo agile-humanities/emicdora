@@ -280,7 +280,6 @@
             add_tab("wb_tei_markup_tab", url, "", "json", true);
             break;
           case 'wb_show_annos':
-        	  console.log("show_annos");
             var ddt = $("#easyui_tree").tree('find', 'tree_imageannotations');
             var dda = $("#easyui_tree").tree('find', 'tree_entities');
         	  if ($(this).hasClass('annos')) {
@@ -389,7 +388,6 @@
         if (selector == "wb_show_annos") {
           var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
           $('#' + ddt.domId).hide();
-          console.log(ddt);
         }
       }
     }
