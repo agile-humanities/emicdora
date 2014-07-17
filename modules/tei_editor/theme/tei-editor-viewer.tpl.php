@@ -10,7 +10,6 @@
  *   The image annotation pane, as themed by image annotation.
  */
 ?>
-
 <div id="islandora-crited-wrapper-id" class="islandora-crited-wrapper">
   <div id="iframe_replacement" class=".iframe_replacement" style="height: 100%;position:relative;">
     <input id="full-window-button" type="button" value="<?php print t('Full Window'); ?>" />

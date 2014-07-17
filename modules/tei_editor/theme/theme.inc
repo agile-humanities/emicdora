@@ -51,6 +51,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   // the vars flag '$variables['custom_js'] = TRUE'.
   drupal_add_css($tei_editor_module_path . "/css/tei_editor.css");
   drupal_add_css($tei_editor_module_path . "/css/tei_editor_markup.css");
+  drupal_add_css($tei_editor_module_path . "/css/tei_editor_dialogs.css");
   drupal_add_js($tei_editor_module_path . "/js/custom_delegate.js");
   drupal_add_js($tei_editor_module_path . '/js/writer_wrapper.js');
   drupal_add_js($tei_editor_module_path . "/js/dialog_text_image_anno.js");
@@ -118,6 +119,9 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
         'validate_path' => $validate_path,
         'page_pid' => $pids[0],
         'image_loader' => $image_loader,
+      ),
+      'current_user' => array(
+        'id' => $user->uid,
       ),
     ),
     'setting'
