@@ -210,11 +210,11 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       // Triggered field #.
       $field = $form_state['triggering_element']['#field'];
       // Get $solr_field.
-      $solr_field = $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'];
+      $term_label = $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'];
       // Get dialog values from recent dialog submit.
       $dialog_values = $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
       // Save the dialog values in the form state.
-      $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field] = _emicdora_handle_solr_field_settings($dialog_values, $field_type);
+      $form_state['solr_field_settings']['emicdora_' . $field_type][$term_label] = _emicdora_handle_solr_field_settings($dialog_values, $field_type);
     }
   }
 
@@ -259,7 +259,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
             $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'];
       }
       $term['solr_field_settings'] = array(
-        '#markup' => $solr_field_settings ? t('Label: @label', array('@label' => $solr_field_settings)) : '',
+        '#markup' => $solr_field_settings ? $solr_field_settings : '',
       );
       $term['weight'] = array(
         '#type' => 'weight',
@@ -336,7 +336,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
   }
   $version_terms['add_solr_field'] = array(
     '#type' => 'textfield',
-    '#title' => t('Add another item'),
+    '#title' => t('Add new category'),
     '#size' => 45,
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
@@ -461,9 +461,16 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
   );
   $form['options']['label'] = array(
     '#type' => 'textfield',
-    '#title' => t('Label'),
+    '#title' => t('Solr Field'),
     '#default_value' => isset($values['label']) ? $values['label'] : '',
-    '#description' => t('A human-readable name.'),
+    '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
+    '#description' => t('Solr field.'),
+  );
+    $form['options']['value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Value'),
+    '#default_value' => isset($values['value']) ? $values['value'] : '',
+    '#description' => t('Exact match for solr field.'),
   );
   $luke_result = islandora_solr_get_luke(NULL, $solr_field);
   if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
@@ -484,7 +491,7 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
   $path = drupal_get_path('module', 'emicdora');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Apply this change'),
+    '#value' => t('Configure this field'),
     '#weight' => 5,
     '#field' => 'dialog_submit',
     '#field_type' => 'version_fields',
@@ -507,7 +514,7 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
  * @params array $variables
  *   This parameter contains default values to be passed from the main form.
  */
-function emicdora_sort_fields($form, &$form_state, $variables) {
+function emicdora_sort_fields_unneeded($form, &$form_state, $variables) {
   form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
 
   $form_state['dialog'] = $variables;
@@ -585,9 +592,11 @@ function _emicdora_admin_settings_submit($form, $form_state) {
   emicdora_delete_terms($critical_edition);
   $type = 'version';
   foreach ($version_terms as $counter => $term) {
-    $label = str_replace('Label:', '', $term['solr_field_settings']['#markup']);
+    $label = $term['solr_field_render']['#markup'];
+    $solr_term = $term['solr_field_settings']['#markup'];
     $solr_field_settings = array(
       'label' => $label,
+      'value' => $solr_term,
       'permissions' => array(1, 2, 3),
     );
     $fields = array(
@@ -633,7 +642,7 @@ function theme_emicdora_fields($variables) {
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'emicdora-multiple-drag');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'emicdora-solr-field-render');
-        $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_settings']), 'class' => 'emicdora-solr-field-settings');
+       // $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_settings']), 'class' => 'emicdora-solr-field-settings');
         $row[] = array('data' => drupal_render($form['terms'][$key]['weight']));
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'emicdora-operations');
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'emicdora-operations emicdora-operations-hidden');
@@ -650,11 +659,11 @@ function theme_emicdora_fields($variables) {
   // Create header array.
   $header = array();
   $header[] = array(
-    'data' => t('Solr field'),
+    'data' => t('Label'),
     'colspan' => 2,
     'class' => 'emicdora-solr-field-header',
   );
-  $header[] = array('data' => t('Settings'));
+ // $header[] = array('data' => t('Settings'));
   $header[] = array('data' => t('Weight'), 'class' => 'emicdora-solr-field-weight');
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
 
@@ -772,6 +781,7 @@ function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $fiel
       case 'version_fields':
         $to_return = array(
           'label' => trim($solr_field_settings['label']),
+          'value' => trim($solr_field_settings['value']),
           'permissions' => $solr_field_settings['permissions'],
         );
         break;

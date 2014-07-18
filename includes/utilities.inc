@@ -397,6 +397,7 @@ and \$subject <dc:title> \$title)
 
   return $edition_pids;
 }
+
 /**
  * Constructs CWRC datastream on an object if none exists.
  *
@@ -425,26 +426,22 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   }
   catch (Exception $e) {
     drupal_set_message(t(
-        'An error occured while creating the CWRC datastream on @pid with message: "@message"',
-        array(
-          '@pid' => $object->id,
-          "@message" => $e->getMessage(),
-        )
-      ),
-      'error'
+            'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
+      '@pid' => $object->id,
+      "@message" => $e->getMessage(),
+            )
+        ), 'error'
     );
     watchdog(
-      'islandora_critical_edition',
-      'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace',
-      array(
-        '@pid' => $object->id,
-        '@message' => $e->getMessage(),
-        '@trace' => $e->getTraceAsString(),
-      ),
-      WATCHDOG_ERROR
+        'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
+      '@pid' => $object->id,
+      '@message' => $e->getMessage(),
+      '@trace' => $e->getTraceAsString(),
+        ), WATCHDOG_ERROR
     );
   }
 }
+
 /**
  * Converts the given TEI xml document to plain text.
  *
@@ -468,6 +465,7 @@ function emicdora_convert_tei_to_plain_text($tei) {
   }
   return strip_tags($text);
 }
+
 /**
  * Retrieves all member objects.
  *
@@ -478,6 +476,7 @@ function emicdora_convert_tei_to_plain_text($tei) {
  *   Sorted member objects
  */
 function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
+  module_load_include('inc', 'emicdora', 'includes/db');
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -492,6 +491,11 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
       break;
 
     case 'source_versions':
+      $configs = emicdora_get_terms($object->id, 'version');
+      $categories = array();
+      foreach ($configs as $config) {
+        $categories[$config['solr_field']] = $config['solr_field_settings']['label'];
+      }
       $source_content_models = array('islandora:versionCModel' => 0);
       break;
 
@@ -522,13 +526,16 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
   foreach ($json['response']['docs'] as $candidate) {
 
     switch ($type) {
+
       case 'source':
+        $configs = emicdora_get_terms($object->id, $type);
         $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
         $content_model = $content_model_parts[1];
         $sorted_results[$content_model][] = $candidate['PID'];
         break;
 
       case 'versions':
+        $configs = emicdora_get_terms($object->id, $type);
         $type_parts = array();
         if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
           $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
@@ -546,6 +553,17 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
         if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
           $sorted_results[$type_part][] = $candidate['PID'];
         }
+
+
+
+
+        foreach ($categories as $solr_field => $label) {
+          if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
+         //   $sorted_results[$type_part][] = $candidate['PID'];
+          }
+        }
+
+
         break;
 
       case 'transcriptions':
