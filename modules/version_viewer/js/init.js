@@ -285,18 +285,34 @@
         	  if ($(this).hasClass('annos')) {
     	        $(this).removeClass('annos');
     	        $(this).css('background-color', 'initial');
-    	        $('#' + ddt.domId).hide();
-    	        $('#' + dda.domId).hide();
-    	        hide_tree_children(ddt['children']);
-    	        hide_tree_children(dda['children']);
+    	        if (ddt) {
+    	          $('#' + ddt.domId).hide();
+    	          if (ddt['children'].length > 0) {
+    	            hide_tree_children(ddt['children']);	
+    	          }
+    	        }
+    	        if (dda) {
+    	          $('#' + dda.domId).hide();
+    	          if (dda['children'].length > 0) {
+    	            hide_tree_children(dda['children']);
+    	          }
+    	        }
     	      }
     	      else {
     	        $(this).addClass('annos');
     	        $('#wb_show_annos').css('background-color', btn_background_color);
-    	        $('#' + ddt.domId).show();
-    	        $('#' + dda.domId).show();
-    	        show_tree_children(ddt['children']);
-    	        show_tree_children(dda['children']);
+    	        if (ddt) {
+    	          $('#' + ddt.domId).show();
+    	          if (ddt['children'].length > 0) {
+    	            show_tree_children(ddt['children']);
+    	          }
+    	        }
+    	        if (dda) {
+    	          $('#' + dda.domId).show();
+    	          if (dda['children'].length > 0) {
+    	            show_tree_children(dda['children']);
+    	          }
+    	        }
     	      }
             break;
           case 'wb_show_til':
@@ -304,14 +320,22 @@
         	  if ($(this).hasClass('annos')) {
       	        $(this).removeClass('annos');
       	        $(this).css('background-color', 'initial');
-      	        hide_tree_children(ddt['children']);
-      	        $('#' + ddt.domId).hide();
+      	        if (ddt) {
+      	          $('#' + ddt.domId).hide();
+      	          if (ddt['children'].length > 0) {
+      	            hide_tree_children(ddt['children']);
+      	          }
+      	        }
       	      }
       	      else {
       	        $(this).addClass('annos');
       	        $('#wb_show_til').css('background-color', btn_background_color);
-      	        show_tree_children(ddt['children']);
-      	        $('#' + ddt.domId).show();
+      	        if (ddt) {
+      	          $('#' + ddt.domId).show();
+      	          if (ddt['children'].length > 0) {
+      	            show_tree_children(ddt['children']);
+      	          }
+      	        }
       	      }
             break;
       }

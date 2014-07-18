@@ -34,7 +34,7 @@ function emicdora_workbench() {
         '#links' => array(
           array(
             'title' => t('Add Critical Edition'),
-            'href' => 'workbench/add/islandora:criticalEditionCModel',
+            'href' => 'workbench/add/islandora:criticalEditionContainerCModel',
           ),
         ),
       ),
@@ -56,7 +56,7 @@ function emicdora_workbench() {
 function emicdora_workbench_ingestible_content_models() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   return array(
-    'islandora:criticalEditionCModel' => t('Critical Edition'),
+    'islandora:criticalEditionContainerCModel' => t('Critical Edition'),
   ) + emicdora_source_content_models();
 }
 
