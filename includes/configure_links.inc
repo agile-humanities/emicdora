@@ -82,12 +82,6 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#weight' => 0,
     '#submit' => array('emicdora_admin_settings_submit'),
   );
-  $form['actions']['reset'] = array(
-    '#type' => 'submit',
-    '#value' => t('Reset to defaults'),
-    '#weight' => 1,
-    '#submit' => array('emicdora_admin_settings_submit'),
-  );
 
   if (!empty($_POST) && form_get_errors()) {
     drupal_set_message(t('Error: the settings have not been saved.'), 'error');
@@ -158,17 +152,6 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       if (empty($add_solr_field)) {
         $solr_field_error = t('Field cannot be empty.');
       }
-      // Check if value is already added.
-      if (isset($form_state['values']['emicdora_' . $field_type]['terms'])) {
-        $check_terms = $form_state['values']['emicdora_' . $field_type]['terms'];
-      }
-      if (isset($check_terms)) {
-        foreach ($check_terms as $key => $term) {
-          if (isset($term['solr_field']) && $term['solr_field'] == $add_solr_field) {
-            $solr_field_error = t('Solr term can only be added once.');
-          }
-        }
-      }
       // Add new field to values.
       if ($solr_field_error == NULL) {
         $form_state['values']['emicdora_' . $field_type]['terms'][] = array('solr_field' => $add_solr_field);
@@ -196,6 +179,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
         $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
       }
       $values = array_merge_recursive($values, $solr_field_settings);
+      $temp = $solr_field_settings;
       // Prepare dialog values.
       $dialog_id = 'edit-emicdora-' . $field_type_class . '-terms-' . $field . '-dialog-button';
       $form_state['dialog'] = array(
@@ -259,7 +243,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
             $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'];
       }
       $term['solr_field_settings'] = array(
-        '#markup' => $solr_field_settings ? $solr_field_settings : '',
+          //'#markup' => $solr_field_settings ? $solr_field_settings : '',
       );
       $term['weight'] = array(
         '#type' => 'weight',
@@ -466,7 +450,7 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#description' => t('Solr field.'),
   );
-    $form['options']['value'] = array(
+  $form['options']['value'] = array(
     '#type' => 'textfield',
     '#title' => t('Value'),
     '#default_value' => isset($values['value']) ? $values['value'] : '',
@@ -509,75 +493,6 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
 }
 
 /**
- * Form for sort field settings.
- *
- * @params array $variables
- *   This parameter contains default values to be passed from the main form.
- */
-function emicdora_sort_fields_unneeded($form, &$form_state, $variables) {
-  form_load_include($form_state, 'inc', 'islandora_solr', 'includes/admin');
-
-  $form_state['dialog'] = $variables;
-
-  $values = $variables['values'];
-  $permissions = $values['permissions'];
-
-  $permissions_disable = _emicdora_permissions_disable();
-  $permissions_default = _emicdora_permissions_default();
-
-  $form['options'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('scroll')),
-    '#id' => 'emicdora-admin-dialog-form',
-  );
-  $form['options']['label'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Label'),
-    '#default_value' => $values['label'],
-    '#description' => t('A human-readable name.'),
-  );
-  $form['options']['permissions_fieldset'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Permissions'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-  $form['options']['permissions_fieldset']['permissions'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Permissions'),
-    '#options' => user_roles(),
-    '#default_value' => !empty($permissions) ? $permissions : $permissions_default,
-    '#description' => t('Select which roles can access this field.<br /><strong>Note:</strong> checkboxes may be grayed out for roles which do not have permission to search the Solr index.'),
-  );
-  foreach ($permissions_disable as $rid) {
-    $form['options']['permissions_fieldset']['permissions'][$rid] = array(
-      '#disabled' => TRUE,
-    );
-  }
-  $form['actions'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('form-buttons')),
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Apply'),
-    '#weight' => 5,
-    '#field' => 'dialog_submit',
-    '#field_type' => 'version_fields',
-    '#name' => 'result-fields-dialog-submit',
-    '#submit' => array('emicdora_update_fields_submit'),
-    '#ajax' => array(
-      'callback' => 'emicdora_settings_dialog',
-      'wrapper' => 'emicdora-admin-dialog-form',
-      'effect' => 'none',
-      'event' => 'click',
-      'progress' => array('message' => '', 'type' => 'throbber'),
-    ),
-  );
-  return $form;
-}
-
-/**
  * Submit handler for term selection.
  *
  * @param array $form
@@ -587,22 +502,19 @@ function emicdora_sort_fields_unneeded($form, &$form_state, $variables) {
  */
 function emicdora_admin_settings_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
-  $version_terms = $form_state['source_terms'];
   $critical_edition = $form_state['values']['critical_edition_pid'];
   emicdora_delete_terms($critical_edition);
   $type = 'version';
-  foreach ($version_terms as $counter => $term) {
-    $label = $term['solr_field_render']['#markup'];
-    $solr_term = $term['solr_field_settings']['#markup'];
+  $terms = $form_state['solr_field_settings']['emicdora_version_fields'];
+  foreach ($terms as $label => $components) {
     $solr_field_settings = array(
-      'label' => $label,
-      'value' => $solr_term,
-      'permissions' => array(1, 2, 3),
+      'label' => $components['label'],
+      'value' => $components['value'],
     );
     $fields = array(
-      'solr_field' => $term['solr_field']['#value'],
+      'solr_field' => $label,
       'field_type' => 'unused',
-      'weight' => $term['weight']['#default_value']['#default_value'],
+      'weight' => 0,
       'solr_field_settings' => $solr_field_settings,
     );
     emicdora_insert_terms($critical_edition, $type, $fields);
@@ -642,7 +554,7 @@ function theme_emicdora_fields($variables) {
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'emicdora-multiple-drag');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'emicdora-solr-field-render');
-       // $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_settings']), 'class' => 'emicdora-solr-field-settings');
+        // $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_settings']), 'class' => 'emicdora-solr-field-settings');
         $row[] = array('data' => drupal_render($form['terms'][$key]['weight']));
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'emicdora-operations');
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'emicdora-operations emicdora-operations-hidden');
@@ -663,7 +575,7 @@ function theme_emicdora_fields($variables) {
     'colspan' => 2,
     'class' => 'emicdora-solr-field-header',
   );
- // $header[] = array('data' => t('Settings'));
+  // $header[] = array('data' => t('Settings'));
   $header[] = array('data' => t('Weight'), 'class' => 'emicdora-solr-field-weight');
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
 

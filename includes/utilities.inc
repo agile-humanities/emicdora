@@ -284,72 +284,7 @@ function emicdora_get_apparatus_as_content($object) {
 }
 
 /**
- * Retrieves all source objects.
- *
- * @param AbstractObject $object
- *   Critical Edition object
- *
- * @return array
- *   Sorted member objects
- */
-function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit = 25) {
-  $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
-  $source_content_models = array();
-  $filters[] = format_string('!membership:("info:fedora/!pid")', array(
-    '!pid' => $object->id,
-    '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
-  switch ($type) {
-    case 'source':
-      $source_content_models = emicdora_source_content_models();
-      break;
-
-    case 'versions':
-      $source_content_models = array('islandora:versionCModel' => 0);
-  }
-
-  $sources = array();
-  foreach (array_keys($source_content_models) as $content_model) {
-    $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
-  }
-  $filters[] = format_string('!model:(!sources)', array(
-    '!sources' => implode(' OR ', $sources),
-    '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
-  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-  $solr->setCreateDocuments(FALSE);
-
-
-  try {
-    $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
-    $json = json_decode($results->getRawResponse(), TRUE);
-  }
-  catch (Exception $e) {
-    watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
-  }
-  $sorted_results = array();
-  if (isset($json['response']['docs'])) {
-    foreach ($json['response']['docs'] as $candidate) {
-      if ($type == 'source') {
-        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-        $content_model = $content_model_parts[1];
-        $sorted_results[$content_model][] = $candidate['PID'];
-      }
-      if ($type == 'versions') {
-        $type_parts = array();
-        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-        }
-        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-        $sorted_results[$type_part][] = $candidate['PID'];
-      }
-    }
-  }
-
-  return $sorted_results;
-}
-
-/**
- * Gets all versionable objects assicated with critical edition.
+ * Gets all versionable objects associated with critical edition.
  *
  * @return array
  *   PIDs of currently associated versionable objects
@@ -540,16 +475,34 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
         break;
 
       case 'versions':
-        $configs = emicdora_get_terms($object->id, $type);
-        $type_parts = array();
-        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        $configs = emicdora_get_terms($object->id, 'version');
+        $version_facets = array();
+        foreach ($configs as $config) {
+          $version_facets[$config['solr_field']] = array(
+            'solr_field' => $config['solr_field_settings']['label'],
+            'solr_value' => $config['solr_field_settings']['value'],
+          );
         }
-        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-        $sorted_results[$type_part][] = $candidate['PID'];
+        $added = FALSE;
+        foreach ($version_facets as $label => $facet) {
+          if (isset($candidate[$facet['solr_field']])) {
+            $sorted_results[$label][] = $candidate['PID'];
+            $added = TRUE;
+          }
+        }
+        if (!$added) {
+          $sorted_results[t('Unclassified')][] = $candidate['PID'];
+        }
         break;
 
       case 'source_versions':
+        $version_facets = array();
+        foreach ($configs as $config) {
+          $version_facets[$config['solr_field']] = array(
+            'solr_field' => $config['solr_field_settings']['label'],
+            'solr_value' => $config['solr_field_settings']['value'],
+          );
+        }
         $type_parts = array();
         if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
           $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
@@ -564,7 +517,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
 
         foreach ($categories as $solr_field => $label) {
           if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
-         //   $sorted_results[$type_part][] = $candidate['PID'];
+            //   $sorted_results[$type_part][] = $candidate['PID'];
           }
         }
 

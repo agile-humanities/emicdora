@@ -510,10 +510,12 @@ function emicdora_block_view($delta = '') {
       switch ($is_source) {
         case TRUE:
           $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
+          $configs = emicdora_get_configuration($path_parts[4], 'version');
           break;
 
         case FALSE:
           $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+          $configs = emicdora_get_configuration($critical_edition->id, 'version');
           break;
       }
       $total = 0;
@@ -523,13 +525,18 @@ function emicdora_block_view($delta = '') {
 
       $links = array();
       foreach (array_keys($versions) as $key) {
-        if ($key == 'unclassified') {
+        if ($key == 'Unclassified') {
           continue;
+        }
+        $solr = NULL;
+        if(array_key_exists($key, $configs)) {
+          $solr = $configs[$key];
         }
         $count = count($versions[$key]);
         $links[] = array(
           'title' => ucfirst($key) . " ($count)",
-          'href' => "islandora/object/{$critical_edition->id}/versions/$key",
+          'href' => "islandora/object/{$critical_edition->id}/versions",
+          'solr' => array('solr' => $solr),
         );
       }
       $links[] = array(
@@ -906,14 +913,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 }
 
 /**
- * Implements hook_CMODEL_islandora_view_object().
- */
-function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
-  // Placeholder only.
-  // NOTE: the version_veiwer module implements this hook.
-}
-
-/**
  * Display the sources related to this critical edition.
  *
  * @param AbstractObject $object
@@ -966,6 +965,9 @@ function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL
   if ($type) {
     $filters[] = format_string('!type:("info:fedora/' . $type . '")', array(
       '!type' => 'RELS_EXT_hasSourceType_uri_ms'));
+  }
+  if (isset($_GET['solr'])) {
+    $filters[] = $_GET['solr'];
   }
   $_GET['f'] = array(implode(' AND ', $filters));
   $output = islandora_solr('*:*');

@@ -61,3 +61,31 @@ function emicdora_delete_terms($critical_edition) {
       ->condition('critical_edition', $critical_edition)
       ->execute();
 }
+
+/**
+ * Get terms associated with critical edition.
+ *
+ * @param string $critical_edition
+ *   PID of critical edition
+ * @param string $type
+ *   Term type - either source or version
+ *
+ * @return array
+ *   Terms associated with this Critical Edition
+ */
+function emicdora_get_configuration($critical_edition, $type) {
+  $list = db_select('emicdora_facets', 'c')
+      ->fields('c')
+      ->condition('critical_edition', $critical_edition)
+      ->condition('type', $type)
+      ->execute();
+  $to_return = array();
+  while ($data = $list->fetchObject()) {
+    $values = unserialize($data->terms);
+    $solr_field = $values['solr_field_settings']['label'];
+    $solr_value = $values['solr_field_settings']['value'];
+    $to_return[$values['solr_field']] = "$solr_field:'$solr_value'";
+  }
+
+  return $to_return;
+}
