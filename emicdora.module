@@ -815,6 +815,15 @@ function emicdora_islandora_xml_form_builder_form_associations() {
       'template' => FALSE,
     );
   }
+  // Add the 'islandora:criticalEditionContainerCModel' content model.
+  $source_form_associations[] = array(
+    'content_model' => 'islandora:criticalEditionContainerCModel',
+    'form_name' => 'EMiC Source MODS form',
+    'dsid' => 'MODS',
+    'title_field' => array('titleInfo', 'title'),
+    'transform' => 'mods_to_dc.xsl',
+    'template' => FALSE,
+  );
   return $source_form_associations + array(
     'critical_edition_form_mods' => array(
       'content_model' => 'islandora:criticalEditionCModel',
