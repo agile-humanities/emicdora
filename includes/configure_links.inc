@@ -80,13 +80,13 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#type' => 'submit',
     '#value' => t('Save configuration'),
     '#weight' => 0,
-    '#submit' => array('_emicdora_admin_settings_submit'),
+    '#submit' => array('emicdora_admin_settings_submit'),
   );
   $form['actions']['reset'] = array(
     '#type' => 'submit',
     '#value' => t('Reset to defaults'),
     '#weight' => 1,
-    '#submit' => array('_emicdora_admin_settings_submit'),
+    '#submit' => array('emicdora_admin_settings_submit'),
   );
 
   if (!empty($_POST) && form_get_errors()) {
@@ -214,7 +214,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       // Get dialog values from recent dialog submit.
       $dialog_values = $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
       // Save the dialog values in the form state.
-      $form_state['solr_field_settings']['emicdora_' . $field_type][$term_label] = _emicdora_handle_solr_field_settings($dialog_values, $field_type);
+      $form_state['solr_field_settings']['emicdora_' . $field_type][$term_label] = emicdora_handle_solr_field_settings($dialog_values, $field_type);
     }
   }
 
@@ -279,11 +279,11 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
         '#field' => $key,
         '#field_type' => $field_type,
         '#attributes' => array('class' => array('emicdora-configure-submit')),
-        '#submit' => array('_emicdora_update_fields_submit'),
+        '#submit' => array('emicdora_update_fields_submit'),
         '#name' => $field_type . '_configure_' . $key,
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-configure-button',
         '#ajax' => array(
-          'callback' => '_emicdora_field_configure',
+          'callback' => 'emicdora_field_configure',
           'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
@@ -302,11 +302,11 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
         '#field' => $key,
         '#field_type' => $field_type,
         '#attributes' => array('class' => array('emicdora-remove-submit')),
-        '#submit' => array('_emicdora_update_fields_submit'),
+        '#submit' => array('emicdora_update_fields_submit'),
         '#name' => $field_type . '_remove_' . $key,
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-remove-button',
         '#ajax' => array(
-          'callback' => '_emicdora_update_fields',
+          'callback' => 'emicdora_update_fields',
           'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
@@ -319,11 +319,11 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
         '#field' => $key,
         '#field_type' => $field_type,
         '#attributes' => array('class' => array('emicdora-dialog-submit')),
-        '#submit' => array('_emicdora_update_fields_submit'),
+        '#submit' => array('emicdora_update_fields_submit'),
         '#name' => $field_type . '_dialog_' . $key,
         '#id' => 'edit-emicdora-' . $field_type_class . '-terms-' . $key . '-dialog-button',
         '#ajax' => array(
-          'callback' => '_emicdora_update_fields',
+          'callback' => 'emicdora_update_fields',
           'wrapper' => 'emicdora-' . $result_type . '-wrapper',
           'effect' => 'none',
           'event' => 'click',
@@ -350,12 +350,12 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
     '#type' => 'button',
     '#value' => t('Add'),
     '#attributes' => array('class' => array('emicdora-add-more-submit')),
-    '#submit' => array('_emicdora_update_fields_submit'),
+    '#submit' => array('emicdora_update_fields_submit'),
     '#name' => $field_type . '_add_more',
     '#field_type' => $field_type,
     '#id' => 'edit-emicdora-' . $field_type_class . '-add-more',
     '#ajax' => array(
-      'callback' => '_emicdora_update_fields',
+      'callback' => 'emicdora_update_fields',
       'wrapper' => 'emicdora-' . $result_type . '-wrapper',
       'event' => 'click',
       'effect' => 'none',
@@ -376,7 +376,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
  * @return array
  *   The part of the form array that needs asynchronous updating.
  */
-function _emicdora_update_fields($form, &$form_state) {
+function emicdora_update_fields($form, &$form_state) {
 
   // Check what section the call is from.
   switch ($form_state['triggering_element']['#field_type']) {
@@ -395,7 +395,7 @@ function _emicdora_update_fields($form, &$form_state) {
  * @param array $form_state
  *   An associative array containing the form state.
  */
-function _emicdora_update_fields_submit($form, &$form_state) {
+function emicdora_update_fields_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
@@ -412,7 +412,7 @@ function _emicdora_update_fields_submit($form, &$form_state) {
  * @return array
  *   An array of AJAX commands.
  */
-function _emicdora_settings_dialog($form, &$form_state) {
+function emicdora_settings_dialog($form, &$form_state) {
 
   $dialog_id = $form_state['dialog']['dialog_id'];
 
@@ -496,9 +496,9 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     '#field' => 'dialog_submit',
     '#field_type' => 'version_fields',
     '#name' => 'result-fields-dialog-submit',
-    '#submit' => array('_emicdora_update_fields_submit'),
+    '#submit' => array('emicdora_update_fields_submit'),
     '#ajax' => array(
-      'callback' => '_emicdora_settings_dialog',
+      'callback' => 'emicdora_settings_dialog',
       'wrapper' => 'emicdora-admin-dialog-form',
       'effect' => 'none',
       'event' => 'click',
@@ -565,9 +565,9 @@ function emicdora_sort_fields_unneeded($form, &$form_state, $variables) {
     '#field' => 'dialog_submit',
     '#field_type' => 'version_fields',
     '#name' => 'result-fields-dialog-submit',
-    '#submit' => array('_emicdora_update_fields_submit'),
+    '#submit' => array('emicdora_update_fields_submit'),
     '#ajax' => array(
-      'callback' => '_emicdora_settings_dialog',
+      'callback' => 'emicdora_settings_dialog',
       'wrapper' => 'emicdora-admin-dialog-form',
       'effect' => 'none',
       'event' => 'click',
@@ -585,7 +585,7 @@ function emicdora_sort_fields_unneeded($form, &$form_state, $variables) {
  * @param array $form_state
  *   Drupal Form State
  */
-function _emicdora_admin_settings_submit($form, $form_state) {
+function emicdora_admin_settings_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $version_terms = $form_state['source_terms'];
   $critical_edition = $form_state['values']['critical_edition_pid'];
@@ -717,11 +717,11 @@ function theme_emicdora_fields($variables) {
  * @return array
  *   An array of AJAX commands.
  */
-function _emicdora_field_configure($form, &$form_state) {
+function emicdora_field_configure($form, &$form_state) {
   $variables = $form_state['dialog'];
   $field_type = $form_state['dialog']['field_type'];
   $solr_field = $form_state['dialog']['solr_field'];
-  $form_function = _emicdora_get_form_function($field_type);
+  $form_function = emicdora_get_form_function($field_type);
 
   $commands = array();
 
@@ -750,7 +750,7 @@ function _emicdora_field_configure($form, &$form_state) {
  *   A form function name associated with the field type, or FALSE if field
  *   type is not given or does not exist.
  */
-function _emicdora_get_form_function($field_type = NULL) {
+function emicdora_get_form_function($field_type = NULL) {
   if (!empty($field_type)) {
     switch ($field_type) {
       case 'version_fields':
@@ -773,7 +773,7 @@ function _emicdora_get_form_function($field_type = NULL) {
  * @todo This should probably be removed and values we don't need maybe should
  *   be filtered out before sending it back to the main form.
  */
-function _emicdora_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
+function emicdora_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
   $to_return = FALSE;
 
   if (!empty($solr_field_settings) && !empty($field_type)) {

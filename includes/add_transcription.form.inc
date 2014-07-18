@@ -195,7 +195,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
       $end_page = $form_state['values']['last_page'];
     }
     $tei_rdf = islandora_object_load($form_state['values']['versionable_object_pid']);
-    add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
+    emicdoara_add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
   }
 
   if ($content_source == 'file') {
@@ -413,7 +413,7 @@ function islandora_critical_transcription_edit_form_submit($form, $form_state) {
  * @param IslandoraFedoraDatastream $transcription_datastream
  *   Datastream object to be updated
  */
-function add_derived_transcription($tei_rdf_object, $versionable_object_pid, $transcription, $transcription_datastream, $start_page = NULL, $end_page = NULL) {
+function emicdoara_add_derived_transcription($tei_rdf_object, $versionable_object_pid, $transcription, $transcription_datastream, $start_page = NULL, $end_page = NULL) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $pages = array_keys(islandora_paged_content_get_pages($tei_rdf_object));
