@@ -728,6 +728,9 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
     $text = $page['OCR']->content;
   }
   file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
+
+  // Force delete.
+  file_delete($file, TRUE);
 }
 
 /**

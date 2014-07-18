@@ -81,7 +81,7 @@ function emicdora_has_content_model(AbstractObject $object, $content_model) {
  *   model type if one exists, otherwise FALSE.
  */
 function emicdora_get_default_collection($content_model) {
-  if ($content_model == 'islandora:criticalEditionCModel') {
+  if ($content_model == 'islandora:criticalEditionContainerCModel') {
     return EMICDORA_EDITION_COLLECTION;
   }
   elseif (emicdora_is_source_content_model($content_model)) {
@@ -292,8 +292,9 @@ function emicdora_get_apparatus_as_content($object) {
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit = 25) {
+function emicdora_get_raw_objects($object, $type = 'source', $offset = 0, $limit = 25) {
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
+  $source_content_models = array();
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
@@ -317,6 +318,7 @@ function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit
   $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
   $solr->setCreateDocuments(FALSE);
 
+
   try {
     $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
     $json = json_decode($results->getRawResponse(), TRUE);
@@ -325,21 +327,24 @@ function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit
     watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
   }
   $sorted_results = array();
-  foreach ($json['response']['docs'] as $candidate) {
-    if ($type == 'source') {
-      $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-      $content_model = $content_model_parts[1];
-      $sorted_results[$content_model][] = $candidate['PID'];
-    }
-    if ($type == 'versions') {
-      $type_parts = array();
-      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+  if (isset($json['response']['docs'])) {
+    foreach ($json['response']['docs'] as $candidate) {
+      if ($type == 'source') {
+        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
+        $content_model = $content_model_parts[1];
+        $sorted_results[$content_model][] = $candidate['PID'];
       }
-      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-      $sorted_results[$type_part][] = $candidate['PID'];
+      if ($type == 'versions') {
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        $sorted_results[$type_part][] = $candidate['PID'];
+      }
     }
   }
+
   return $sorted_results;
 }
 
