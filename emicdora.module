@@ -529,7 +529,7 @@ function emicdora_block_view($delta = '') {
           continue;
         }
         $solr = NULL;
-        if(array_key_exists($key, $configs)) {
+        if (array_key_exists($key, $configs)) {
           $solr = $configs[$key];
         }
         $count = count($versions[$key]);
@@ -1132,6 +1132,9 @@ function emicdora_show_version_context_menu($permission, $object) {
       $access = TRUE;
     }
     if (isset($url_parts[4]) && $url_parts[4] == 'create' && $url_parts[1] == 'contextual-links' && $url_parts[2] == 'version') {
+      $access = TRUE;
+    }
+    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
       $access = TRUE;
     }
   }

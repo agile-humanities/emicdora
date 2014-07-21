@@ -179,7 +179,6 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
         $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
       }
       $values = array_merge_recursive($values, $solr_field_settings);
-      $temp = $solr_field_settings;
       // Prepare dialog values.
       $dialog_id = 'edit-emicdora-' . $field_type_class . '-terms-' . $field . '-dialog-button';
       $form_state['dialog'] = array(
@@ -242,9 +241,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
             i18n_string("islandora_solr:field_settings:$field_type:label:$solr_field", $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label']) :
             $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]['label'];
       }
-      $term['solr_field_settings'] = array(
-          //'#markup' => $solr_field_settings ? $solr_field_settings : '',
-      );
+
       $term['weight'] = array(
         '#type' => 'weight',
         '#default_value' => isset($value['weight']) ? $value['weight'] : $key,

@@ -512,16 +512,11 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
           $sorted_results[$type_part][] = $candidate['PID'];
         }
 
-
-
-
         foreach ($categories as $solr_field => $label) {
           if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
             //   $sorted_results[$type_part][] = $candidate['PID'];
           }
         }
-
-
         break;
 
       case 'transcriptions':
@@ -531,6 +526,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
         }
         $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
         $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
+        break;
     }
   }
   return $sorted_results;
