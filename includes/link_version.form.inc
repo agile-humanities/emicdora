@@ -30,7 +30,7 @@ function emicdora_link_version_form($form, $form_state, $critical_edition) {
     'title' => array('data' => t('Version'), 'class' => array('class' => 'version_title')),
     'pid' => array('data' => t('PID'), 'class' => array('class' => 'version_pid')),
   );
-  $existing_versions = emicdora_get_raw_objects($critical_edition, 'versions');
+  $existing_versions = emicdora_get_raw_objects($critical_edition, 'version');
   $current = array();
   foreach ($existing_versions as $type) {
     foreach ($type as $pid) {

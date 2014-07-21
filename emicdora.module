@@ -471,25 +471,36 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'source_material':
-      module_load_include('inc', 'emicdora', 'includes/utilities');
-      $raw_data = emicdora_get_raw_objects($critical_edition);
-      $content_types = emicdora_source_content_models();
-      $full_count = 0;
-      $links = array();
-      foreach ($content_types as $content_model => $label) {
-        if (isset($raw_data[$content_model])) {
-          $count = count($raw_data[$content_model]);
-          $full_count += $count;
-          $links[] = array(
-            'title' => $label . " ($count)",
-            'href' => "islandora/object/{$critical_edition->id}/sources/$content_model",
-          );
-        }
+
+      $sources = emicdora_get_raw_objects($critical_edition);
+      $configs = emicdora_get_configuration($critical_edition->id, 'source');
+
+      $total = 0;
+      foreach ($sources as $key => $value) {
+        $total += count($sources[$key]);
       }
-      array_unshift($links, array(
-        'title' => t("All") . " ($full_count)",
-        'href' => "islandora/object/{$critical_edition->id}/sources/",
-      ));
+
+      $links = array();
+      foreach (array_keys($sources) as $key) {
+        if ($key == 'Unclassified') {
+          continue;
+        }
+        $solr = NULL;
+        if (array_key_exists($key, $configs)) {
+          $solr = $configs[$key];
+        }
+        $count = count($sources[$key]);
+        $links[] = array(
+          'title' => ucfirst($key) . " ($count)",
+          'href' => "islandora/object/{$critical_edition->id}/sources",
+          'solr' => array('solr' => $solr),
+        );
+      }
+      $links[] = array(
+        'title' => t('All') . " ($total)",
+        'href' => "islandora/object/{$critical_edition->id}/sources",
+      );
+
       $block['subject'] = t('Source Material');
       $block['content'] = array(
         '#theme' => 'links',
@@ -514,7 +525,7 @@ function emicdora_block_view($delta = '') {
           break;
 
         case FALSE:
-          $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+          $versions = emicdora_get_raw_objects($critical_edition, 'version');
           $configs = emicdora_get_configuration($critical_edition->id, 'version');
           break;
       }
@@ -651,7 +662,7 @@ function emicdora_block_view($delta = '') {
         break;
       }
       module_load_include('inc', 'emicdora', 'includes/utilities');
-      $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+      $versions = emicdora_get_raw_objects($critical_edition, 'version');
       $transcription_data = array();
       foreach ($versions as $type) {
         foreach ($type as $version) {
@@ -938,6 +949,9 @@ function emicdora_critical_edition_sources(AbstractObject $object, $content_mode
   $filters[] = format_string('!model:(!sources)', array(
     '!sources' => implode(' OR ', $sources),
     '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
+  if (isset($_GET['solr'])) {
+    $filters[] = $_GET['solr'];
+  }
   $_GET['f'] = array(implode(' AND ', $filters));
   $output = islandora_solr('*:*');
   emicdora_set_source_breadcrumbs($object);
