@@ -175,7 +175,7 @@ function islandora_emicdora_add_transcription_form_validate($form, $form_state) 
  *   Drupal form_state
  */
 function islandora_emicdora_add_transcription_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'emicdora', 'includes/calliope');
+  module_load_include('inc', 'collation', 'includes/calliope');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $versionable_object_pid = $form_state['values']['versionable_object_pid'];
   $versionable_object = islandora_object_load($versionable_object_pid);
@@ -210,7 +210,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   }
 
   $transcription->ingestDatastream($transcription_datastream);
-  islandora_calliope_write_file($transcription->id);
+  emicdora_calliope_write_file($transcription->id);
   drupal_set_message(t("Transcription object created"));
 }
 
@@ -373,7 +373,7 @@ function islandora_critical_transcription_edit_form($form, $form_state, $transcr
  *   Drupal form
  */
 function islandora_critical_transcription_edit_form_submit($form, $form_state) {
-  module_load_include('inc', 'emicdora_advanced', 'includes/calliope');
+  module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;
   $content = $form_state['values']['transcription'];
@@ -472,7 +472,7 @@ function emicdora_build_text_file($object, $filename) {
  *   file to be added
  */
 function islandora_transcription_file_add($transcription, $transcription_datastream, $filename) {
-  module_load_include('inc', 'emicdora_advanced', 'includes/calliope');
+  module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_datastream->setContentFromFile($filename);
   $transcription->ingestDatastream($transcription_datastream);
   islandora_calliope_write_file($transcription->id);

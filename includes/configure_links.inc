@@ -68,9 +68,12 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
   $form['emicdora_tabs']['version_settings']['emicdora_version_fields'] = $version_terms;
   $form['emicdora_tabs']['version_settings']['emicdora_source_fields'] = $source_terms;
   if (isset($version_terms['terms'])) {
-    $form_state['source_terms'] = $version_terms['terms'];
+    $form_state['version_terms'] = $version_terms['terms'];
   }
 
+  if (isset($source_terms['terms'])) {
+    $form_state['source_terms'] = $source_terms['terms'];
+  }
   // The content of the popup dialog.
   $form['emicdora_dialog'] = array(
     '#theme_wrappers' => array('container'),
@@ -201,7 +204,9 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       $solr_field = isset($form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field']) ? $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'] : '';
       $solr_field_settings = array();
       if (isset($form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field])) {
-        $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
+        if ($form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field]) {
+          $solr_field_settings = $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field];
+        }
       }
       $values = array_merge_recursive($values, $solr_field_settings);
       // Prepare dialog values.
@@ -344,7 +349,6 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
     '#type' => 'textfield',
     '#title' => $title,
     '#size' => 45,
-    '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
   );
   if (isset($solr_field_error) && !empty($solr_field_error)) {
@@ -388,6 +392,9 @@ function emicdora_update_fields($form, &$form_state) {
   switch ($form_state['triggering_element']['#field_type']) {
     case 'version_fields':
       return $form['emicdora_tabs']['version_settings']['emicdora_version_fields'];
+
+    case 'source_fields':
+      return $form['emicdora_tabs']['version_settings']['emicdora_source_fields'];
   }
 }
 
@@ -526,20 +533,22 @@ function emicdora_admin_settings_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $critical_edition = $form_state['values']['critical_edition_pid'];
   emicdora_delete_terms($critical_edition);
-  $type = 'version';
-  $terms = $form_state['solr_field_settings']['emicdora_version_fields'];
-  foreach ($terms as $label => $components) {
-    $solr_field_settings = array(
-      'label' => $components['label'],
-      'value' => $components['value'],
-    );
-    $fields = array(
-      'solr_field' => $label,
-      'field_type' => 'unused',
-      'weight' => 0,
-      'solr_field_settings' => $solr_field_settings,
-    );
-    emicdora_insert_terms($critical_edition, $type, $fields);
+  $terms['version'] = $form_state['solr_field_settings']['emicdora_version_fields'];
+  $terms['source'] = $form_state['solr_field_settings']['emicdora_source_fields'];
+  foreach ($terms as $term_type => $values) {
+    foreach ($values as $label => $components) {
+      $solr_field_settings = array(
+        'label' => $components['label'],
+        'value' => $components['value'],
+      );
+      $fields = array(
+        'solr_field' => $label,
+        'field_type' => 'unused',
+        'weight' => 0,
+        'solr_field_settings' => $solr_field_settings,
+      );
+      emicdora_insert_terms($critical_edition, $term_type, $fields);
+    }
   }
 }
 
@@ -689,6 +698,10 @@ function emicdora_get_form_function($field_type = NULL) {
         $form_callback = 'emicdora_settings_version_fields';
         break;
 
+      case 'source_fields':
+        $form_callback = 'emicdora_settings_version_fields';
+        break;
+
       default:
         return FALSE;
     }
@@ -711,6 +724,14 @@ function emicdora_handle_solr_field_settings($solr_field_settings = NULL, $field
   if (!empty($solr_field_settings) && !empty($field_type)) {
     switch ($field_type) {
       case 'version_fields':
+        $to_return = array(
+          'label' => trim($solr_field_settings['label']),
+          'value' => trim($solr_field_settings['value']),
+          'permissions' => $solr_field_settings['permissions'],
+        );
+        break;
+
+      case 'source_fields':
         $to_return = array(
           'label' => trim($solr_field_settings['label']),
           'value' => trim($solr_field_settings['value']),
