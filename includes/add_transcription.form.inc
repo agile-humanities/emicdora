@@ -13,10 +13,12 @@
  * @param array $form_state
  *   The Drupal form state.
  */
-function emicdora_create_transcription_form(array $form, array &$form_state, AbstractObject $object) {
+function islandora_emicdora_add_transcription_form($form, $form_state, AbstractObject $object) {
+
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  emicdora_set_source_breadcrumbs($object);
   drupal_set_title($object->label);
 
   drupal_add_css(drupal_get_path('module', 'emicdora') . "/css/fix_textfield_width.css");
@@ -31,21 +33,18 @@ function emicdora_create_transcription_form(array $form, array &$form_state, Abs
     '#default_value' => t('Transcription of') . ' ' . $object->label,
   );
 
-  $members = emicdora_get_members($object->id);
-  $tei_rdf = array_search('islandora:criticalEditionCModel', $members);
-  if ($tei_rdf) {
-    $page_results = islandora_paged_content_get_pages(islandora_object_load($tei_rdf));
-    $count = count($page_results);
-    $input_types['tei_rdf'] = t('Create transcription from TEI-RDF Object');
-    $form['cwrcwriter'] = array(
-      '#type' => 'hidden',
-      '#value' => $tei_rdf,
-    );
-    $form['page_count'] = array(
-      '#type' => 'hidden',
-      '#value' => $count,
-    );
-  }
+  $page_results = islandora_paged_content_get_pages($object);
+  $count = count($page_results);
+  $input_types['tei_rdf'] = t('Create transcription from TEI-RDF Object');
+  $form['version'] = array(
+    '#type' => 'hidden',
+    '#value' => $object->id,
+  );
+  $form['page_count'] = array(
+    '#type' => 'hidden',
+    '#value' => $count,
+  );
+
   $input_types['none'] = t('Create born-digital transcription');
   $input_types['file'] = t('Upload transcription from file');
 
@@ -59,7 +58,7 @@ function emicdora_create_transcription_form(array $form, array &$form_state, Abs
     '#options' => $input_types,
     '#default_value' => 'none',
   );
-  if ($tei_rdf && $count > 1) {
+  if ($count > 1) {
     $form['page'] = array(
       '#type' => 'fieldset',
       '#title' => t('Select page range'),
@@ -99,9 +98,7 @@ function emicdora_create_transcription_form(array $form, array &$form_state, Abs
     );
   }
   $form['file'] = array(
-    '#title' => t('Upload Optional Transcription.'),
     '#type' => 'managed_file',
-    '#description' => t('Select file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $extensions[0])),
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
@@ -129,9 +126,25 @@ function emicdora_create_transcription_form(array $form, array &$form_state, Abs
  * @param array $form_state
  *   Drupal form state
  */
-function emicdora_create_transcription_form_validate($form, $form_state) {
-  $versionable_object_pid = $form_state['values']['versionable_object_pid'];
-  $current_transcriptions = emicdora_get_related_transcriptions($versionable_object_pid);
+function islandora_emicdora_add_transcription_form_validate($form, $form_state) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $versionable_object = islandora_object_load($form_state['values']['version']);
+  $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  $critical_edition = islandora_object_load($parents[0]['object']['value']);
+  $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+  $transcription_data = array();
+  foreach ($versions as $type) {
+    foreach ($type as $version) {
+      $versionable_objects[] = $version;
+      $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
+      $transcription_data = array_merge($transcription_data, $version_data);
+    }
+  }
+  foreach ($transcription_data as $pid => $values) {
+    foreach ($values as $value) {
+      $current_transcriptions[] = $value['label'];
+    }
+  }
   $page_count = $form_state['values']['page_count'];
   if (in_array($form_state['values']['transcription'], $current_transcriptions)) {
     form_set_error('transcription', t('A transcription with this name is already associated with this versionable object.'));
@@ -161,8 +174,8 @@ function emicdora_create_transcription_form_validate($form, $form_state) {
  * @param array $form_state
  *   Drupal form_state
  */
-function emicdora_create_transcription_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'emicdora', 'includes/calliope');
+function islandora_emicdora_add_transcription_form_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'collation', 'includes/calliope');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $versionable_object_pid = $form_state['values']['versionable_object_pid'];
   $versionable_object = islandora_object_load($versionable_object_pid);
@@ -181,7 +194,7 @@ function emicdora_create_transcription_form_submit(array $form, array &$form_sta
       $start_page = $form_state['values']['first_page'];
       $end_page = $form_state['values']['last_page'];
     }
-    $tei_rdf = islandora_object_load($form_state['values']['cwrcwriter']);
+    $tei_rdf = islandora_object_load($form_state['values']['versionable_object_pid']);
     emicdora_add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
   }
 
@@ -197,7 +210,7 @@ function emicdora_create_transcription_form_submit(array $form, array &$form_sta
   }
 
   $transcription->ingestDatastream($transcription_datastream);
-  islandora_calliope_write_file($transcription->id);
+  emicdora_calliope_write_file($transcription->id);
   drupal_set_message(t("Transcription object created"));
 }
 
@@ -213,7 +226,7 @@ function emicdora_manage_transcriptions_form(array $form, array &$form_state, Ab
   $form = array();
   $rows = array();
   $versionable_object_pid = $object->id;
-  $transcriptions = emicdora_get_related_transcriptions($versionable_object_pid);
+  $transcriptions = islandora_critical_get_related_transcriptions($versionable_object_pid);
   $members = emicdora_get_members($object->id);
   $cwrcwriter = array_search('islandora:criticalEditionCModel', $members);
   foreach ($transcriptions as $pid => $label) {
@@ -308,7 +321,7 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
 
     case 'cwrc_update':
       $cwrcwriter = $form_state['values']['cwrcwriter'];
-      emicdora_update_from_tei_rdf_object_file_add($cwrcwriter, $transcription_pid);
+      islandora_update_from_tei_rdf_object($cwrcwriter, $transcription_pid);
       break;
   }
 }
@@ -323,7 +336,7 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
  * @param abstractObject $transcription
  *   transcription object
  */
-function emicdora_transcription_edit_form($form, $form_state, $transcription) {
+function islandora_critical_transcription_edit_form($form, $form_state, $transcription) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
   drupal_set_breadcrumb(islandora_get_breadcrumbs($transcription));
   drupal_set_title($transcription->label);
@@ -359,7 +372,7 @@ function emicdora_transcription_edit_form($form, $form_state, $transcription) {
  * @param array $form_state
  *   Drupal form
  */
-function emicdora_transcription_edit_form_submit($form, $form_state) {
+function islandora_critical_transcription_edit_form_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;
@@ -412,7 +425,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
   $batch = array(
     'title' => t('Creating Transcription from TEI-RDF Object'),
     'operations' => array(),
-    'file' => drupal_get_path('module', 'emicdora') . '/includes/transcriptions.inc',
+    'file' => drupal_get_path('module', 'emicdora_advanced') . '/includes/transcriptions.inc',
     'progress_message' => t('@current of @total pages processed.'),
   );
   $flat_pid = islandora_escape_pid_for_function($versionable_object_pid);
@@ -423,7 +436,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
         'page_object' => islandora_object_load($page),
         'filename' => $filename));
   }
-  $batch['operations'][] = array('emicdora_transcription_file_add',
+  $batch['operations'][] = array('islandora_transcription_file_add',
     array(
       'transcription' => $transcription,
       'transcription_datastream' => $transcription_datastream,
@@ -441,7 +454,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
  *   Temp file to hold data
  */
 function emicdora_build_text_file($object, $filename) {
-  module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'emicdora_advanced', 'includes/utilities');
   if (isset($object['CWRC'])) {
     $text = emicdora_convert_tei_to_plain_text($object['CWRC']->content);
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
@@ -458,7 +471,7 @@ function emicdora_build_text_file($object, $filename) {
  * @param string $filename
  *   file to be added
  */
-function emicdora_transcription_file_add($transcription, $transcription_datastream, $filename) {
+function islandora_transcription_file_add($transcription, $transcription_datastream, $filename) {
   module_load_include('inc', 'emicdora', 'includes/calliope');
   $transcription_datastream->setContentFromFile($filename);
   $transcription->ingestDatastream($transcription_datastream);
@@ -474,7 +487,7 @@ function emicdora_transcription_file_add($transcription, $transcription_datastre
  * @param string $transcription_pid
  *   PID of Transcription Object being updated
  */
-function emicdora_update_from_tei_rdf_object_file_add($tei_rdf_object_pid, $transcription_pid) {
+function islandora_update_from_tei_rdf_object($tei_rdf_object_pid, $transcription_pid) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
   $tei_rdf_object = islandora_object_load($tei_rdf_object_pid);
@@ -483,7 +496,7 @@ function emicdora_update_from_tei_rdf_object_file_add($tei_rdf_object_pid, $tran
   $batch = array(
     'title' => t('Creating Transcription from TEI-RDF Object'),
     'operations' => array(),
-    'file' => drupal_get_path('module', 'emicdora') . '/includes/transcriptions.inc',
+    'file' => drupal_get_path('module', 'emicdora_advanced') . '/includes/transcriptions.inc',
     'progress_message' => t('@current of @total pages processed.'),
   );
 
@@ -494,7 +507,7 @@ function emicdora_update_from_tei_rdf_object_file_add($tei_rdf_object_pid, $tran
         'page_object' => islandora_object_load($page),
         'filename' => $filename));
   }
-  $batch['operations'][] = array('emicdora_transcription_file_update',
+  $batch['operations'][] = array('islandora_transcription_file_update',
     array(
       'transcription' => $transcription,
       'filename' => $filename));
@@ -510,7 +523,7 @@ function emicdora_update_from_tei_rdf_object_file_add($tei_rdf_object_pid, $tran
  * @param string $filename
  *   file to be added
  */
-function emicdora_transcription_file_update($transcription, $filename) {
+function islandora_transcription_file_update($transcription, $filename) {
   $transcription['TRANSCRIPTION']->setContentFromFile($filename);
   unlink($filename);
 }

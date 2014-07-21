@@ -120,13 +120,14 @@ function versionable_object_viewer_library() {
  */
 function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
   // Add the jQuery EasyUI library.
-  drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
+
 
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
 
   // This the Shared Canvas prefered jQuery.
+    drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
   drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-1.7.js');
   drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');

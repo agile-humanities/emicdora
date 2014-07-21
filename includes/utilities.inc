@@ -81,7 +81,7 @@ function emicdora_has_content_model(AbstractObject $object, $content_model) {
  *   model type if one exists, otherwise FALSE.
  */
 function emicdora_get_default_collection($content_model) {
-  if ($content_model == 'islandora:criticalEditionCModel') {
+  if ($content_model == 'islandora:criticalEditionContainerCModel') {
     return EMICDORA_EDITION_COLLECTION;
   }
   elseif (emicdora_is_source_content_model($content_model)) {
@@ -284,67 +284,7 @@ function emicdora_get_apparatus_as_content($object) {
 }
 
 /**
- * Retrieves all source objects.
- *
- * @param AbstractObject $object
- *   Critical Edition object
- *
- * @return array
- *   Sorted member objects
- */
-function emicdora_get_raw_sources($object, $type = 'source', $offset = 0, $limit = 25) {
-  $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
-  $filters[] = format_string('!membership:("info:fedora/!pid")', array(
-    '!pid' => $object->id,
-    '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
-  switch ($type) {
-    case 'source':
-      $source_content_models = emicdora_source_content_models();
-      break;
-
-    case 'versions':
-      $source_content_models = array('islandora:versionCModel' => 0);
-  }
-
-  $sources = array();
-  foreach (array_keys($source_content_models) as $content_model) {
-    $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
-  }
-  $filters[] = format_string('!model:(!sources)', array(
-    '!sources' => implode(' OR ', $sources),
-    '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
-  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-  $solr->setCreateDocuments(FALSE);
-
-  try {
-    $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
-    $json = json_decode($results->getRawResponse(), TRUE);
-  }
-  catch (Exception $e) {
-    watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
-  }
-  $sorted_results = array();
-  foreach ($json['response']['docs'] as $candidate) {
-    if ($type == 'source') {
-      $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-      $content_model = $content_model_parts[1];
-      $sorted_results[$content_model][] = $candidate['PID'];
-    }
-    if ($type == 'versions') {
-      $type_parts = array();
-      if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
-        $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
-      }
-      $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
-      $sorted_results[$type_part][] = $candidate['PID'];
-    }
-  }
-  return $sorted_results;
-}
-
-/**
- * Gets all versionable objects assicated with critical edition.
+ * Gets all versionable objects associated with critical edition.
  *
  * @return array
  *   PIDs of currently associated versionable objects
@@ -397,6 +337,7 @@ and \$subject <dc:title> \$title)
 
   return $edition_pids;
 }
+
 /**
  * Constructs CWRC datastream on an object if none exists.
  *
@@ -425,26 +366,22 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   }
   catch (Exception $e) {
     drupal_set_message(t(
-        'An error occured while creating the CWRC datastream on @pid with message: "@message"',
-        array(
-          '@pid' => $object->id,
-          "@message" => $e->getMessage(),
-        )
-      ),
-      'error'
+            'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
+              '@pid' => $object->id,
+              "@message" => $e->getMessage(),
+            )
+        ), 'error'
     );
     watchdog(
-      'islandora_critical_edition',
-      'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace',
-      array(
-        '@pid' => $object->id,
-        '@message' => $e->getMessage(),
-        '@trace' => $e->getTraceAsString(),
-      ),
-      WATCHDOG_ERROR
+        'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
+          '@pid' => $object->id,
+          '@message' => $e->getMessage(),
+          '@trace' => $e->getTraceAsString(),
+        ), WATCHDOG_ERROR
     );
   }
 }
+
 /**
  * Converts the given TEI xml document to plain text.
  *
@@ -467,4 +404,125 @@ function emicdora_convert_tei_to_plain_text($tei) {
     $text = str_replace($candidate, "$candidate\n", $text);
   }
   return strip_tags($text);
+}
+
+/**
+ * Retrieves all member objects.
+ *
+ * @param AbstractObject $object
+ *   Critical Edition object
+ *
+ * @return array
+ *   Sorted member objects
+ */
+function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
+  $filters[] = format_string('!membership:("info:fedora/!pid")', array(
+    '!pid' => $object->id,
+    '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
+  switch ($type) {
+    case 'source':
+      $source_content_models = emicdora_source_content_models();
+      break;
+
+    case 'versions':
+      $source_content_models = array('islandora:versionCModel' => 0);
+      break;
+
+    case 'source_versions':
+      $configs = emicdora_get_terms($object->id, 'version');
+      $categories = array();
+      foreach ($configs as $config) {
+        $categories[$config['solr_field']] = $config['solr_field_settings']['label'];
+      }
+      $source_content_models = array('islandora:versionCModel' => 0);
+      break;
+
+    case 'transcriptions':
+      $source_content_models = array('islandora:transcriptionCModel' => 0);
+      break;
+  }
+
+  $sources = array();
+  foreach (array_keys($source_content_models) as $content_model) {
+    $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
+  }
+  $filters[] = format_string('!model:(!sources)', array(
+    '!sources' => implode(' OR ', $sources),
+    '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
+  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
+  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
+  $solr->setCreateDocuments(FALSE);
+
+  try {
+    $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
+    $json = json_decode($results->getRawResponse(), TRUE);
+  }
+  catch (Exception $e) {
+    watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
+  }
+  $sorted_results = array();
+  foreach ($json['response']['docs'] as $candidate) {
+
+    switch ($type) {
+
+      case 'source':
+        $configs = emicdora_get_terms($object->id, $type);
+        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
+        $content_model = $content_model_parts[1];
+        $sorted_results[$content_model][] = $candidate['PID'];
+        break;
+
+      case 'versions':
+        $configs = emicdora_get_terms($object->id, 'version');
+        $version_facets = array();
+        foreach ($configs as $config) {
+          $version_facets[$config['solr_field']] = array(
+            'solr_field' => $config['solr_field_settings']['label'],
+            'solr_value' => $config['solr_field_settings']['value'],
+          );
+        }
+        $added = FALSE;
+        foreach ($version_facets as $label => $facet) {
+          if (isset($candidate[$facet['solr_field']])) {
+            $sorted_results[$label][] = $candidate['PID'];
+            $added = TRUE;
+          }
+        }
+        if (!$added) {
+          $sorted_results[t('Unclassified')][] = $candidate['PID'];
+        }
+        break;
+
+      case 'source_versions':
+        $version_facets = array();
+        foreach ($configs as $config) {
+          $version_facets[$config['solr_field']] = array(
+            'solr_field' => $config['solr_field_settings']['label'],
+            'solr_value' => $config['solr_field_settings']['value'],
+          );
+        }
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
+          $sorted_results[$type_part][] = $candidate['PID'];
+        }
+
+        break;
+
+      case 'transcriptions':
+        $type_parts = array();
+        if (isset($candidate['RELS_EXT_hasSourceType_uri_t'])) {
+          $type_parts = explode('/', $candidate['RELS_EXT_hasSourceType_uri_t']);
+        }
+        $type_part = isset($type_parts[1]) ? $type_parts[1] : t("unclassified");
+        $sorted_results[$object->id][] = array('label' => $candidate['dc.title'][0], 'pid' => $candidate['PID']);
+        break;
+    }
+  }
+  return $sorted_results;
 }

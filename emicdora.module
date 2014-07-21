@@ -163,10 +163,10 @@ function emicdora_menu() {
     'emicdora/contextual-links/transcription/%islandora_object/add' => array(
       'title' => 'Add New Transcription',
       'file' => 'includes/add_transcription.form.inc',
-      'page callback' => 'emicdora_add_transcription_form',
-      'page arguments' => array(3),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_emicdora_add_transcription_form', 3),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'create_transcription'),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -176,12 +176,32 @@ function emicdora_menu() {
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/version/%islandora_object/create' => array(
-      'title' => 'Add this source object to Critical Edition',
+      'title' => 'Add new version',
       'page callback' => 'emicdora_ingest_versionable_object_page',
       'page arguments' => array(3),
       'access callback' => 'emicdora_show_version_context_menu',
       'access arguments' => array(ISLANDORA_INGEST, 3),
       'file' => 'includes/ingest_versionable_object.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/link' => array(
+      'title' => 'Link existing version',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_link_version_form', 3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/link_version.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version/%islandora_object/configure' => array(
+      'title' => 'Configure Links',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_configure_version_links', 3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -273,8 +293,14 @@ function emicdora_permission() {
  * Implements hook_theme().
  */
 function emicdora_theme() {
+  $path = drupal_get_path('module', 'emicdora');
   return array(
-      // @todo Theme functions, etc.
+    // Theme admin form fields.
+    'emicdora_fields' => array(
+      'path' => $path,
+      'file' => 'includes/configure_links.inc',
+      'render element' => 'form',
+    ),
   );
 }
 
@@ -382,14 +408,14 @@ function emicdora_block_configure($delta = '') {
 function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $path_parts = explode('/', $_GET['q']);
-  $source_selected = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
+  $is_source = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
   $is_sources_page = (isset($path_parts[3]) && $path_parts[3] == 'sources') ? TRUE : FALSE;
   // Check to see if we are on a critical edition object.
   $object = menu_get_object('islandora_object', 2);
   $versionable_object = NULL;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
+  $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
   if (!$is_critical_edition) {
-    $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
     if (!$is_versionable_object) {
       return array();
     }
@@ -401,11 +427,9 @@ function emicdora_block_view($delta = '') {
         return array();
       }
       $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
-      $editors = emicdora_get_members($versionable_object->id, 'islandora:tei-rdfCModel');
-      if (!empty($editors)) {
-        $editor_pid = key($editors);
-        $editor = islandora_object_load($editor_pid);
-        $source_objects = $editor->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+      $source_objects = $versionable_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+      if (!empty($source_objects)) {
+
         $source_object = $source_objects[0]['object']['value'];
       }
     }
@@ -431,24 +455,24 @@ function emicdora_block_view($delta = '') {
           );
         }
       }
-      if (!empty($links)) {
-        $block['subject'] = t('Apparatus');
-        $block['content'] = array(
-          '#theme' => 'links',
-          '#links' => $links,
-          '#contextual_links' => array(
-            'emicdora' => array(
-              'emicdora/contextual-links/apparatus',
-              array($critical_edition->id),
-            ),
+
+      $block['subject'] = t('Apparatus');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#contextual_links' => array(
+          'emicdora' => array(
+            'emicdora/contextual-links/apparatus',
+            array($critical_edition->id),
           ),
-        );
-      }
+        ),
+      );
+
       break;
 
     case 'source_material':
       module_load_include('inc', 'emicdora', 'includes/utilities');
-      $raw_data = emicdora_get_raw_sources($critical_edition);
+      $raw_data = emicdora_get_raw_objects($critical_edition);
       $content_types = emicdora_source_content_models();
       $full_count = 0;
       $links = array();
@@ -483,7 +507,17 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
         break;
       }
-      $versions = emicdora_get_raw_sources($critical_edition, $type = 'versions');
+      switch ($is_source) {
+        case TRUE:
+          $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
+          $configs = emicdora_get_configuration($path_parts[4], 'version');
+          break;
+
+        case FALSE:
+          $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+          $configs = emicdora_get_configuration($critical_edition->id, 'version');
+          break;
+      }
       $total = 0;
       foreach ($versions as $key => $value) {
         $total += count($versions[$key]);
@@ -491,13 +525,18 @@ function emicdora_block_view($delta = '') {
 
       $links = array();
       foreach (array_keys($versions) as $key) {
-        if ($key == 'unclassified') {
+        if ($key == 'Unclassified') {
           continue;
+        }
+        $solr = NULL;
+        if (array_key_exists($key, $configs)) {
+          $solr = $configs[$key];
         }
         $count = count($versions[$key]);
         $links[] = array(
           'title' => ucfirst($key) . " ($count)",
-          'href' => "islandora/object/{$critical_edition->id}/versions/$key",
+          'href' => "islandora/object/{$critical_edition->id}/versions",
+          'solr' => array('solr' => $solr),
         );
       }
       $links[] = array(
@@ -519,31 +558,43 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'operations':
+      $links = array();
+      if ($is_critical_edition) {
+        $id = $critical_edition->id;
+      }
       if ($versionable_object) {
+        $id = $versionable_object->id;
+      }
+      if ($is_source) {
+        $id = $path_parts[4];
+      }
 
-        $links = array();
+      $links[] = array(
+        'title' => 'View',
+        'href' => "islandora/object/$id",
+      );
+
+      if ($is_source) {
         $links[] = array(
-          'title' => 'View',
-          'href' => "islandora/object/{$versionable_object->id}",
+          'title' => 'View Source Object',
+          'href' => "islandora/object/{$path_parts[4]}",
         );
-        if (isset($editor)) {
-          $links[] = array(
-            'title' => 'View Source Object',
-            'href' => "islandora/object/$source_object",
-          );
-        }
-        if (user_access(EMICDORA_MODIFY_EDITION)) {
-          $links[] = array(
-            'title' => 'Edit Metatdata',
-            'href' => "islandora/edit_form/{$versionable_object->id}/MODS",
-          );
-        }
-        if (user_access(EMICDORA_DELETE_EDITION)) {
-          $links[] = array(
-            'title' => 'Delete',
-            'href' => "islandora/object/{$versionable_object->id}/delete",
-          );
-        }
+      }
+
+      if (user_access(EMICDORA_MODIFY_EDITION)) {
+        $links[] = array(
+          'title' => 'Edit Metatdata',
+          'href' => "islandora/edit_form/$id/MODS",
+        );
+      }
+      if (user_access(EMICDORA_DELETE_EDITION)) {
+        $links[] = array(
+          'title' => 'Delete',
+          'href' => "islandora/object/$id/delete",
+        );
+      }
+
+      if (!empty($links)) {
         $block['subject'] = t('Operations');
         $block['content'] = array(
           array(
@@ -564,7 +615,7 @@ function emicdora_block_view($delta = '') {
         'title' => 'Diplomatic Transcription',
         'href' => $path,
       );
-      if (module_exists('tei_editor') && isset($editor) && user_access(EMICDORA_MODIFY_EDITION)) {
+      if (module_exists('tei_editor') && $is_versionable_object && user_access(EMICDORA_MODIFY_EDITION)) {
         $links[] = array(
           'title' => 'Edit',
           'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
@@ -596,25 +647,44 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
+      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source) {
         break;
       }
+      module_load_include('inc', 'emicdora', 'includes/utilities');
+      $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+      $transcription_data = array();
+      foreach ($versions as $type) {
+        foreach ($type as $version) {
+          $versionable_objects[] = $version;
+          $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
+          $transcription_data = array_merge($transcription_data, $version_data);
+        }
+      }
       $links = array();
-      $links[] = array(
-        'title' => 'Transcription #1',
-        'href' => $path,
-      );
+      foreach ($transcription_data as $pid => $transcriptions) {
+        foreach ($transcriptions as $transcription) {
+          $transcription_object = islandora_object_load($pid);
+          $links[] = array(
+            'title' => $transcription['label'],
+            'href' => "islandora/object/" . $transcription['pid'],
+            'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
+          );
+        }
+      }
+
       $block['subject'] = t('Transcriptions');
       $block['content'] = array(
         '#theme' => 'links',
         '#links' => $links,
-        '#contextual_links' => array(
+      );
+      if ($is_versionable_object) {
+        $block['content']['#contextual_links'] = array(
           'emicdora' => array(
             'emicdora/contextual-links/transcription',
-            array($critical_edition->id),
+            array($versionable_object->id),
           ),
-        ),
-      );
+        );
+      }
       break;
   }
   return $block;
@@ -752,6 +822,15 @@ function emicdora_islandora_xml_form_builder_form_associations() {
       'template' => FALSE,
     );
   }
+  // Add the 'islandora:criticalEditionContainerCModel' content model.
+  $source_form_associations[] = array(
+    'content_model' => 'islandora:criticalEditionContainerCModel',
+    'form_name' => 'EMiC Source MODS form',
+    'dsid' => 'MODS',
+    'title_field' => array('titleInfo', 'title'),
+    'transform' => 'mods_to_dc.xsl',
+    'template' => FALSE,
+  );
   return $source_form_associations + array(
     'critical_edition_form_mods' => array(
       'content_model' => 'islandora:criticalEditionCModel',
@@ -829,17 +908,8 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
       $content .= theme('islandora_large_image', array('islandora_object' => $source_object));
       break;
-
   }
   return array('emicdora' => $content);
-}
-
-/**
- * Implements hook_CMODEL_islandora_view_object().
- */
-function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
-  // Placeholder only.
-  // NOTE: the version_veiwer module implements this hook.
 }
 
 /**
@@ -854,6 +924,7 @@ function emicdora_islandora_versionCModel_islandora_view_object(AbstractObject $
 function emicdora_critical_edition_sources(AbstractObject $object, $content_model = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  drupal_set_title(t("@edition - Source Objects", array('@edition' => $object->label)));
   // Only show members of the given critical edition.
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -894,6 +965,9 @@ function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL
   if ($type) {
     $filters[] = format_string('!type:("info:fedora/' . $type . '")', array(
       '!type' => 'RELS_EXT_hasSourceType_uri_ms'));
+  }
+  if (isset($_GET['solr'])) {
+    $filters[] = $_GET['solr'];
   }
   $_GET['f'] = array(implode(' AND ', $filters));
   $output = islandora_solr('*:*');
@@ -936,6 +1010,12 @@ function emicdora_object_management_access($object, $context) {
   $access = FALSE;
 
   switch ($context) {
+
+    case 'create_transcription':
+      if (in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_MODIFY_EDITION)) {
+        $access = TRUE;
+      }
+      break;
 
     case 'associate_versionable_object':
       if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(EMICDORA_MODIFY_EDITION)) {
@@ -1054,6 +1134,30 @@ function emicdora_show_version_context_menu($permission, $object) {
     if (isset($url_parts[4]) && $url_parts[4] == 'create' && $url_parts[1] == 'contextual-links' && $url_parts[2] == 'version') {
       $access = TRUE;
     }
+    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      $access = TRUE;
+    }
   }
   return $access;
+}
+
+/**
+ * Implements hook_forms().
+ */
+function emicdora_forms($form_id, $args) {
+  $forms = array();
+  if (strpos($form_id, 'islandora_solr_admin') === 0) {
+    module_load_include('inc', 'islandora_solr', 'includes/admin');
+
+    // Handle two form using the same building function, but allowing each to
+    // be altered separately.
+    if (in_array($form_id, array(
+          'islandora_solr_admin_settings_search_fields',
+          'islandora_solr_admin_settings_sort_fields',
+        ))) {
+      $forms[$form_id] = array(
+        'callback' => 'islandora_solr_admin_settings_search_or_sort_fields',
+      );
+    }
+  }
 }

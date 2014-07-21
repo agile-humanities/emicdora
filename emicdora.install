@@ -24,3 +24,40 @@ function emicdora_uninstall() {
   $variables = array();
   array_walk($variables, 'variable_del');
 }
+
+/**
+ * Implements hook_schema().
+ */
+function emicdora_schema() {
+  $schema['emicdora_facets'] = array(
+    'description' => 'Facets for Source and Version categories.',
+    'fields' => array(
+      'fid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for each critical edition.',
+      ),
+      'critical_edition' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'Fedora PID of Critical Edition.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'version or source.',
+      ),
+      'terms' => array(
+        'type' => 'varchar',
+        'length' => 2047,
+        'not null' => FALSE,
+        'description' => 'serialized array of Label => Solr field pairs.',
+      ),
+    ),
+    'primary key' => array('fid'),
+  );
+  return $schema;
+}

@@ -202,26 +202,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
           'effect' => 'fade',
         ),
       ),
-      'tei_rdf_ajax_wrapper' => array(
-        '#access' => $valid_source_selected,
-        '#type' => 'container',
-        '#prefix' => '<div id="tei-rdf-ajax-container-wrapper">',
-        '#suffix' => '</div>',
-        'tei_rdf' => array(
-          '#access' => $tei_rdf_source == 'existing',
-          '#type' => 'tableselect',
-          '#multiple' => FALSE,
-          '#header' => array('PID', 'Label'),
-          '#options' => $tei_rdf_objects,
-          '#empty' => t('No TEI-RDF objects available. Please select "Create New"'),
-        ),
-        'tei_rdf_label' => array(
-          '#access' => $tei_rdf_source == 'new',
-          '#required' => TRUE,
-          '#type' => 'textfield',
-          '#title' => t('TEI-RDF Label'),
-        ),
-      ),
+
       'transcription_label' => array(
         '#access' => $valid_source_selected,
         '#type' => 'textfield',
@@ -395,16 +376,14 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   }
   if (in_array('islandora:sp-audioCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
   if (in_array('islandora:sp_videoCModel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
   if (in_array('islandora:sp_large_image_cmodel', $source->models)) {
     $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'image');
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   }
+  $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
@@ -749,6 +728,9 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
     $text = $page['OCR']->content;
   }
   file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
+
+  // Force delete.
+  file_delete($file, TRUE);
 }
 
 /**
