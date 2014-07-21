@@ -467,8 +467,6 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
 
     switch ($type) {
 
-
-
       case 'version':
       case 'source':
         $configs = emicdora_get_terms($object->id, $type);

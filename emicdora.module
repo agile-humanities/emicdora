@@ -470,7 +470,7 @@ function emicdora_block_view($delta = '') {
 
       break;
 
-case 'source_material':
+    case 'source_material':
 
       $sources = emicdora_get_raw_objects($critical_edition);
       $configs = emicdora_get_configuration($critical_edition->id, 'source');
