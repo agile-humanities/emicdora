@@ -131,7 +131,7 @@ function islandora_emicdora_add_transcription_form_validate($form, $form_state) 
   $versionable_object = islandora_object_load($form_state['values']['version']);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = islandora_object_load($parents[0]['object']['value']);
-  $versions = emicdora_get_raw_objects($critical_edition, 'versions');
+  $versions = emicdora_get_raw_objects($critical_edition, 'version');
   $transcription_data = array();
   foreach ($versions as $type) {
     foreach ($type as $version) {

@@ -426,7 +426,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
       $source_content_models = emicdora_source_content_models();
       break;
 
-    case 'versions':
+    case 'version':
       $source_content_models = array('islandora:versionCModel' => 0);
       break;
 
@@ -467,15 +467,11 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
 
     switch ($type) {
 
+
+
+      case 'version':
       case 'source':
         $configs = emicdora_get_terms($object->id, $type);
-        $content_model_parts = explode('/', $candidate['RELS_EXT_hasModel_uri_t']);
-        $content_model = $content_model_parts[1];
-        $sorted_results[$content_model][] = $candidate['PID'];
-        break;
-
-      case 'versions':
-        $configs = emicdora_get_terms($object->id, 'version');
         $version_facets = array();
         foreach ($configs as $config) {
           $version_facets[$config['solr_field']] = array(
@@ -485,7 +481,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
         }
         $added = FALSE;
         foreach ($version_facets as $label => $facet) {
-          if (isset($candidate[$facet['solr_field']])) {
+          if (isset($candidate[$facet['solr_field']]) && $candidate[$facet['solr_field']] == $facet['solr_value']) {
             $sorted_results[$label][] = $candidate['PID'];
             $added = TRUE;
           }
