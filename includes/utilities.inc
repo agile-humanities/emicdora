@@ -367,16 +367,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-      '@pid' => $object->id,
-      "@message" => $e->getMessage(),
+              '@pid' => $object->id,
+              "@message" => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
-      '@trace' => $e->getTraceAsString(),
+          '@pid' => $object->id,
+          '@message' => $e->getMessage(),
+          '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -512,11 +512,6 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
           $sorted_results[$type_part][] = $candidate['PID'];
         }
 
-        foreach ($categories as $solr_field => $label) {
-          if (isset($candidate['RELS_EXT_isDerivationOf_uri_s']) && $candidate['RELS_EXT_isDerivationOf_uri_s'] == "info:fedora/$source_id") {
-            //   $sorted_results[$type_part][] = $candidate['PID'];
-          }
-        }
         break;
 
       case 'transcriptions':

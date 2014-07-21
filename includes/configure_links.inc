@@ -36,10 +36,10 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
-  // Display fields.
+  // Display version fields.
   $version_terms = array(
     '#type' => 'item',
-    '#title' => t('Display fields'),
+    '#title' => t('Display Version fields'),
     '#description' => t('Set labels for Solr fields to be included in the search results.'),
     '#tree' => TRUE,
     '#prefix' => '<div id="emicdora-version-wrapper">',
@@ -48,11 +48,25 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
     '#theme' => 'emicdora_fields',
   );
 
+  // Display source fields.
+  $source_terms = array(
+    '#type' => 'item',
+    '#title' => t('Display Source fields'),
+    '#description' => t('Set labels for Solr fields to be included in the search results.'),
+    '#tree' => TRUE,
+    '#prefix' => '<div id="emicdora-source-wrapper">',
+    '#suffix' => '</div>',
+    '#field_type' => 'source_fields',
+    '#theme' => 'emicdora_fields',
+  );
+
   // Create terms/fields.
   emicdora_settings_fields($form_state, $version_terms, 'version', $critical_edition->id);
+  emicdora_settings_fields($form_state, $source_terms, 'source', $critical_edition->id);
 
   // Result fields.
   $form['emicdora_tabs']['version_settings']['emicdora_version_fields'] = $version_terms;
+  $form['emicdora_tabs']['version_settings']['emicdora_source_fields'] = $source_terms;
   if (isset($version_terms['terms'])) {
     $form_state['source_terms'] = $version_terms['terms'];
   }
@@ -102,8 +116,19 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
 function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $critical_edition) {
   module_load_include('inc', 'emicdora', 'includes/db');
   // Set variables.
-  $field_type = 'version_fields';
-  $field_type_class = 'result-fields';
+  switch ($result_type) {
+    case 'version':
+      $field_type = 'version_fields';
+      $field_type_class = "version-fields";
+      $title = t("Add new version category");
+      break;
+
+    case 'source':
+      $field_type = 'source_fields';
+      $field_type_class = "source-fields";
+      $title = t("Add new source category");
+      break;
+  }
 
   // Ways to populate the fields table:
   // 1. Saved values from the DB
@@ -317,7 +342,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
   }
   $version_terms['add_solr_field'] = array(
     '#type' => 'textfield',
-    '#title' => t('Add new category'),
+    '#title' => $title,
     '#size' => 45,
     '#autocomplete_path' => 'islandora_solr/autocomplete_luke',
     '#default_value' => '',
@@ -551,7 +576,6 @@ function theme_emicdora_fields($variables) {
         $row = array();
         $row[] = array('data' => drupal_render($form['terms'][$key]['draggable_handler']), 'class' => 'emicdora-multiple-drag');
         $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_render']), 'class' => 'emicdora-solr-field-render');
-        // $row[] = array('data' => drupal_render($form['terms'][$key]['solr_field_settings']), 'class' => 'emicdora-solr-field-settings');
         $row[] = array('data' => drupal_render($form['terms'][$key]['weight']));
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure']), 'class' => 'emicdora-operations');
         $row[] = array('data' => drupal_render($form['terms'][$key]['configure_button']), 'class' => 'emicdora-operations emicdora-operations-hidden');
@@ -572,7 +596,6 @@ function theme_emicdora_fields($variables) {
     'colspan' => 2,
     'class' => 'emicdora-solr-field-header',
   );
-  // $header[] = array('data' => t('Settings'));
   $header[] = array('data' => t('Weight'), 'class' => 'emicdora-solr-field-weight');
   $header[] = array('data' => t('Operations'), 'colspan' => 4);
 
