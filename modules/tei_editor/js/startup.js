@@ -25,12 +25,15 @@ function cwrcWriterInit(Writer, Delegator) {
 			}
 		});
 		writer.event('entityUnfocused').subscribe(function(entityId) {
-			if (writer.entities[entityId] !== 'undefined') {
-				var entity_type = writer.entities[entityId]['props']['type'];
-				if (entity_type === "textimagelink") {
-		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+			if (typeof writer.entities[entityId] !== 'undefined' && entityId !== 'undefined') {
+				if (writer.entities[entityId]['props']['type'] !== 'undefined') {
+					var entity_type = writer.entities[entityId]['props']['type'];
+					if (entity_type === "textimagelink") {
+			          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+					}
 				}
 			}
+			resizeCanvas();
 		});
 		writer.event('documentLoaded').subscribe(function() {
 			hide_loading_bar();
