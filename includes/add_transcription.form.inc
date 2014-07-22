@@ -544,25 +544,3 @@ function emicdora_build_transcription($versionable_object, $label) {
   $versionable_object->repository->ingestObject($transcription);
   return $transcription;
 }
-
-/**
- * Builds a transcription object.
- *
- * @param AbstractObject $versionable_object
- *   object representing enclising Versionable Object
- * @param string $label
- *   Label for new Transcription
- *
- * @return AbsgtractObject
- *   Transcription object
- */
-function emicdora_construct_transcription(AbstractObject $versionable_object, $label) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  $namespace = islandora_get_namespace($versionable_object->id);
-  $transcription = $versionable_object->repository->constructObject($namespace);
-  $transcription->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
-  $transcription->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:transcriptionCModel');
-  $transcription->label = $label;
-  $transcription->owner = $versionable_object->owner;
-  return $transcription;
-}
