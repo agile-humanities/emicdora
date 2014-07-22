@@ -22,7 +22,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $tei_editor_module_path = drupal_get_path('module', 'tei_editor');
   $islandora_markup_editor_path = drupal_get_path('module', 'islandora_markup_editor');
   $islandora_image_anno_path = drupal_get_path('module', 'islandora_image_annotation');
-// Theme the default markup editor.
+  // Theme the default markup editor.
   theme('islandora_markup_editor', $variables);
   // Theme our custom components to the tei_editor viewer.
   $variables['anno_list_pane'] = theme('islandora_anno_list_pane');
