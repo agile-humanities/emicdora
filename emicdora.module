@@ -205,6 +205,16 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+    'emicdora/contextual-links/source/%islandora_object/configure' => array(
+      'title' => 'Configure Links',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_configure_version_links', 3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/configure_links.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'emicdora_workbench',
