@@ -533,8 +533,8 @@ function emicdora_admin_settings_submit($form, $form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $critical_edition = $form_state['values']['critical_edition_pid'];
   emicdora_delete_terms($critical_edition);
-  $terms['version'] = $form_state['solr_field_settings']['emicdora_version_fields'];
-  $terms['source'] = $form_state['solr_field_settings']['emicdora_source_fields'];
+  $terms['version'] = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
+  $terms['source'] = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
   foreach ($terms as $term_type => $values) {
     foreach ($values as $label => $components) {
       $solr_field_settings = array(
