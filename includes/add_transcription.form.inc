@@ -540,6 +540,7 @@ function islandora_transcription_file_update($transcription, $filename) {
  *   Transcription object
  */
 function emicdora_build_transcription($versionable_object, $label) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $transcription = emicdora_construct_transcription($versionable_object, $label);
   $versionable_object->repository->ingestObject($transcription);
   return $transcription;
