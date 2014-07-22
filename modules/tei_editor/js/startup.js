@@ -76,12 +76,15 @@ function cwrcWriterInit(Writer, Delegator) {
 		        init_ui();
 		        resizeCanvas();
 		        update_loading_text("Building Image Viewer");
-		        if (Drupal.settings.islandora_markup_editor.type != 'text') {
-		          $('#create_annotation').hide();
-		          $('#image_annotation_wrapper').css('display', 'block');
-		          $('.shared-canvas-logo').css('display', 'none');
-		          $('#annotation_tab').css('display', 'none');
+		        if (typeof Drupal.settings.islandora_markup_editor.type != 'undefined') {
+		          if (Drupal.settings.islandora_markup_editor.type != 'text') {
+		            $('#create_annotation').hide();
+		            $('#image_annotation_wrapper').css('display', 'block');
+		            $('.shared-canvas-logo').css('display', 'none');
+		            $('#annotation_tab').css('display', 'none');
+		          }
 		        }
+		        
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
 			},
 			error: function() {
