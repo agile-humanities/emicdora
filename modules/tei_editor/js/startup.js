@@ -25,12 +25,15 @@ function cwrcWriterInit(Writer, Delegator) {
 			}
 		});
 		writer.event('entityUnfocused').subscribe(function(entityId) {
-			if (writer.entities[entityId] !== 'undefined') {
-				var entity_type = writer.entities[entityId]['props']['type'];
-				if (entity_type === "textimagelink") {
-		          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+			if (typeof writer.entities[entityId] !== 'undefined' && entityId !== 'undefined') {
+				if (writer.entities[entityId]['props']['type'] !== 'undefined') {
+					var entity_type = writer.entities[entityId]['props']['type'];
+					if (entity_type === "textimagelink") {
+			          $('.svg_' + writer.entities[entityId]['info']['attributes']['uuid']).remove();
+					}
 				}
 			}
+			resizeCanvas();
 		});
 		writer.event('documentLoaded').subscribe(function() {
 			hide_loading_bar();
@@ -73,6 +76,15 @@ function cwrcWriterInit(Writer, Delegator) {
 		        init_ui();
 		        resizeCanvas();
 		        update_loading_text("Building Image Viewer");
+		        if (typeof Drupal.settings.islandora_markup_editor.type != 'undefined') {
+		          if (Drupal.settings.islandora_markup_editor.type != 'text') {
+		            $('#create_annotation').hide();
+		            $('#image_annotation_wrapper').css('display', 'block');
+		            $('.shared-canvas-logo').css('display', 'none');
+		            $('#annotation_tab').css('display', 'none');
+		          }
+		        }
+		        
 		        islandoraCWRCWriter.Writer.setup_canvas(PID, init_canvas_div);
 			},
 			error: function() {

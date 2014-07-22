@@ -68,7 +68,7 @@ function tei_editor_theme($existing, $type, $theme, $path) {
     'tei_editor_viewer' => array(
       'file' => 'theme/theme.inc',
       'template' => 'theme/tei-editor-viewer',
-      'variables' => array('islandora_object' => NULL),
+      'variables' => array('islandora_object' => NULL, 'islandora_content' => NULL),
     ),
   );
 }

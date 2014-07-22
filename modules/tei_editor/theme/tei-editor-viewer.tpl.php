@@ -70,7 +70,7 @@
         <div id="image_annotation_wrapper" class="image-annotation-wrapper">
           <!-- Persist a single player and build new interface to it -->
           <div id="canvas-body-wrapper" style="width: 100%; height: 600px;">
-            <?php print $anno_img_pane; ?>
+            <?php print $islandora_content; ?>
             <!--  At least one visible image needed for GData transport -->
             <div class="shared-canvas-logo" style="font-size: 8pt">
               <img id="shared-canvas-logo-img" src="<?php print $sc_img_path; ?>"
