@@ -264,6 +264,13 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
       'file' => 'includes/utilities.inc',
     ),
+    'emicdora/json/list' => array(
+      'title' => 'Reconfigure inputs',
+      'page callback' => 'emicdora_fix_calliope_inputs',
+      'file' => 'includes/emicdora_endpoints.inc',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
   );
 }
 
@@ -311,7 +318,21 @@ function emicdora_theme() {
       'file' => 'includes/configure_links.inc',
       'render element' => 'form',
     ),
+    'emicdora_transcription_object' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/emicdora_transcription_object',
+      'pattern' => 'emicdora_transcription_object__',
+      'variables' => array('islandora_object' => NULL),
+    ),
   );
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_view_object().
+ */
+function emicdora_islandora_transcriptioncmodel_islandora_view_object($object, $page_number, $page_size) {
+  $output = theme('emicdora_transcription_object', array('islandora_object' => $object));
+  return array('' => $output);
 }
 
 /**
