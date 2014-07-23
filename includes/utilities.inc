@@ -284,6 +284,8 @@ EOD;
  *   array of form elements
  */
 function emicdora_get_apparatus_as_content($object) {
+  $path = drupal_get_path('module', 'emicdora');
+  drupal_add_js("$path/js/apparatus.js");
   $datastreams = emicdora_get_apparatus_datastreams($object);
   $content = array(
     'apparatus' => array(

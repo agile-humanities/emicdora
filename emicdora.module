@@ -91,8 +91,8 @@ function emicdora_menu() {
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_apparatus_form', 2),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_ADD_DS, 2),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(2, 'manage_apparatus'),
     ),
     // Contextual Links for Blocks.
     'emicdora/contextual-links/apparatus/%islandora_object' => array(
@@ -483,6 +483,7 @@ function emicdora_block_view($delta = '') {
             'title' => $datastream->label,
             'href' => $path,
             'fragment' => strtolower($dsid),
+            'attributes' => array('class' => array('apparatus_link')),
           );
         }
       }
@@ -1087,7 +1088,7 @@ function emicdora_object_management_access($object, $context) {
       break;
 
     case 'manage_apparatus':
-      if (in_array('islandora:criticalApparatusCModel', $content_models) && user_access(EMICDORA_MANAGE_EDITION)) {
+      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(EMICDORA_MANAGE_EDITION)) {
         $access = TRUE;
       }
       break;
