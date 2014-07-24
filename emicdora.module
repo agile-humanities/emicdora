@@ -481,7 +481,7 @@ function emicdora_block_view($delta = '') {
         if (emicdora_is_apparatus_supported_datastream($dsid)) {
           $links[] = array(
             'title' => $datastream->label,
-            'href' => $path,
+            'href' => "islandora/object/{$critical_edition->id}",
             'fragment' => strtolower($dsid),
             'attributes' => array('class' => array('apparatus_link')),
           );
