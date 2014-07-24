@@ -121,7 +121,7 @@ function collation_block_view($delta = '') {
       foreach ($mvds as $mvd) {
         $links[] = array(
           'title' => $mvd['name'],
-          'href' => "collationtools/compare",
+          'href' => "islandora/object/{$critical_edition->id}/collation/",
           'fragment' => $mvd['name'] . "/" . $critical_edition->id,
         );
       }
