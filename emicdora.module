@@ -67,10 +67,19 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    'islandora/object/%islandora_object/collation' => array(
+    'islandora/object/%islandora_object/compare' => array(
       'title' => 'Collations',
       'context' => MENU_CONTEXT_PAGE,
-      'page callback' => 'emicdora_collations',
+      'page callback' => 'emicdora_compare_view',
+      'file' => 'includes/collation_view.inc',
+      'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
+    'islandora/object/%islandora_object/table' => array(
+      'title' => 'Collations',
+      'context' => MENU_CONTEXT_PAGE,
+      'page callback' => 'emicdora_table_view',
       'file' => 'includes/collation_view.inc',
       'page arguments' => array(2),
       'access callback' => 'islandora_object_access_callback',
@@ -330,10 +339,6 @@ function emicdora_theme() {
       'file' => 'theme/theme.inc',
       'variables' => array('left' => NULL, 'right' => NULL),
     ),
-    'tableapparatus2' => array(
-      'template' => 'slider',
-      'variables' => array('left' => NULL, 'right' => NULL),
-    ),
   );
 }
 
@@ -452,6 +457,9 @@ function emicdora_block_view($delta = '') {
   $path_parts = explode('/', $_GET['q']);
   $is_source = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
   $is_sources_page = (isset($path_parts[3]) && $path_parts[3] == 'sources') ? TRUE : FALSE;
+  $is_compare = (isset($path_parts[3]) && $path_parts[3] == 'compare') ? TRUE : FALSE;
+  $is_table = (isset($path_parts[3]) && $path_parts[3] == 'table') ? TRUE : FALSE;
+
   $versionable_object = NULL;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
@@ -620,7 +628,22 @@ function emicdora_block_view($delta = '') {
       if ($is_source) {
         $id = $path_parts[4];
       }
-
+      if ($is_table) {
+        $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
+        $links[] = array(
+          'title' => 'Compare View',
+          'href' => "islandora/object/$id/compare/$mvd",
+          'fragment' => "$mvd/{$critical_edition->id}",
+        );
+      }
+      if ($is_compare) {
+        $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
+        $links[] = array(
+          'title' => 'Table View',
+          'href' => "islandora/object/$id/table/$mvd",
+          'fragment' => "$mvd/{$critical_edition->id}",
+        );
+      }
       // Placeholder until we figure what the view button is for.
       $condition = '';
       if ($condition == 'met') {

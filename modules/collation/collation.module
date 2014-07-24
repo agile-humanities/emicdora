@@ -110,7 +110,6 @@ function collation_block_view($delta = '') {
     return array();
   }
   // Build the block uses paths relative to our current path.
-  $path = current_path();
   $block = array();
   switch ($delta) {
 
@@ -121,8 +120,8 @@ function collation_block_view($delta = '') {
       foreach ($mvds as $mvd) {
         $links[] = array(
           'title' => $mvd['name'],
-          'href' => "islandora/object/{$critical_edition->id}/collation/",
-          'fragment' => $mvd['name'] . "/" . $critical_edition->id,
+          'href' => "islandora/object/{$critical_edition->id}/compare/{$mvd['name']}",
+          'fragment' => "{$mvd['name']}/{$critical_edition->id}",
         );
       }
       $block['subject'] = t('Collations');
