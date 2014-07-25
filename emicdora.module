@@ -67,7 +67,15 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-
+    'islandora/object/%islandora_object/transcription' => array(
+      'title' => 'Transcriptions',
+      'context' => MENU_CONTEXT_PAGE,
+      'page callback' => 'emicdora_transcription_view',
+      'file' => 'includes/transcription_view.inc',
+      'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
     'islandora/object/%islandora_object/source/%islandora_object' => array(
       'title callback' => 'emicdora_drupal_title',
       'title arguments' => array(2),
@@ -160,6 +168,16 @@ function emicdora_menu() {
       'page arguments' => array('islandora_emicdora_add_transcription_form', 3),
       'access callback' => 'emicdora_object_management_access',
       'access arguments' => array(3, 'create_transcription'),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/transcription/%islandora_object/edit' => array(
+      'title' => 'Edit Transcription',
+      'file' => 'includes/edit_transcription.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_transcription_form', 3),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'edit_transcription'),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -328,7 +346,7 @@ function emicdora_theme() {
 /**
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
-function emicdora_islandora_transcriptioncmodel_islandora_view_object($object, $page_number, $page_size) {
+function emicdora_islandora_transcriptioncmodel_islandora_view_object_x($object, $page_number, $page_size) {
   $output = theme('emicdora_transcription_object', array('islandora_object' => $object));
   return array('' => $output);
 }
@@ -442,7 +460,10 @@ function emicdora_block_view($delta = '') {
   $is_sources_page = (isset($path_parts[3]) && $path_parts[3] == 'sources') ? TRUE : FALSE;
   $is_compare = (isset($path_parts[3]) && $path_parts[3] == 'compare') ? TRUE : FALSE;
   $is_table = (isset($path_parts[3]) && $path_parts[3] == 'table') ? TRUE : FALSE;
-
+  $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
+  if ($is_transcript) {
+    $transcript_pid = $path_parts[4];
+  }
   $versionable_object = NULL;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
@@ -727,7 +748,7 @@ function emicdora_block_view($delta = '') {
           $transcription_object = islandora_object_load($pid);
           $links[] = array(
             'title' => $transcription['label'],
-            'href' => "islandora/object/" . $transcription['pid'],
+            'href' => "islandora/object/{$critical_edition->id}/transcription/{$transcription['pid']}",
             'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
           );
         }
@@ -743,6 +764,14 @@ function emicdora_block_view($delta = '') {
           'emicdora' => array(
             'emicdora/contextual-links/transcription',
             array($versionable_object->id),
+          ),
+        );
+      }
+      if ($is_transcript) {
+        $block['content']['#contextual_links'] = array(
+          'emicdora' => array(
+            "emicdora/contextual-links/transcription/$transcript_pid/edit",
+            array($transcript_pid),
           ),
         );
       }
