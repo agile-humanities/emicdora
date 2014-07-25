@@ -118,7 +118,7 @@ function versionable_object_viewer_library() {
 /**
  * Implements hook_CMODEL_islandora_view_object().
  */
-function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
+function versionable_object_viewer_islandora_versionCModel_islandora_view_object_x(AbstractObject $object) {
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
