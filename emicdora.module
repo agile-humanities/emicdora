@@ -346,7 +346,7 @@ function emicdora_theme() {
 /**
  * Implements hook_CMODEL_PID_islandora_view_object().
  */
-function emicdora_islandora_transcriptioncmodel_islandora_view_object_x($object, $page_number, $page_size) {
+function emicdora_islandora_transcriptioncmodel_islandora_view_object($object, $page_number, $page_size) {
   $output = theme('emicdora_transcription_object', array('islandora_object' => $object));
   return array('' => $output);
 }

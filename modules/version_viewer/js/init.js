@@ -1,3 +1,4 @@
+//jQuery.noConflict(true);
 (function ($) {
   $(document).ready(function () {
   // Initilize our layout per versionable obj type.
