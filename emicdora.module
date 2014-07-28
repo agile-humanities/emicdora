@@ -496,33 +496,35 @@ function emicdora_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
-      module_load_include('inc', 'emicdora', 'includes/apparatus');
-      $links = array();
-      foreach ($critical_edition as $dsid => $datastream) {
-        if (emicdora_is_apparatus_supported_datastream($dsid)) {
-          $links[] = array(
-            'title' => $datastream->label,
-            'href' => "islandora/object/{$critical_edition->id}",
-            'fragment' => strtolower($dsid),
-            'attributes' => array('class' => array('apparatus_link')),
-          );
+      if (emicdora_show_apparatus_block()) {
+        module_load_include('inc', 'emicdora', 'includes/apparatus');
+        $links = array();
+        foreach ($critical_edition as $dsid => $datastream) {
+          if (emicdora_is_apparatus_supported_datastream($dsid)) {
+            $links[] = array(
+              'title' => $datastream->label,
+              'href' => "islandora/object/{$critical_edition->id}",
+              'fragment' => strtolower($dsid),
+              'attributes' => array('class' => array('apparatus_link')),
+            );
+          }
         }
-      }
-
-      $block['subject'] = t('Apparatus');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-        '#contextual_links' => array(
-          'emicdora' => array(
-            'emicdora/contextual-links/apparatus',
-            array($critical_edition->id),
+  
+        dsm($path_parts, "path parts");
+        
+        $block['subject'] = t('Apparatus');
+        $block['content'] = array(
+          '#theme' => 'links',
+          '#links' => $links,
+          '#contextual_links' => array(
+            'emicdora' => array(
+              'emicdora/contextual-links/apparatus',
+              array($critical_edition->id),
+            ),
           ),
-        ),
-      );
-
+        );
+      }
       break;
-
     case 'source_material':
 
       $sources = emicdora_get_raw_objects($critical_edition);
