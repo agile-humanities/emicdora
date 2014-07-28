@@ -17,13 +17,13 @@
   });
   // Add the 'ESC' key press exit full screen.
   function window_change_view_size() {
-   // $('.islandora-anno-wrapper').toggleClass('islandora-anno-fullwindow');
+    $('.islandora-anno-wrapper').toggleClass('islandora-anno-fullwindow');
     resizeCanvas();
     if ($('#full-window-button').html() == Drupal.t('Full Window')) {
       $('#full-window-button').html(Drupal.t('Exit Full Window'));
       $('#islandora_shared_canvas_header').css('height', '0');
       
-      //$('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
+      $('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
       
       // Add a message to notify user of the 'ESC' button.
       $messageCont = $('<div class="message_cont">');
@@ -225,12 +225,11 @@ function maybeResize() {
     $('#canvas_0').css("width", w);
     
     // Set the top to zero.
-    //$('.islandora-anno-wrapper').css('top', 0);
+    $('.islandora-anno-wrapper').css('top', 0);
     
     // Resize incase we have the admin menu available.
     if($('#admin-menu-wrapper').length > 0) {
-    	console.log("admin menu wrapper exists here");
-      //$('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
+      $('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
     }
 }
    function continueSetup() {

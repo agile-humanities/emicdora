@@ -44,8 +44,3 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   versionable_object_viewer_build_version_media_view($version_object, $variables);
 
 }
-
-function EMIC_Theme_viewer_versionable_object_viewer_preprocess_html(&$variables) {
-  dsm($variables, "html preprocess");
-  drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
-}
