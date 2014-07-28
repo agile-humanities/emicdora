@@ -179,7 +179,7 @@ function emicdora_menu() {
       'access callback' => 'emicdora_object_management_access',
       'access arguments' => array(3, 'edit_transcription'),
       'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/version/%islandora_object' => array(
       'title' => 'versions',

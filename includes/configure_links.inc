@@ -117,6 +117,8 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
  *   Type of field
  */
 function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $critical_edition) {
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  emicdora_set_source_breadcrumbs(islandora_object_load($critical_edition));
   module_load_include('inc', 'emicdora', 'includes/db');
   // Set variables.
   switch ($result_type) {
