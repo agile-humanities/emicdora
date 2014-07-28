@@ -509,9 +509,6 @@ function emicdora_block_view($delta = '') {
             );
           }
         }
-  
-        dsm($path_parts, "path parts");
-        
         $block['subject'] = t('Apparatus');
         $block['content'] = array(
           '#theme' => 'links',
