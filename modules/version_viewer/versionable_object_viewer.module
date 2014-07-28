@@ -76,34 +76,10 @@ function versionable_object_viewer_library() {
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   $items = array();
 
-  $items['jq_uilayout'] = array(
-    'title' => t('jQuery UILayout'),
-    'version' => '1.0',
-    'js' => array(
-      "$module_path/js/jquery/jquery.layout-latest.min.js" => array(),
-      "$module_path/js/jquery/jquery.ui.all.js" => array(),
-    ),
-    'css' => array(
-      "$module_path/js/jquery/layout-default-latest.css" => array(),
-    ),
-  );
-
-  $items['jq_latest'] = array(
-    'title' => t('jQuery'),
-    'version' => '1.11.1',
-    'js' => array(
-      "$module_path/js/jquery/jquery-1.11.1.min.js" => array(),
-    ),
-    'css' => array(
-      "$module_path/js/jquery/layout-default-latest.css" => array(),
-    ),
-  );
-
   $items['jquery_easy_ui'] = array(
     'title' => t('jQuery EasyUI'),
     'version' => '1.3.6',
     'js' => array(
-      "$module_path/js/jquery/jquery-easyui/jquery.min.js" => array(),
       "$module_path/js/jquery/jquery-easyui/jquery.easyui.min.js" => array(),
     ),
     'css' => array(
@@ -119,16 +95,6 @@ function versionable_object_viewer_library() {
  * Implements hook_CMODEL_islandora_view_object().
  */
 function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
-  // Drop in our initilization script.
-  $module_path = drupal_get_path('module', 'versionable_object_viewer');
-  drupal_add_js("$module_path/js/init.js");
-
-  // This the Shared Canvas prefered jQuery.
-  drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
-  $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
-  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-1.7.js');
-  drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
-
   // Theme our verionable object viewer.
   return theme('versionable_object_viewer',
     array(

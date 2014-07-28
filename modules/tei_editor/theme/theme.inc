@@ -37,7 +37,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   $variables['cwrc_lib_path'] = $islandora_markup_editor_path;
   $variables['sc_img_path'] = url("$islandora_image_anno_path/shared_canvas/imgs/small-logo.png");
 
-    // Theme the default markup editor.
+  // Theme the default markup editor.
   theme('islandora_markup_editor', $variables);
   // Custom JS for our tei editor.
   tei_editor_add_js($variables);

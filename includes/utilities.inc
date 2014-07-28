@@ -21,6 +21,28 @@ function emicdora_source_content_models() {
 }
 
 /**
+ * Determin if the Apparatus block should be shown.
+ *
+ * @return boolean
+ *   TRUE if the apparatus should be shown, FALSE otherwise.
+ */
+function emicdora_show_apparatus_block() {
+  $path_parts = explode('/', $_GET['q']);
+  $return = FALSE;
+  // Ensure we are looking at the default edition view.
+  if (isset($path_parts[2]) && !isset($path_parts[3])) {
+    // Confirm the given objects content model.
+    $object = islandora_object_load($path_parts[2]);
+    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      // Correct content model, and correct path, i say
+      // lets show the Apparatus block.
+      $return = TRUE;
+    }
+  }
+  return $return;
+}
+
+/**
  * Builds a transcription object.
  *
  * @param AbstractObject $versionable_object
@@ -284,6 +306,8 @@ EOD;
  *   array of form elements
  */
 function emicdora_get_apparatus_as_content($object) {
+  $path = drupal_get_path('module', 'emicdora');
+  drupal_add_js("$path/js/apparatus.js");
   $datastreams = emicdora_get_apparatus_datastreams($object);
   $content = array(
     'apparatus' => array(

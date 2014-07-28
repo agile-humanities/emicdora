@@ -373,7 +373,7 @@ function islandora_critical_transcription_edit_form($form, $form_state, $transcr
  *   Drupal form
  */
 function islandora_critical_transcription_edit_form_submit($form, $form_state) {
-  module_load_include('inc', 'emicdora', 'includes/calliope');
+  module_load_include('inc', 'collation', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;
   $content = $form_state['values']['transcription'];
@@ -397,7 +397,7 @@ function islandora_critical_transcription_edit_form_submit($form, $form_state) {
   }
   if ($success) {
     drupal_set_message(t("Transcription updated."));
-    islandora_calliope_write_file($transcription_object->id);
+    emicdora_calliope_write_file($transcription_object->id);
   }
 }
 
@@ -425,7 +425,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
   $batch = array(
     'title' => t('Creating Transcription from TEI-RDF Object'),
     'operations' => array(),
-    'file' => drupal_get_path('module', 'emicdora_advanced') . '/includes/transcriptions.inc',
+    'file' => drupal_get_path('module', 'emicdora') . '/includes/add_transcription.form.inc',
     'progress_message' => t('@current of @total pages processed.'),
   );
   $flat_pid = islandora_escape_pid_for_function($versionable_object_pid);
@@ -436,7 +436,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
         'page_object' => islandora_object_load($page),
         'filename' => $filename));
   }
-  $batch['operations'][] = array('islandora_transcription_file_add',
+  $batch['operations'][] = array('emicdora_transcription_file_add',
     array(
       'transcription' => $transcription,
       'transcription_datastream' => $transcription_datastream,
@@ -454,7 +454,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
  *   Temp file to hold data
  */
 function emicdora_build_text_file($object, $filename) {
-  module_load_include('inc', 'emicdora_advanced', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   if (isset($object['CWRC'])) {
     $text = emicdora_convert_tei_to_plain_text($object['CWRC']->content);
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
@@ -471,11 +471,11 @@ function emicdora_build_text_file($object, $filename) {
  * @param string $filename
  *   file to be added
  */
-function islandora_transcription_file_add($transcription, $transcription_datastream, $filename) {
-  module_load_include('inc', 'emicdora', 'includes/calliope');
+function emicdora_transcription_file_add($transcription, $transcription_datastream, $filename) {
+  module_load_include('inc', 'collation', 'includes/calliope');
   $transcription_datastream->setContentFromFile($filename);
   $transcription->ingestDatastream($transcription_datastream);
-  islandora_calliope_write_file($transcription->id);
+  emicdora_calliope_write_file($transcription->id);
   unlink($filename);
 }
 

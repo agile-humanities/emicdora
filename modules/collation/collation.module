@@ -33,6 +33,24 @@ function collation_menu() {
       'access arguments' => array(EMICDORA_READ_EDITION),
       'file' => 'includes/mvd.inc',
     ),
+    'islandora/object/%islandora_object/compare' => array(
+      'title' => 'Collations',
+      'context' => MENU_CONTEXT_PAGE,
+      'page callback' => 'emicdora_compare_view',
+      'file' => 'includes/collation_view.inc',
+      'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
+    'islandora/object/%islandora_object/table' => array(
+      'title' => 'Collations',
+      'context' => MENU_CONTEXT_PAGE,
+      'page callback' => 'emicdora_table_view',
+      'file' => 'includes/collation_view.inc',
+      'page arguments' => array(2),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
   );
 }
 
@@ -110,7 +128,6 @@ function collation_block_view($delta = '') {
     return array();
   }
   // Build the block uses paths relative to our current path.
-  $path = current_path();
   $block = array();
   switch ($delta) {
 
@@ -121,8 +138,8 @@ function collation_block_view($delta = '') {
       foreach ($mvds as $mvd) {
         $links[] = array(
           'title' => $mvd['name'],
-          'href' => "collationtools/compare",
-          'fragment' => $mvd['name'] . "/" . $critical_edition->id,
+          'href' => "islandora/object/{$critical_edition->id}/compare/{$mvd['name']}",
+          'fragment' => "{$mvd['name']}/{$critical_edition->id}",
         );
       }
       $block['subject'] = t('Collations');
