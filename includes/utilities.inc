@@ -23,7 +23,7 @@ function emicdora_source_content_models() {
 /**
  * Determin if the Apparatus block should be shown.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the apparatus should be shown, FALSE otherwise.
  */
 function emicdora_show_apparatus_block() {

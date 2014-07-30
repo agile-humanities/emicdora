@@ -297,7 +297,7 @@ function emicdora_menu_alter(array &$items) {
  * Implements hook_template_preprocess_region().
  */
 function emictheme_preprocess_region(&$variables, $hook) {
-  if($variables['region'] == "sidebar_second"){
+  if ($variables['region'] == "sidebar_second"){
     // Keeping the styles unified.
     $variables['classes_array'][] = 'region-sidebar-first';
   }
@@ -533,6 +533,7 @@ function emicdora_block_view($delta = '') {
         );
       }
       break;
+
     case 'source_material':
 
       $sources = emicdora_get_raw_objects($critical_edition);
@@ -581,16 +582,18 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
         break;
       }
-      
+
       switch ($is_source) {
         case TRUE:
           $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
           $configs = emicdora_get_configuration($path_parts[4], 'version');
           break;
+
         case FALSE:
           $versions = emicdora_get_raw_objects($critical_edition, 'version');
           $configs = emicdora_get_configuration($critical_edition->id, 'version');
           break;
+
       }
       $total = 0;
       foreach ($versions as $key => $value) {
