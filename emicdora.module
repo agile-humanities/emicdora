@@ -294,9 +294,20 @@ function emicdora_menu_alter(array &$items) {
 }
 
 /**
+ * Implements hook_template_preprocess_region().
+ */
+function emictheme_preprocess_region(&$variables, $hook) {
+  if($variables['region'] == "sidebar_second"){
+    // Keeping the styles unified.
+    $variables['classes_array'][] = 'region-sidebar-first';
+  }
+}
+
+/**
  * Implements hook_permission().
  */
 function emicdora_permission() {
+
   return array(
     EMICDORA_CREATE_EDITION => array(
       'title' => t('Create Emic Editions'),
