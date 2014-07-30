@@ -149,7 +149,7 @@
 	        });
 	      }
 	    }).show();
-	    $("span[data-annotationid='" + ent_id + "']").on('click', function(){
+	    $("span[data-annotationid='" + ent_id + "']").click(function(){
 	      if ($('#ent_dialog_' + ent_id).length == 0) {
 	        $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
 	      }
