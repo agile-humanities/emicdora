@@ -297,7 +297,7 @@ function emicdora_menu_alter(array &$items) {
  * Implements hook_template_preprocess_region().
  */
 function emictheme_preprocess_region(&$variables, $hook) {
-  if ($variables['region'] == "sidebar_second"){
+  if ($variables['region'] == "sidebar_second") {
     // Keeping the styles unified.
     $variables['classes_array'][] = 'region-sidebar-first';
   }
