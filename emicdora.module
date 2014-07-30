@@ -304,6 +304,27 @@ function emictheme_preprocess_region(&$variables, $hook) {
 }
 
 /**
+ * Alter the pluploader to not show the upload limit as per Dean's request.
+ */
+function emicdora_element_info_alter(array &$type) {
+  if ($type['plupload']['#pre_render']) {
+    $type['plupload']['#pre_render'][] = 'emicdora_plupload_element_pre_render';
+  }
+}
+
+/**
+ * Alter the pluploader to not show the upload limit as per Dean's request.
+ */
+function emicdora_plupload_element_pre_render($element) {
+  if ($element['#description']) {
+    $validators = $element['#upload_validators'];
+    unset($validators['file_validate_size']);
+    $element['#description'] = theme('file_upload_help', array('upload_validators' => $validators));
+  }
+  return $element;
+}
+
+/**
  * Implements hook_permission().
  */
 function emicdora_permission() {
