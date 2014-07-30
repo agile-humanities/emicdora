@@ -54,7 +54,6 @@ function emicdora_compare_view($right = NULL, $left = NULL) {
  */
 function emicdora_table_view($right = NULL, $left = NULL) {
   global $base_path;
-
   $module_path = drupal_get_path('module', 'collationtools');
   drupal_add_css($module_path . '/ui/app.css');
   drupal_add_js('sites/all/libraries/ext-4.1.1a/ext-all.js');
