@@ -117,7 +117,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
         $child;
         // Entities can now be text image links.
         if ($rdf_anno->cwrcType == "textimagelink") {
-          $child_type = $size + 1;
+          $child_type = $size;
           if (!isset($tree_data[$child_type])) {
             $tree_data[$child_type] = array(
               "id" => "tree_textimagelinks",
