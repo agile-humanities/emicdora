@@ -189,11 +189,6 @@ function build_combo() {
 			combo_value_array[0] = uuid;
 			existing_uuid = uuid;
 			construct_result();
-			paint_commentAnnoTargets(
-				$('#anno_' + uuid),
-				'canvas_0',
-				uuid,
-				"TextImageLink");
 			});
 		}
 		
