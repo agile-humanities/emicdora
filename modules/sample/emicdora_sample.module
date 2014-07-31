@@ -43,6 +43,8 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
     ) + $apparatus_datastreams,
   ));
+  // Add the Sample Critical Edition to the Featured Collection by default.
+  $critical_edition_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:featured_collections');
   // Version Object.
   $version_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-version',
