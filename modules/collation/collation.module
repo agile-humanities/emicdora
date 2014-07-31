@@ -196,10 +196,10 @@ function collation_form_emicdora_admin_settings_form_alter(&$form, &$form_state)
 
 function collation_theme() {
     return array(
-    'collation_compare' => array(
+  'collation_compare' => array(
       'template' => 'theme/collation_compare',
       'file' => 'theme/theme.inc',
       'variables' => array('left' => NULL, 'right' => NULL),
-    ),
-  );
+      ),
+    );
 }
