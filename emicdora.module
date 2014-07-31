@@ -335,11 +335,6 @@ function emicdora_theme() {
       'pattern' => 'emicdora_transcription_object__',
       'variables' => array('islandora_object' => NULL),
     ),
-    'collation_compare' => array(
-      'template' => 'theme/collation_compare',
-      'file' => 'theme/theme.inc',
-      'variables' => array('left' => NULL, 'right' => NULL),
-    ),
   );
 }
 
@@ -522,6 +517,7 @@ function emicdora_block_view($delta = '') {
         );
       }
       break;
+
     case 'source_material':
 
       $sources = emicdora_get_raw_objects($critical_edition);
