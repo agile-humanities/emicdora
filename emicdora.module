@@ -6,6 +6,7 @@
  */
 
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
+define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_CREATE_EDITION', 'emic create edition');
 define('EMICDORA_READ_EDITION', 'emic read edition');
@@ -893,6 +894,23 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  // Featured Editions - Featured Critical Edition Collection.
+  $featured_editions = emicdora_create_required_object($connection, array(
+    'pid' => EMICDORA_FEATURED_EDITIONS_COLLECTION,
+    'label' => 'Featured Editions',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        // Uses the same collection policy as the islandora:editions.
+        'file' => "$module_path/data/objects/editions_collection_policy.xml",
+      ),
+    ),
+  ));
+  $featured_editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
   return array(
     'emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
@@ -903,6 +921,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $transcription_content_model,
         $editions,
         $coop,
+        $featured_editions,
       ),
     ),
   );
