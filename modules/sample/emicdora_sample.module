@@ -31,6 +31,12 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       'RELS-EXT' => array(
         'file' => "$object_path/sample_critical_edition_rels_ext.rdf",
       ),
+      'MODS' => array(
+        'file' => "$object_path/sample_critical_edition_mods.xml",
+      ),
+      'DC' => array(
+        'file' => "$object_path/sample_critical_edition_dc.xml",
+      ),
       'TN' => array(
         'file' => "$object_path/sample_critical_edition_tn.jpg",
         'mimetype' => 'image/jpg',
