@@ -9,6 +9,6 @@
     <form FORMAT_URI="info:fedora/fedora-system:FedoraRELSInt-1.0" MIME="application/rdf+xml"/>
   </dsTypeModel>
   <dsTypeModel ID="TEI-RDF" optional="true">
-    <form MIME="text/xml"/>
+    <form MIME="application/xml"/>
   </dsTypeModel>
 </dsCompositeModel>
