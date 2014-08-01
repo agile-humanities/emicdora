@@ -67,28 +67,41 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // Transcription Object.
-  $transcription_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-transcription',
-    'label' => 'Sample Transcription',
+  $transcription_01_object = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:sample-transcription-01',
+    'label' => 'The Legend of the Two Sisters 1908',
     'datastreams' => array(
       'RELS-EXT' => array(
-        'file' => "$object_path/sample_transcription_rels_ext.rdf",
+        'file' => "$object_path/sample_transcription_01_rels_ext.rdf",
       ),
       'TRANSCRIPTION' => array(
-        'file' => "$object_path/sample_transcription_transcription.txt",
+        'file' => "$object_path/sample_transcription_01_transcription.txt",
         'mimetype' => 'text/plain',
       ),
     ),
   ));
-  $transcription_object_2 = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-transcription-2',
-    'label' => 'Sample Transcription 2',
+  $transcription_02_object = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:sample-transcription-02',
+    'label' => "The True Legend of Vancouver's Lions 1910",
     'datastreams' => array(
       'RELS-EXT' => array(
-        'file' => "$object_path/sample_transcription_rels_ext_2.rdf",
+        'file' => "$object_path/sample_transcription_02_rels_ext.rdf",
       ),
       'TRANSCRIPTION' => array(
-        'file' => "$object_path/sample_transcription_transcription.txt",
+        'file' => "$object_path/sample_transcription_02_transcription.txt",
+        'mimetype' => 'text/plain',
+      ),
+    ),
+  ));
+  $transcription_03_object = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:sample-transcription-03',
+    'label' => 'The Two Sisters 1913',
+    'datastreams' => array(
+      'RELS-EXT' => array(
+        'file' => "$object_path/sample_transcription_03_rels_ext.rdf",
+      ),
+      'TRANSCRIPTION' => array(
+        'file' => "$object_path/sample_transcription_03_transcription.txt",
         'mimetype' => 'text/plain',
       ),
     ),
@@ -158,10 +171,11 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
         $critical_edition_object,
         $version_object,
         $tei_rdf_object,
-        $transcription_object,
+        $transcription_01_object,
+        $transcription_02_object,
+        $transcription_03_object,
         $source_book_object,
         $source_page_01_object,
-        $transcription_object_2,
       ),
     ),
   );
