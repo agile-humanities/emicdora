@@ -154,13 +154,6 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
     ),
   ));
-  // Add 'hasSourceType' and 'isDerivationOf' Relationships to the version rels.
-//   $version_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
-//   $version_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source_book_object->id);
-//   $tei_rdf_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $version_object->id);
-//   $tei_rdf_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source_page_01_object->id);
-  
-//   $source_page_01_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', "islandora:sample-version");
   // @todo Add Collation Objects, will also require some database manipulation.
   return array(
     'emicdora_sample' => array(
