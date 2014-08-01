@@ -51,6 +51,10 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       'TEI' => array(
         'file' => "$object_path/sample_version_tei.xml",
       ),
+      'TN' => array(
+        'file' => "$object_path/sample_version_tn.jpg",
+        'mimetype' => 'image/jpg',
+      ),
     ),
   ));
   // TEI-RDF Object.
@@ -61,7 +65,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       'RELS-EXT' => array(
         'file' => "$object_path/sample_tei_rdf_01_rels_ext.rdf",
       ),
-      'TEI_RDF' => array(
+      'CWRC' => array(
         'file' => "$object_path/sample_tei_rdf_01_tei_rdf.xml",
       ),
     ),
@@ -150,6 +154,13 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
     ),
   ));
+  // Add 'hasSourceType' and 'isDerivationOf' Relationships to the version rels.
+//   $version_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
+//   $version_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source_book_object->id);
+//   $tei_rdf_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $version_object->id);
+//   $tei_rdf_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source_page_01_object->id);
+  
+//   $source_page_01_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', "islandora:sample-version");
   // @todo Add Collation Objects, will also require some database manipulation.
   return array(
     'emicdora_sample' => array(

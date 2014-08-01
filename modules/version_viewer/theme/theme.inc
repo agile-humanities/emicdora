@@ -19,9 +19,6 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
 
   $version_object = $variables['islandora_object'];
   $type = $version_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
-
-  drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
   drupal_add_css("$module_path/css/viewer.css");
 
   // Drop in our initilization script.
@@ -41,5 +38,4 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
 
   versionable_object_viewer_build_version_media_view($version_object, $variables);
-
 }

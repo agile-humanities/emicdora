@@ -92,7 +92,6 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
   // Islandora Image Annotation base path, required module.
   $image_annotation_module_path = drupal_get_path('module', 'islandora_image_annotation');
   $islandora_markup_editor_module_path = drupal_get_path('module', 'islandora_markup_editor');
-
   $pages = islandora_paged_content_get_pages($variables['islandora_object']);
   $pids = array_keys($pages);
   $schema_object = array();

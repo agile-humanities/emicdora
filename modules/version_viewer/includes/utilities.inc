@@ -208,7 +208,6 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     foreach ($members as $member) {
       array_push($pids, $member['obj']['value']);
     }
-
     $derivation_pids = array();
     foreach ($pids as $pid) {
       $page_derivation = islandora_object_load($pid);
