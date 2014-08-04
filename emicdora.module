@@ -607,13 +607,15 @@ function emicdora_block_view($delta = '') {
       $block['content'] = array(
         '#theme' => 'links',
         '#links' => $links,
-        '#contextual_links' => array(
+      );
+      if ($is_source) {
+        $block['content']['#contextual_links'] = array(
           'emicdora' => array(
             'emicdora/contextual-links/version',
             array($critical_edition->id),
           ),
-        ),
-      );
+        );
+      }
       break;
 
     case 'operations':
@@ -1213,4 +1215,12 @@ function emicdora_forms($form_id, $args) {
       );
     }
   }
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_object_ingested().
+ */
+function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(AbstractObject $object) {
+  module_load_include('inc', 'collation', 'includes/calliope');
+  emicdora_calliope_write_file($object->id);
 }
