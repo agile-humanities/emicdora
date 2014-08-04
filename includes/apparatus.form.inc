@@ -28,7 +28,7 @@ function emicdora_apparatus_form(array $form, array $form_state, AbstractObject 
   $supported_datastreams = emicdora_apparatus_supported_datastreams();
   $default_selected_datastream = key($supported_datastreams);
   $selected_datastream = isset($form_state['values']['datastream']) ? $form_state['values']['datastream'] : $default_selected_datastream;
-  $content = t('Enter text for @datastream', array('@datastream' => $supported_datastreams[$default_selected_datastream]));
+  $content = t('Enter text for @datastream', array('@datastream' => $supported_datastreams[$selected_datastream]));
   if (isset($object[$selected_datastream])) {
     $content = $object[$selected_datastream]->content;
   }
@@ -91,6 +91,11 @@ function emicdora_apparatus_form_submit(array $form, array $form_state) {
   $selected_datastream = $form_state['values']['datastream'];
   $content = $form_state['values'][$selected_datastream];
   $content = is_array($content) ? $content['value'] : $content;
-  emicdora_set_apparatus_datastream($object, $selected_datastream, $content);
+  if ($content) {
+    emicdora_set_apparatus_datastream($object, $selected_datastream, $content);
+  }
+  else {
+    $object->purgeDatastream($selected_datastream);
+  }
   drupal_set_message(t('Updated @component', array('@component' => $form['datastream']['#options'][$selected_datastream])));
 }

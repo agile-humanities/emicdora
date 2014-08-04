@@ -8,19 +8,17 @@
 
     attach: function(context, settings) {
       var chosen = undefined;
-      var oldhash = window.location.hash;
-      var newhash = oldhash;
+      var hash = window.location.hash;
       if (("onhashchange" in window) && !($.browser.msie)) {
         window.onhashchange = function() {
           $('.vertical-tab-button.selected').removeClass('selected');
           var choice = $('.vertical-tab-button a strong');
           choice.each(function(){
-            if($(this).text().toLowerCase() == chosen.toLowerCase()) {
+            if($(this).text().toLowerCase().replace(' ', '_') == chosen.toLowerCase()) {
               $(this).closest('.vertical-tab-button').addClass('selected');
-              newhash = "#" + chosen;
-              $(oldhash).css('display', 'none');
-              $(newhash).css('display', 'block');
-              oldhash = newhash;
+              hash = "#" + chosen;
+              $('.vertical-tabs-pane').css('display', 'none');
+              $(hash).css('display', 'block');
             }
           });
         }
