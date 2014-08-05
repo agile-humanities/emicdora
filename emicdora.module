@@ -456,6 +456,8 @@ function emicdora_block_view($delta = '') {
   $is_compare = (isset($path_parts[3]) && $path_parts[3] == 'compare') ? TRUE : FALSE;
   $is_table = (isset($path_parts[3]) && $path_parts[3] == 'table') ? TRUE : FALSE;
   $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
+  $is_tei_editor = (isset($path_parts[3]) && $path_parts[3] == 'tei_editor') ? TRUE : FALSE;
+
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
   }
@@ -646,13 +648,12 @@ function emicdora_block_view($delta = '') {
         );
       }
       // Placeholder until we figure what the view button is for.
-      $condition = '';
-      if ($condition == 'met') {
-        $links[] = array(
-          'title' => 'View',
-          'href' => "islandora/object/$id",
-        );
-      }
+
+      $links[] = array(
+        'title' => 'View',
+        'href' => "islandora/object/$id",
+      );
+
       if ($is_source) {
         $links[] = array(
           'title' => 'View Source Object',
