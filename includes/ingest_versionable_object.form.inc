@@ -599,7 +599,7 @@ function emicdora_tei_rdf_ajax_container(array $form, array &$form_state) {
 function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $page, $versionable_object, array &$context) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $namespace = islandora_get_namespace($tei_rdf);
+  $namespace = islandora_get_namespace($versionable_object);
   $tei_rdf_page = islandora_get_tuque_connection()->repository->constructObject($namespace);
   $tei_rdf_page->label = $page['label'];
 
@@ -715,7 +715,8 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   // islandora_ingest_form_next_submit() as it doesn't respect form_load_include
   // and doesn't check load any files required by submit handles.
   module_load_include('inc', 'islandora', 'includes/ingest.form');
-  if (empty($context['sandbox'])) {
+  if (empty($context['results'])) {
+    $file_id = uniqid();
     $file = file_save_data('', 'temporary://transcription.txt');
     $context['results']['filename'] = drupal_realpath($file->uri);
   }
@@ -729,14 +730,13 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   }
   file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
 
-  // Force delete.
-  file_delete($file, TRUE);
 }
 
 /**
  * Finished call-back for the create TEI-RDF batch process.
  */
 function emicdora_ingest_versionable_object_transcription_batch_finished($success, array $results, array $operations) {
+  module_load_include('inc', 'collation', 'includes/calliope');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $batch = &batch_get();
   // We have to unset the cached files here due to a bug in core. Basically when
@@ -750,8 +750,10 @@ function emicdora_ingest_versionable_object_transcription_batch_finished($succes
     $ingest_objects = &islandora_ingest_form_get_objects($batch['form_state']);
     $transcription = $ingest_objects['transcription'];
     $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
-    $datastream->setContentFromFile($results['filename'], FALSE);
+    $contents = file_get_contents($results['filename']);
+    $datastream->setContentFromString($contents);
     $transcription->ingestDatastream($datastream);
+    unlink($results['filename']);
     drupal_set_message(t('Succesfully created Transcription Object.'));
   }
   else {

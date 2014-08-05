@@ -121,10 +121,16 @@ function collation_block_configure($delta = '') {
 function collation_block_view($delta = '') {
   module_load_include('inc', 'collation', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  // Check to see if we are on a critical edition object.
-  $critical_edition = menu_get_object('islandora_object', 2);
-  $is_critical_edition = is_object($critical_edition) && emicdora_has_content_model($critical_edition, 'islandora:criticalEditionContainerCModel');
-  if (!$is_critical_edition) {
+  $object = menu_get_object('islandora_object', 2);
+  if (is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel')) {
+    $critical_edition = $object;
+  }
+  elseif (is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel')) {
+    $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+    $critical_edition = islandora_object_load($parents[0]['object']['value']);
+  }
+
+  if (!isset($critical_edition)) {
     return array();
   }
   // Build the block uses paths relative to our current path.
@@ -187,5 +193,18 @@ function collation_form_emicdora_admin_settings_form_alter(&$form, &$form_state)
     '#title' => t("Database name"),
     '#description' => t("Mongo Database instance name"),
     '#default_value' => variable_get('emicdora_mongo_db', "test"),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function collation_theme() {
+  return array(
+    'collation_compare' => array(
+      'template' => 'theme/collation_compare',
+      'file' => 'theme/theme.inc',
+      'variables' => array('left' => NULL, 'right' => NULL),
+    ),
   );
 }

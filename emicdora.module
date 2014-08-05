@@ -367,11 +367,6 @@ function emicdora_theme() {
       'pattern' => 'emicdora_transcription_object__',
       'variables' => array('islandora_object' => NULL),
     ),
-    'collation_compare' => array(
-      'template' => 'theme/collation_compare',
-      'file' => 'theme/theme.inc',
-      'variables' => array('left' => NULL, 'right' => NULL),
-    ),
   );
 }
 
@@ -493,6 +488,8 @@ function emicdora_block_view($delta = '') {
   $is_compare = (isset($path_parts[3]) && $path_parts[3] == 'compare') ? TRUE : FALSE;
   $is_table = (isset($path_parts[3]) && $path_parts[3] == 'table') ? TRUE : FALSE;
   $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
+  $is_tei_editor = (isset($path_parts[3]) && $path_parts[3] == 'tei_editor') ? TRUE : FALSE;
+
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
   }
@@ -646,13 +643,15 @@ function emicdora_block_view($delta = '') {
       $block['content'] = array(
         '#theme' => 'links',
         '#links' => $links,
-        '#contextual_links' => array(
+      );
+      if ($is_source) {
+        $block['content']['#contextual_links'] = array(
           'emicdora' => array(
             'emicdora/contextual-links/version',
             array($critical_edition->id),
           ),
-        ),
-      );
+        );
+      }
       break;
 
     case 'operations':
@@ -683,13 +682,12 @@ function emicdora_block_view($delta = '') {
         );
       }
       // Placeholder until we figure what the view button is for.
-      $condition = '';
-      if ($condition == 'met') {
-        $links[] = array(
-          'title' => 'View',
-          'href' => "islandora/object/$id",
-        );
-      }
+
+      $links[] = array(
+        'title' => 'View',
+        'href' => "islandora/object/$id",
+      );
+
       if ($is_source) {
         $links[] = array(
           'title' => 'View Source Object',
@@ -1252,4 +1250,12 @@ function emicdora_forms($form_id, $args) {
       );
     }
   }
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_object_ingested().
+ */
+function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(AbstractObject $object) {
+  module_load_include('inc', 'collation', 'includes/calliope');
+  emicdora_calliope_write_file($object->id);
 }
