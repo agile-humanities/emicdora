@@ -490,7 +490,7 @@ function emicdora_block_view($delta = '') {
         return array();
       }
       $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
-      $source_objects = $versionable_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isDerivationOf');
+      $source_objects = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
       if (!empty($source_objects)) {
 
         $source_object = $source_objects[0]['object']['value'];
@@ -1033,10 +1033,6 @@ function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
   $filters[] = format_string('!model:("info:fedora/islandora:versionCModel")', array(
     '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
-  if ($type) {
-    $filters[] = format_string('!type:("info:fedora/' . $type . '")', array(
-      '!type' => 'RELS_EXT_hasSourceType_uri_ms'));
-  }
   if (isset($_GET['solr'])) {
     $filters[] = $_GET['solr'];
   }

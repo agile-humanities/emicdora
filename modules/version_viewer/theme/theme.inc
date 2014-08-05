@@ -18,7 +18,7 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   dom_document_pretty_print_include_files();
 
   $version_object = $variables['islandora_object'];
-  $type = $version_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
+  $type = emicdora_get_source_type($version_object);
   drupal_add_css("$module_path/css/viewer.css");
 
   // Drop in our initilization script.
@@ -31,7 +31,7 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-1.7.js');
   drupal_add_js($image_module_path . '/shared_canvas/js/jquery/jquery-ui-1.8.13.custom.min.js');
 
-  $variables['content_model_type'] = $type[0]['object']['value'];
+  $variables['content_model_type'] = emicdora_get_source_type($version_object);
   $variables['transcription_source'] = url("islandora/object/$version_object->id/get_transcription_data");
   $variables['meta_source'] = url("islandora/cwrc_viewer/detail_meta_data");
 

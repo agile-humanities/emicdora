@@ -2,7 +2,7 @@
   <rdf:Description rdf:about="info:fedora/islandora:sample-tei-rdf-01">
     <fedora-model:hasModel rdf:resource="info:fedora/islandora:tei-rdfCModel"/>
     <fedora:isMemberOf rdf:resource="info:fedora/islandora:sample-version"/>
-    <islandora:isDerivationOf rdf:resource="info:fedora/islandora:sample-page-01"/>
+    <fedora:isDerivationOf rdf:resource="info:fedora/islandora:sample-page-01"/>
     <islandora:isPageOf rdf:resource="info:fedora/islandora:sample-version"/>
     <islandora:isSequenceNumber>1</islandora:isSequenceNumber>
     <islandora:isPageNumber>1</islandora:isPageNumber>
