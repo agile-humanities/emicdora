@@ -612,7 +612,6 @@ function emicdora_block_view($delta = '') {
           $versions = emicdora_get_raw_objects($critical_edition, 'version');
           $configs = emicdora_get_configuration($critical_edition->id, 'version');
           break;
-
       }
       $total = 0;
       foreach ($versions as $key => $value) {
@@ -645,14 +644,14 @@ function emicdora_block_view($delta = '') {
         '#theme' => 'links',
         '#links' => $links,
       );
-      if ($is_source) {
-        $block['content']['#contextual_links'] = array(
-          'emicdora' => array(
-            'emicdora/contextual-links/version',
-            array($critical_edition->id),
-          ),
-        );
-      }
+
+      $block['content']['#contextual_links'] = array(
+        'emicdora' => array(
+          'emicdora/contextual-links/version',
+          array($critical_edition->id),
+        ),
+      );
+
       break;
 
     case 'operations':

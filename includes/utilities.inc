@@ -554,7 +554,21 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
         }
         $added = FALSE;
         foreach ($version_facets as $label => $facet) {
-          if (isset($candidate[$facet['solr_field']]) && $candidate[$facet['solr_field']] == $facet['solr_value']) {
+          $matched = FALSE;
+          $solr_field = $facet['solr_field'];
+          if (isset($candidate[$facet['solr_field']])) {
+            if (is_array($candidate[$facet['solr_field']])) {
+              if (in_array($facet['solr_value'], $candidate[$facet['solr_field']])) {
+                $matched = TRUE;
+              }
+            }
+            else {
+              if ($candidate[$facet['solr_field']] == $facet['solr_value']) {
+                $matched = TRUE;
+              }
+            }
+          }
+          if ($matched) {
             $sorted_results[$label][] = $candidate['PID'];
             $added = TRUE;
           }
