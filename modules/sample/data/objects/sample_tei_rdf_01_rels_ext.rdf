@@ -3,5 +3,9 @@
     <fedora-model:hasModel rdf:resource="info:fedora/islandora:tei-rdfCModel"/>
     <fedora:isMemberOf rdf:resource="info:fedora/islandora:sample-version"/>
     <fedora:isDerivationOf rdf:resource="info:fedora/islandora:sample-page-01"/>
+    <islandora:isPageOf rdf:resource="info:fedora/islandora:sample-version"/>
+    <islandora:isSequenceNumber>1</islandora:isSequenceNumber>
+    <islandora:isPageNumber>1</islandora:isPageNumber>
+    <islandora:isSection>1</islandora:isSection>
   </rdf:Description>
 </rdf:RDF>

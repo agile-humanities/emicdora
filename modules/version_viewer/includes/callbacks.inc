@@ -51,11 +51,11 @@ function versionable_object_viewer_prepare_detail_meta_data() {
  */
 function versionable_object_viewer_build_transcription_data($object) {
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
-
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $page = urldecode($_GET['page']);
-  $type = $object->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
+  $type = emicdora_get_source_type($object);
   $transcriptions = versionable_object_viewer_get_transcription_text($object);
-  switch ($type[0]['object']['value']) {
+  switch ($type) {
     case "audio":
       $return['body'] = $transcriptions[$page - 1]['text'];
       $return['title'] = $transcriptions[$page - 1]['title'];

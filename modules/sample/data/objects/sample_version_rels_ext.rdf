@@ -2,5 +2,6 @@
   <rdf:Description rdf:about="info:fedora/islandora:sample-version">
     <fedora-model:hasModel rdf:resource="info:fedora/islandora:versionCModel"/>
     <fedora:isMemberOf rdf:resource="info:fedora/islandora:sample-critical_edition"/>
+    <fedora:isDerivationOf rdf:resource="info:fedora/islandora:sample-book"/>
   </rdf:Description>
 </rdf:RDF>

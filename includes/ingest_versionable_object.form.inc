@@ -371,19 +371,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $tn_datastream->setContentFromString($tn);
   $tn = '';
   $versionable_object->ingestDatastream($tn_datastream);
-  if (in_array('islandora:bookCModel', $source->models)) {
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'text');
-  }
-  if (in_array('islandora:sp-audioCModel', $source->models)) {
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'audio');
-  }
-  if (in_array('islandora:sp_videoCModel', $source->models)) {
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'video');
-  }
-  if (in_array('islandora:sp_large_image_cmodel', $source->models)) {
-    $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'hasSourceType', 'image');
-  }
-  $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
+  $versionable_object->relationships->add(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF, $source->id);
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
@@ -607,7 +595,7 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
   $tei_rdf_page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
   $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object);
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object);
-  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isDerivationOf', $page['pid']);
+  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF, $page['pid']);
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);

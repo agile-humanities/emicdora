@@ -21,6 +21,35 @@ function emicdora_source_content_models() {
 }
 
 /**
+ * Get the plain text sourc type of the isDerivationOf rel.
+ *
+ * @param AbstractObject $version_object
+ *   The versionable object to be processed
+ *
+ * @return string
+ *   text, audio, video, image or NULL.
+ */
+function emicdora_get_source_type(AbstractObject $version_object) {
+  $derivation = $version_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+  $derivation_pid = $derivation[0]['object']['value'];
+  $object = islandora_object_load($derivation_pid);
+  $type = NULL;
+  if (in_array('islandora:bookCModel', $object->models)) {
+    $type = "text";
+  }
+  if (in_array('islandora:sp-audioCModel', $object->models)) {
+    $type = "audio";
+  }
+  if (in_array('islandora:sp_videoCModel', $object->models)) {
+    $type = "video";
+  }
+  if (in_array('islandora:sp_large_image_cmodel', $object->models)) {
+    $type = "image";
+  }
+  return $type;
+}
+
+/**
  * Determin if the Apparatus block should be shown.
  *
  * @return bool

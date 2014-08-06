@@ -18,6 +18,7 @@
 function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
 
   $tei_editor_module_path = drupal_get_path('module', 'tei_editor');
   $islandora_markup_editor_path = drupal_get_path('module', 'islandora_markup_editor');
@@ -25,8 +26,7 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
 
   // Theme our custom components to the tei_editor viewer.
   $variables['anno_list_pane'] = theme('islandora_anno_list_pane');
-  $type = $variables['islandora_object']->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
-  $variables['content_model_type'] = $type[0]['object']['value'];
+  $variables['content_model_type'] = emicdora_get_source_type($variables['islandora_object']);
 
   versionable_object_viewer_build_version_media_view($variables['islandora_object'], $variables);
   $variables['images_path'] = url($islandora_markup_editor_path . '/CWRC-Writer/src/img/',
@@ -85,6 +85,7 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora_markup_editor', 'includes/utilities');
   module_load_include('inc', 'tei_editor', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   $tei_editor_module_path = drupal_get_path('module', 'tei_editor');
 
@@ -92,7 +93,6 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
   // Islandora Image Annotation base path, required module.
   $image_annotation_module_path = drupal_get_path('module', 'islandora_image_annotation');
   $islandora_markup_editor_module_path = drupal_get_path('module', 'islandora_markup_editor');
-
   $pages = islandora_paged_content_get_pages($variables['islandora_object']);
   $pids = array_keys($pages);
   $schema_object = array();
@@ -110,14 +110,14 @@ function tei_editor_add_js(&$variables, $media = FALSE) {
     'url' => $doc_process_instructions['href'],
   );
 
-  $type = $variables['islandora_object']->relationships->get(ISLANDORA_RELS_EXT_URI, 'hasSourceType');
+  $type = emicdora_get_source_type($variables['islandora_object']);
   // To avoid hard coded values in JavaScript, this is the best option.
   drupal_add_js(
     array(
       'islandora_markup_editor' => array(
         'image_anno_img' => $image_anno_images,
         'book_pid' => $bp,
-        'type' => $type[0]['object']['value'],
+        'type' => $type,
         'module_base' => $variables['cwrc_lib_path'],
         'schema_object' => $schema_object,
         'images_path' => $variables['images_path'],

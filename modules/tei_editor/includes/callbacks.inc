@@ -66,7 +66,7 @@ function tei_editor_canvas_setup(AbstractObject $fedora_object) {
   $results['islandora_anno_stroke_width'] = $stroke_width;
   $results['no_edit'] = !islandora_object_access_callback(ISLANDORA_VIEW_OBJECTS, $fedora_object);
   $results['entities_search_callback'] = url('islandora/entities/search');
-  $page_object_rels = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, "isDerivationOf");
+  $page_object_rels = $fedora_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
   if (isset($page_object_rels[0]['object']['value'])) {
     $page_object = islandora_object_load($page_object_rels[0]['object']['value']);
     $page_object_of_relationship = $page_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageOf');
