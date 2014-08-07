@@ -9,9 +9,12 @@
   $(document).ready(function() {
     // Assume it's always hidden to start off.
     $('.form-type-plupload').hide();
-    if ($('input[name="transcription_source"][value="upload"]').is(':checked')) {
-      $('.form-type-plupload').show();
-    }
+    $('input[name="transcription_source"]').click(function() {
+      if ($('input[name="transcription_source"][value="upload"]').is(':checked')) {
+        $('.form-type-plupload').show();
+      }
+    });
+
     // Prevent enter submit on the source textfield as this will skip
     // validation of the #access = FALSE elements.
     $('input[name="source"]').keypress(function(event) {
