@@ -428,7 +428,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', 1, RELS_TYPE_PLAIN_LITERAL);
       // Add default datastreams.
       $datastream = $page->constructDatastream("OCR", 'M');
-      $datastream->mimetype = 'text/xml';
+      $datastream->mimetype = 'text/plain';
       $datastream->label = "Default Transcription";
       $datastream->setContentFromString(t("Transcription"));
       $page->ingestDatastream($datastream);
