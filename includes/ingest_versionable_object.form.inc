@@ -705,7 +705,7 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   if (empty($context['results'])) {
     $file_id = uniqid();
-    $file = file_save_data('', 'temporary://transcription.txt');
+    $file = file_save_data('', "temporary://{$file_id}transcription.txt");
     $context['results']['filename'] = drupal_realpath($file->uri);
   }
   $page = islandora_object_load($page);
