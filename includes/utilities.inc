@@ -443,7 +443,7 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
               '@pid' => $object->id,
-              "@message" => $e->getMessage(),
+              '@message' => $e->getMessage(),
             )
         ), 'error'
     );
@@ -552,24 +552,26 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
             'solr_value' => $config['solr_field_settings']['value'],
           );
         }
+        $matched = FALSE;
         $added = FALSE;
         foreach ($version_facets as $label => $facet) {
-          $matched = FALSE;
-          $solr_field = $facet['solr_field'];
+
           if (isset($candidate[$facet['solr_field']])) {
             if (is_array($candidate[$facet['solr_field']])) {
-              if (in_array($facet['solr_value'], $candidate[$facet['solr_field']])) {
+              $search_array = array_map('strtolower', $candidate[$facet['solr_field']]);
+              if (in_array(strtolower($facet['solr_value']), $search_array)) {
                 $matched = TRUE;
               }
             }
             else {
-              if ($candidate[$facet['solr_field']] == $facet['solr_value']) {
+              if (strtolower($candidate[$facet['solr_field']]) == strtolower($facet['solr_value'])) {
                 $matched = TRUE;
               }
             }
           }
           if ($matched) {
             $sorted_results[$label][] = $candidate['PID'];
+            $matched = FALSE;
             $added = TRUE;
           }
         }
