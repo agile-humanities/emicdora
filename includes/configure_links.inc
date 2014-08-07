@@ -538,15 +538,24 @@ function emicdora_admin_settings_submit($form, $form_state) {
   $terms['version'] = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
   $terms['source'] = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
   foreach ($terms as $term_type => $values) {
-    foreach ($values as $label => $components) {
+    $form_field = "emicdora_{$term_type}_fields";
+    if (!isset($form_state['values'][$form_field]['terms'])) {
+      continue;
+    }
+    $weights = array();
+    foreach ($form_state['values'][$form_field]['terms'] as $category => $category_values) {
+      $weights[intval($category_values['weight'])] = $category_values['solr_field'];
+    }
+    ksort($weights);
+    foreach ($weights as $index => $weight) {
       $solr_field_settings = array(
-        'label' => $components['label'],
-        'value' => $components['value'],
+        'label' => $values[$weight]['label'],
+        'value' => $values[$weight]['value'],
       );
       $fields = array(
-        'solr_field' => $label,
+        'solr_field' => $weight,
         'field_type' => 'unused',
-        'weight' => 0,
+        'weight' => $index,
         'solr_field_settings' => $solr_field_settings,
       );
       emicdora_insert_terms($critical_edition, $term_type, $fields);

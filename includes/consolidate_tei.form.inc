@@ -101,14 +101,14 @@ function emicdora_update_tei_datastream_batch_operation($tei_rdf, array &$contex
   if (!isset($tei_rdf['TEI'])) {
     $datastream = $tei_rdf->constructDatastream('TEI', 'M');
     $datastream->label = 'Consolidated TEI';
-    $datastream->mimetype = 'application/tei+xml';
+    $datastream->mimetype = 'text/xml';
     $datastream->setContentFromString($context['results']['tei']);
     $tei_rdf->ingestDatastream($datastream);
   }
   else {
     $datastream = $tei_rdf['TEI'];
     $datastream->label = 'Consolidated TEI';
-    $datastream->mimetype = 'application/tei+xml';
+    $datastream->mimetype = 'text/xml';
     $datastream->setContentFromString($context['results']['tei']);
   }
 }
