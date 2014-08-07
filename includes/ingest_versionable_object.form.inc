@@ -654,7 +654,7 @@ function emicdora_ingest_versionable_object_tei_rdf_tei_datastream_batch_operati
   }
   else {
     $datastream = $tei_rdf->constructDatastream('TEI', 'M');
-    $datastream->mimetype = 'application/tei+xml';
+    $datastream->mimetype = 'text/xml';
     $datastream->setContentFromString($context['sandbox']['content']);
     $datastream->label = "Consolidated TEI";
     $tei_rdf->ingestDatastream($datastream);
