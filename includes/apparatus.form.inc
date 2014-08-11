@@ -98,4 +98,7 @@ function emicdora_apparatus_form_submit(array $form, array $form_state) {
     $object->purgeDatastream($selected_datastream);
   }
   drupal_set_message(t('Updated @component', array('@component' => $form['datastream']['#options'][$selected_datastream])));
+  unset($_GET['destination']);
+  drupal_static_reset('drupal_get_destination');
+  drupal_get_destination();
 }
