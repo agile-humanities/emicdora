@@ -10,7 +10,7 @@
  * @param unknown $islandora_object
  *   The Critical Edition object to find source objects for.
  */
-function emicdora_coop($islandora_object) {
+function emicdora_coop() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $source_content_models = emicdora_source_content_models();
   $add_source_links = array();
@@ -21,7 +21,6 @@ function emicdora_coop($islandora_object) {
     );
   }
   return theme('emicdora_coop_group_page', array(
-    'islandora_object' => $islandora_object,
     'add_list' => $add_source_links,
     'source_collection' => url("islandora/object/" . EMICDORA_SOURCE_COLLECTION),
     )

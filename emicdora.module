@@ -388,7 +388,6 @@ function emicdora_theme() {
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_coop_group_page',
       'variables' => array(
-        'islandora_object' => NULL,
         'add_list' => array(),
         'source_collection' => "",
       ),

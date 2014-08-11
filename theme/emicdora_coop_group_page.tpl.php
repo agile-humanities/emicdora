@@ -35,4 +35,3 @@
 		</div>
 	</div>
 </div>
-<div style="width: 100%; height:700px;border-style: solid;border-color: #0000ff;float: left;display: inline-block;vertical-align: top"></div>
