@@ -381,7 +381,7 @@ function emicdora_theme() {
       'template' => 'theme/emicdora_coop_group',
       'variables' => array(
         'islandora_object' => NULL,
-        'group_list' => array()
+        'group_list' => array(),
       ),
     ),
     'emicdora_coop_group_page' => array(
@@ -389,7 +389,6 @@ function emicdora_theme() {
       'template' => 'theme/emicdora_coop_group_page',
       'variables' => array(
         'islandora_object' => NULL,
-        'group_lists' => array(),
         'add_list' => array(),
         'source_collection' => "",
       ),

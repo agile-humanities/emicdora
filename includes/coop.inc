@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Defines all the funciton calls involving the coop cmodel.
+ */
 
 /**
  * Page callback to view COOP objects in a critical edition.
@@ -19,7 +23,6 @@ function emicdora_coop($islandora_object) {
   return theme('emicdora_coop_group_page', array(
     'islandora_object' => $islandora_object,
     'add_list' => $add_source_links,
-    'group_lists' => array(),
     'source_collection' => url("islandora/object/" . EMICDORA_SOURCE_COLLECTION),
     )
   );

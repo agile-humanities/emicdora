@@ -4,7 +4,6 @@
  * islandora-basic-collection.tpl.php
  */
 ?>
-<!-- Set up the 'header' portion -->
 
 <div>
 	<div class="coop_desc_feat" style="width: 100%;">
