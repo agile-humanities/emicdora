@@ -33,9 +33,17 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
   global $user;
   if (isset($_GET['destination'])) {
     $url_parts = explode('/', $_GET['destination']);
-    $form_state['values']['source'] = $url_parts[4];
     $form_state['values']['limit_page_range'] = TRUE;
-    $_POST['source'] = $url_parts[4];
+    if (!isset($url_parts[4])) {
+      $version_object = islandora_object_load($url_parts[2]);
+      $sources = $version_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+      $source_pid = $sources[0]['object']['value'];
+    }
+    else {
+      $source_pid = $url_parts[4];
+    }
+    $_POST['source'] = $source_pid;
+    $form_state['values']['source'] = $source_pid;
     unset($_GET['destination']);
   }
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
@@ -202,7 +210,6 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
           'effect' => 'fade',
         ),
       ),
-
       'transcription_label' => array(
         '#access' => $valid_source_selected,
         '#type' => 'textfield',
@@ -387,7 +394,6 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
     // @todo We need to migrate the existing data at some point in the future
     // The following property should not be a literal value, but we must make
     // it so for backwards compatibility.
-
     // TEI-RDF objects associated with books require a batch process to be
     // created, all the files created in the batch will be added to the
     // $form_state, to be ingested when islandora_ingest_form is submited.
@@ -622,6 +628,7 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
   $context['results']['pages'][] = $tei_rdf_page;
   $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
 }
+
 /**
  * Creates the TEI datastream on the TEI-RDF object.
  *
@@ -705,7 +712,7 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   if (empty($context['results'])) {
     $file_id = uniqid();
-    $file = file_save_data('', 'temporary://transcription.txt');
+    $file = file_save_data('', "temporary://{$file_id}transcription.txt");
     $context['results']['filename'] = drupal_realpath($file->uri);
   }
   $page = islandora_object_load($page);
@@ -717,7 +724,6 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
     $text = $page['OCR']->content;
   }
   file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
-
 }
 
 /**
