@@ -19,3 +19,8 @@
   width:80px;
   height:80px;
 }
+
+/* Fix for context menus of the block covering the drop down in '/coop'. */
+.contextual-links-region{
+  position: unset !important;
+}

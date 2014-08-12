@@ -505,6 +505,7 @@ function emicdora_block_configure($delta = '') {
  * Implements hook_block_view().
  */
 function emicdora_block_view($delta = '') {
+  print($delta);
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $object = menu_get_object('islandora_object', 2);
   $path_parts = explode('/', $_GET['q']);
@@ -548,6 +549,7 @@ function emicdora_block_view($delta = '') {
   $path = current_path();
 
   $block = array();
+  
   switch ($delta) {
     case 'critical_apparatus':
       if (emicdora_show_apparatus_block()) {
