@@ -13,6 +13,11 @@
       if ($('input[name="transcription_source"][value="upload"]').is(':checked')) {
         $('.form-type-plupload').show();
       }
+      else {
+        // Hide the uplaod header and allowed files if a user is
+        // clicking around the radio buttons.
+        $('.form-type-plupload').hide();
+      }
     });
 
     // Prevent enter submit on the source textfield as this will skip

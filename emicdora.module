@@ -644,13 +644,14 @@ function emicdora_block_view($delta = '') {
         '#theme' => 'links',
         '#links' => $links,
       );
-
-      $block['content']['#contextual_links'] = array(
-        'emicdora' => array(
-          'emicdora/contextual-links/version',
-          array($critical_edition->id),
-        ),
-      );
+      if ($is_source || $is_versionable_object) {
+        $block['content']['#contextual_links'] = array(
+          'emicdora' => array(
+            'emicdora/contextual-links/version',
+            array($critical_edition->id),
+          ),
+        );
+      }
 
       break;
 

@@ -21,7 +21,7 @@ function emicdora_source_content_models() {
 }
 
 /**
- * Get the plain text sourc type of the isDerivationOf rel.
+ * Get the plain text source type of the isDerivationOf rel.
  *
  * @param AbstractObject $version_object
  *   The versionable object to be processed
