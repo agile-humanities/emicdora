@@ -24,11 +24,6 @@
 
   var is_toggled = false;
 
-  // Keep track of what the user is viewing, entity wise
-  var active_image_annos = [];
-  var active_text_image_link_annos = [];
-  var active_entities = [];
-
   // Setup the initial menu 'look'.
   var btn_background_color = 'red';
   $('#wb_show_til').css('background-color', btn_background_color);
@@ -305,7 +300,6 @@
     	        $(this).removeClass('annos');
     	        $(this).css('background-color', 'initial');
     	        if (ddt) {
-    	          //ddt['children'] = getTreeChecked(ddt);
     	          $('#' + ddt.domId).hide();
     	          if (ddt['children'].length > 0) {
     	            hide_tree_children(ddt['children']);	
@@ -313,7 +307,6 @@
     	        }
     	        if (dda) {
     	          $('#' + dda.domId).hide();
-    	          //dda['children'] = getTreeChecked(dda);
     	          if (dda['children'].length > 0) {
     	            hide_tree_children(dda['children']);
     	          }
@@ -324,14 +317,12 @@
     	        $('#wb_show_annos').css('background-color', btn_background_color);
     	        if (ddt) {
     	          $('#' + ddt.domId).show();
-    	          //ddt['children'] = getTreeChecked(ddt);
     	          if (ddt['children'].length > 0) {
     	            show_tree_children(ddt['children']);
     	          }
     	        }
     	        if (dda) {
     	          $('#' + dda.domId).show();
-    	          //dda['children'] = getTreeChecked(dda);
     	          if (dda['children'].length > 0) {
     	            show_tree_children(dda['children']);
     	          }
@@ -345,7 +336,6 @@
       	        $(this).css('background-color', 'initial');
       	        if (ddt) {
       	          $('#' + ddt.domId).hide();
-      	          //ddt['children'] = getTreeChecked(ddt);
       	          if (ddt['children'].length > 0) {
       	            hide_tree_children(ddt['children']);
       	          }
@@ -356,7 +346,6 @@
       	        $('#wb_show_til').css('background-color', btn_background_color);
       	        if (ddt) {
       	          $('#' + ddt.domId).show();
-      	          //ddt['children'] = getTreeChecked(ddt);
       	          if (ddt['children'].length > 0) {
       	            show_tree_children(ddt['children']);
       	          }
