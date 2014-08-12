@@ -6,9 +6,6 @@
 
 /**
  * Page callback to view COOP objects in a critical edition.
- *
- * @param unknown $islandora_object
- *   The Critical Edition object to find source objects for.
  */
 function emicdora_coop() {
   module_load_include('inc', 'emicdora', 'includes/utilities');

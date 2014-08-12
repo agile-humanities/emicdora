@@ -548,7 +548,7 @@ function emicdora_block_view($delta = '') {
   $path = current_path();
 
   $block = array();
-  
+
   switch ($delta) {
     case 'critical_apparatus':
       if (emicdora_show_apparatus_block()) {
