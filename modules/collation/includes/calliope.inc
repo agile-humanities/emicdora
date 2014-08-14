@@ -400,3 +400,41 @@ function emicdora_calliope_compare_callback($critical_edition_pid) {
   $collection = $db->selectCollection('mvds');
   return $collection->find($query);
 }
+
+/**
+ * Writes new Collation to Mongo.
+ *
+ * @param array $newmvd
+ *   All paramaters to build new MVD
+ *
+ * @return bool
+ *   Success indicator
+ */
+function emicdora_calliope_write_collation($query, $contents) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('collations');
+  $current_record = emicdora_calliope_get_collation_file($query);
+  if ($current_record) {
+    $collection->remove(array('_id' => $id));
+  }
+  $query['contents'] = $contents;
+  $newobj = array('emic_data' => $query);
+  $inserted = $collection->insert($newobj, array('w' => 1));
+  return $inserted ? TRUE : FALSE;
+}
+
+/**
+ * Returns Mongo file associated with query.
+ *
+ * @param string $query
+ *   Mongo query
+ *
+ * @return MongoGridFSFile
+ *   Associated file
+ */
+function emicdora_calliope_get_collation_file($query) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('collations');
+  $file = $collection->findOne($query);
+  return $file;
+}

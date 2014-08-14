@@ -3,11 +3,10 @@
 
 <div id="metadata"></div>
 <div id="uiplaceholder"></div>
-<input id="emicdora_1"  type="text" style="width: 30%; -moz-user-select: text;" readonly="readonly">
-<input id="emicdora_2"  type="text" style="width: 30%; -moz-user-select: text;" readonly="readonly">
-<input id="edit-submit" class="form-submit" type="submit" value="Link">
+<input id="diff_l"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly">
+<input id="diff_r"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly">
+<input id="collation_link" class="form-submit" type="submit" value="Merge Text">
+<br />
+<input id="merged_text"  type="text" style="width: 80%; -moz-user-select: text;" readonly="readonly">
 <input id="edit-submit" class="form-submit" type="submit" value="Unlink">
-
-
-
 
