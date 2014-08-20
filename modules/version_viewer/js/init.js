@@ -76,7 +76,7 @@
     });
     
     function show_annotations(nodes) {
-      if (nodes[0]['attributes']['urn']) {
+      if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
           paint_commentAnnoTargets(null, 'canvas_0', anno_id, nodes[i]['attributes']['type']);
@@ -99,7 +99,7 @@
       }
     }
     function hide_annotations(nodes) {
-      if (nodes[0]['attributes']['urn']) {
+      if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
           $('.svg_' + anno_id).remove();
@@ -228,18 +228,7 @@
     }
     
     $('#eui_window').layout('collapse','south');
-    
-    function getTreeChecked(children){
-      // $('node-id').getChecked() is a joke, it dun broke bra.
-      var checked_array = [];
-      for (var i = 0; i< children.length; i++) {
-        var my_span = $("#" + children[i].domId + ' > .tree-checkbox1:eq(0)');
-        if (my_span.length > 0) {
-          checked_array.push(children[i]);
-        }
-      }
-      return checked_array;
-    }
+
     $('.work_action_img').click(function() {
       var is_selected = false;
       if ($(this).hasClass('img_selected')) {
@@ -359,7 +348,7 @@
         is_toggled = true;
       }
       else {
-	    if (is_toggled == true) {
+        if (is_toggled == true) {
 	      is_toggled = false;
 	      $('#eui_window').layout('expand', 'west');
 	    }
@@ -370,7 +359,7 @@
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).hide();
       }
-      children = getTreeChecked(children);
+      children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
     }
     
@@ -378,7 +367,7 @@
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).show();
       }
-      children = getTreeChecked(children);
+      children = $("#easyui_tree").tree('getChecked');
       show_annotations(children);
     }
     
