@@ -3,38 +3,7 @@
  *  Handles the data collection for collation editting.
  */
 (function($) {
-  function adjustRange(range) {
-    range = range.cloneRange();
 
-    // Expand range to encompass complete element if element's text is all selected by the range
-    var container = range.commonAncestorContainer;
-    var parentElement = container.nodeType == 3 ? container.parentNode : container;
-    if (parentElement.textContent == range.toString()) {
-      range.selectNode(parentElement);
-    }
-
-    return range;
-  }
-
-  function getSelectionHtml() {
-    var html = "", sel, range;
-    if (typeof window.getSelection != "undefined") {
-      sel = window.getSelection();
-      if (sel.rangeCount) {
-        var container = document.createElement("div");
-        for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-          range = adjustRange(sel.getRangeAt(i));
-          container.appendChild(range.cloneContents());
-        }
-        html = container.innerHTML;
-      }
-    } else if (typeof document.selection != "undefined") {
-      if (document.selection.type == "Text") {
-        html = document.selection.createRange().htmlText;
-      }
-    }
-    return html;
-  }
   Drupal.behaviors.emicdoraEdit = {
     attach: function(context, settings) {
 
@@ -55,7 +24,7 @@
         $('#diff_l').val($('#d' + qualifier).next().text());
       });
 
-      $(document).delegate('span.merged', 'click', function() {
+      $(document).delegate('span.merged', 'click mouseup', function() {
         var qualifier = $(this).attr('id').slice(1);
         $(".merged").css('background-color', '');
         left = $('#d' + qualifier);
@@ -64,32 +33,41 @@
         right.css("background-color", 'green');
         $('#merged_text').val($(left).text());
         merged_content = left.wrap('<span/>').parent().html();
-        alert(merged_content);
+
       });
 
       waitUntilExists("versionview-1010", function() {
 
-        $('#versionview-1010-body').mouseup(function() {
+        $('#versionview-1010-body').mouseup(function(evt) {
           selection_deleted = rangy.getSelection();
           text_deleted = selection_deleted.toString();
           if (selection_deleted.toHtml() !== '') {
             context_deleted = selection_deleted.toHtml();
           }
-          console.log(context_deleted);
+          if (context_deleted.indexOf('<span') === -1) {
+            var elem = document.elementFromPoint(evt.clientX, evt.clientY);
+            context_deleted = elem.outerHTML;
+          }
           $("#diff_l").val(text_deleted);
         });
 
-        $('#versionview-1011-body').mouseup(function() {
+        $('#versionview-1011-body').mouseup(function(evt) {
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
-          context_added = selection_added.toHtml();
+          if (selection_added.toHtml() !== '') {
+            context_added = selection_added.toHtml();
+          }
+          if (context_added.indexOf('<span') === -1) {
+            var elem = document.elementFromPoint(evt.clientX, evt.clientY);
+            context_added = elem.outerHTML;
+          }
           $("#diff_r").val(text_added);
         });
         $("#collation_link").click(function() {
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
           $.ajax({
             url: callback_url,
-            dataType: "text/xml",
+            dataType: "XML",
             type: "POST",
             data: {
               collation_id: Drupal.settings.collation.collation_name,
@@ -97,11 +75,15 @@
               text_deleted: text_deleted,
               context_added: context_added,
               text_added: text_added,
-              merged_content :merged_content,
+              merged_content: merged_content,
+              all_deleted: $("#versionview-1010").html(),
+              all_added: $("#versionview-1011").html(),
             },
             async: false,
             success: function(data, status, xhr) {
-              console.log(data);
+              var results = JSON.parse(data);
+              $('#versionview-1010-body').html($(results.new_deleted).html());
+              $('#versionview-1011-body').html($(results.new_added).html());
             },
             error: function(data, status, xhd) {
               console.log("failure");
@@ -109,9 +91,6 @@
           });
         });
       });
-
-
-
     }
   };
 })(jQuery);
