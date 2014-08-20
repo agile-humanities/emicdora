@@ -6,7 +6,7 @@
 
   Drupal.behaviors.emicdoraEdit = {
     attach: function(context, settings) {
-
+      var emicdora_counter = 1;
       var context_deleted = "";
       var context_added = "";
       var text_deleted = "";
@@ -32,7 +32,9 @@
         left.css("background-color", 'green');
         right.css("background-color", 'green');
         $('#merged_text').val($(left).text());
-        merged_content = left.wrap('<span/>').parent().html();
+        wrapped_content = left.wrap('<span/>');
+        merged_content = $(wrapped_content).parent().html();
+        $(wrapped_content).unwrap();
 
       });
 
@@ -78,10 +80,12 @@
               merged_content: merged_content,
               all_deleted: $("#versionview-1010").html(),
               all_added: $("#versionview-1011").html(),
+              emicdora_counter: emicdora_counter,
             },
             async: false,
             success: function(data, status, xhr) {
               var results = JSON.parse(data);
+              emicdora_counter = results.emicdora_counter;
               $('#versionview-1010-body').html($(results.new_deleted).html());
               $('#versionview-1011-body').html($(results.new_added).html());
             },
@@ -90,6 +94,9 @@
             },
           });
         });
+        function execute_callback() {
+
+        };
       });
     }
   };

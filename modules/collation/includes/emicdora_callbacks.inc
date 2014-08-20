@@ -11,7 +11,6 @@
 function emicdora_collation_edit() {
   module_load_include('inc', 'collation', 'includes/calliope');
   $deleted = $_POST['context_deleted'];
-  $deleted_spans = explode('</span>', $deleted);
   $marshalled_deleted = emicdora_marshall_spans('deleted');
   $marshalled_added = emicdora_marshall_spans('added');
   $query = array(
@@ -27,6 +26,7 @@ function emicdora_collation_edit() {
   $results = array(
     'new_deleted' => emicdora_updated_div_contents($fixed_deleted, $marshalled_deleted, 'deleted'),
     'new_added' => emicdora_updated_div_contents($fixed_added, $marshalled_added, 'added'),
+    'emicdora_counter' => $_POST['emicdora_counter'] + 1,
   );
   echo json_encode($results);
 }
@@ -93,33 +93,55 @@ function emicdora_marshall_spans($type) {
  *   new div contents
  */
 function emicdora_updated_div_contents($fixed_content, $marshalled_content, $type) {
+  $identified_text = $_POST["text_$type"];
+  $prefix = $type[0];
   $config = array(
     'added' => 'versionview-1011-body',
     'deleted' => 'versionview-1010-body',
   );
   $dom = new DOMDocument;
   $dom->loadHTML($fixed_content);
-  $unmerged = TRUE;
+  $nodes_to_delete = array();
   foreach ($marshalled_content as $id => $content) {
+    // alter values of existing spans
     $node = $dom->getElementById($id);
     if ($node) {
+      if (!isset($refnode)) {
+        $refnode = $node->nextSibling;
+      }
       $node_value = $node->nodeValue;
       $class = $node->getAttribute('class');
-      if ($node_value && $unmerged) {
+      if ($node_value) {
         if ($node_value == $content) {
-          $node->nodeValue = $_POST["text_$type"];
-          $node_value = $_POST["text_$type"];
-          $node->setAttribute('class', 'merged');
-          $node->removeAttribute('data-variant');
-          $unmerged = FALSE;
+          $nodes_to_delete[] = $node;
           continue;
         }
       }
       if ($node_value != $content) {
+        $location = strpos($node_value, $content);
         $new_value = str_replace($content, '', $node_value);
-        $node->nodeValue = str_replace($content, '', $new_value);
+        if ($location > 0) {
+          $refnode = $node;
+          $node->nodeValue = $new_value;
+        }
+        else {
+          $next = $node->nextSibling;
+          $current = $next->nodeValue;
+          $next->nodeValue = $new_value . $current;
+          $nodes_to_delete[] = $node;
+        }
       }
     }
+  }
+  $new_element = $dom->createElement('span', $identified_text);
+  $counter = $_POST['emicdora_counter'];
+  $new_element->setAttribute('id', "{$prefix}e{$counter}");
+  $new_element->setAttribute('class', 'merged');
+  $parent_node = $dom->getElementById($config[$type]);
+  $refnode = $dom->getElementById($id);
+  $parent_node->insertBefore($new_element, $refnode);
+  foreach ($nodes_to_delete as $victim) {
+    $victim->parentNode->removeChild($victim);
   }
   $node = $dom->getElementById($config[$type]);
   return $dom->saveXML($node);
