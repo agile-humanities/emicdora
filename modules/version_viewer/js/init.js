@@ -74,7 +74,7 @@
     });
     
     function show_annotations(nodes) {
-      if (nodes[0]['attributes']['urn']) {
+      if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
           paint_commentAnnoTargets(null, 'canvas_0', anno_id, nodes[i]['attributes']['type']);
@@ -97,7 +97,7 @@
       }
     }
     function hide_annotations(nodes) {
-      if (nodes[0]['attributes']['urn']) {
+      if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
           $('.svg_' + anno_id).remove();
@@ -425,9 +425,17 @@
   $('#easy-ui-east').panel({
       onResize:function(w,h){
         var mode = Drupal.settings.versionable_object_viewer.mode;
-     if ( mode == "text" || mode == "image") {
-       resizeCanvas();
-     }
+        if ( mode == "text" || mode == "image") {
+          resizeCanvas();
+          var children = $("#easyui_tree").tree('getChecked');
+          hide_annotations(children);
+          
+          // Wait for 'resizeCanvas()' functionality to finish before calling
+          // show_annotations. This is because the SVG canvas isent ready yet.
+          setTimeout(function() {
+            show_annotations(children);
+          }, 500);
+        }
       }
   });
   

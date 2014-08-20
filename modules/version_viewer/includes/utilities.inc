@@ -388,3 +388,70 @@ function versionable_object_viewer_get_transcription_text($object) {
   }
   return $transcriptions;
 }
+
+/**
+ * Flatten all annotations for use with the version viewer 'tree'.
+ *
+ * @param array $rdf_annotations
+ *   A zero based indexed array of entities/annotations.
+ *
+ * @return array
+ */
+function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
+  $tree_data = array();
+  foreach ($rdf_annotations as $rdf_anno) {
+    if ($rdf_anno->cwrcType == "textimagelink"){
+      if (!isset($tree_data["textimagelink"])) {
+        $tree_data["textimagelink"] = array(
+          "id" => "tree_textimagelinks",
+          "text" => "Text Image Annotations",
+          "state" => "closed",
+          "attributes" => array(
+            "root" => TRUE,
+          ),
+          "children" => array(),
+        );
+      }
+      $child = array(
+        "id" => $rdf_anno->annotationId,
+        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+        "state" => "open",
+        "attributes" => $rdf_anno,
+      );
+      array_push(
+        $tree_data["textimagelink"]["children"],
+        $child
+      );
+    }
+    else {
+      if (!isset($tree_data['entity'])) {
+        $tree_data['entity'] = array(
+          "id" => "tree_entities",
+          "text" => "Entities",
+          "state" => "closed",
+          "attributes" => array(
+            "root" => TRUE,
+          ),
+          "children" => array(),
+        );
+      }
+      $child = array(
+        "id" => $rdf_anno->annotationId,
+        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+        "state" => "open",
+        "attributes" => $rdf_anno,
+      );
+      array_push(
+        $tree_data['entity']["children"],
+        $child
+      );
+    }
+  }
+  // The following sillyness ensures keys are numeric.
+  foreach ($tree_data as $k => $v) {
+    $new_key =  array_search($k, array_keys($tree_data));
+    $tree_data[$new_key] = $v;
+  }
+  unset($tree_data['entity'], $tree_data['textimagelink']);
+  return $tree_data;
+}
