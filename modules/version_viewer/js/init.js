@@ -21,7 +21,9 @@
       $('#wb_show_til').hide();
       break;
   }
+
   var is_toggled = false;
+
   // Setup the initial menu 'look'.
   var btn_background_color = 'red';
   $('#wb_show_til').css('background-color', btn_background_color);
@@ -226,7 +228,7 @@
     }
     
     $('#eui_window').layout('collapse','south');
-    
+
     $('.work_action_img').click(function() {
       var is_selected = false;
       if ($(this).hasClass('img_selected')) {
@@ -282,6 +284,7 @@
           case 'wb_show_annos':
             var ddt = $("#easyui_tree").tree('find', 'tree_imageannotations');
             var dda = $("#easyui_tree").tree('find', 'tree_entities');
+            
         	  if ($(this).hasClass('annos')) {
     	        $(this).removeClass('annos');
     	        $(this).css('background-color', 'initial');
@@ -345,7 +348,7 @@
         is_toggled = true;
       }
       else {
-	    if (is_toggled == true) {
+        if (is_toggled == true) {
 	      is_toggled = false;
 	      $('#eui_window').layout('expand', 'west');
 	    }
@@ -353,17 +356,19 @@
     });
     
     function hide_tree_children(children) {
-      hide_annotations(children);
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).hide();
       }
+      children = $("#easyui_tree").tree('getChecked');
+      hide_annotations(children);
     }
     
     function show_tree_children(children) {
-      show_annotations(children);
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).show();
       }
+      children = $("#easyui_tree").tree('getChecked');
+      show_annotations(children);
     }
     
     function hide_all_imageannotations() {
@@ -429,7 +434,6 @@
           resizeCanvas();
           var children = $("#easyui_tree").tree('getChecked');
           hide_annotations(children);
-          
           // Wait for 'resizeCanvas()' functionality to finish before calling
           // show_annotations. This is because the SVG canvas isent ready yet.
           setTimeout(function() {
@@ -438,7 +442,5 @@
         }
       }
   });
-  
-  
   });
 })(jQuery);
