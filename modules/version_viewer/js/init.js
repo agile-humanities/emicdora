@@ -21,7 +21,9 @@
       $('#wb_show_til').hide();
       break;
   }
+
   var is_toggled = false;
+
   // Setup the initial menu 'look'.
   var btn_background_color = 'red';
   $('#wb_show_til').css('background-color', btn_background_color);
@@ -227,6 +229,17 @@
     
     $('#eui_window').layout('collapse','south');
     
+    function getTreeChecked(children){
+      // $('node-id').getChecked() is a joke, it dun broke bra.
+      var checked_array = [];
+      for (var i = 0; i< children.length; i++) {
+        var my_span = $("#" + children[i].domId + ' > .tree-checkbox1:eq(0)');
+        if (my_span.length > 0) {
+          checked_array.push(children[i]);
+        }
+      }
+      return checked_array;
+    }
     $('.work_action_img').click(function() {
       var is_selected = false;
       if ($(this).hasClass('img_selected')) {
@@ -282,6 +295,7 @@
           case 'wb_show_annos':
             var ddt = $("#easyui_tree").tree('find', 'tree_imageannotations');
             var dda = $("#easyui_tree").tree('find', 'tree_entities');
+            
         	  if ($(this).hasClass('annos')) {
     	        $(this).removeClass('annos');
     	        $(this).css('background-color', 'initial');
@@ -353,17 +367,19 @@
     });
     
     function hide_tree_children(children) {
-      hide_annotations(children);
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).hide();
       }
+      children = getTreeChecked(children);
+      hide_annotations(children);
     }
     
     function show_tree_children(children) {
-      show_annotations(children);
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).show();
       }
+      children = getTreeChecked(children);
+      show_annotations(children);
     }
     
     function hide_all_imageannotations() {
@@ -425,9 +441,9 @@
   $('#easy-ui-east').panel({
       onResize:function(w,h){
         var mode = Drupal.settings.versionable_object_viewer.mode;
-     if ( mode == "text" || mode == "image") {
-       resizeCanvas();
-     }
+        if ( mode == "text" || mode == "image") {
+          resizeCanvas();
+        }
       }
   });
   
