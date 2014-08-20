@@ -396,11 +396,12 @@ function versionable_object_viewer_get_transcription_text($object) {
  *   A zero based indexed array of entities/annotations.
  *
  * @return array
+ *   An indexed array of annotations for use with the version viewer.
  */
 function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
   $tree_data = array();
   foreach ($rdf_annotations as $rdf_anno) {
-    if ($rdf_anno->cwrcType == "textimagelink"){
+    if ($rdf_anno->cwrcType == "textimagelink") {
       if (!isset($tree_data["textimagelink"])) {
         $tree_data["textimagelink"] = array(
           "id" => "tree_textimagelinks",
@@ -449,7 +450,7 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
   }
   // The following sillyness ensures keys are numeric.
   foreach ($tree_data as $k => $v) {
-    $new_key =  array_search($k, array_keys($tree_data));
+    $new_key = array_search($k, array_keys($tree_data));
     $tree_data[$new_key] = $v;
   }
   unset($tree_data['entity'], $tree_data['textimagelink']);
