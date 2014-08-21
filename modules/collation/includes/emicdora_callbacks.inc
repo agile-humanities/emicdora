@@ -10,25 +10,48 @@
  */
 function emicdora_collation_edit() {
   module_load_include('inc', 'collation', 'includes/calliope');
-  $deleted = $_POST['context_deleted'];
-  $marshalled_deleted = emicdora_marshall_spans('deleted');
-  $marshalled_added = emicdora_marshall_spans('added');
-  $query = array(
-    'emic_data.collation' => $_POST['collation_id'],
-    'emic_data.diff_kind' => 'deleted'
-  );
-  $deleted_pane_contents = $_POST['all_deleted'];
-  $spans_deleted = explode('</span>', $deleted_pane_contents);
-  $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_fix_calliope($spans_deleted, 'deleted') . "</div>";
-  $added_pane_contents = $_POST['all_added'];
-  $spans_added = explode('</span>', $added_pane_contents);
-  $fixed_added = "<div id = 'emicdora_added'>" . emicdora_fix_calliope($spans_added, 'added') . "</div>";
-  $results = array(
-    'new_deleted' => emicdora_updated_div_contents($fixed_deleted, $marshalled_deleted, 'deleted'),
-    'new_added' => emicdora_updated_div_contents($fixed_added, $marshalled_added, 'added'),
-    'emicdora_counter' => $_POST['emicdora_counter'] + 1,
-  );
-  echo json_encode($results);
+  $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
+
+  $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
+  $action = emicdora_cleaned_post('action');
+  $results = array();
+  switch ($action) {
+    case 'link':
+      $marshalled_deleted = emicdora_marshall_spans('deleted');
+      $marshalled_added = emicdora_marshall_spans('added');
+      $new_deleted = emicdora_link($fixed_deleted, $marshalled_deleted, 'deleted');
+      $new_added = emicdora_link($fixed_added, $marshalled_added, 'added');
+      $results = array(
+        'new_deleted' => $new_deleted,
+        'new_added' => $new_added,
+        'emicdora_counter' => $_POST['emicdora_counter'] + 1,
+        'refresh' => 'refresh',
+      );
+      break;
+
+    case 'unlink':
+      $new_deleted = emicdora_unlink($fixed_deleted, 'deleted');
+      $new_added = emicdora_unlink($fixed_added, 'added');
+      $results = array(
+        'new_deleted' => $new_deleted,
+        'new_added' => $new_added,
+        'emicdora_counter' => $_POST['emicdora_counter'] + 1,
+        'refresh' => 'refresh',
+      );
+      break;
+
+    case 'save':
+      emicdora_update_collation('deleted');
+      emicdora_update_collation('added');
+      $results = array(
+        'added' => 'success',
+        'refresh' => 'false',
+        'emicdora_counter' => $_POST['emicdora_counter'],
+      );
+  }
+  if (!empty($results)) {
+    echo json_encode($results);
+  }
 }
 
 /**
@@ -66,10 +89,11 @@ function emicdora_fix_calliope($spans, $type) {
  *   Associative array id => content
  */
 function emicdora_marshall_spans($type) {
-  $input = $_POST["context_$type"];
+  $input = emicdora_cleaned_post("context_$type");
   $spans = array_filter(explode('</span>', $input));
+  $marshalled_spans = array();
   foreach ($spans as $candidate) {
-    $dom = new DOMDocument;
+    $dom = new DOMDocument();
     $dom->loadXML($candidate . '</span>');
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
@@ -80,7 +104,7 @@ function emicdora_marshall_spans($type) {
 }
 
 /**
- * Updates div contents with incoming request.
+ * Updates div contents with incoming link request.
  *
  * @param xml $fixed_content
  *   Repaired content from viewer
@@ -92,18 +116,17 @@ function emicdora_marshall_spans($type) {
  * @return xml
  *   new div contents
  */
-function emicdora_updated_div_contents($fixed_content, $marshalled_content, $type) {
-  $identified_text = $_POST["text_$type"];
+function emicdora_link($fixed_content, $marshalled_content, $type) {
+  $identified_text = emicdora_cleaned_post("text_$type");
   $prefix = $type[0];
   $config = array(
     'added' => 'versionview-1011-body',
     'deleted' => 'versionview-1010-body',
   );
-  $dom = new DOMDocument;
+  $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
   foreach ($marshalled_content as $id => $content) {
-    // alter values of existing spans
     $node = $dom->getElementById($id);
     if ($node) {
       if (!isset($refnode)) {
@@ -134,7 +157,7 @@ function emicdora_updated_div_contents($fixed_content, $marshalled_content, $typ
     }
   }
   $new_element = $dom->createElement('span', $identified_text);
-  $counter = $_POST['emicdora_counter'];
+  $counter = emicdora_cleaned_post('emicdora_counter');
   $new_element->setAttribute('id', "{$prefix}e{$counter}");
   $new_element->setAttribute('class', 'merged');
   $parent_node = $dom->getElementById($config[$type]);
@@ -145,4 +168,86 @@ function emicdora_updated_div_contents($fixed_content, $marshalled_content, $typ
   }
   $node = $dom->getElementById($config[$type]);
   return $dom->saveXML($node);
+}
+
+/**
+ * Updates div contents with incoming unlink request.
+ *
+ * @param xml $fixed_content
+ *   Repaired content from viewer
+ * @param string $type
+ *   added or deleted
+ *
+ * @return xml
+ *   new div contents
+ */
+function emicdora_unlink($fixed_content, $type) {
+  $merged_content = emicdora_cleaned_post('merged_content');
+  $span_dom = new DOMDocument();
+  $span_dom->loadXML($merged_content);
+  $items = $span_dom->getElementsByTagName('span');
+  $id = $items->item(0)->getAttribute('id');
+  $qualifier = substr($id, 1);
+  $id = $type[0] . $qualifier;
+
+  $config = array(
+    'added' => 'versionview-1011-body',
+    'deleted' => 'versionview-1010-body',
+  );
+  $dom = new DOMDocument();
+  $dom->loadHTML($fixed_content);
+  $element = $dom->getElementById($id);
+  $previous = $element->previousSibling;
+  $added = FALSE;
+  if ($previous) {
+    $class = $previous->getAttribute('class');
+    if ($class != 'merged') {
+      $previous->nodeValue = $previous->nodeValue . $element->nodeValue;
+      $added = TRUE;
+    }
+  }
+  if (!$added) {
+    $element->nextSibling->nodeValue = $element->nodeValue . $element->nextSibling->nodeValue;
+  }
+
+  $element->parentNode->removeChild($element);
+  $node = $dom->getElementById($config[$type]);
+  return $dom->saveXML($node);
+}
+
+/**
+ * Utility function to unencode $_POST variables.
+ *
+ * @param string $term
+ *   array key
+ *
+ * @return string
+ *   Decoded input
+ */
+function emicdora_cleaned_post($term) {
+  if (isset($_POST[$term]))
+    return (isset($_POST[$term])) ? urldecode(filter_xss($_POST[$term])) : '';
+}
+
+function emicdora_update_collation($type) {
+  module_load_include('inc', 'austese_collation', 'includes/emicdora');
+  $query = emicdora_get_file_query($type);
+  $file = emicdora_calliope_get_collation_file($query);
+
+  $file_params = array(
+    'collation' => $file['emic_data']['collation'],
+    'version1' => $file['emic_data']['version1'],
+    'version2' => $file['emic_data']['version2'],
+    'diff_kind' => $type,
+    'emicdora_count' => isset($_POST['emicdora_count']) ? $_POST['emicdora_count'] : 1,
+  );
+  $contents = emicdora_cleaned_post("all_$type");
+  emicdora_calliope_write_collation($file_params, $contents);
+}
+
+function emicdora_get_file_query($type) {
+  return array(
+    'emic_data.collation' => $_POST['collation_id'],
+    'emic_data.diff_kind' => $type,
+  );
 }

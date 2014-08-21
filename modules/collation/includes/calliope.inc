@@ -404,7 +404,7 @@ function emicdora_calliope_compare_callback($critical_edition_pid) {
 /**
  * Writes new Collation to Mongo.
  *
- * @param array $newmvd
+ * @param array $contents
  *   All paramaters to build new MVD
  *
  * @return bool
@@ -413,9 +413,13 @@ function emicdora_calliope_compare_callback($critical_edition_pid) {
 function emicdora_calliope_write_collation($query, $contents) {
   $db = emicdora_calliope_create_mongo_db();
   $collection = $db->selectCollection('collations');
-  $current_record = emicdora_calliope_get_collation_file($query);
+  $search_query = array(
+    'emic_data.collation' => $query['collation'],
+    'emic_data.diff_kind' => $query['diff_kind'],
+  );
+  $current_record = emicdora_calliope_get_collation_file($search_query);
   if ($current_record) {
-    $collection->remove(array('_id' => $id));
+    $collection->remove(array('_id' => $current_record['_id']));
   }
   $query['contents'] = $contents;
   $newobj = array('emic_data' => $query);
