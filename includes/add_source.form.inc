@@ -8,6 +8,10 @@
 /**
  * Form for ingesting / adding a new source object to a critical edition.
  *
+ * @param array $form
+ *   An array representing a Drupal form.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
  * @param string $content_model
  *   The identifier of the Content Model type to ingest.
  * @param string $critical_edition
@@ -36,7 +40,6 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
     '#type' => 'hidden',
     '#value' => $critical_edition->id,
   );
-
   if ($mappings['tn']) {
     $form = array_merge($form, emicdora_get_thumbnail_wrapper($upload_size));
   }
@@ -98,21 +101,18 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
     $dc = $dc->asArray();
     $label = $dc['dc:title']['value'];
   }
-  $object->label = $label ? $label : t("New @type", array('@type' => $form_state['values']['type']));
-  islandora_add_object($object);
+  $object->label = $label ? $label : t("New @type", array('@type' => $mapping['label']));
   if ($form_state['values']['choice_wrapper']['privacy']) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
     $xacml->writeBackToFedora();
   }
   // Add thumbnail.
-  $tn_added = FALSE;
   if (isset($form_state['values']['tn_wrapper']['tn_file'])) {
     $tn_file = $form_state['values']['tn_wrapper']['tn_file'];
     $file = file_load($tn_file);
     if ($file) {
       emicdora_ingest_add_file($file, 'TN', $object);
-      $tn_added = TRUE;
     }
   }
   if (!empty($form_state['values']['content_wrapper']['content'])) {
@@ -137,6 +137,7 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
         break;
     }
   }
+  islandora_add_object($object);
 }
 
 /**
@@ -282,7 +283,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
  */
 function emicdora_ingest_add_file($file, $dsid, $object) {
   module_load_include('inc', 'islandora', 'includes/utilities');
-  if (empty($object[$dsid])) {
+  if (!isset($object[$dsid])) {
     $ds = $object->constructDatastream($dsid, 'M');
     $ds->setContentFromFile($file->uri, FALSE);
     $mime_detect = new MimeDetect();
