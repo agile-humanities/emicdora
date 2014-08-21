@@ -531,10 +531,12 @@ function emicdora_block_view($delta = '') {
         $links = array();
         foreach ($critical_edition as $dsid => $datastream) {
           if (emicdora_is_apparatus_supported_datastream($dsid)) {
+            // Do some shenanigans to make fragments nice.
+            $fragment = strtolower(preg_replace('/[\s,]+/', '_', $datastream->label));
             $links[] = array(
               'title' => $datastream->label,
               'href' => "islandora/object/{$critical_edition->id}",
-              'fragment' => strtolower($dsid),
+              'fragment' => $fragment,
               'attributes' => array('class' => array('apparatus_link')),
             );
           }
