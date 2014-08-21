@@ -427,15 +427,21 @@
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
   
+  // Callback to fix the drawing of SVG annotations upon resize.
+  var cleanDrawSVGAnnotations = function() {
+    var children = $("#easyui_tree").tree('getChecked');
+    hide_annotations(children);
+    show_annotations(children);
+  };
+
   $('#easy-ui-east').panel({
       onResize:function(w,h){
         var mode = Drupal.settings.versionable_object_viewer.mode;
         if ( mode == "text" || mode == "image") {
-          resizeCanvas();
+          // @see emicdora/modules/version_viewer/js/islandora_image_annotation_init.js.
+          resizeCanvas(cleanDrawSVGAnnotations);
         }
       }
   });
-  
-  
   });
 })(jQuery);
