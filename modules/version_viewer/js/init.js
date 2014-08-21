@@ -428,6 +428,14 @@
   
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
-
+  
+  $('#easy-ui-east').panel({
+      onResize:function(w,h){
+        var mode = Drupal.settings.versionable_object_viewer.mode;
+        if ( mode == "text" || mode == "image") {
+          resizeCanvas();
+        }
+      }
+  });
   });
 })(jQuery);
