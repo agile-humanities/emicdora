@@ -38,3 +38,11 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   drupal_set_title($object->label);
 }
+
+/**
+ * Implements hook_preprocess_theme().
+ */
+function emicdora_preprocess_emicdora_coop_group_page(array &$variables) {
+  $module_path = drupal_get_path('module', 'emicdora');
+  drupal_add_css("$module_path/css/coop_view.css");
+}
