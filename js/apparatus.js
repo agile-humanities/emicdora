@@ -14,7 +14,7 @@
           $('.vertical-tab-button.selected').removeClass('selected');
           var choice = $('.vertical-tab-button a strong');
           choice.each(function(){
-            if($(this).text().toLowerCase().replace(' ', '_') == chosen.toLowerCase()) {
+            if($(this).text().toLowerCase().replace(/[\s,]+/g, '_') == chosen.toLowerCase()) {
               $(this).closest('.vertical-tab-button').addClass('selected');
               hash = "#" + chosen;
               $('.vertical-tabs-pane').css('display', 'none');
