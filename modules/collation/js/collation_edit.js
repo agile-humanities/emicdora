@@ -6,7 +6,7 @@
 
   Drupal.behaviors.emicdoraEdit = {
     attach: function(context, settings) {
-      var emicdora_counter = 1;
+      var emicdora_counter = 'undeclared';
       var context_deleted = "";
       var context_added = "";
       var text_deleted = "";
@@ -39,6 +39,7 @@
       });
 
       waitUntilExists("versionview-1010", function() {
+        $("#save_changes").hide();
         $('#versionview-1010-body').mouseup(function(evt) {
           selection_deleted = rangy.getSelection();
           text_deleted = selection_deleted.toString();
@@ -73,14 +74,15 @@
           var all_deleted;
           if (args.data.action == 'save') {
             $(".merged").css('background-color', '');
-            $("#emicdora_status").text("Changes saved.");
-            all_added = encodeURIComponent($("#versionview-1011").html());
-            all_deleted = encodeURIComponent($("#versionview-1011").html());
+            $("#save_changes").hide();
+            all_added = encodeURIComponent($("#versionview-1011-body").html());
+            all_deleted = encodeURIComponent($("#versionview-1010-body").html());
           }
           else {
             $("#emicdora_status").text("Unsaved changes");
+             $("#save_changes").show();
             all_added = encodeURIComponent($("#versionview-1011").html());
-            all_deleted = encodeURIComponent($("#versionview-1011").html());
+            all_deleted = encodeURIComponent($("#versionview-1010").html());
           }
 
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
@@ -106,9 +108,11 @@
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
-                child_props = $(results.new_deleted).html();
-                console.log(child_props)
                 $('#versionview-1011-body').html($(results.new_added).html());
+              }
+              if(results.added == 'success') {
+                $(".emicdora_input").val('');
+                $("#emicdora_status").text("Changes saved.");
               }
             },
             error: function(data, status, xhd) {

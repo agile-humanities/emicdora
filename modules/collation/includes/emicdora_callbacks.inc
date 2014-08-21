@@ -141,7 +141,8 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
         }
       }
       if ($node_value != $content) {
-        $location = strpos($node_value, $content);
+        // If delimiter is empty, force string to next sibling.
+        $location = ($content) ? strpos($node_value, $content) : 1;
         $new_value = str_replace($content, '', $node_value);
         if ($location > 0) {
           $refnode = $node;
@@ -158,6 +159,10 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
   }
   $new_element = $dom->createElement('span', $identified_text);
   $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared') {
+    $counter = emicdora_get_counter();
+  }
+  $_POST['emicdora_counter'] = $counter;
   $new_element->setAttribute('id', "{$prefix}e{$counter}");
   $new_element->setAttribute('class', 'merged');
   $parent_node = $dom->getElementById($config[$type]);
@@ -225,10 +230,15 @@ function emicdora_unlink($fixed_content, $type) {
  *   Decoded input
  */
 function emicdora_cleaned_post($term) {
-  if (isset($_POST[$term]))
-    return (isset($_POST[$term])) ? urldecode(filter_xss($_POST[$term])) : '';
+  return (isset($_POST[$term])) ? urldecode(filter_xss($_POST[$term])) : '';
 }
 
+/**
+ * Persists updated collation.
+ *
+ * @param string $type
+ *   added or deleted
+ */
 function emicdora_update_collation($type) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
   $query = emicdora_get_file_query($type);
@@ -244,10 +254,31 @@ function emicdora_update_collation($type) {
   $contents = emicdora_cleaned_post("all_$type");
   emicdora_calliope_write_collation($file_params, $contents);
 }
-
+/**
+ * Gets mongo file query.
+ *
+ * @param string $type
+ *   added or deleted
+ *
+ * @return array
+ *   returned query
+ */
 function emicdora_get_file_query($type) {
   return array(
     'emic_data.collation' => $_POST['collation_id'],
     'emic_data.diff_kind' => $type,
   );
+}
+
+/**
+ * Returns current counter for emic generated tags.
+ *
+ * @return int
+ *   current emicdora count
+ */
+function emicdora_get_counter() {
+  module_load_include('inc', 'austese_collation', 'includes/emicdora');
+  $query = emicdora_get_file_query('deleted');
+  $file = emicdora_calliope_get_collation_file($query);
+  return $file['emic_data']['emicdora_count'];
 }
