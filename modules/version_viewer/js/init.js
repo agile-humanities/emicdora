@@ -428,46 +428,6 @@
   
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
-  
-  $('#easy-ui-east').panel({
-      onResize:function(w,h){
-        var mode = Drupal.settings.versionable_object_viewer.mode;
-        if ( mode == "text" || mode == "image") {
-          resizeCanvas();
-          var children = $("#easyui_tree").tree('getChecked');
-          hide_annotations(children);
-          // Wait for 'resizeCanvas()' functionality to finish before calling
-          // show_annotations. This is because the SVG canvas isent ready yet.
-          setTimeout(function() {
-            show_annotations(children);
-          }, 500);
-        }
-      }
-  });
-  $('.layout-expand-west').click = function(data, fn) {
-    console.log(data);
-  }
-  console.log($('.layout-expand-west'));
-  //$('.layout-expand').click(function(e){return console.log(e);});
-//  var panel = $('#eui_window').layout('panel', 'west');    // get the west panel
-//  panel.panel({
-//	  onBeforeExpand:function(e){
-//    	  console.log(e);
-//          console.log('after west panel collapsed');
-//      }
-//  });
-  
-//  $('#easy-ui-west').panel('options').onBeforeExpand = function(e,b) {
-//	  console.log("hit it here");
-//	  console.log($(this));
-//	  console.log(e);
-//	  console.log(b);
-//  }
- // $('#easy-ui-west').panel('onBeforeExpand', function() {});
-  //console.log($('#easy-ui-west').panel('options').onBeforeExpand);
-//  $('#easy-ui-west').panel('onBeforeExpand', function(e){
-//	  console.log("hit it");
-//  });
-  
+
   });
 })(jQuery);

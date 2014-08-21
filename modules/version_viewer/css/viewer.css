@@ -36,3 +36,7 @@
 .panel-tool {
   visibility: hidden !important;
 }
+
+.layout-expand {
+  pointer-events:none !important;
+}
