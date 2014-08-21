@@ -29,9 +29,10 @@ function emicdora_link_source_form(array $form, array $form_state, AbstractObjec
     '#type' => 'radios',
     '#title' => t('Select Content type'),
     '#options' => array_merge(
-        array(NULL => t('All')),
+        array('default' => t('All')),
         emicdora_source_content_models()
     ),
+    '#default_value' => 'default',
     '#ajax' => array(
       'callback' => 'emicdora_source_select_ajax_callback',
       'wrapper' => 'source-wrapper',

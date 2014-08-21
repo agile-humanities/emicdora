@@ -263,8 +263,9 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/ingest_versionable_object.form.inc',
     ),
-    'islandora/emicdora_source/autocomplete' => array(
+    'islandora/emicdora_source/autocomplete/%/%' => array(
       'page callback' => 'emicdora_versionable_object_form_source_autocomplete',
+      'page arguments' => array(3, 4),
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
       'file' => 'includes/ingest_versionable_object.form.inc',
       'type' => MENU_CALLBACK,
