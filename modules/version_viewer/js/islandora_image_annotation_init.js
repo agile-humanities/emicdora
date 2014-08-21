@@ -204,15 +204,12 @@ function init_ui() {
 
 var timeout = false;
 var delta = 300;
-function resizeCanvas(callback) {
+function resizeCanvas() {
   var w = $('#canvas-body').width();
   if(timeout === false) {
     timeout = true;
     closeAndEndAnnotating();
     window.setTimeout(maybeResize, delta);
-  }
-  if (callback) {
-    callback.call();
   }
 }
 
