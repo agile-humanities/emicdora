@@ -1,5 +1,7 @@
 (function ($) {
   $(document).ready(function () {
+	  
+	  
   // Initilize our layout per versionable obj type.
   switch(Drupal.settings.versionable_object_viewer.mode) {
     case "text":
