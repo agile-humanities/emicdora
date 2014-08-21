@@ -68,14 +68,14 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    'islandora/object/%islandora_object/transcription' => array(
+    'islandora/object/%islandora_object/transcription/%islandora_object' => array(
       'title' => 'Transcriptions',
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_transcription_view',
       'file' => 'includes/transcription_view.inc',
-      'page arguments' => array(2),
+      'page arguments' => array(4),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/source/%islandora_object' => array(
       'title callback' => 'emicdora_drupal_title',
@@ -263,8 +263,9 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_INGEST, 2),
       'file' => 'includes/ingest_versionable_object.form.inc',
     ),
-    'islandora/emicdora_source/autocomplete' => array(
+    'islandora/emicdora_source/autocomplete/%/%' => array(
       'page callback' => 'emicdora_versionable_object_form_source_autocomplete',
+      'page arguments' => array(3, 4),
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
       'file' => 'includes/ingest_versionable_object.form.inc',
       'type' => MENU_CALLBACK,
@@ -490,6 +491,7 @@ function emicdora_block_view($delta = '') {
   $is_table = (isset($path_parts[3]) && $path_parts[3] == 'table') ? TRUE : FALSE;
   $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
   $is_tei_editor = (isset($path_parts[3]) && $path_parts[3] == 'tei_editor') ? TRUE : FALSE;
+  $is_version_search = (isset($path_parts[3]) && $path_parts[3] == 'versions') ? TRUE : FALSE;
 
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
@@ -598,25 +600,25 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'versions':
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page) {
+      $source_or_transcription_object = menu_get_object('islandora_object', 4);
+      // First see if the object is a critical edition or a version.
+      if (!array_intersect($object->models, array('islandora:criticalEditionContainerCModel', 'islandora:versionCModel'))) {
         break;
       }
 
-      switch ($is_source) {
-        case TRUE:
-          $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
-          $configs = emicdora_get_configuration($path_parts[4], 'version');
-          break;
+      if (!$source_or_transcription_object && !$is_version_search && !in_array('islandora:versionCModel', $object->models)) {
+        break;
+      }
 
-        case FALSE:
-          $versions = emicdora_get_raw_objects($critical_edition, 'version');
-          $configs = emicdora_get_configuration($critical_edition->id, 'version');
-          break;
+      if ($is_source) {
+        $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
+        $configs = emicdora_get_configuration($path_parts[4], 'version');
       }
-      $total = 0;
-      foreach ($versions as $key => $value) {
-        $total += count($versions[$key]);
+      else {
+        $versions = emicdora_get_raw_objects($critical_edition, 'version');
+        $configs = emicdora_get_configuration($critical_edition->id, 'version');
       }
+      $total = array_sum(array_map('count', $versions));
 
       $links = array();
       foreach (array_keys($versions) as $key) {

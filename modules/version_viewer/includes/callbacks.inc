@@ -105,65 +105,8 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
 
-  $count = 0;
-  $tree_data = array();
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
-  if (count($rdf_annotations) > 0) {
-    $size = count($tree_data);
-    foreach ($rdf_annotations as $rdf_anno) {
-      // For non TextImgLink annotations.
-      $child_type = $size;
-      if (isset($rdf_anno->annotationId)) {
-        $child;
-        // Entities can now be text image links.
-        if ($rdf_anno->cwrcType == "textimagelink") {
-          $child_type = $size;
-          if (!isset($tree_data[$child_type])) {
-            $tree_data[$child_type] = array(
-              "id" => "tree_textimagelinks",
-              "text" => "Text Image Annotations",
-              "state" => "closed",
-              "attributes" => array(
-                "root" => TRUE,
-              ),
-              "children" => array(),
-            );
-          }
-          $child = array(
-            "id" => $rdf_anno->annotationId,
-            "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
-            "state" => "open",
-            "attributes" => $rdf_anno,
-          );
-        }
-        else {
-          $child_type = $size;
-          if (!isset($tree_data[$child_type])) {
-            $tree_data[$child_type] = array(
-              "id" => "tree_entities",
-              "text" => "Entities",
-              "state" => "closed",
-              "attributes" => array(
-                "root" => TRUE,
-              ),
-              "children" => array(),
-            );
-          }
-          $child = array(
-            "id" => $rdf_anno->annotationId,
-            "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
-            "state" => "open",
-            "attributes" => $rdf_anno,
-          );
-        }
-        array_push(
-          $tree_data[$child_type]["children"],
-          $child
-        );
-      }
-    }
-  }
-
+  $tree_data = versionable_object_viewer_flatten_rdf_annos($rdf_annotations);
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   if (isset($anno_pids['pids'])) {
     $size = count($tree_data);
@@ -226,7 +169,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
       }
     }
   }
-
   drupal_json_output($tree_data);
   drupal_exit();
 }

@@ -64,7 +64,7 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
 /**
  * Autocomplete menu callback for source objects.
  */
-function emicdora_versionable_object_form_source_autocomplete($type = NULL, $search = NULL) {
+function emicdora_versionable_object_form_source_autocomplete($type, $search) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $type = trim(urldecode($type));
   // List of approved source content model types.

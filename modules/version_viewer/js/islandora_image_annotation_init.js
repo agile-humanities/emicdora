@@ -204,16 +204,17 @@ function init_ui() {
 
 var timeout = false;
 var delta = 300;
-function resizeCanvas() {
+function resizeCanvas(callback) {
+  callback = typeof callback !== 'undefined' ? callback : null;
   var w = $('#canvas-body').width();
   if(timeout === false) {
     timeout = true;
     closeAndEndAnnotating();
-    window.setTimeout(maybeResize, delta);
+    window.setTimeout(maybeResize(callback), delta);
   }
 }
 
-function maybeResize() {
+function maybeResize(callback) {
     timeout = false;
     var w = $('#canvas-body').width();
     var image_element = $('.base_img').children(":first");
@@ -230,6 +231,9 @@ function maybeResize() {
     // Resize incase we have the admin menu available.
     if($('#admin-menu-wrapper').length > 0) {
       $('.islandora-anno-wrapper').css('top', $('#admin-menu-wrapper').height());
+    }
+    if (callback) {
+      callback.call();
     }
 }
    function continueSetup() {
