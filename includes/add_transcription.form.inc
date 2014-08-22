@@ -228,7 +228,7 @@ function emicdora_manage_transcriptions_form(array $form, array &$form_state, Ab
   $versionable_object_pid = $object->id;
   $transcriptions = islandora_critical_get_related_transcriptions($versionable_object_pid);
   $members = emicdora_get_members($object->id);
-  $cwrcwriter = array_search('islandora:criticalEditionCModel', $members);
+  $cwrcwriter = array_search('islandora:criticalEditionContainerCModel', $members);
   foreach ($transcriptions as $pid => $label) {
     $rows[$pid] = array(
       'pid' => $pid,

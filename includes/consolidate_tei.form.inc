@@ -10,14 +10,16 @@
  *
  * Consolidate TEI-RDF Page objects into a TEI Datastream on the TEI-RDF object.
  *
- * Be sure you pass in a TEI-RDF object (islandora:criticalEditionCModel) as
- * no checking is done.
+ * Be sure you pass in a TEI-RDF object as no checking is done.
+ *
+ * @note A TEI-RDF object is one with the content model of
+ * islandora:criticalEditionContainerCModel.
  *
  * @param array $form
  *   The Drupal form definition.
  * @param array $form_state
  *   The Drupal form state.
- * @param strin $tei_rdf
+ * @param string $tei_rdf
  *   The PID of the TEI-RDF object.
  *
  * @return array
