@@ -30,19 +30,24 @@ function emicdora_link_version_form($form, $form_state, $critical_edition) {
     'title' => array('data' => t('Version'), 'class' => array('class' => 'version_title')),
     'pid' => array('data' => t('PID'), 'class' => array('class' => 'version_pid')),
   );
-  $existing_versions = emicdora_get_raw_objects($critical_edition, 'version');
-  $current = array();
-  foreach ($existing_versions as $type) {
-    foreach ($type as $pid) {
-      $current[] = $pid;
-    }
+  // We check the date here being bound as having a FILTER inside the
+  // OPTIONAL as well as that the end was yielding some weird behavior.
+  $versions_query = <<<EOQ
+SELECT ?pid ?label FROM <#ri> WHERE {
+  ?pid <fedora-rels-ext:isDerivationOf> <info:fedora/$source_pid> ;
+       <fedora-model:label> ?label
+  OPTIONAL {
+    ?pid <fedora-rels-ext:isMemberOf> <info:fedora/$critical_edition->id> ;
+         <fedora-model:createdDate> ?date
   }
-  foreach (emicdora_get_versions($source_pid) as $label => $pid) {
-    if (in_array($pid, $current)) {
-      continue;
-    }
+  FILTER(!bound(?date))
+}
+EOQ;
+  $results = $critical_edition->repository->ri->sparqlQuery($versions_query);
+  foreach ($results as $result) {
+    $pid = $result['pid']['value'];
     $rows[$pid] = array(
-      'title' => array('data' => $label, 'class' => array('class' => 'version_title')),
+      'title' => array('data' => $result['label']['value'], 'class' => array('class' => 'version_title')),
       'pid' => array('data' => $pid, 'class' => array('class' => 'version_pid')),
     );
   }

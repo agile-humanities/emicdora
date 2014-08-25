@@ -302,7 +302,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
     else {
       $tei_rdf = islandora_object_load($values['tei_rdf']);
       // Must exist and actually be an TEI-RDF object.
-      if (!$tei_rdf || !in_array('islandora:criticalEditionCModel', $tei_rdf->models)) {
+      if (!$tei_rdf || !in_array('islandora:criticalEditionContainerCModel', $tei_rdf->models)) {
         // We don't put the form error on the tableselect as that is not
         // supported by the Drupal Form API.
         form_error($form, t('TEI-RDF Object: "@tei_rdf" is not valid object.', array(
@@ -349,9 +349,9 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
  *
  * Creates a single Versionable Object (islandora:versionCModel) and
  * either creates or links an existing TEI-RDF Object
- * (islandora:criticalEditionCModel) with the Verisonable Object. Also generates
- * a Transcription Object (islandora:transcriptionCModel) from the TEI-RDF
- * Object and links it with the Versionable Object.
+ * (islandora:criticalEditionContainerCModel) with the Verisonable Object. Also
+ * generates a Transcription Object (islandora:transcriptionCModel) from the
+ * TEI-RDF Object and links it with the Versionable Object.
  *
  * It's assumed that the next form page will be the versionable objects
  * Metadata.
