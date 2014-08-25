@@ -344,10 +344,12 @@ function emicdora_get_apparatus_as_content($object) {
     ),
   );
   foreach ($datastreams as $dsid => $datastream) {
+    // Do some shenanigans to make fragments nice.
+    $fragment = strtolower(preg_replace('/[\s,]+/', '_', $datastream->label));
     $content['apparatus'][$dsid] = array(
       '#title' => $datastream->label,
       '#type' => 'fieldset',
-      '#id' => strtolower($dsid),
+      '#id' => $fragment,
       '#collapsible' => TRUE,
       '#collapsed' => FALSE,
       'markup' => array(

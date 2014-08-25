@@ -32,3 +32,11 @@
 #ui-easy-paginator {
   margin-top: 0.0em !important;
 }
+
+.panel-tool {
+  visibility: hidden !important;
+}
+
+.layout-expand {
+  pointer-events:none !important;
+}
