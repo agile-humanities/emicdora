@@ -423,7 +423,7 @@ and \$subject <dc:title> \$title)
  *   datastream.
  */
 function emicdora_add_cwrc_datastream(AbstractObject $object) {
-  module_load_include('inc', 'islandora_critical_edition', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   try {
     $cwrc_stream = emicdora_wrap_plain_text_in_tei($object['OCR']->content);
     if (!$object['CWRC']) {

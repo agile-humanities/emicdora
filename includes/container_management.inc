@@ -191,7 +191,6 @@ function emicdora_management_menu(AbstractObject $object) {
   drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
   drupal_set_title($object->label);
   $members = emicdora_get_members($object->id);
-  $tei_rdf = array_search('islandora:criticalEditionCModel', $members);
   $versionable_objects = array_keys($members, 'islandora:versionCModel');
   $transcriptions = array();
   foreach ($versionable_objects as $versionable_object) {

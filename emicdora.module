@@ -967,18 +967,9 @@ function emicdora_islandora_xml_form_builder_form_associations() {
       'template' => FALSE,
     );
   }
-  // Add the 'islandora:criticalEditionContainerCModel' content model.
-  $source_form_associations[] = array(
-    'content_model' => 'islandora:criticalEditionContainerCModel',
-    'form_name' => 'EMiC Source MODS form',
-    'dsid' => 'MODS',
-    'title_field' => array('titleInfo', 'title'),
-    'transform' => 'mods_to_dc.xsl',
-    'template' => FALSE,
-  );
   return $source_form_associations + array(
     'critical_edition_form_mods' => array(
-      'content_model' => 'islandora:criticalEditionCModel',
+      'content_model' => 'islandora:criticalEditionContainerCModel',
       'form_name' => 'EMiC Critical Edition MODS form',
       'dsid' => 'MODS',
       'title_field' => array('titleInfo', 'title'),
@@ -1158,7 +1149,7 @@ function emicdora_object_management_access($object, $context) {
 
     case 'display_consolidated_tei':
       if (in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_READ)) {
-        $tei_rdfs = array_keys(emicdora_get_members($object->id, 'islandora:criticalEditionCModel'));
+        $tei_rdfs = array_keys(emicdora_get_members($object->id, 'islandora:criticalEditionContainerCModel'));
         if (!empty($tei_rdfs)) {
           $access = TRUE;
         }
