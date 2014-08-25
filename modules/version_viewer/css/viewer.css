@@ -33,10 +33,26 @@
   margin-top: 0.0em !important;
 }
 
-.panel-tool {
+.layout-button-up {
+  visibility: hidden !important;
+}
+
+.layout-button-right {
+  visibility: hidden !important;
+}
+
+.layout-button-left {
   visibility: hidden !important;
 }
 
 .layout-expand {
   pointer-events:none !important;
+}
+
+#easy-ui-east {
+  height: 445px !important;
+}
+
+#easy-ui-west {
+  height: 445px !important;
 }
