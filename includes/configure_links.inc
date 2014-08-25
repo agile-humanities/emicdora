@@ -485,7 +485,9 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     '#type' => 'textfield',
     '#title' => t('Value'),
     '#default_value' => isset($values['value']) ? $values['value'] : '',
-    '#description' => t('Exact match for solr field.'),
+    '#description' => t('Value to search the field for. Can use any valid <a href="!url">Lucene</a> syntax', array(
+      '!url' => 'http://wiki.apache.org/solr/SolrQuerySyntax',
+    )),
   );
   $luke_result = islandora_solr_get_luke(NULL, $solr_field);
   if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {

@@ -560,34 +560,25 @@ function emicdora_block_view($delta = '') {
     case 'source_material':
 
       $sources = emicdora_get_raw_objects($critical_edition);
-      $configs = emicdora_get_configuration($critical_edition->id, 'source');
-
-      $total = 0;
-      foreach ($sources as $key => $value) {
-        $total += count($sources[$key]);
-      }
+      $facets = emicdora_retrieve_user_created_facets($critical_edition->id, 'source');
+      $total = array_sum(array_map('count', $sources));
 
       $links = array();
-      foreach (array_keys($sources) as $key) {
-        if ($key == 'Unclassified') {
-          continue;
-        }
-        $solr = NULL;
-        if (array_key_exists($key, $configs)) {
-          $solr = $configs[$key];
-        }
-        $count = count($sources[$key]);
-        $links[] = array(
-          'title' => ucfirst($key) . " ($count)",
-          'href' => "islandora/object/{$critical_edition->id}/sources",
-          'solr' => array('solr' => $solr),
-        );
-      }
       $links[] = array(
         'title' => t('All') . " ($total)",
         'href' => "islandora/object/{$critical_edition->id}/sources",
       );
 
+      foreach ($facets as $solr_field_val => $values) {
+        $links[] = array(
+          'title' => format_string('@display (@count)', array(
+            '@display' => ucfirst($values['display_name']),
+            '@count' => $values['count'],
+          )),
+          'href' => "islandora/object/{$critical_edition->id}/sources",
+          'query' => array('solr' => $solr_field_val),
+        );
+      }
       $block['subject'] = t('Source Material');
       $block['content'] = array(
         '#theme' => 'links',
@@ -614,35 +605,28 @@ function emicdora_block_view($delta = '') {
 
       if ($is_source) {
         $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
-        $configs = emicdora_get_configuration($path_parts[4], 'version');
       }
       else {
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
-        $configs = emicdora_get_configuration($critical_edition->id, 'version');
       }
-      $total = array_sum(array_map('count', $versions));
-
+      $facets = emicdora_retrieve_user_created_facets($critical_edition->id, 'version');
       $links = array();
-      foreach (array_keys($versions) as $key) {
-        if ($key == 'Unclassified') {
-          continue;
-        }
-        $solr = NULL;
-        if (array_key_exists($key, $configs)) {
-          $solr = $configs[$key];
-        }
-        $count = count($versions[$key]);
-        $links[] = array(
-          'title' => ucfirst($key) . " ($count)",
-          'href' => "islandora/object/{$critical_edition->id}/versions",
-          'solr' => array('solr' => $solr),
-        );
-      }
+
+      $total = array_sum(array_map('count', $versions));
       $links[] = array(
         'title' => t('All') . " ($total)",
         'href' => "islandora/object/{$critical_edition->id}/versions",
       );
-
+      foreach ($facets as $solr_field_val => $values) {
+        $links[] = array(
+          'title' => format_string('@display (@count)', array(
+            '@display' => ucfirst($values['display_name']),
+            '@count' => $values['count'],
+          )),
+          'href' => "islandora/object/{$critical_edition->id}/versions",
+          'query' => array('solr' => $solr_field_val),
+        );
+      }
       $block['subject'] = t('Versions');
       $block['content'] = array(
         '#theme' => 'links',
