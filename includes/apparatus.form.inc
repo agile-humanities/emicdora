@@ -86,6 +86,7 @@ function emicdora_apparatus_form_ajax_callback(array $form, array $form_state) {
  *   Drupal form state
  */
 function emicdora_apparatus_form_submit(array $form, array $form_state) {
+
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   $object = islandora_object_load($form_state['pid']);
   $selected_datastream = $form_state['values']['datastream'];
