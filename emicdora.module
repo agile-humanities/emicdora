@@ -1054,7 +1054,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 
     case 'islandora:sp_videoCModel':
       $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content .= theme('islandora_video', array('islandora_object' => $source_object));
+      $content .= theme('islandora_video', array('object' => $source_object));
       break;
 
     case 'islandora:sp_large_image_cmodel':
