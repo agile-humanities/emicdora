@@ -518,10 +518,13 @@ function emicdora_block_view($delta = '') {
   $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
   $is_tei_editor = (isset($path_parts[3]) && $path_parts[3] == 'tei_editor') ? TRUE : FALSE;
   $is_version_search = (isset($path_parts[3]) && $path_parts[3] == 'versions') ? TRUE : FALSE;
+  $is_version_viewer = (isset($path_parts[3]) && $path_parts[3] == 'version') ? TRUE : FALSE;
+  $versionable_object_pid = (isset($path_parts[4]) && $path_parts[3] == 'version') ? $path_parts[4] : NULL;
 
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
   }
+
   $versionable_object = NULL;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
@@ -735,35 +738,35 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'tei':
-      $links = array();
-      $links[] = array(
-        'title' => 'Reading Transcription',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Diplomatic Transcription',
-        'href' => $path,
-      );
-      if (module_exists('tei_editor') && $is_versionable_object && user_access(EMICDORA_MODIFY_EDITION)) {
+      if ($is_tei_editor || $is_version_viewer) {
+        $links = array();
         $links[] = array(
-          'title' => 'Edit',
-          'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
+          'title' => 'Reading Transcription',
+          'href' => $path,
         );
-      }
-      $links[] = array(
-        'title' => 'Consolidate',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Upload',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Download',
-        'href' => $path,
-      );
-      $block['subject'] = t('TEI');
-      if ($versionable_object) {
+        $links[] = array(
+          'title' => 'Diplomatic Transcription',
+          'href' => $path,
+        );
+        if (module_exists('tei_editor') && $is_version_viewer && isset($versionable_object_pid) && user_access(EMICDORA_MODIFY_EDITION)) {
+          $links[] = array(
+            'title' => 'Edit',
+            'href' => "islandora/object/$versionable_object_pid/tei_editor/edit",
+          );
+        }
+        $links[] = array(
+          'title' => 'Consolidate',
+          'href' => $path,
+        );
+        $links[] = array(
+          'title' => 'Upload',
+          'href' => $path,
+        );
+        $links[] = array(
+          'title' => 'Download',
+          'href' => $path,
+        );
+        $block['subject'] = t('TEI');
         $block['content'] = array(
           array(
             '#theme' => 'links',
@@ -779,48 +782,51 @@ function emicdora_block_view($delta = '') {
       if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source) {
         break;
       }
-      module_load_include('inc', 'emicdora', 'includes/utilities');
-      $versions = emicdora_get_raw_objects($critical_edition, 'version');
-      $transcription_data = array();
-      foreach ($versions as $type) {
-        foreach ($type as $version) {
-          $versionable_objects[] = $version;
-          $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
-          $transcription_data = array_merge($transcription_data, $version_data);
+      // Only show the transcriptions content if viewing the version viewer or
+      // the markup editor.
+      if ($is_tei_editor || $is_version_viewer) {
+        module_load_include('inc', 'emicdora', 'includes/utilities');
+        $versions = emicdora_get_raw_objects($critical_edition, 'version');
+        $transcription_data = array();
+        foreach ($versions as $type) {
+          foreach ($type as $version) {
+            $versionable_objects[] = $version;
+            $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
+            $transcription_data = array_merge($transcription_data, $version_data);
+          }
         }
-      }
-      $links = array();
-      foreach ($transcription_data as $pid => $transcriptions) {
-        foreach ($transcriptions as $transcription) {
-          $transcription_object = islandora_object_load($pid);
-          $links[] = array(
-            'title' => $transcription['label'],
-            'href' => "islandora/object/{$critical_edition->id}/transcription/{$transcription['pid']}",
-            'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
+        $links = array();
+        foreach ($transcription_data as $pid => $transcriptions) {
+          foreach ($transcriptions as $transcription) {
+            $transcription_object = islandora_object_load($pid);
+            $links[] = array(
+              'title' => $transcription['label'],
+              'href' => "islandora/object/{$critical_edition->id}/transcription/{$transcription['pid']}",
+              'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
+            );
+          }
+        }
+        $block['subject'] = t('Transcriptions');
+        $block['content'] = array(
+          '#theme' => 'links',
+          '#links' => $links,
+        );
+        if ($is_versionable_object) {
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              'emicdora/contextual-links/transcription',
+              array($versionable_object->id),
+            ),
           );
         }
-      }
-
-      $block['subject'] = t('Transcriptions');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-      );
-      if ($is_versionable_object) {
-        $block['content']['#contextual_links'] = array(
-          'emicdora' => array(
-            'emicdora/contextual-links/transcription',
-            array($versionable_object->id),
-          ),
-        );
-      }
-      if ($is_transcript) {
-        $block['content']['#contextual_links'] = array(
-          'emicdora' => array(
-            "emicdora/contextual-links/transcription/$transcript_pid/edit",
-            array($transcript_pid),
-          ),
-        );
+        if ($is_transcript) {
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              "emicdora/contextual-links/transcription/$transcript_pid/edit",
+              array($transcript_pid),
+            ),
+          );
+        }
       }
       break;
   }
