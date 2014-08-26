@@ -63,21 +63,21 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
   );
 
   $form['none'] = array(
-      '#type' => 'textarea',
-      '#size' => 6,
-      '#title' => t('Transcription content'),
-      '#default_value' => "",
-      '#states' => array(
-        'visible' => array(
-          ':input[name="content_source"]' => array('checked' => TRUE),
-        ),
+    '#type' => 'textarea',
+    '#size' => 6,
+    '#title' => t('Transcription content'),
+    '#default_value' => "",
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_source"]' => array('checked' => TRUE),
       ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="content_source"]' => array('value' => 'none'),
-        ),
+    ),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_source"]' => array('value' => 'none'),
       ),
-    );
+    ),
+  );
 
   if ($count > 1) {
     $form['page'] = array(
@@ -197,8 +197,6 @@ function islandora_emicdora_add_transcription_form_validate($form, $form_state) 
  *   Drupal form_state
  */
 function islandora_emicdora_add_transcription_form_submit(array $form, array &$form_state) {
-//   module_load_include('inc', 'emicdora', 'includes/calliope');
-//   module_load_include('inc', 'islandora', 'includes/utilities');
   $versionable_object_pid = $form_state['values']['versionable_object_pid'];
   $versionable_object = islandora_object_load($versionable_object_pid);
   $label = $form_state['values']['transcription'];
