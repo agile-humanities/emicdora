@@ -84,7 +84,16 @@ function emicdora_menu() {
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
+    ),
+    'islandora/object/%islandora_object/version/%islandora_object' => array(
+      'title callback' => 'emicdora_drupal_title',
+      'title arguments' => array(2),
+      'page callback' => 'islandora_view_object',
+      'page arguments' => array(2, 4),
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/manage/apparatus' => array(
       'title' => 'Apparatus',
@@ -1027,39 +1036,46 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_critical_edition_breadcrumbs($object);
   $content = t("unknown content type");
-  $source_object = menu_get_object('islandora_object', 4);
+  $supplied_object = menu_get_object('islandora_object', 4);
   $content_models = array_keys(emicdora_source_content_models());
-  if (!$source_object) {
+  $content_models[] = 'islandora:versionCModel';
+  if (!$supplied_object) {
     $content = emicdora_get_apparatus_as_content($object);
     return array('emicdora' => $content);
   }
 
   foreach ($content_models as $content_model) {
-    if (in_array($content_model, $source_object->models)) {
+    if (in_array($content_model, $supplied_object->models)) {
       $model = $content_model;
     }
   }
 
   switch ($model) {
     case 'islandora:bookCModel':
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content .= theme('islandora_book_book', array('object' => $source_object));
-      $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($source_object, FALSE) . "</div>";
+      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
+      $content .= theme('islandora_book_book', array('object' => $supplied_object));
+      $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($supplied_object, FALSE) . "</div>";
       break;
 
     case 'islandora:sp-audioCModel':
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content .= theme('islandora_audio', array('islandora_object' => $source_object));
+      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
+      $content .= theme('islandora_audio', array('islandora_object' => $supplied_object));
       break;
 
     case 'islandora:sp_videoCModel':
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content .= theme('islandora_video', array('object' => $source_object));
+      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
+      $content .= theme('islandora_video', array('islandora_object' => $supplied_object));
+
       break;
 
     case 'islandora:sp_large_image_cmodel':
-      $content = '<div class="emicdora_source_title">' . $source_object->label . "</div>";
-      $content .= theme('islandora_large_image', array('islandora_object' => $source_object));
+      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
+      $content .= theme('islandora_large_image', array('islandora_object' => $supplied_object));
+      break;
+
+    case 'islandora:versionCModel':
+      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
+      $content .= theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
       break;
   }
   return array('emicdora' => $content);
@@ -1095,14 +1111,14 @@ function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL
 /**
  * Implements hook_CMODEL_PID_islandora_solr_object_result_alter().
  */
-function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter_disabled(&$search_results, $query_processor) {
+function emicdora_islandora_versioncmodel_islandora_solr_object_result_alter(&$search_results, $query_processor) {
   $url_parts = explode('/', $_GET['q']);
   if (isset($url_parts[3]) && $url_parts[3] == 'versions') {
     $parent_pid = $url_parts[2];
     $parent_object = islandora_object_load($parent_pid);
     if ($parent_object && in_array('islandora:criticalEditionContainerCModel', $parent_object->models)) {
       $version_pid = $search_results['PID'];
-      $search_results['object_url'] = "islandora/object/$parent_pid/$version_pid";
+      $search_results['object_url'] = "islandora/object/$parent_pid/version/$version_pid";
     }
   }
 }
