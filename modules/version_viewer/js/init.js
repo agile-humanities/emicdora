@@ -247,6 +247,7 @@
             $('#wb_meta').css('background-color', 'initial');
             
             $('#wb_meta').css('background-color', btn_background_color);
+            $('#easy-ui-south').css('height', '500px');
             toggle_layout(is_selected, 'south', 'wb_meta');
             break;
           case 'wb_dt':

@@ -84,7 +84,7 @@ function emicdora_menu() {
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/version/%islandora_object' => array(
       'title callback' => 'emicdora_drupal_title',
@@ -93,7 +93,7 @@ function emicdora_menu() {
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/manage/apparatus' => array(
       'title' => 'Apparatus',
@@ -294,6 +294,23 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
   );
+}
+
+/**
+ * Implements hook_file_mimetype_mapping_alter().
+ */
+function emicdora_file_mimetype_mapping_alter(&$mapping) {
+  // Fix the mime type mapping for rng (Schema datastreams), EMiC Specific.
+  $new_mappings['rng'] = "application/xml";
+  foreach ($new_mappings as $extension => $mime_type) {
+    if (!in_array($mime_type, $mapping['mimetypes'])) {
+      // If the mime type does not already exist, add it.
+      $mapping['mimetypes'][] = $mime_type;
+    }
+    // Get the index of the mime type and assign the extension to that key.
+    $index = array_search($mime_type, $mapping['mimetypes']);
+    $mapping['extensions'][$extension] = $index;
+  }
 }
 
 /**
@@ -1048,6 +1065,7 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
     case 'islandora:sp_videoCModel':
       $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
       $content .= theme('islandora_video', array('islandora_object' => $supplied_object));
+
       break;
 
     case 'islandora:sp_large_image_cmodel':

@@ -30,14 +30,14 @@
                   </div>
 			</div>
         </div>
-        <div id="easy-ui-south" data-options="region:'south',split:true,collapsible:false,minimized:true,border:false" style="height:500px;">
-          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
+        <div id="easy-ui-south" data-options="region:'south',split:true,collapsible:false,minimized:true,border:true" style="height:500px;">
+          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,split:true,border:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
           </div>
         </div>
-        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:false,collapsible:false" title="Source" style="width:200px;maxWidth:700px">
+        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;maxWidth:700px;height:445px;">
           <?php print $islandora_content; ?>
         </div>
-        <div id="easy-ui-west" data-options="region:'west',split:true,border:false,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
+        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>
