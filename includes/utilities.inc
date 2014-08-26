@@ -671,3 +671,50 @@ function emicdora_wrap_plain_text_in_tei($content = 'Blank Page') {
 
   return $prefix . $content . $suffix;
 }
+
+/**
+ * Retrieves created user facets for versions and sources.
+ *
+ * @param string $pid
+ *   The PID of the critical edition that the facets were made under.
+ * @param string $type
+ *   The type of facets being retrieved either 'version' or 'source'.
+ *
+ * @return array
+ *   An array of arrays where the key is the Solr field and value and the values
+ *   contain:
+ *   -display_name: A string representing the field name for display in the UI.
+ *   -count: An integer of the number of occurences of the facet.
+ */
+function emicdora_retrieve_user_created_facets($pid, $type) {
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $qp = new IslandoraSolrQueryProcessor();
+  $qp->buildQuery('*:*');
+  $filters[] = format_string('!membership:("info:fedora/!pid")', array(
+    '!pid' => $pid,
+    '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
+  $qp->solrParams['fq'] = $filters;
+  $qp->solrParams['fl'] = '*';
+  $qp->solrParams['facet.limit'] = 100000;
+  $qp->solrParams['facet.mincount'] = variable_get('islandora_solr_facet_min_limit', '2');
+  $qp->solrParams['facet.field'] = array();
+  $configs = emicdora_get_terms($pid, $type);
+  $facets = array();
+  $formatted_facets = array();
+  foreach ($configs as $config) {
+    $facet_query = format_string('@solr_field:@solr_value', array(
+      '@solr_field' => $config['solr_field_settings']['label'],
+      '@solr_value' => $config['solr_field_settings']['value'],
+    ));
+    $facets[] = $facet_query;
+    $formatted_facets[$facet_query] = array(
+      'display_name' => $config['solr_field'],
+    );
+  }
+  $qp->solrParams['facet.query'] = $facets;
+  $qp->executeQuery(FALSE);
+  foreach ($qp->islandoraSolrResult['facet_counts']['facet_queries'] as $field_val => $count) {
+    $formatted_facets[$field_val]['count'] = $count;
+  }
+  return $formatted_facets;
+}
