@@ -8,7 +8,6 @@
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
-define('EMICDORA_READ_EDITION', 'emic read edition');
 define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 
 /**
@@ -349,18 +348,6 @@ function emicdora_plupload_element_pre_render($element) {
 }
 
 /**
- * Implements hook_permission().
- */
-function emicdora_permission() {
-  return array(
-    EMICDORA_READ_EDITION => array(
-      'title' => t('Read Emic Editions'),
-      'description' => t('Read EMiC Critical Editions'),
-    ),
-  );
-}
-
-/**
  * Implements hook_theme().
  */
 function emicdora_theme() {
@@ -533,7 +520,6 @@ function emicdora_block_view($delta = '') {
 
   // Build the block uses paths relative to our current path.
   $path = current_path();
-  dsm($path, 'path');
 
   $block = array();
   switch ($delta) {
@@ -671,17 +657,31 @@ function emicdora_block_view($delta = '') {
 
     case 'operations':
       module_load_include('inc', 'emicdora', 'includes/operations.blocks');
-      $source_or_transcription_object = menu_get_object('islandora_object', 4);
+      // This nested object is either a source, version or transcription.
+      $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
       if ($is_critical_edition) {
         $id = $critical_edition->id;
       }
-      if ($versionable_object) {
-        emicdora_versionable_object_operations_block($versionable_object->id, $block);
-        $id = $versionable_object->id;
-      }
-      if ($is_source) {
-        $links = emicdora_source_object_operations_block_links($source_or_transcription_object->id, $critical_edition->id);
+      if ($nested_object) {
+        if (in_array('islandora:versionCModel', $nested_object->models)) {
+          // If it's a version we need to get the source version from it.
+          $source_rels = $nested_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+          $source_rels = reset($source_rels);
+          $source_pid = $source_rels['object']['value'];
+          $links = emicdora_versionable_object_operations_block_links($nested_object->id, $critical_edition->id, $source_pid);
+        }
+        elseif (in_array('islandora:transcriptionCModel', $nested_object->models)) {
+          // If it's a transcription we need to get the version from it.
+          $version_rels = $nested_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+          $version_rels = reset($version_rels);
+          $version_pid = $version_rels['object']['value'];
+          $links = emicdora_transcription_object_operations_block_links($nested_object->id, $critical_edition->id, $version_pid);
+        }
+        // It's a source object.
+        else {
+          $links = emicdora_source_object_operations_block_links($nested_object->id, $critical_edition->id);
+        }
       }
       if ($is_table) {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
@@ -1137,27 +1137,11 @@ function emicdora_object_management_access($object, $context) {
       break;
 
     case 'display_consolidated_tei':
-      if (in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_READ)) {
+      if (in_array('islandora:versionCModel', $content_models) && islandora_object_access(ISLANDORA_ADD_DS, $object)) {
         $tei_rdfs = array_keys(emicdora_get_members($object->id, 'islandora:criticalEditionContainerCModel'));
         if (!empty($tei_rdfs)) {
           $access = TRUE;
         }
-      }
-      break;
-
-    case 'view_critical_edition':
-      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && user_access(EMICDORA_READ)) {
-        $access = TRUE;
-      }
-      break;
-
-    case 'view_versionable_object':
-      module_load_include('inc', 'islandora_emicdora', 'includes/utilities');
-      $members = emicdora_get_members($object->id);
-      $transcription = array_search('islandora:transcriptionCModel', $members);
-      $transcription_object = islandora_object_load($transcription);
-      if ($transcription_object && in_array('islandora:versionCModel', $content_models) && user_access(EMICDORA_READ)) {
-        $access = TRUE;
       }
       break;
   }
