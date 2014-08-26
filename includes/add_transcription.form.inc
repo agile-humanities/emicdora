@@ -71,7 +71,7 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
     );
     $form['page']['restricted'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use restricted  page range'),
+      '#title' => t('Use restricted page range'),
       '#default_value' => FALSE,
     );
     $form['page']['first_page'] = array(
@@ -187,7 +187,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   $transcription_datastream = $transcription->constructDatastream($datastream_id, $control_group);
   $transcription_datastream->mimetype = 'text/plain';
   $transcription_datastream->label = 'Transcription';
-  if ($content_source == 'tei_rdf') {
+  if ($content_source == 'tei_rdf' && isset($form_state['values']['restricted'])) {
     $start_page = NULL;
     $end_page = NULL;
     if ($form_state['values']['restricted']) {
@@ -210,7 +210,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   }
 
   $transcription->ingestDatastream($transcription_datastream);
-  emicdora_calliope_write_file($transcription->id);
+  islandora_add_object($transcription);
   drupal_set_message(t("Transcription object created"));
 }
 
@@ -542,6 +542,5 @@ function islandora_transcription_file_update($transcription, $filename) {
 function emicdora_build_transcription($versionable_object, $label) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $transcription = emicdora_construct_transcription($versionable_object, $label);
-  $versionable_object->repository->ingestObject($transcription);
   return $transcription;
 }
