@@ -293,6 +293,14 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
+    'coop' => array(
+      'title' => 'COOP',
+      'page callback' => 'emicdora_coop',
+      'file' => 'includes/coop.inc',
+      'type' => MENU_NORMAL_ITEM,
+      'access callback' => 'user_access',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
   );
 }
 
@@ -394,6 +402,22 @@ function emicdora_theme() {
       'template' => 'theme/emicdora_transcription_object',
       'pattern' => 'emicdora_transcription_object__',
       'variables' => array('islandora_object' => NULL),
+    ),
+    'emicdora_coop_group' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/emicdora_coop_group',
+      'variables' => array(
+        'islandora_object' => NULL,
+        'group_list' => array(),
+      ),
+    ),
+    'emicdora_coop_group_page' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/emicdora_coop_group_page',
+      'variables' => array(
+        'add_list' => array(),
+        'source_collection' => "",
+      ),
     ),
   );
 }
@@ -559,6 +583,7 @@ function emicdora_block_view($delta = '') {
   $path = current_path();
 
   $block = array();
+
   switch ($delta) {
     case 'critical_apparatus':
       if (emicdora_show_apparatus_block()) {
