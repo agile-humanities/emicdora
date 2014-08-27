@@ -446,5 +446,8 @@
         }
       }
   });
+  
+  $('#easy-ui-east').css('height', '445px');
+  $('#easy-ui-west').css('height', '445px');
   });
 })(jQuery);
