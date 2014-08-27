@@ -523,8 +523,15 @@ function emicdora_block_view($delta = '') {
     $transcript_pid = $path_parts[4];
   }
   $versionable_object = NULL;
+  $is_versionable_object = FALSE;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
-  $is_versionable_object = is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel');
+  $nested_object = menu_get_object('islandora_object', 4);
+  if ($nested_object) {
+    $is_versionable_object = emicdora_has_content_model($nested_object, 'islandora:versionCModel');
+    if ($is_versionable_object) {
+      $versionable_object = $nested_object;
+    }
+  }
   if (!$is_critical_edition) {
     if (!$is_versionable_object) {
       return array();
