@@ -52,6 +52,34 @@ function collation_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
+    'islandora/object/%islandora_object/refresh/%/%' => array(
+      'title' => 'Refresh Transcriptions',
+      'page callback' => 'drupal_get_form',
+      'file' => 'includes/mvd.inc',
+      'page arguments' => array(
+        'emicdora_mvd_operation_confirm_form',
+        2,
+        'refresh',
+        4,
+        5,
+      ),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 2),
+    ),
+    'islandora/object/%islandora_object/delete/%/%' => array(
+      'title' => 'Delete Collation',
+      'page callback' => 'drupal_get_form',
+      'file' => 'includes/mvd.inc',
+      'page arguments' => array(
+        'emicdora_mvd_operation_confirm_form',
+        2,
+        'delete',
+        4,
+        5,
+      ),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 2),
+    ),
   );
 }
 

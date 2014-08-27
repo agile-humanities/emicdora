@@ -660,9 +660,6 @@ function emicdora_block_view($delta = '') {
       // This nested object is either a source, version or transcription.
       $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
-      if ($is_critical_edition) {
-        $id = $critical_edition->id;
-      }
       if ($nested_object) {
         if (in_array('islandora:versionCModel', $nested_object->models)) {
           // If it's a version we need to get the source version from it.
@@ -683,29 +680,11 @@ function emicdora_block_view($delta = '') {
           $links = emicdora_source_object_operations_block_links($nested_object->id, $critical_edition->id);
         }
       }
-      if ($is_table) {
+      if ($is_table || $is_compare) {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
-        $links[] = array(
-          'title' => 'Compare View',
-          'href' => "islandora/object/$id/compare/$mvd",
-          'fragment' => "$mvd/{$critical_edition->id}",
-        );
+        $current_view = $is_table ? 'table' : 'compare';
+        $links = emicdora_collation_object_operations_block_links($critical_edition->id, $mvd, $current_view);
       }
-      if ($is_compare) {
-        $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
-        $links[] = array(
-          'title' => 'Table View',
-          'href' => "islandora/object/$id/table/$mvd",
-          'fragment' => "$mvd/{$critical_edition->id}",
-        );
-      }
-
-      /*if ($is_source) {
-        $links[] = array(
-          'title' => 'View Source Object',
-          'href' => "islandora/object/{$path_parts[4]}",
-        );
-      }*/
 
       if (!empty($links)) {
         $block['subject'] = t('Operations');

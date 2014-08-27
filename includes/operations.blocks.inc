@@ -21,6 +21,19 @@ function emicdora_source_object_operations_block_links($source_pid, $critical_ed
   return $links;
 }
 
+/**
+ * Creates the links for versionable objects operations block.
+ *
+ * @param string $version_pid
+ *   The PID of the versionable object.
+ * @param string $critical_edition_pid
+ *   The PID of the critical edition object.
+ * @param string $source_pid
+ *   The PID of the source object.
+ *
+ * @return array
+ *   An array of links to be used in the operations block.
+ */
 function emicdora_versionable_object_operations_block_links($version_pid, $critical_edition_pid, $source_pid) {
   $links = array();
   $links[] = array(
@@ -35,6 +48,19 @@ function emicdora_versionable_object_operations_block_links($version_pid, $criti
   return $links;
 }
 
+/**
+ * Creates the links for transcription objects operations block.
+ *
+ * @param string $transcription_pid
+ *   The PID of the transcription object.
+ * @param string $critical_edition_pid
+ *   The PID of the critical edition object.
+ * @param string $version_pid
+ *   The PID of the versionable object.
+ *
+ * @return array
+ *   An array of links to be used in the operations block.
+ */
 function emicdora_transcription_object_operations_block_links($transcription_pid, $critical_edition_pid, $version_pid) {
   $links = array();
   $destination_params = array(
@@ -45,8 +71,39 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
   return $links;
 }
 
-function emicdora_collation_object_operations_block() {
-
+/**
+ * Creates the links for collation objects operations block.
+ *
+ * @param string $critical_edition_pid
+ *   The PID of the critical edition object.
+ * @param string $mvd
+ *   The label of the MVD that we are performing operations on.
+ * @param string $current_view
+ *   The current view that the opeartions is being rendered.
+ *
+ * @return array
+ *   An array of links to be used in the operations block.
+ */
+function emicdora_collation_object_operations_block_links($critical_edition_pid, $mvd, $current_view) {
+  $links[] = array(
+    'title' => 'Compare View',
+    'href' => "islandora/object/$critical_edition_pid/compare/$mvd",
+    'fragment' => "$mvd/$critical_edition_pid",
+  );
+  $links[] = array(
+    'title' => 'Table View',
+    'href' => "islandora/object/$critical_edition_pid/table/$mvd",
+    'fragment' => "$mvd/$critical_edition_pid",
+  );
+  $links[] = array(
+    'title' => 'Refresh Transcriptions',
+    'href' => "islandora/object/$critical_edition_pid/refresh/$mvd/$current_view",
+  );
+  $links[] = array(
+    'title' => 'Delete',
+    'href' => "islandora/object/$critical_edition_pid/delete/$mvd/$current_view",
+  );
+  return $links;
 }
 
 /**
