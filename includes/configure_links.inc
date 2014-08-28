@@ -499,7 +499,7 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     );
   }
 
-  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable);
+  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable, TRUE);
 
   $form['actions'] = array(
     '#type' => 'container',
