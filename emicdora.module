@@ -516,14 +516,26 @@ function emicdora_block_view($delta = '') {
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
   }
+
   $versionable_object = NULL;
+  $critical_edition = NULL;
+
   $is_versionable_object = FALSE;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   $nested_object = menu_get_object('islandora_object', 4);
   if ($nested_object) {
-    $is_versionable_object = emicdora_has_content_model($nested_object, 'islandora:versionCModel');
+    $is_versionable_object = in_array('islandora:versionCModel', $nested_object->models);
     if ($is_versionable_object) {
       $versionable_object = $nested_object;
+    }
+  }
+  if ($is_tei_editor) {
+    $is_versionable_object = in_array('islandora:versionCModel', $object->models);
+    if ($is_versionable_object) {
+      $versionable_object = $object;
+      $obj_rel = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+      $obj_rel = reset($obj_rel);
+      $critical_edition = islandora_object_load($obj_rel['object']['value']);
     }
   }
   if (!$is_critical_edition) {
@@ -540,7 +552,6 @@ function emicdora_block_view($delta = '') {
       $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
       $source_objects = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
       if (!empty($source_objects)) {
-
         $source_object = $source_objects[0]['object']['value'];
       }
     }
@@ -548,12 +559,10 @@ function emicdora_block_view($delta = '') {
   else {
     $critical_edition = $object;
   }
-
   // Build the block uses paths relative to our current path.
   $path = current_path();
 
   $block = array();
-
   switch ($delta) {
     case 'critical_apparatus':
       if (emicdora_show_apparatus_block()) {
@@ -714,35 +723,35 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'tei':
-      $links = array();
-      $links[] = array(
-        'title' => 'Reading Transcription',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Diplomatic Transcription',
-        'href' => $path,
-      );
-      if (module_exists('tei_editor') && $is_versionable_object && islandora_object_access('ISLANDORA_METADATA_EDIT', $object)) {
+      if ($is_tei_editor || isset($versionable_object->id)) {
+        $links = array();
         $links[] = array(
-          'title' => 'Edit',
-          'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
+          'title' => 'Reading Transcription',
+          'href' => $path,
         );
-      }
-      $links[] = array(
-        'title' => 'Consolidate',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Upload',
-        'href' => $path,
-      );
-      $links[] = array(
-        'title' => 'Download',
-        'href' => $path,
-      );
-      $block['subject'] = t('TEI');
-      if ($versionable_object) {
+        $links[] = array(
+          'title' => 'Diplomatic Transcription',
+          'href' => $path,
+        );
+        if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
+          $links[] = array(
+            'title' => 'Edit',
+            'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
+          );
+        }
+        $links[] = array(
+          'title' => 'Consolidate',
+          'href' => $path,
+        );
+        $links[] = array(
+          'title' => 'Upload',
+          'href' => $path,
+        );
+        $links[] = array(
+          'title' => 'Download',
+          'href' => $path,
+        );
+        $block['subject'] = t('TEI');
         $block['content'] = array(
           array(
             '#theme' => 'links',
@@ -755,51 +764,54 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source) {
+      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source || $is_version_search) {
         break;
       }
-      module_load_include('inc', 'emicdora', 'includes/utilities');
-      $versions = emicdora_get_raw_objects($critical_edition, 'version');
-      $transcription_data = array();
-      foreach ($versions as $type) {
-        foreach ($type as $version) {
-          $versionable_objects[] = $version;
-          $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
-          $transcription_data = array_merge($transcription_data, $version_data);
+      // Only show the transcriptions content if viewing the version viewer or
+      // the markup editor.
+      if ($is_tei_editor || isset($versionable_object->id)) {
+        module_load_include('inc', 'emicdora', 'includes/utilities');
+        $versions = emicdora_get_raw_objects($critical_edition, 'version');
+        $transcription_data = array();
+        foreach ($versions as $type) {
+          foreach ($type as $version) {
+            $versionable_objects[] = $version;
+            $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
+            $transcription_data = array_merge($transcription_data, $version_data);
+          }
         }
-      }
-      $links = array();
-      foreach ($transcription_data as $pid => $transcriptions) {
-        foreach ($transcriptions as $transcription) {
-          $transcription_object = islandora_object_load($pid);
-          $links[] = array(
-            'title' => $transcription['label'],
-            'href' => "islandora/object/{$critical_edition->id}/transcription/{$transcription['pid']}",
-            'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
+        $links = array();
+        foreach ($transcription_data as $pid => $transcriptions) {
+          foreach ($transcriptions as $transcription) {
+            $transcription_object = islandora_object_load($pid);
+            $links[] = array(
+              'title' => $transcription['label'],
+              'href' => "islandora/object/{$critical_edition->id}/transcription/{$transcription['pid']}",
+              'attributes' => array('title' => t("Transcription of @trans", array('@trans' => $transcription_object->label))),
+            );
+          }
+        }
+        $block['subject'] = t('Transcriptions');
+        $block['content'] = array(
+          '#theme' => 'links',
+          '#links' => $links,
+        );
+        if ($is_versionable_object) {
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              'emicdora/contextual-links/transcription',
+              array($versionable_object->id),
+            ),
           );
         }
-      }
-
-      $block['subject'] = t('Transcriptions');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-      );
-      if ($is_versionable_object) {
-        $block['content']['#contextual_links'] = array(
-          'emicdora' => array(
-            'emicdora/contextual-links/transcription',
-            array($versionable_object->id),
-          ),
-        );
-      }
-      if ($is_transcript) {
-        $block['content']['#contextual_links'] = array(
-          'emicdora' => array(
-            "emicdora/contextual-links/transcription/$transcript_pid/edit",
-            array($transcript_pid),
-          ),
-        );
+        if ($is_transcript) {
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              "emicdora/contextual-links/transcription/$transcript_pid/edit",
+              array($transcript_pid),
+            ),
+          );
+        }
       }
       break;
   }
