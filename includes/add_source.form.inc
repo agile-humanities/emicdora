@@ -228,7 +228,7 @@ function emicdora_get_content_wrapper($mappings, $upload_size) {
 function islandora_simplified_ingest_get_mappings($content_model) {
   $mappings = array(
     'islandora:bookCModel' => array(
-      'form' => 'EMiC Textual Content MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Text'),
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
@@ -238,7 +238,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'extensions' => 'zip',
     ),
     'islandora:sp_videoCModel' => array(
-      'form' => 'Video MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Video'),
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
@@ -248,7 +248,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'extensions' => 'ogg mp4 mov qt m4a avi',
     ),
     'islandora:sp-audioCModel' => array(
-      'form' => 'Audio MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Audio'),
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
@@ -258,7 +258,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'extensions' => 'wav mp3',
     ),
     'islandora:sp_large_image_cmodel' => array(
-      'form' => 'Large image MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Image'),
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
