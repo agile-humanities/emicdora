@@ -733,7 +733,7 @@ function emicdora_block_view($delta = '') {
           'title' => 'Diplomatic Transcription',
           'href' => $path,
         );
-        if (module_exists('tei_editor') && isset($versionable_object) && && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
+        if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
           $links[] = array(
             'title' => 'Edit',
             'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
@@ -769,7 +769,7 @@ function emicdora_block_view($delta = '') {
       }
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
-      if ($is_tei_editor || isset($versionable_object->id) || $critical_edition) {
+      if ($is_tei_editor || isset($versionable_object->id)) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         $transcription_data = array();
