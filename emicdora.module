@@ -548,13 +548,24 @@ function emicdora_block_view($delta = '') {
   }
 
   $versionable_object = NULL;
+  $critical_edition = NULL;
+
   $is_versionable_object = FALSE;
   $is_critical_edition = is_object($object) && emicdora_has_content_model($object, 'islandora:criticalEditionContainerCModel');
   $nested_object = menu_get_object('islandora_object', 4);
   if ($nested_object) {
-    $is_versionable_object = emicdora_has_content_model($nested_object, 'islandora:versionCModel');
+    $is_versionable_object = in_array('islandora:versionCModel', $nested_object->models);
     if ($is_versionable_object) {
       $versionable_object = $nested_object;
+    }
+  }
+  if ($is_tei_editor) {
+    $is_versionable_object = in_array('islandora:versionCModel', $object->models);
+    if ($is_versionable_object) {
+      $versionable_object = $object;
+      $obj_rel = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+      $obj_rel = reset($obj_rel);
+      $critical_edition = islandora_object_load($obj_rel['object']['value']);
     }
   }
   if (!$is_critical_edition) {
@@ -571,7 +582,6 @@ function emicdora_block_view($delta = '') {
       $critical_edition = islandora_object_load($critical_editions[0]['object']['value']);
       $source_objects = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
       if (!empty($source_objects)) {
-
         $source_object = $source_objects[0]['object']['value'];
       }
     }
@@ -579,12 +589,10 @@ function emicdora_block_view($delta = '') {
   else {
     $critical_edition = $object;
   }
-
   // Build the block uses paths relative to our current path.
   $path = current_path();
 
   $block = array();
-
   switch ($delta) {
     case 'critical_apparatus':
       if (emicdora_show_apparatus_block()) {
@@ -768,7 +776,7 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'tei':
-      if ($is_tei_editor || $versionable_object) {
+      if ($is_tei_editor || isset($versionable_object->id)) {
         $links = array();
         $links[] = array(
           'title' => 'Reading Transcription',
@@ -809,12 +817,12 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source) {
+      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source || $is_version_search) {
         break;
       }
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
-      if ($is_tei_editor || $versionable_object) {
+      if ($is_tei_editor || isset($versionable_object->id) || $critical_edition) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         $transcription_data = array();
