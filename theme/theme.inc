@@ -42,7 +42,20 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
 /**
  * Implements hook_preprocess_theme().
  */
-function emicdora_preprocess_emicdora_coop_group_page(array &$variables) {
+function emicdora_preprocess_emicdora_coop(array &$variables) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
-  drupal_add_css("$module_path/css/coop_view.css");
+  drupal_add_css("$module_path/css/emicdora.coop.css");
+  // No Title on this page.
+  drupal_set_title('');
+  // No Breadcrumbs on this page.
+  drupal_set_breadcrumb(array());
+  // Links for Add to COOP.
+  foreach (emicdora_source_content_models() as $content_model => $label) {
+    $add_source_links[] = array(
+      'title' => t('Add @label', array('@label' => $label)),
+      'href' => "workbench/add/$content_model",
+    );
+  }
+  $variables['add_source_links'] = $add_source_links;
 }
