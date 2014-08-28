@@ -453,15 +453,6 @@ function emicdora_block_info() {
       'status' => 1,
       'region' => 'sidebar_first',
     ),
-    'collations' => array(
-      'info' => t('Collations'),
-      'cache' => DRUPAL_NO_CACHE,
-      'visibility' => BLOCK_VISIBILITY_LISTED,
-      'pages' => 'islandora/object/*',
-      'weight' => -20,
-      'status' => 1,
-      'region' => 'sidebar_first',
-    ),
     'versions' => array(
       'info' => t('Versions'),
       'cache' => DRUPAL_NO_CACHE,
