@@ -542,8 +542,6 @@ function emicdora_block_view($delta = '') {
   $is_transcript = (isset($path_parts[3]) && $path_parts[3] == 'transcription') ? TRUE : FALSE;
   $is_tei_editor = (isset($path_parts[3]) && $path_parts[3] == 'tei_editor') ? TRUE : FALSE;
   $is_version_search = (isset($path_parts[3]) && $path_parts[3] == 'versions') ? TRUE : FALSE;
-  $is_version_viewer = (isset($path_parts[3]) && $path_parts[3] == 'version') ? TRUE : FALSE;
-  $versionable_object_pid = (isset($path_parts[4]) && $path_parts[3] == 'version') ? $path_parts[4] : NULL;
 
   if ($is_transcript) {
     $transcript_pid = $path_parts[4];
@@ -770,7 +768,7 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'tei':
-      if ($is_tei_editor || $is_version_viewer) {
+      if ($is_tei_editor || $versionable_object) {
         $links = array();
         $links[] = array(
           'title' => 'Reading Transcription',
@@ -780,10 +778,10 @@ function emicdora_block_view($delta = '') {
           'title' => 'Diplomatic Transcription',
           'href' => $path,
         );
-        if (module_exists('tei_editor') && $is_version_viewer && isset($versionable_object_pid) && user_access(EMICDORA_MODIFY_EDITION)) {
+        if (module_exists('tei_editor') && isset($versionable_object) && user_access(EMICDORA_MODIFY_EDITION)) {
           $links[] = array(
             'title' => 'Edit',
-            'href' => "islandora/object/$versionable_object_pid/tei_editor/edit",
+            'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
           );
         }
         $links[] = array(
@@ -816,7 +814,7 @@ function emicdora_block_view($delta = '') {
       }
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
-      if ($is_tei_editor || $is_version_viewer) {
+      if ($is_tei_editor || $versionable_object) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         $transcription_data = array();
