@@ -63,11 +63,26 @@ function emicdora_versionable_object_operations_block_links($version_pid, $criti
  */
 function emicdora_transcription_object_operations_block_links($transcription_pid, $critical_edition_pid, $version_pid) {
   $links = array();
-  $destination_params = array(
-    'path' => 'version',
-    'pid' => $version_pid,
-  );
-  emicdora_append_edit_and_delete_links($links, $transcription_pid, $critical_edition_pid, $destination_params);
+  $object = islandora_object_load($transcription_pid);
+  if (islandora_object_access(ISLANDORA_METADATA_EDIT, $object)) {
+    $destination = drupal_get_destination();
+    $links[] = array(
+      'title' => 'Edit Metatdata',
+      'href' => "islandora/object/$critical_edition_pid/transcription/$transcription_pid/edit",
+      'query' => array(
+        'destination' => $destination['destination'],
+      ),
+    );
+  }
+  if (islandora_object_access(ISLANDORA_PURGE, $object)) {
+    $links[] = array(
+      'title' => 'Delete',
+      'href' => "islandora/object/$transcription_pid/delete",
+      'query' => array(
+        'destination' => "islandora/object/$critical_edition_pid/version/$version_pid",
+      ),
+    );
+  }
   return $links;
 }
 

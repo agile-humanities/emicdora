@@ -12,6 +12,11 @@
  *   The Drupal form definition.
  * @param array $form_state
  *   The Drupal form state.
+ * @param AbstractObject $transcription
+ *   An AbstractObject representing an object within Fedora.
+ *
+ * @return array
+ *   An array containing the transcription form to be rendered.
  */
 function emicdora_edit_transcription_form($form, $form_state, AbstractObject $transcription) {
   module_load_include('inc', 'islandora', 'includes/breadcrumb');
