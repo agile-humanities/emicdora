@@ -203,7 +203,7 @@ function emicdora_management_menu(AbstractObject $object) {
 
   $output['manage_critical_edition']['replace_apparatus'] = array(
     '#id' => 'replace-apparatus',
-    '#access' => user_access(ISLANDORA_ADD_DS) && empty($apparatus),
+    '#access' => islandora_object_access(ISLANDORA_ADD_DS, $object) && empty($apparatus),
     '#title' => t('Create Apparatus'),
     '#description' => t('Creates blank Critical Apparatus'),
     '#type' => 'fieldset',
@@ -212,7 +212,7 @@ function emicdora_management_menu(AbstractObject $object) {
   );
   $output['manage_critical_edition']['attach_vo'] = array(
     '#id' => 'attach-vo',
-    '#access' => user_access(ISLANDORA_ADD_DS),
+    '#access' => islandora_object_access(ISLANDORA_ADD_DS, $object),
     '#title' => t('Associate existing Versionable Object'),
     '#description' => t('Manage Versionable Object associations'),
     '#type' => 'fieldset',
@@ -222,7 +222,7 @@ function emicdora_management_menu(AbstractObject $object) {
 
   $output['manage_critical_edition']['mvd'] = array(
     '#id' => 'mvd',
-    '#access' => user_access(ISLANDORA_ADD_DS) && $transcriptions,
+    '#access' => islandora_object_access(ISLANDORA_ADD_DS, $object) && $transcriptions,
     '#title' => t('Create Collation'),
     '#type' => 'fieldset',
     'form' => drupal_get_form('emicdora_mvd_form', $object),
