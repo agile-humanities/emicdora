@@ -21,6 +21,6 @@
     )); ?>
   </div>
   <p>Welcome to the COOP. This is where all the source material for the Critical </br> Editions resides. We have grouped the content by various categories.</p>
-  <a href='islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel)'>Browse All</a>
+  <a href='islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)'>Browse All</a>
   <div class="clearfix"></div>
 </div>
