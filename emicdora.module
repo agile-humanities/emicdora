@@ -72,6 +72,15 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
+    'islandora/object/%islandora_object/transcription/%islandora_object/edit' => array(
+      'title' => 'Edit Transcription',
+      'context' => MENU_CONTEXT_PAGE,
+      'file' => 'includes/edit_transcription.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_transcription_form', 4),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(4, 'edit_transcription'),
+    ),
     'islandora/object/%islandora_object/source/%islandora_object' => array(
       'title callback' => 'emicdora_drupal_title',
       'title arguments' => array(2),
