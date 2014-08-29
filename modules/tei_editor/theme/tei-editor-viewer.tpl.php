@@ -13,11 +13,6 @@
 <div id="islandora-crited-wrapper-id" class="islandora-crited-wrapper">
   <div id="iframe_replacement" class=".iframe_replacement" style="height: 100%;position:relative;">
     <input id="full-window-button" type="button" value="<?php print t('Full Window'); ?>" />
-    <?php if (!isset($suppress_button)): ?>
-    <?php $label = t('Return to Book View'); ?>
-    <?php print "<input id='bookview_button' type='button' value='$label' />"; ?>
-    <?php endif; ?>
-
     <div id="cwrc_wrapper" class="cwrc_wrapper islandora-crited-iframe-wrapper" style="width: 100%; height:600px">
 
       <div id="header" class="ui-layout-north">
