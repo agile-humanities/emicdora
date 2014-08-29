@@ -476,7 +476,7 @@ function emicdora_convert_tei_to_plain_text($tei) {
     '</lg>',
   );
   // @codingStandardsIgnoreEnd
-  $text = simplexml_load_string($tei)->text[0]->asXML();
+  $text = @simplexml_load_string($tei)->text[0]->asXML();
   foreach ($replace_candidates as $candidate) {
     $text = str_replace($candidate, "$candidate\n", $text);
   }
