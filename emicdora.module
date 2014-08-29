@@ -781,14 +781,8 @@ function emicdora_block_view($delta = '') {
       if ($is_tei_editor || isset($versionable_object->id)) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
-        $transcription_data = array();
-        foreach ($versions as $type) {
-          foreach ($type as $version) {
-            $versionable_objects[] = $version;
-            $version_data = emicdora_get_raw_objects(islandora_object_load($version), 'transcriptions');
-            $transcription_data = array_merge($transcription_data, $version_data);
-          }
-        }
+        // Only show transcriptions relevant to the version we are on.
+        $transcription_data = emicdora_get_raw_objects($versionable_object, 'transcriptions');
         $links = array();
         foreach ($transcription_data as $pid => $transcriptions) {
           foreach ($transcriptions as $transcription) {
