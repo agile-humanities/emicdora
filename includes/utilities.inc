@@ -704,7 +704,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
   foreach ($configs as $config) {
     $facet_query = format_string('@solr_field:@solr_value', array(
       '@solr_field' => $config['solr_field_settings']['label'],
-      '@solr_value' => $config['solr_field_settings']['value'],
+      '@solr_value' => islandora_solr_lesser_escape($config['solr_field_settings']['value']),
     ));
     $facets[] = $facet_query;
     $formatted_facets[$facet_query] = array(
