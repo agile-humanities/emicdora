@@ -51,11 +51,18 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   // No Breadcrumbs on this page.
   drupal_set_breadcrumb(array());
   // Links for Add to COOP.
+  $variables['add_source_links'] = array();
   foreach (emicdora_source_content_models() as $content_model => $label) {
-    $add_source_links[] = array(
+    $variables['add_source_links'][] = array(
       'title' => t('Add @label', array('@label' => $label)),
       'href' => "workbench/add/$content_model",
     );
   }
-  $variables['add_source_links'] = $add_source_links;
+  $variables['coop_icon'] = theme_image(array(
+    'path' => "{$module_path}/images/coop.png",
+    'attributes' => array('class' => 'coop-icon'),
+  ));
+  // Returns all source object(s), this assumes that solr has been configured to
+  // only display source objects, version objects, and critical editions.
+  $variables['browse_all_link'] = l(t('Browse All'), 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 }
