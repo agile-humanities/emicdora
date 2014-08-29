@@ -317,7 +317,6 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid) {
     $page_number++;
   }
   batch_set($batch);
-  batch_process();
 }
 
 /**
