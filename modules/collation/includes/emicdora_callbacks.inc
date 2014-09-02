@@ -135,6 +135,50 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
       $node_value = $node->nodeValue;
       $class = $node->getAttribute('class');
       if ($node_value) {
+        // Make an allowance for selected text being wholly enclosed in a
+        // merged span.
+        if (strlen($identified_text) < strlen($content)) {
+          if (emicdora_starts_with($content, $identified_text)) {
+            $remainder = str_replace($identified_text, '', $content);
+            $next = $node->nextSibling;
+            $next->nodeValue = $remainder . $next->nodeValue;
+            $nodes_to_delete[] = $node;
+            continue;
+          }
+          if (emicdora_ends_with($content, $identified_text)) {
+            $remainder = str_replace($identified_text, '', $content);
+            $previous = $node->previousSibling;
+            if ($previous) {
+              $previous->nodeValue = $previous->nodeValue . $remainder;
+            }
+            else {
+              $new_node = $dom->createElement('span');
+              $new_node->nodeValue = $remainder;
+              $new_node->setAttribute('class', $type);
+              $parent_node = $dom->getElementById($config[$type]);
+              $parent_node->insertBefore($new_node, $node);
+            }
+            $nodes_to_delete[] = $node;
+            continue;
+          }
+          $string_parts = explode($identified_text, $content);
+          $previous = $node->previousSibling;
+          $class = $previous->getAttribute('class');
+          if ($class != 'merged') {
+            $previous->nodeValue = $previous->nodeValue . $string_parts[0];
+          }
+          else {
+            $new_node = $dom->createElement('span');
+            $new_node->nodeValue = $string_parts[0];
+            $new_node->setAttribute('class', $type);
+            $parent_node = $dom->getElementById($config[$type]);
+            $parent_node->insertBefore($new_node, $node);
+          }
+          $next = $node->nextSibling;
+          $next->nodeValue = $string_parts[1] . $next->nodeValue;
+          $nodes_to_delete[] = $node;
+          continue;
+        }
         if ($node_value == $content) {
           $nodes_to_delete[] = $node;
           continue;
@@ -254,6 +298,7 @@ function emicdora_update_collation($type) {
   $contents = emicdora_cleaned_post("all_$type");
   emicdora_calliope_write_collation($file_params, $contents);
 }
+
 /**
  * Gets mongo file query.
  *
@@ -281,4 +326,34 @@ function emicdora_get_counter() {
   $query = emicdora_get_file_query('deleted');
   $file = emicdora_calliope_get_collation_file($query);
   return $file['emic_data']['emicdora_count'];
+}
+
+/**
+ * Determine if on string matches the start of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+function emicdora_starts_with($haystack, $needle) {
+  return $needle === "" || strpos($haystack, $needle) === 0;
+}
+
+/**
+ * Determine if on string matches the end of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+function emicdora_ends_with($haystack, $needle) {
+  return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }

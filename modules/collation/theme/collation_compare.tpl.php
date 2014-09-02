@@ -11,6 +11,9 @@
 <button id="collation_unlink" class="form-submit" type="submit" value="Unlink">Unlink</button><br/>
 <button id="save_changes">Save Changes</button><br />
 <p id ="emicdora_status"></p>
+<div id="collatex_iframe">
+  <iframe src ="http://astanley-vagrant-emic.local:7369" width="100%" height ="520px"></iframe>
+</div>
 
 
 
