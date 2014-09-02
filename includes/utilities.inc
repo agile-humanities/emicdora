@@ -488,11 +488,15 @@ function emicdora_convert_tei_to_plain_text($tei) {
  *
  * @param AbstractObject $object
  *   Critical Edition object
+ * @param string $type
+ *   The type of objects being searched for.
+ * @param string $source_id
+ *   The PID of the source object if present.
  *
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
+function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
@@ -528,20 +532,13 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
   $filters[] = format_string('!model:(!sources)', array(
     '!sources' => implode(' OR ', $sources),
     '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
-  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-  $solr->setCreateDocuments(FALSE);
-
-  try {
-    $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
-    $json = json_decode($results->getRawResponse(), TRUE);
-  }
-  catch (Exception $e) {
-    watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
-  }
+  $qp = new IslandoraSolrQueryProcessor();
+  $qp->buildQuery($query);
+  $qp->solrParams['fq'] = array_merge($qp->solrParams['fq'], $filters);
+  $qp->executeQuery(FALSE);
   $sorted_results = array();
-  foreach ($json['response']['docs'] as $candidate) {
-
+  foreach ($qp->islandoraSolrResult['response']['objects'] as $result) {
+    $candidate = $result['solr_doc'];
     switch ($type) {
 
       case 'version':

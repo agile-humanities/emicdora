@@ -362,7 +362,7 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
 /**
  * Unzips input file and kicks off batch process.
  *
- * @param uri $zip_uri
+ * @param string $zip_uri
  *   Address to zipped file
  * @param string $book_pid
  *   The PID of the book we are adding the pages to.
