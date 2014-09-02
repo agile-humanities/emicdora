@@ -280,8 +280,8 @@ function emicdora_menu() {
     ),
     'coop' => array(
       'title' => 'COOP',
-      'page callback' => 'emicdora_coop',
-      'file' => 'includes/coop.inc',
+      'page callback' => 'theme',
+      'page arguments' => array('emicdora_coop'),
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'user_access',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
@@ -363,21 +363,9 @@ function emicdora_theme() {
       'pattern' => 'emicdora_transcription_object__',
       'variables' => array('islandora_object' => NULL),
     ),
-    'emicdora_coop_group' => array(
+    'emicdora_coop' => array(
       'file' => 'theme/theme.inc',
-      'template' => 'theme/emicdora_coop_group',
-      'variables' => array(
-        'islandora_object' => NULL,
-        'group_list' => array(),
-      ),
-    ),
-    'emicdora_coop_group_page' => array(
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/emicdora_coop_group_page',
-      'variables' => array(
-        'add_list' => array(),
-        'source_collection' => "",
-      ),
+      'template' => 'theme/emicdora_coop',
     ),
   );
 }
@@ -410,15 +398,6 @@ function emicdora_block_info() {
       'visibility' => BLOCK_VISIBILITY_LISTED,
       'pages' => 'islandora/object/*',
       'weight' => -30,
-      'status' => 1,
-      'region' => 'sidebar_first',
-    ),
-    'collations' => array(
-      'info' => t('Collations'),
-      'cache' => DRUPAL_NO_CACHE,
-      'visibility' => BLOCK_VISIBILITY_LISTED,
-      'pages' => 'islandora/object/*',
-      'weight' => -20,
       'status' => 1,
       'region' => 'sidebar_first',
     ),
