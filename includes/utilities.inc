@@ -534,7 +534,13 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) 
     '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
   $qp = new IslandoraSolrQueryProcessor();
   $qp->buildQuery($query);
-  $qp->solrParams['fq'] = array_merge($qp->solrParams['fq'], $filters);
+  // We are limiting by is memberOf a Critical Edition already. One of the
+  // default FQs restricts certain types of objects from being returned. In this
+  // case let's remove it.
+  $fq = $qp->solrParams['fq'];
+  $key = array_search('RELS_EXT_hasModel_uri_ms:("info:fedora/islandora:criticalEditionContainerCModel", "info:fedora/islandora:versionCModel", "info:fedora/islandora:bookCModel", "info:fedora/islandora:sp-audioCModel", "info:fedora/islandora:sp_videoCModel", "info:fedora/islandora:sp_large_image_cmodel"', $fq);
+  unset($fq[$key]);
+  $qp->solrParams['fq'] = array_merge($fq, $filters);
   $qp->executeQuery(FALSE);
   $sorted_results = array();
   foreach ($qp->islandoraSolrResult['response']['objects'] as $result) {
