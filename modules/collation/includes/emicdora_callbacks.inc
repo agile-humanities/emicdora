@@ -10,8 +10,8 @@
  */
 function emicdora_collation_edit() {
   module_load_include('inc', 'collation', 'includes/calliope');
+  $config = emicdora_get_config();
   $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
-
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $results = array();
@@ -21,9 +21,17 @@ function emicdora_collation_edit() {
       $marshalled_added = emicdora_marshall_spans('added');
       $new_deleted = emicdora_link($fixed_deleted, $marshalled_deleted, 'deleted');
       $new_added = emicdora_link($fixed_added, $marshalled_added, 'added');
+      $outputs = array(
+        'added' => $new_added,
+        'deleted' => $new_deleted,
+      );
+      $cleaned_doms = emicdora_cleanup_merged($outputs);
+      $added_node = $cleaned_doms['added']->getElementById($config['added']);
+      $deleted_node = $cleaned_doms['deleted']->getElementById($config['deleted']);
+
       $results = array(
-        'new_deleted' => $new_deleted,
-        'new_added' => $new_added,
+        'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
+        'new_added' => $cleaned_doms['added']->saveXML($added_node),
         'emicdora_counter' => $_POST['emicdora_counter'] + 1,
         'refresh' => 'refresh',
       );
@@ -119,19 +127,14 @@ function emicdora_marshall_spans($type) {
 function emicdora_link($fixed_content, $marshalled_content, $type) {
   $identified_text = emicdora_cleaned_post("text_$type");
   $prefix = $type[0];
-  $config = array(
-    'added' => 'versionview-1011-body',
-    'deleted' => 'versionview-1010-body',
-  );
+  $config = emicdora_get_config();
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
+  $all_ids = array_keys($marshalled_content);
   foreach ($marshalled_content as $id => $content) {
     $node = $dom->getElementById($id);
     if ($node) {
-      if (!isset($refnode)) {
-        $refnode = $node->nextSibling;
-      }
       $node_value = $node->nodeValue;
       $class = $node->getAttribute('class');
       if ($node_value) {
@@ -189,13 +192,23 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
         $location = ($content) ? strpos($node_value, $content) : 1;
         $new_value = str_replace($content, '', $node_value);
         if ($location > 0) {
-          $refnode = $node;
           $node->nodeValue = $new_value;
         }
         else {
           $next = $node->nextSibling;
           $current = $next->nodeValue;
-          $next->nodeValue = $new_value . $current;
+          $class = $next->getAttribute('class');
+          if ($class != 'merged') {
+            $next->nodeValue = $new_value . $current;
+          }
+          else {
+            $node->node_value = $new_value;
+            $new_node = $dom->createElement('span');
+            $new_node->nodeValue = $new_value;
+            $new_node->setAttribute('class', $type);
+            $parent_node = $dom->getElementById($config[$type]);
+            $parent_node->insertBefore($new_node, $node);
+          }
           $nodes_to_delete[] = $node;
         }
       }
@@ -329,7 +342,7 @@ function emicdora_get_counter() {
 }
 
 /**
- * Determine if on string matches the start of another.
+ * Determine if one string matches the start of another.
  *
  * @param string $haystack
  *   String being searched
@@ -344,7 +357,7 @@ function emicdora_starts_with($haystack, $needle) {
 }
 
 /**
- * Determine if on string matches the end of another.
+ * Determine if one string matches the end of another.
  *
  * @param string $haystack
  *   String being searched
@@ -356,4 +369,97 @@ function emicdora_starts_with($haystack, $needle) {
  */
 function emicdora_ends_with($haystack, $needle) {
   return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+}
+
+/**
+ * Gets matching id from opposite display pane.
+ *
+ * @param string $id
+ *   id of current span
+ *
+ * @return string
+ *   id of opposite span
+ */
+function emicdora_flip_id($id) {
+  $suffix = substr($id, 1);
+  if ($id[0] == 'd') {
+    return "a$suffix";
+  }
+  else {
+    return "d$suffix";
+  }
+}
+
+/**
+ * Removes orphaned merged spans.
+ *
+ * @param array $inputs
+ *   input HTML
+ *
+ * @return array
+ *   DOM
+ */
+function emicdora_cleanup_merged($inputs) {
+  $doms = array();
+  foreach ($inputs as $type => $text) {
+    $dom = new DOMDocument();
+    $dom->loadHTML($text);
+    $doms[$type] = $dom;
+  }
+  foreach ($doms as $type => $dom) {
+    $spans[$type] = $dom->getElementsByTagName('span');
+  }
+  foreach ($spans as $type => $items) {
+    $opposite_type = $type == 'added' ? 'deleted' : 'added';
+    foreach ($items as $item) {
+      if ($item->getAttribute('class') != 'merged') {
+        continue;
+      }
+      $opposite_id = emicdora_flip_id($item->getAttribute('id'));
+      $test_node = $doms[$opposite_type]->getElementById($opposite_id);
+      if ($test_node) {
+        continue;
+      }
+      $incomplete = TRUE;
+      $previous_sibling = $item->previousSibling;
+      if ($previous_sibling) {
+        $class = $previous_sibling->getAttribute('class');
+        if ($class != 'merged') {
+          $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
+          $item->parentNode->removeChild($item);
+          $incomplete = FALSE;
+        }
+      }
+      if ($incomplete) {
+        $next_sibling = $item->nextSibling;
+        if ($next_sibling) {
+          $class = $next_sibling->getAttribute('class');
+          if ($class != 'merged') {
+            $next_sibling->nodeValue = $item->nodeValue . $next_sibling->nodeValue;
+            $item->parentNode->removeChild($item);
+            $incomplete = FALSE;
+          }
+        }
+      }
+      if ($incomplete) {
+        $item->removeAttribute('class');
+        $item->removeAttribute('style');
+        $item->setAttribute('class', $opposite_type);
+      }
+    }
+  }
+  return $doms;
+}
+
+/**
+ * Gets body ids.
+ *
+ * @return array
+ *   Config values
+ */
+function emicdora_get_config() {
+  return array(
+    'added' => 'versionview-1011-body',
+    'deleted' => 'versionview-1010-body',
+  );
 }
