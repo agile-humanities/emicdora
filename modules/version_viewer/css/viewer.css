@@ -1,4 +1,3 @@
-
 .eui-window-fullscreen
 {
     position: fixed;
@@ -27,8 +26,6 @@
   width: 24px;
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAABcklEQVRIie2Vv07DQAzGnbQPlrk5f/YJsoHUFeaCYAFLIBAwIkRFVRV167tQwQNRhYEEXa9/UFDYaumGc2z/4suXMxERMetenvuhmaUUGYDz2FebiD+LfWaW5rkfish+XeAA0E9AS2adZVnWDYrfA1puAgBaOoe7ep9lWZdZZ4CWgH4y6yE550eVo15jM0udw2Xt2wYAtBTxF2aWAjoOaznnR2RmqYhMliHyHu5/A6zLEZFJeOSJc/oYddIQEL65PhJRsvJxmHXeAuBtnVhIxD+01QGA+yjwWy3tAQJ1AWrbAv8KqJZtyt3ZzhqYc3z7XzJ1Tm/qwNP2fzR/shTMzIO2AMw8WAlu67Jj1vnKZRdNohY6WJ6MSTzVmPWjKSDOAfBCRAnluR+GD+pJlOd83QBwVR3xawR5pl5P+4AuquJPFEyiWl3bAJFaEhF5qgCLXk/7RETEzMciMi2KohMXcY5vNwF+dB5YURQdEZkCOCIi+gJ9nNa2g4feggAAAABJRU5ErkJggg==);
 }
-
-
 
 #uitree-wrapper{
   width:auto !important;
@@ -79,4 +76,8 @@
 
 .layout-expand {
   pointer-events:none !important;
+}
+
+#canvas-body {
+  position: relative !important
 }
