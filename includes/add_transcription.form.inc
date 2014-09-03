@@ -26,6 +26,7 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
   $extensions = array('txt');
   $form = array();
   $input_types = array();
+  $form['#attached']['js'] = array(drupal_get_path('module', 'emicdora') . '/js/born_digital_transcription.js');
   $form['transcription'] = array(
     '#type' => 'textfield',
     '#title' => t('Title of new transcription'),
@@ -35,18 +36,20 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
 
   $page_results = islandora_paged_content_get_pages($object);
   $count = count($page_results);
+
+  $input_types['none'] = t('Create born-digital transcription');
+  $input_types['file'] = t('Upload transcription from file');
   $input_types['tei_rdf'] = t('Create transcription from TEI-RDF Object');
+
   $form['version'] = array(
     '#type' => 'hidden',
     '#value' => $object->id,
   );
+
   $form['page_count'] = array(
     '#type' => 'hidden',
     '#value' => $count,
   );
-
-  $input_types['none'] = t('Create born-digital transcription');
-  $input_types['file'] = t('Upload transcription from file');
 
   $form['versionable_object_pid'] = array(
     '#type' => 'hidden',
@@ -58,6 +61,24 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
     '#options' => $input_types,
     '#default_value' => 'none',
   );
+
+  $form['none'] = array(
+    '#type' => 'textarea',
+    '#size' => 6,
+    '#title' => t('Transcription content'),
+    '#default_value' => "",
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_source"]' => array('checked' => TRUE),
+      ),
+    ),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_source"]' => array('value' => 'none'),
+      ),
+    ),
+  );
+
   if ($count > 1) {
     $form['page'] = array(
       '#type' => 'fieldset',
@@ -71,7 +92,7 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
     );
     $form['page']['restricted'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use restricted  page range'),
+      '#title' => t('Use restricted page range'),
       '#default_value' => FALSE,
     );
     $form['page']['first_page'] = array(
@@ -97,6 +118,7 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
       ),
     );
   }
+
   $form['file'] = array(
     '#type' => 'managed_file',
     '#default_value' => isset($form_state['values']['files']) ? $form_state['values']['files'] : NULL,
@@ -175,8 +197,6 @@ function islandora_emicdora_add_transcription_form_validate($form, $form_state) 
  *   Drupal form_state
  */
 function islandora_emicdora_add_transcription_form_submit(array $form, array &$form_state) {
-  module_load_include('inc', 'collation', 'includes/calliope');
-  module_load_include('inc', 'islandora', 'includes/utilities');
   $versionable_object_pid = $form_state['values']['versionable_object_pid'];
   $versionable_object = islandora_object_load($versionable_object_pid);
   $label = $form_state['values']['transcription'];
@@ -187,7 +207,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   $transcription_datastream = $transcription->constructDatastream($datastream_id, $control_group);
   $transcription_datastream->mimetype = 'text/plain';
   $transcription_datastream->label = 'Transcription';
-  if ($content_source == 'tei_rdf') {
+  if ($content_source == 'tei_rdf' && isset($form_state['values']['restricted'])) {
     $start_page = NULL;
     $end_page = NULL;
     if ($form_state['values']['restricted']) {
@@ -206,11 +226,11 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   }
 
   if ($content_source == 'none') {
-    $transcription_datastream->setContentFromstring(t('No transcription entered.'));
+    $transcription_datastream->setContentFromstring($form_state['values']['none']);
   }
 
   $transcription->ingestDatastream($transcription_datastream);
-  emicdora_calliope_write_file($transcription->id);
+  islandora_add_object($transcription);
   drupal_set_message(t("Transcription object created"));
 }
 
@@ -542,6 +562,5 @@ function islandora_transcription_file_update($transcription, $filename) {
 function emicdora_build_transcription($versionable_object, $label) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $transcription = emicdora_construct_transcription($versionable_object, $label);
-  $versionable_object->repository->ingestObject($transcription);
   return $transcription;
 }

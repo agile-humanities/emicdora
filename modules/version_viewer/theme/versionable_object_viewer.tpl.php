@@ -17,6 +17,7 @@
   					<li id="wb_meta" title="Detail Metadata" class="work_action_img detail-meta data_anchor"></li>
   					<li id="wb_show_annos" title="Show/Hide annotations" data-value="0" class="work_action_img anno-entity-switch switch"></li>
   					<li id="wb_show_til" title="Show/Hide Text Image Links" data-value="0" class="work_action_img til-switch switch"></li>
+  					<li id="wb_max_min" title="Maximize Viewer" data-value="0" class="work_action_img win-switch-full switch"></li>
   				  </ul>
                 </div>
                   <div id="ui-easy-paginator" class="easyui-pagination"
@@ -30,14 +31,14 @@
                   </div>
 			</div>
         </div>
-        <div id="easy-ui-south" data-options="region:'south',split:true,collapsible:false,minimized:true,border:false" style="height:500px;">
-          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
+        <div id="easy-ui-south" data-options="region:'south',split:true,collapsible:false,minimized:true,border:true" style="height:500px;">
+          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,split:true,border:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
           </div>
         </div>
-        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:false,collapsible:false" title="Source" style="width:200px;maxWidth:700px">
+        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;maxWidth:700px;height:445px;">
           <?php print $islandora_content; ?>
         </div>
-        <div id="easy-ui-west" data-options="region:'west',split:true,border:false,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
+        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>

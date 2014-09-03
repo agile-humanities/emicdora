@@ -143,8 +143,11 @@ function emicdora_mvd_form_submit($form, $form_state) {
  *   Identifier for MVD
  * @param string $operation
  *   action to perform
+ * @param bool $ui
+ *   Whether the operation is being triggered through the Operations block or
+ *   not.
  */
-function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation) {
+function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = FALSE) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $query = array(
     'metadata.critical_edition' => $critical_edition_pid,
@@ -160,13 +163,15 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation) {
         $resource_ids[] = $transcription['id'];
       }
       $filter = $mvd['metadata']['filter'];
-      emicdora($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
-      drupal_goto("islandora/object/$critical_edition_pid/edit");
+      emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
+      if (!$ui) {
+        drupal_goto("islandora/object/$critical_edition_pid/edit");
+      }
 
       break;
 
     case 'delete':
-      emicdora($mvd['_id']);
+      emicdora_calliope_delete_mvd($mvd['_id']);
       drupal_set_message(t("Collation successfully removed"));
       drupal_goto("islandora/object/$critical_edition_pid");
       break;
@@ -190,5 +195,69 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation) {
 
     default:
       break;
+  }
+}
+
+/**
+ * Confirm form to delete collations and refresh transcriptions through the UI.
+ *
+ * @param array $form
+ *   An array representing a form within Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ * @param AbstractObject $critical_edition
+ *   An AbstractObject representing an object within Fedora.
+ * @param string $operation
+ *   The operation taking place, either 'refresh' or 'delete'.
+ * @param string $mvd_label
+ *   The label of the MVD used when performing actions.
+ * @param string $previous_view
+ *   A string representing the path part the user was viewing previously.
+ *
+ * @return array
+ *   The confirm form as prepared by Drupal.
+ */
+function emicdora_mvd_operation_confirm_form($form, &$form_state, AbstractObject $critical_edition, $operation, $mvd_label, $previous_view) {
+  if ($operation == 'refresh') {
+    $text = t('transcriptions which are linked to this collation?');
+  }
+  else {
+    $text = t('this collation?');
+  }
+  $message = t('Are you sure you want to @operation @text', array(
+    '@operation' => $operation,
+    '@text' => $text,
+  ));
+  $path = array(
+    'path' => "islandora/object/$critical_edition->id/$previous_view/$mvd_label",
+    'fragment' => "$mvd_label/$critical_edition->id",
+  );
+  $form_state['previous_view'] = $previous_view;
+  $form_state['critical_edition'] = $critical_edition->id;
+  $form_state['operation'] = $operation;
+  $form_state['mvd'] = $mvd_label;
+  return confirm_form($form, $message, $path);
+}
+
+/**
+ * Submit handler for the MVD confirm form.
+ *
+ * @param array $form
+ *   An array representing a form within Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ */
+function emicdora_mvd_operation_confirm_form_submit($form, &$form_state) {
+  $critical_edition = $form_state['critical_edition'];
+  $mvd = $form_state['mvd'];
+  $operation = $form_state['operation'];
+  $previous_view = $form_state['previous_view'];
+  emicdora_mvd_crud($critical_edition, $mvd, $operation, TRUE);
+
+  // Want to override the redirect on refresh operation.
+  if ($operation == 'refresh') {
+    drupal_goto("islandora/object/$critical_edition/$previous_view/$mvd", array(
+      'fragment' => "$mvd/$critical_edition",
+    ));
   }
 }

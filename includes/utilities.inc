@@ -476,7 +476,7 @@ function emicdora_convert_tei_to_plain_text($tei) {
     '</lg>',
   );
   // @codingStandardsIgnoreEnd
-  $text = simplexml_load_string($tei)->text[0]->asXML();
+  $text = @simplexml_load_string($tei)->text[0]->asXML();
   foreach ($replace_candidates as $candidate) {
     $text = str_replace($candidate, "$candidate\n", $text);
   }
@@ -488,11 +488,15 @@ function emicdora_convert_tei_to_plain_text($tei) {
  *
  * @param AbstractObject $object
  *   Critical Edition object
+ * @param string $type
+ *   The type of objects being searched for.
+ * @param string $source_id
+ *   The PID of the source object if present.
  *
  * @return array
  *   Sorted member objects
  */
-function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, $offset = 0, $limit = 25) {
+function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $query = 'RELS_EXT_isMemberOf_uri_mt:"' . $object->id . '"';
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
@@ -528,20 +532,13 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL, 
   $filters[] = format_string('!model:(!sources)', array(
     '!sources' => implode(' OR ', $sources),
     '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_mt')));
-  $url = parse_url(variable_get('islandora_solr_url', 'localhost:8080/solr'));
-  $solr = new Apache_Solr_Service($url['host'], $url['port'], $url['path'] . '/');
-  $solr->setCreateDocuments(FALSE);
-
-  try {
-    $results = $solr->search($query, $offset, $limit, array('fq' => $filters));
-    $json = json_decode($results->getRawResponse(), TRUE);
-  }
-  catch (Exception $e) {
-    watchdog_exception('emicdora', $e, 'Got an exception while searching for collection.', array(), WATCHDOG_ERROR);
-  }
+  $qp = new IslandoraSolrQueryProcessor();
+  $qp->buildQuery($query);
+  $qp->solrParams['fq'] = array_merge($qp->solrParams['fq'], $filters);
+  $qp->executeQuery(FALSE);
   $sorted_results = array();
-  foreach ($json['response']['docs'] as $candidate) {
-
+  foreach ($qp->islandoraSolrResult['response']['objects'] as $result) {
+    $candidate = $result['solr_doc'];
     switch ($type) {
 
       case 'version':
@@ -670,4 +667,51 @@ function emicdora_wrap_plain_text_in_tei($content = 'Blank Page') {
   $content = trim(preg_replace("/\n/", '<lb/>', $content));
 
   return $prefix . $content . $suffix;
+}
+
+/**
+ * Retrieves created user facets for versions and sources.
+ *
+ * @param string $pid
+ *   The PID of the critical edition that the facets were made under.
+ * @param string $type
+ *   The type of facets being retrieved either 'version' or 'source'.
+ *
+ * @return array
+ *   An array of arrays where the key is the Solr field and value and the values
+ *   contain:
+ *   -display_name: A string representing the field name for display in the UI.
+ *   -count: An integer of the number of occurences of the facet.
+ */
+function emicdora_retrieve_user_created_facets($pid, $type) {
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $qp = new IslandoraSolrQueryProcessor();
+  $qp->buildQuery('*:*');
+  $filters[] = format_string('!membership:("info:fedora/!pid")', array(
+    '!pid' => $pid,
+    '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
+  $qp->solrParams['fq'] = $filters;
+  $qp->solrParams['fl'] = '*';
+  $qp->solrParams['facet.limit'] = 100000;
+  $qp->solrParams['facet.mincount'] = variable_get('islandora_solr_facet_min_limit', '2');
+  $qp->solrParams['facet.field'] = array();
+  $configs = emicdora_get_terms($pid, $type);
+  $facets = array();
+  $formatted_facets = array();
+  foreach ($configs as $config) {
+    $facet_query = format_string('@solr_field:@solr_value', array(
+      '@solr_field' => $config['solr_field_settings']['label'],
+      '@solr_value' => islandora_solr_lesser_escape($config['solr_field_settings']['value']),
+    ));
+    $facets[] = $facet_query;
+    $formatted_facets[$facet_query] = array(
+      'display_name' => $config['solr_field'],
+    );
+  }
+  $qp->solrParams['facet.query'] = $facets;
+  $qp->executeQuery(FALSE);
+  foreach ($qp->islandoraSolrResult['facet_counts']['facet_queries'] as $field_val => $count) {
+    $formatted_facets[$field_val]['count'] = $count;
+  }
+  return $formatted_facets;
 }
