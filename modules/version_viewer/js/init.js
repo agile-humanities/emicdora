@@ -1,7 +1,7 @@
 (function ($) {
   $(document).ready(function () {
-	  
-	  
+
+
   // Initilize our layout per versionable obj type.
   switch(Drupal.settings.versionable_object_viewer.mode) {
     case "text":
@@ -32,10 +32,10 @@
   $('#wb_show_til').addClass('annos');
   $('#wb_show_annos').css('background-color', btn_background_color);
   $('#wb_show_annos').addClass('annos');
-  
+
   $('#wb_image').css('background-color', btn_background_color);
   $('#wb_reading').css('background-color', btn_background_color);
-  
+
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
     $("#easyui_tree").tree({
@@ -52,7 +52,7 @@
         }
       }
     });
-    
+
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
@@ -69,14 +69,14 @@
           }
       });
     }
-    
+
     $('#ui-easy-paginator').pagination({
       onSelectPage:function(pageNumber, pageSize){
         show_transcription(pageNumber);
         update_tree_data();
       }
     });
-    
+
     function show_annotations(nodes) {
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
@@ -123,7 +123,7 @@
         }
       }
     }
-    
+
     function show_entity_tooltip(data, ent_id) {
       if (data.hasOwnProperty('cwrcAttributes')) {
 	   var colour = "red";
@@ -131,7 +131,7 @@
 	      colour = data['cwrcAttributes']['attributes']['Colour'];
 	    }
 	    $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
-	    
+
 	    $("span[data-annotationid='" + ent_id + "']").tooltip({
 	      position: 'top',
 	      width: 100,
@@ -142,7 +142,7 @@
 	        if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description') ) {
 	          tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
 	        }
-	        return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' + 
+	        return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
 	        tool_tip_content +
 	        '</div>';
 	      },
@@ -174,7 +174,7 @@
         // Wireframes dont well me what to show in this case.
       }
     }
-    
+
     function build_dialog_content(data) {
       var content = "";
       for (var key in data["cwrcAttributes"]) {
@@ -191,13 +191,13 @@
       }
       return  '<textarea style="width:100%;height:100%;resize:none">' + content + '</textarea>';
     }
-    
+
     function show_transcription(page) {
       var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=rd';
       add_tab("wb_reading_tab", url, 'reading_tei');
       advance_shared_canvas_page(page);
     }
-    
+
     function advance_shared_canvas_page(page) {
       $.ajax({
           url: Drupal.settings.basePath + 'islandora/anno/setup/'
@@ -213,22 +213,7 @@
           dataType: 'json'
       });
     }
-    
-    function show_tei() {
-      $.ajax({
-        url: Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page,
-        async: false,
-        timeout: 3000,
-        success: function(data, status, xhr) {
-          $('#content_data').empty();
-          $('#content_data').append('<pre>' + data + '</pre>');
-        },
-        error: function() {
-          console.log("failure");
-        }
-        });
-    }
-    
+
     $('#eui_window').layout('collapse','south');
 
     $('.work_action_img').click(function() {
@@ -240,12 +225,12 @@
         $(this).addClass('img_selected');
         is_selected = true;
       }
-      
+
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       switch($(this).attr('id')) {
           case 'wb_meta':
             $('#wb_meta').css('background-color', 'initial');
-            
+
             $('#wb_meta').css('background-color', btn_background_color);
             $('#easy-ui-south').css('height', '500px');
             toggle_layout(is_selected, 'south', 'wb_meta');
@@ -255,7 +240,7 @@
               $('#wb_tei_markup').css('background-color', 'initial');
         	  $('#wb_dt').css('background-color', 'initial');
         	  $('#wb_tei_markup').css('background-color', 'initial');
-        	  
+
         	  $('#wb_dt').css('background-color', btn_background_color);
             var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=dt';
             add_tab("wb_dt_tab", url, 'diplomatic_tei');
@@ -269,7 +254,7 @@
         	  $('#wb_dt').css('background-color', 'initial');
               $('#wb_tei_markup').css('background-color', 'initial');
         	  $('#wb_reading').css('background-color', 'initial');
-        	  
+
         	  $('#wb_reading').css('background-color', btn_background_color);
             var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=rd';
             add_tab("wb_reading_tab", url, 'reading_tei');
@@ -287,14 +272,14 @@
           case 'wb_show_annos':
             var ddt = $("#easyui_tree").tree('find', 'tree_imageannotations');
             var dda = $("#easyui_tree").tree('find', 'tree_entities');
-            
+
         	  if ($(this).hasClass('annos')) {
     	        $(this).removeClass('annos');
     	        $(this).css('background-color', 'initial');
     	        if (ddt) {
     	          $('#' + ddt.domId).hide();
     	          if (ddt['children'].length > 0) {
-    	            hide_tree_children(ddt['children']);	
+    	            hide_tree_children(ddt['children']);
     	          }
     	        }
     	        if (dda) {
@@ -357,7 +342,7 @@
 	    }
       }
     });
-    
+
     function hide_tree_children(children) {
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).hide();
@@ -365,7 +350,7 @@
       children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
     }
-    
+
     function show_tree_children(children) {
       for (var i = 0; i< children.length; i++) {
         $("#" + children[i].domId).show();
@@ -373,12 +358,12 @@
       children = $("#easyui_tree").tree('getChecked');
       show_annotations(children);
     }
-    
+
     function hide_all_imageannotations() {
       var node = $("#easyui_tree").tree('find', 'tree_imageannotations');
       hide_annotations($(node).children());
     }
-    
+
     function add_tab(type, endpoint, add_class, data_type) {
       add_class = typeof add_class !== 'undefined' ? add_class : "";
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
@@ -398,13 +383,13 @@
         }
       });
     }
-    
+
     function construct_tab(data, type) {
       $('#content_data').empty();
       $('#content_data').append(data['body']);
       prettyPrint();
     }
-    
+
     function toggle_layout(selected, region, selector) {
       if (!selected) {
         $('#eui_window').layout('collapse', region);
@@ -423,13 +408,13 @@
         }
       }
     }
-    
+
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
-  
+
   // Show our first tab.
   add_tab("wb_reading_tab", url, "reading_tei");
-  
+
   // Callback to fix the drawing of SVG annotations upon resize.
   var cleanDrawSVGAnnotations = function() {
     var children = $("#easyui_tree").tree('getChecked');
@@ -446,5 +431,8 @@
         }
       }
   });
+
+  $('#easy-ui-east').css('height', '445px');
+  $('#easy-ui-west').css('height', '445px');
   });
 })(jQuery);

@@ -12,14 +12,23 @@ function emicdora_configure_version_links($form, $form_state, $critical_edition)
   module_load_include('inc', 'islandora_solr', 'includes/admin');
   module_load_include('inc', 'emicdora', 'includes/db');
 
-  // Add admin form css.
-  drupal_set_title(t('Source Material Display Configuration'));
-  drupal_add_css(drupal_get_path('module', 'emicdora') . '/css/emicdora_terms.css');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_js(drupal_get_path('module', 'emicdora') . '/js/emicdora_terms.js');
-
   // Create form.
-  $form = array();
+  $form['#attached'] = array(
+    'css' => array(
+      drupal_get_path('module', 'emicdora') . '/css/emicdora_terms.css',
+    ),
+    'library' => array(
+      array('system', 'ui.dialog'),
+    ),
+    'js' => array(
+      drupal_get_path('module', 'emicdora') . '/js/emicdora_terms.js',
+    ),
+    'drupal_set_title' => array(
+      array(
+        t('Source Material Display Configuration'),
+      ),
+    ),
+  );
   $form['critical_edition_pid'] = array(
     '#type' => 'hidden',
     '#value' => $critical_edition->id,
@@ -485,7 +494,9 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     '#type' => 'textfield',
     '#title' => t('Value'),
     '#default_value' => isset($values['value']) ? $values['value'] : '',
-    '#description' => t('Exact match for solr field.'),
+    '#description' => t('Value to search the field for. Can use any valid <a href="!url">Lucene</a> syntax', array(
+      '!url' => 'http://wiki.apache.org/solr/SolrQuerySyntax',
+    )),
   );
   $luke_result = islandora_solr_get_luke(NULL, $solr_field);
   if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
@@ -497,7 +508,7 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     );
   }
 
-  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable);
+  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable, TRUE);
 
   $form['actions'] = array(
     '#type' => 'container',
@@ -521,6 +532,64 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
     ),
   );
   return $form;
+}
+
+/**
+ * Validation for configuring links that kick off facet queries.
+ *
+ * @param array $form
+ *   An array representing a form within Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ */
+function emicdora_configure_version_links_validate($form, &$form_state) {
+  if ($form_state['triggering_element']['#array_parents'] == array('actions', 'submit')) {
+    module_load_include('inc', 'islandora_solr', 'includes/luke');
+    $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
+    $terms['version'] = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
+    $terms['source'] = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
+    foreach ($terms as $term_type => $fields) {
+      $form_field = "emicdora_{$term_type}_fields";
+      if (!isset($form_state['values'][$form_field]['terms'])) {
+        continue;
+      }
+      foreach ($form_state['values'][$form_field]['terms'] as $display_label => $values) {
+        $solr_field = $values['solr_field'];
+        // Grab the stored values from the form state and combine them with the
+        // values.
+        if (isset($form_state['solr_field_settings'][$form_field])) {
+          $values = array_merge_recursive($values, $form_state['solr_field_settings'][$form_field][$solr_field]);
+        }
+        if (!isset($values['label'])) {
+          form_set_error("{$values['solr_field']}label", t('The @label Solr field contains an empty Solr field value.', array('@label' => $values['solr_field'])));
+        }
+        else {
+          $label = trim($values['label']);
+          if (empty($label)) {
+            form_set_error("{$values['solr_field']}label", t('The @label Solr field contains an empty Solr field value.', array('@label' => $values['solr_field'])));
+          }
+          else {
+            $luke = islandora_solr_get_luke($solr_url, $label);
+            if (empty($luke['fields'])) {
+              form_set_error("{$values['solr_field']}luke", t('The Solr field @val is not a valid Solr field under @display.', array(
+                '@val' => $label,
+                '@display' => $values['solr_field'],
+              )));
+            }
+          }
+        }
+        if (!isset($values['value'])) {
+          form_set_error("{$values['solr_field']}value", t('The @label value is empty.', array('@label' => $values['solr_field'])));
+        }
+        else {
+          $value = trim($values['value']);
+          if (empty($value)) {
+            form_set_error("{$values['solr_field']}value", t('The @label value is empty.', array('@label' => $values['solr_field'])));
+          }
+        }
+      }
+    }
+  }
 }
 
 /**

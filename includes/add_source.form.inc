@@ -102,10 +102,12 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
     $label = $dc['dc:title']['value'];
   }
   $object->label = $label ? $label : t("New @type", array('@type' => $mapping['label']));
+  $xacml = FALSE;
   if ($form_state['values']['choice_wrapper']['privacy']) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
     $xacml->writeBackToFedora();
+    $xacml = TRUE;
   }
   // Add thumbnail.
   if (isset($form_state['values']['tn_wrapper']['tn_file'])) {
@@ -121,7 +123,7 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
     switch ($form_state['values']['content_model']) {
       case 'islandora:bookCModel':
         $uri = drupal_realpath($file->uri);
-        emicdora_add_zipped_pages($uri, $object->id);
+        emicdora_add_zipped_pages($uri, $object->id, $xacml);
         break;
 
       case 'islandora:sp-audioCModel':
@@ -228,17 +230,17 @@ function emicdora_get_content_wrapper($mappings, $upload_size) {
 function islandora_simplified_ingest_get_mappings($content_model) {
   $mappings = array(
     'islandora:bookCModel' => array(
-      'form' => 'Islandora Book MODS Form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Text'),
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
-      'prompt' => t("Add zipped pages to this book?"),
+      'prompt' => t("Add zipped pages?"),
       'required' => FALSE,
       'upload_prompt' => t('Add zipped page images'),
       'extensions' => 'zip',
     ),
     'islandora:sp_videoCModel' => array(
-      'form' => 'Video MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Video'),
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
@@ -248,7 +250,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'extensions' => 'ogg mp4 mov qt m4a avi',
     ),
     'islandora:sp-audioCModel' => array(
-      'form' => 'Audio MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Audio'),
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
@@ -258,7 +260,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'extensions' => 'wav mp3',
     ),
     'islandora:sp_large_image_cmodel' => array(
-      'form' => 'Large image MODS form',
+      'form' => 'EMiC Source MODS form',
       'label' => t('Image'),
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
@@ -301,9 +303,9 @@ function emicdora_ingest_add_file($file, $dsid, $object) {
  * @param string $pid
  *   PID of host book
  */
-function emicdora_batch_add_zipped_pages($files_to_add, $pid) {
+function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml) {
   $batch = array(
-    'title' => t('Adding pages to new book'),
+    'title' => t('Adding pages to new textual content'),
     'operations' => array(),
     'file' => drupal_get_path('module', 'emicdora') . '/includes/add_source.form.inc',
     'progress_message' => t('@current of @total pages created.'),
@@ -313,11 +315,13 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid) {
     $batch['operations'][] = array('emicdora_consolidate_add_page', array(
         'page' => $page,
         'book' => $pid,
-        'page_number' => $page_number));
+        'page_number' => $page_number,
+        'xacml' => $xacml,
+      ),
+    );
     $page_number++;
   }
   batch_set($batch);
-  batch_process();
 }
 
 /**
@@ -329,9 +333,13 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid) {
  *   Book PID
  * @param int $page_number
  *   page number
+ * @param bool $xacml
+ *   Whether the pages need the base XACML policy or not.
  */
-function emicdora_consolidate_add_page($page, $book, $page_number) {
+function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  global $user;
+
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
   $object = $repository->constructObject('islandora');
@@ -343,16 +351,25 @@ function emicdora_consolidate_add_page($page, $book, $page_number) {
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
   islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $book);
   islandora_paged_content_update_datastream($object, $page, 'OBJ', NULL, NULL, 'M', FALSE);
+  if ($xacml) {
+    $xacml = new IslandoraXacml($object);
+    $xacml->viewingRule->addUser($user->name);
+    $xacml->writeBackToFedora();
+  }
   islandora_add_object($object);
 }
 
 /**
  * Unzips input file and kicks off batch process.
  *
- * @param uri $zip_uri
+ * @param string $zip_uri
  *   Address to zipped file
+ * @param string $book_pid
+ *   The PID of the book we are adding the pages to.
+ * @param bool $xacml
+ *   Whether the pages need the base XACML policy or not.
  */
-function emicdora_add_zipped_pages($zip_uri, $book_pid) {
+function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE) {
   $zip = new ZipArchive();
   $zip->open($zip_uri);
   $tmp_dir = uniqid();
@@ -385,5 +402,5 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid) {
     return ($file_a < $file_b) ? -1 : 1;
   };
   usort($files_to_add, $comparator);
-  emicdora_batch_add_zipped_pages($files_to_add, $book_pid);
+  emicdora_batch_add_zipped_pages($files_to_add, $book_pid, $xacml);
 }

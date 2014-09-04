@@ -24,7 +24,7 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
-
+  drupal_add_js("$module_path/js/viewer_behaviours.js");
   // This is the Shared Canvas prefered jQuery.
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
@@ -38,4 +38,5 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
 
   versionable_object_viewer_build_version_media_view($version_object, $variables);
+
 }
