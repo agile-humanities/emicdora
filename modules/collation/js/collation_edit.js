@@ -17,13 +17,11 @@
         $('#diff_l').val($(this).text());
         $('#diff_r').val($('#a' + qualifier).next().text());
       });
-
       $(document).delegate('span.added', 'click', function() {
         var qualifier = $(this).prev().attr('id').slice(1);
         $('#diff_r').val($(this).text());
         $('#diff_l').val($('#d' + qualifier).next().text());
       });
-
       $(document).delegate('span.merged', 'click mouseup', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
@@ -35,10 +33,16 @@
         wrapped_content = left.wrap('<span/>');
         merged_content = $(wrapped_content).parent().html();
         $(wrapped_content).unwrap();
-
       });
-
+      
       waitUntilExists("versionview-1010", function() {
+        var $head = $("#emicdora_collatex_iframe").contents().find("head");
+        $head.append($("<link/>", {
+          rel: "stylesheet",
+          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
+          type: "text/css"
+        }
+        ));
         $("#save_changes").hide();
         $('#versionview-1010-body').mouseup(function(evt) {
           selection_deleted = rangy.getSelection();
@@ -52,7 +56,6 @@
           }
           $("#diff_l").val(text_deleted);
         });
-
         $('#versionview-1011-body').mouseup(function(evt) {
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
@@ -68,7 +71,6 @@
         $("#collation_link").click({action: 'link'}, execute_callback);
         $("#collation_unlink").click({action: 'unlink'}, execute_callback);
         $("#save_changes").click({action: 'save'}, execute_callback);
-
         function execute_callback(args) {
           var all_added;
           var all_deleted;
@@ -80,7 +82,7 @@
           }
           else {
             $("#emicdora_status").text("Unsaved changes");
-             $("#save_changes").show();
+            $("#save_changes").show();
             all_added = encodeURIComponent($("#versionview-1011").html());
             all_deleted = encodeURIComponent($("#versionview-1010").html());
           }
@@ -110,7 +112,7 @@
                 $('#versionview-1010-body').html($(results.new_deleted).html());
                 $('#versionview-1011-body').html($(results.new_added).html());
               }
-              if(results.added == 'success') {
+              if (results.added == 'success') {
                 $(".emicdora_input").val('');
                 $("#emicdora_status").text("Changes saved.");
               }
