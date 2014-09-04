@@ -122,7 +122,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   $page_count = 0;
   $tei_rdf_objects = array();
   if ($source) {
-    // Not efficent we should create a seperate function in
+    // Not efficent we should create a separate function in
     // islandora_paged_content to compute the number of pages.
     $page_count = count(islandora_paged_content_get_pages($source));
     foreach (emicdora_get_critical_editions($source) as $pid => $label) {
