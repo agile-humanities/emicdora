@@ -46,7 +46,8 @@ function emicdora_menu() {
     ),
     // Sources filtered by critical edition.
     'islandora/object/%islandora_object/sources' => array(
-      'title' => 'Sources',
+      'title callback' => 'emicdora_sources_title',
+      'title arguments' => array(2),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_critical_edition_sources',
       'page arguments' => array(2),
@@ -56,7 +57,8 @@ function emicdora_menu() {
     ),
     // Versions filtered by critical edition.
     'islandora/object/%islandora_object/versions' => array(
-      'title' => 'Versions',
+      'title callback' => 'emicdora_versions_title',
+      'title arguments' => array(2),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_critical_edition_versions',
       'page arguments' => array(2),
@@ -64,7 +66,8 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
     'islandora/object/%islandora_object/transcription/%islandora_object' => array(
-      'title' => 'Transcriptions',
+      'title callback' => 'emicdora_transcription_title',
+      'title arguments' => array(2, 4),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_transcription_view',
       'file' => 'includes/transcription_view.inc',
@@ -82,8 +85,8 @@ function emicdora_menu() {
       'access arguments' => array(4, 'edit_transcription'),
     ),
     'islandora/object/%islandora_object/source/%islandora_object' => array(
-      'title callback' => 'emicdora_drupal_title',
-      'title arguments' => array(2),
+      'title callback' => 'emicdora_source_title',
+      'title arguments' => array(2, 4),
       'page callback' => 'islandora_view_object',
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
@@ -91,8 +94,8 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/version/%islandora_object' => array(
-      'title callback' => 'emicdora_drupal_title',
-      'title arguments' => array(2),
+      'title callback' => 'emicdora_version_title',
+      'title arguments' => array(2, 4),
       'page callback' => 'islandora_view_object',
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
@@ -287,6 +290,155 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
   );
+}
+
+/**
+ * Set the page 'Title' and 'Subtitle' consistantly.
+ *
+ * @param string $title
+ *   The text to use as the page title.
+ *
+ * @param string $subtitle
+ *   The text to use as the page subtitle.
+ */
+function emicdora_set_page_title_and_subtitle($title, $subtitle) {
+  drupal_set_title(t("<h1>@title</h1></br><h3>@subtitle</h3>",
+    array(
+      '@title' => $title,
+      '@subtitle' => $subtitle,
+    )
+  ), PASS_THROUGH);
+}
+
+/**
+ * Callback to set /sources/ url page title and subtitle.
+ *
+ * @param AbstractObject $object
+ *   The object being viewed.
+ */
+function emicdora_sources_title($object) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  $bc = islandora_get_breadcrumbs($object);
+
+  array_shift($bc);
+  array_shift($bc);
+
+  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
+  $bc[] = t("Sources");
+
+  drupal_set_breadcrumb($bc);
+  emicdora_set_page_title_and_subtitle($object->label, t("Search Source(s)"));
+}
+
+/**
+ * Callback to set /transcription/ url page title and subtitle.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object in the url.
+ *
+ * @param AbstractObject $transcription
+ *   The transcription object in the url.
+ */
+function emicdora_transcription_title($critical_edition, $transcription) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+
+  $trans_rels = $transcription->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  $trans_rels = reset($trans_rels);
+  $version_pid = $trans_rels['object']['value'];
+  $version = islandora_object_load($version_pid);
+
+  $version_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+  $version_rels = reset($version_rels);
+  $source_pid = $version_rels['object']['value'];
+  $source = islandora_object_load($source_pid);
+
+  $bc = islandora_get_breadcrumbs($version);
+
+  array_shift($bc);
+  array_shift($bc);
+
+  $bc[] = l(filter_xss($source->label), "islandora/object/{$source->id}");
+  $bc[] = l(filter_xss($version->label), "islandora/object/{$version->id}");
+  $bc[] = l(filter_xss($transcription->label), "islandora/object/{$transcription->id}");
+
+  drupal_set_breadcrumb($bc);
+  emicdora_set_page_title_and_subtitle($critical_edition->label, $transcription->label);
+}
+
+/**
+ * Callback to set /version/ url page title and subtitle.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object in the url.
+ *
+ * @param AbstractObject $version
+ *   The version object in the url.
+ */
+function emicdora_version_title($critical_edition, $version) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  // Get the source objects label.
+  $source_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+  $source_rels = reset($source_rels);
+  $source_pid = $source_rels['object']['value'];
+  $source = islandora_object_load($source_pid);
+
+  $bc = islandora_get_breadcrumbs($version);
+  array_shift($bc);
+  array_shift($bc);
+  $bc[] = l(filter_xss($source->label), "islandora/object/{$critical_edition->id}/source/$source->id");
+  $bc[] = t("@vlabel", array('@vlabel' => $version->label));
+  drupal_set_breadcrumb($bc);
+}
+
+/**
+ * Callback to set /versions/ url page title and subtitle.
+ *
+ * @param AbstractObject $object
+ *   The critical edition object in the url.
+ */
+function emicdora_versions_title($object) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $versions = emicdora_get_raw_objects($object, 'version');
+
+  $arr_vals = array_values($versions);
+  $versions = array_shift($arr_vals);
+  $bc = islandora_get_breadcrumbs($object);
+  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
+  if (count($versions) > 0) {
+    // Use the first version to get the source.
+    $version = islandora_object_load($versions[0]);
+    $version_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+    $version_rels = reset($version_rels);
+    $source_pid = $version_rels['object']['value'];
+    $source = islandora_object_load($source_pid);
+    $bc[] = l(filter_xss($source->label), "islandora/object/{$object->id}/source/$source->id");
+  }
+  $bc[] = t("Versions");
+  array_shift($bc);
+  array_shift($bc);
+  drupal_set_breadcrumb($bc);
+  emicdora_set_page_title_and_subtitle($object->label, "Search Version(s)");
+}
+
+/**
+ * Callback to set /source/ url page title and subtitle.
+ *
+ * @param AbstractObject $object
+ *   The critical edition object in the url.
+ *
+ * @param AbstractObject $source
+ *   The source object in the url.
+ */
+function emicdora_source_title($object, $source) {
+  module_load_include('inc', 'islandora', 'includes/breadcrumb');
+  $bc = islandora_get_breadcrumbs($object);
+  array_shift($bc);
+  array_shift($bc);
+  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
+  $bc[] = l(filter_xss($source->label), "islandora/object/{$object->id}/source/$source->id");
+  drupal_set_breadcrumb($bc);
+  emicdora_set_page_title_and_subtitle($object->label, $source->label);
 }
 
 /**
@@ -677,6 +829,19 @@ function emicdora_block_view($delta = '') {
       if ($is_table || $is_compare) {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
         $current_view = $is_table ? 'table' : 'compare';
+
+        module_load_include('inc', 'islandora', 'includes/breadcrumb');
+        module_load_include('inc', 'emicdora', 'includes/utilities');
+        $bc = islandora_get_breadcrumbs($critical_edition);
+
+        array_shift($bc);
+        array_shift($bc);
+
+        $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
+        $bc[] = t("mvd", array('@mvd' => $mvd));
+        emicdora_set_page_title_and_subtitle($critical_edition->label, $mvd);
+        drupal_set_breadcrumb($bc);
+
         $links = emicdora_collation_object_operations_block_links($critical_edition->id, $mvd, $current_view);
       }
 
@@ -971,12 +1136,24 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'islandora', 'includes/metadata');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
-  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
-  emicdora_set_critical_edition_breadcrumbs($object);
-  $content = t("unknown content type");
+
+  $breadcrumbs = islandora_get_breadcrumbs($object);
+  // Discard "Home" as it's redundant.
+  array_shift($breadcrumbs);
+  // Discard "Islandora Repository" as we don't want user navigating to it.
+  array_shift($breadcrumbs);
+  $breadcrumbs[] = $object->label;
+  drupal_set_breadcrumb($breadcrumbs);
+  $title = isset($object->label) ? $object->label : t("Critical Edition");
+
+  $content = "";
   $supplied_object = menu_get_object('islandora_object', 4);
   $content_models = array_keys(emicdora_source_content_models());
   $content_models[] = 'islandora:versionCModel';
+
+  $sol = isset($supplied_object->label) ? $supplied_object->label : t("Apparatus");
+  emicdora_set_page_title_and_subtitle($title, $sol);
+
   if (!$supplied_object) {
     $content = emicdora_get_apparatus_as_content($object);
     return array('emicdora' => $content);
@@ -990,32 +1167,28 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
 
   switch ($model) {
     case 'islandora:bookCModel':
-      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
-      $content .= theme('islandora_book_book', array('object' => $supplied_object));
+      $content = theme('islandora_book_book', array('object' => $supplied_object));
       $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($supplied_object, FALSE) . "</div>";
       break;
 
     case 'islandora:sp-audioCModel':
-      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
-      $content .= theme('islandora_audio', array('islandora_object' => $supplied_object));
+      $content = theme('islandora_audio', array('islandora_object' => $supplied_object));
       break;
 
     case 'islandora:sp_videoCModel':
-      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
-      $content .= theme('islandora_video', array('object' => $supplied_object));
-
+      $content = theme('islandora_video', array('object' => $supplied_object));
       break;
 
     case 'islandora:sp_large_image_cmodel':
-      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
-      $content .= theme('islandora_large_image', array('islandora_object' => $supplied_object));
+      $content = theme('islandora_large_image', array('islandora_object' => $supplied_object));
       break;
 
     case 'islandora:versionCModel':
-      $content = '<div class="emicdora_source_title">' . $supplied_object->label . "</div>";
-      $content .= theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
+      $content = theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
       break;
+
   }
+
   return array('emicdora' => $content);
 }
 
@@ -1030,7 +1203,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
  */
 function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   // Only show members of the given critical edition.
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -1042,7 +1214,6 @@ function emicdora_critical_edition_versions(AbstractObject $object, $type = NULL
   }
   $_GET['f'] = array(implode(' AND ', $filters));
   $output = islandora_solr('*:*');
-  emicdora_set_source_breadcrumbs($object);
   return $output;
 }
 
@@ -1205,4 +1376,20 @@ function emicdora_forms($form_id, $args) {
 function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(AbstractObject $object) {
   module_load_include('inc', 'collation', 'includes/calliope');
   emicdora_calliope_write_file($object->id);
+}
+
+/**
+ * Implements hook_islandora_view_object().
+ */
+function emicdora_islandora_view_object(AbstractObject $object) {
+  // Manually override the breadcrumbs for the Editions collection.
+  if (isset($object) &&  $object->id == 'islandora:editions') {
+    module_load_include('inc', 'islandora', 'includes/breadcrumb');
+    $bc = islandora_get_breadcrumbs($object);
+
+    array_shift($bc);
+    array_shift($bc);
+    $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
+    drupal_set_breadcrumb($bc);
+  }
 }
