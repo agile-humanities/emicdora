@@ -387,7 +387,6 @@
     function construct_tab(data, type) {
       $('#content_data').empty();
       $('#content_data').append(data['body']);
-      //$('#content_data').css('height', '472px');
       prettyPrint();
     }
 
@@ -432,9 +431,7 @@
         }
       }
   });
-  $('#eui_window').layout('resize', {
-    width:'80%',
-  });
+
   $('#easy-ui-east').css('height', '445px');
   $('#easy-ui-west').css('height', '445px');
   
