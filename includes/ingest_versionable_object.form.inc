@@ -122,7 +122,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   $page_count = 0;
   $tei_rdf_objects = array();
   if ($source) {
-    // Not efficent we should create a seperate function in
+    // Not efficent we should create a separate function in
     // islandora_paged_content to compute the number of pages.
     $page_count = count(islandora_paged_content_get_pages($source));
     foreach (emicdora_get_critical_editions($source) as $pid => $label) {
@@ -426,7 +426,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $page = $versionable_object->repository->constructObject($namespace);
       $page->label = $versionable_object->label;
       // Add all relationships.
-      $page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:criticalEditionCModelPage');
+      $page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
       $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', 1, RELS_TYPE_PLAIN_LITERAL);
