@@ -72,7 +72,7 @@ function emicdora_versionable_object_form_source_autocomplete($type, $search) {
   $models = in_array($type, $models) ? array($type) : $models;
   $where_clause = '';
   foreach ($models as $model) {
-    $where_clause .= !empty($where_clause) ? 'UNION ' : '';
+    $where_clause .=!empty($where_clause) ? 'UNION ' : '';
     $where_clause .= "{ ?object fedora-model:hasModel <info:fedora/$model> . }\n";
   }
   $where_clause = substr($where_clause, 0, -1);
@@ -122,11 +122,14 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
   $page_count = 0;
   $tei_rdf_objects = array();
   if ($source) {
+    $versions = array_keys(emicdora_get_members($source->id, 'islandora:versionCModel', 'isDerivationOf'));
     // Not efficent we should create a separate function in
     // islandora_paged_content to compute the number of pages.
     $page_count = count(islandora_paged_content_get_pages($source));
-    foreach (emicdora_get_critical_editions($source) as $pid => $label) {
-      $tei_rdf_objects[$pid] = array($pid, $label);
+
+    foreach ($versions as $version) {
+      $version_object = islandora_object_load($version);
+      $tei_rdf_objects[$version] = array($version, $version_object->label);
     }
   }
   $tei_rdf_source = isset($values['tei_rdf_source']) ? $values['tei_rdf_source'] : 'new';
@@ -208,6 +211,28 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
           'wrapper' => 'tei-rdf-ajax-container-wrapper',
           'method' => 'replace',
           'effect' => 'fade',
+        ),
+      ),
+      'tei_rdf_ajax_wrapper' => array(
+        '#access' => $valid_source_selected,
+        '#type' => 'container',
+        '#prefix' => '<div id="tei-rdf-ajax-container-wrapper">',
+        '#suffix' => '</div>',
+        'tei_rdf' => array(
+          '#prefix' => '<div id="version_select_table">',
+          '#suffix' => '</div>',
+          '#access' => $tei_rdf_source == 'existing',
+          '#type' => 'tableselect',
+          '#multiple' => FALSE,
+          '#header' => array('PID', 'Version Title'),
+          '#options' => $tei_rdf_objects,
+          '#empty' => t('No TEI-RDF objects available. Please select "Create New"'),
+        ),
+        'tei_rdf_label' => array(
+          '#access' => $tei_rdf_source == 'new',
+          '#required' => TRUE,
+          '#type' => 'textfield',
+          '#title' => t('TEI-RDF Label'),
         ),
       ),
       'transcription_label' => array(
@@ -302,7 +327,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
     else {
       $tei_rdf = islandora_object_load($values['tei_rdf']);
       // Must exist and actually be an TEI-RDF object.
-      if (!$tei_rdf || !in_array('islandora:criticalEditionContainerCModel', $tei_rdf->models)) {
+      if (!$tei_rdf || !in_array('islandora:versionCModel', $tei_rdf->models)) {
         // We don't put the form error on the tableselect as that is not
         // supported by the Drupal Form API.
         form_error($form, t('TEI-RDF Object: "@tei_rdf" is not valid object.', array(
@@ -385,7 +410,9 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   // Link to an existing TEI-RDF Object.
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
-    $tei_rdf->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+    // get and clone all pages
+    // $tei_rdf->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+    
   }
   // Create a new TEI-RDF object.
   else {

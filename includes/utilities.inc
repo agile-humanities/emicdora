@@ -210,11 +210,13 @@ function emicdora_create_required_object(IslandoraTuque $connection, array $args
  *   PID of object
  * @param string $content_model
  *   Optional Content Model to restrict results.
+ * @param string $relationship
+ *   fedora relationship
  *
  * @return array
  *   associative array of PID => Content Model pairs.
  */
-function emicdora_get_members($object_pid, $content_model = NULL) {
+function emicdora_get_members($object_pid, $content_model = NULL, $relationship = 'isMemberOfCollection') {
   $qualifier = $content_model ? "fm:hasModel <info:fedora/$content_model>;" : "";
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
@@ -223,7 +225,7 @@ function emicdora_get_members($object_pid, $content_model = NULL) {
             FROM <#ri>
             WHERE {
               {?subject fm:state fm:Active;
-                        fr:isMemberOfCollection <info:fedora/$object_pid>;
+                        fr:$relationship <info:fedora/$object_pid>;
                         fm:hasModel ?object;
                         $qualifier
 
@@ -444,16 +446,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-              '@pid' => $object->id,
-              '@message' => $e->getMessage(),
+      '@pid' => $object->id,
+      '@message' => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-          '@pid' => $object->id,
-          '@message' => $e->getMessage(),
-          '@trace' => $e->getTraceAsString(),
+      '@pid' => $object->id,
+      '@message' => $e->getMessage(),
+      '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -721,4 +723,14 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
+}
+
+function emicdora_get_associated_versions($source_object_id) {
+  $query = <<<EOT
+select $subject $title from <#ri>
+where ($subject <info:fedora/fedora-system:def/relations-external#isDerivationOf> <info:fedora/$source_object_id>
+and $subject <info:fedora/fedora-system:def/model#state> <info:fedora/fedora-system:def/model#Active>
+and $subject <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:versionCModel>
+and $subject <dc:title> \$title)
+EOT;
 }
