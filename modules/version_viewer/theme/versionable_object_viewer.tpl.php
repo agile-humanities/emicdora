@@ -44,9 +44,9 @@
               </ul>
           </div>
         </div>
-        <div id="center_data" class="easyui-panel" data-options="region:'center',iconCls:'icon-ok',collapsible:false" style="width:100%;height:100%;">
-              <div id="content_data" class="easyui-panel" style="width:100%;height:100%;background:#fafafa;"
-				    data-options="iconCls:'icon-save',closable:true,collapsible:true,minimizable:true,maximizable:true,fit:true">
+        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:472px;">
+              <div id="content_data" class="easyui-panel" style="width:100%;height:472px;background:#fafafa;"
+				    data-options="fit:true">
 		     </div>
         </div>
     </div>

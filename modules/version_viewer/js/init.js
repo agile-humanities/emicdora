@@ -387,6 +387,7 @@
     function construct_tab(data, type) {
       $('#content_data').empty();
       $('#content_data').append(data['body']);
+      //$('#content_data').css('height', '472px');
       prettyPrint();
     }
 
@@ -431,8 +432,15 @@
         }
       }
   });
-
+  $('#eui_window').layout('resize', {
+    width:'80%',
+  });
   $('#easy-ui-east').css('height', '445px');
   $('#easy-ui-west').css('height', '445px');
+  
+  // The panels will automatically set to fit, but we
+  // use these method to trigger the resize event.
+  $('#center_data').css('height', '472px');
+  $('#content_data').css('height', '472px');
   });
 })(jQuery);
