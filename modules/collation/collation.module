@@ -43,6 +43,13 @@ function collation_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
+    'emicdora/edit_collation' => array(
+      'title' => 'edit collation',
+      'page callback' => 'emicdora_collation_edit',
+      'file' => 'includes/emicdora_callbacks.inc',
+      'access arguments' => array('edit_collations'),
+      'type' => MENU_CALLBACK,
+    ),
     'islandora/object/%islandora_object/table' => array(
       'title' => 'Collations',
       'context' => MENU_CONTEXT_PAGE,

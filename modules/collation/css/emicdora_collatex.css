@@ -1,0 +1,9 @@
+div#logo {
+  display: none;
+}
+body {
+  width: 100%;
+}
+#input {
+  height: auto !important;
+}
