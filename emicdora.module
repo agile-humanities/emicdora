@@ -102,15 +102,6 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
-    'islandora/object/%islandora_object/version/%islandora_object' => array(
-      'title callback' => 'emicdora_drupal_title',
-      'title arguments' => array(2),
-      'page callback' => 'islandora_view_object',
-      'page arguments' => array(2, 4),
-      'type' => MENU_NORMAL_ITEM,
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
-    ),
     'islandora/object/%islandora_object/manage/apparatus' => array(
       'title' => 'Apparatus',
       'file' => 'includes/apparatus.form.inc',
