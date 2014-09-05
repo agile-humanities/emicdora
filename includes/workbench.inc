@@ -104,104 +104,121 @@ function emicdora_workbench_form($form, &$form_state) {
   );
   // Get the user's default list and do some parsing.
   $list_id = islandora_bookmark_get_default_list();
-  $list = Bookmark::getList($list_id);
-  $pids = $list->getPids();
-  $source_pids = array();
-  $critical_pids = array();
-  foreach ($pids as $pid) {
-    $temp_obj = islandora_object_load($pid);
-    $models = $temp_obj->models;
-    $remove_button = array(
-      '#type' => 'submit',
-      '#name' => 'remove_pid_' . $pid,
-      '#id' => 'remove_pid_' . $pid,
-      '#pid' => $pid,
-      '#value' => t('Remove'),
-    );
-    if (in_array('islandora:criticalEditionContainerCModel', $models)) {
-      $critical_pids[$pid] = array(
-        array(
-          'data' => islandora_bookmark_generate_markup($pid),
-        ),
-        array(
-          'data' => drupal_render($remove_button),
-          'class' => 'operations',
-        ),
-      );
+  // User has yet to have a default list created, so let's do that now.
+  if (!$list_id && variable_get('islandora_bookmark_create_user_default_lists', FALSE)) {
+    global $user;
+    $default_list_name = variable_get('islandora_bookmark_default_list_name', "@username's Default List");
+    $default_list_name = format_string($default_list_name, array('@username' => $user->name));
+    $persistent_bookmark = BookmarkDefaultDatabaseList::createNewList($default_list_name, 'bookmark_default', $user);
+    if (variable_get('islandora_bookmark_share_default_list', FALSE)) {
+      // The anonymous user (uid 0) is considered to be "Everyone".
+      $persistent_bookmark->addUser('0');
     }
-    if (array_intersect(array_keys($source_content_models), $models)) {
-      $source_pids[$pid] = array(
-        array(
-          'data' => islandora_bookmark_generate_markup($pid),
-        ),
-        array(
-          'data' => drupal_render($remove_button),
-          'class' => 'operations',
-        ),
-      );
-    }
+    $list_id = $persistent_bookmark->getId();
   }
-  $form['critical_edition_bookmarks'] = array(
-    '#type' => 'fieldset',
-    '#title' => 'Critical Edition Bookmarks',
-    '#attributes' => array(
-      'class' => array(
-        'emicdora-workbench-bookmark',
+  if ($list_id) {
+    $list = Bookmark::getList($list_id);
+    $pids = $list->getPids();
+    $source_pids = array();
+    $critical_pids = array();
+    foreach ($pids as $pid) {
+      $temp_obj = islandora_object_load($pid);
+      $models = $temp_obj->models;
+      $remove_button = array(
+        '#type' => 'submit',
+        '#name' => 'remove_pid_' . $pid,
+        '#id' => 'remove_pid_' . $pid,
+        '#pid' => $pid,
+        '#value' => t('Remove'),
+      );
+      if (in_array('islandora:criticalEditionContainerCModel', $models)) {
+        $critical_pids[$pid] = array(
+          array(
+            'data' => islandora_bookmark_generate_markup($pid),
+          ),
+          array(
+            'data' => drupal_render($remove_button),
+            'class' => 'operations',
+          ),
+        );
+      }
+      if (array_intersect(array_keys($source_content_models), $models)) {
+        $source_pids[$pid] = array(
+          array(
+            'data' => islandora_bookmark_generate_markup($pid),
+          ),
+          array(
+            'data' => drupal_render($remove_button),
+            'class' => 'operations',
+          ),
+        );
+      }
+    }
+    $form['critical_edition_bookmarks'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Critical Edition Bookmarks',
+      '#attributes' => array(
+        'class' => array(
+          'emicdora-workbench-bookmark',
+        ),
       ),
-    ),
-  );
-  $form['critical_edition_bookmarks']['table'] = array(
-    '#type' => 'tableselect',
-    '#header' => array(
-      t('Label'),
-      t('Operations'),
-    ),
-    '#options' => $critical_pids,
-    '#empty' => t('No Critical Editions present.'),
-  );
-  $form['critical_edition_bookmarks']['remove_selected'] = array(
-    '#type' => 'submit',
-    '#value' => t('Remove selected'),
-    '#access' => count($critical_pids),
-    '#name' => 'critical_edition_remove_selected',
-  );
-  $form['critical_edition_bookmarks']['remove_all'] = array(
-    '#type' => 'submit',
-    '#value' => t('Remove all'),
-    '#access' => count($critical_pids),
-    '#name' => 'critical_edition_remove_all',
-  );
-  $form['source_bookmarks'] = array(
-    '#type' => 'fieldset',
-    '#title' => 'Source Bookmarks',
-    '#attributes' => array(
-      'class' => array(
-        'emicdora-workbench-bookmark',
+    );
+    $form['critical_edition_bookmarks']['table'] = array(
+      '#type' => 'tableselect',
+      '#header' => array(
+        t('Label'),
+        t('Operations'),
       ),
-    ),
-  );
-  $form['source_bookmarks']['table'] = array(
-    '#type' => 'tableselect',
-    '#header' => array(
-      t('Label'),
-      t('Operations'),
-    ),
-    '#options' => $source_pids,
-    '#empty' => t('No Source objects present.'),
-  );
-  $form['source_bookmarks']['remove_selected'] = array(
-    '#type' => 'submit',
-    '#value' => t('Remove selected'),
-    '#access' => count($source_pids),
-    '#name' => 'source_bookmarks_remove_selected',
-  );
-  $form['source_bookmarks']['remove_all'] = array(
-    '#type' => 'submit',
-    '#value' => t('Remove all'),
-    '#access' => count($source_pids),
-    '#name' => 'source_bookmarks_remove_all',
-  );
-  $form_state['bookmark_id'] = $list_id;
+      '#options' => $critical_pids,
+      '#empty' => t('No Critical Editions present.'),
+    );
+    $form['critical_edition_bookmarks']['remove_selected'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove selected'),
+      '#access' => count($critical_pids),
+      '#name' => 'critical_edition_remove_selected',
+    );
+    $form['critical_edition_bookmarks']['remove_all'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove all'),
+      '#access' => count($critical_pids),
+      '#name' => 'critical_edition_remove_all',
+    );
+    $form['source_bookmarks'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Source Bookmarks',
+      '#attributes' => array(
+        'class' => array(
+          'emicdora-workbench-bookmark',
+        ),
+      ),
+    );
+    $form['source_bookmarks']['table'] = array(
+      '#type' => 'tableselect',
+      '#header' => array(
+        t('Label'),
+        t('Operations'),
+      ),
+      '#options' => $source_pids,
+      '#empty' => t('No Source objects present.'),
+    );
+    $form['source_bookmarks']['remove_selected'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove selected'),
+      '#access' => count($source_pids),
+      '#name' => 'source_bookmarks_remove_selected',
+    );
+    $form['source_bookmarks']['remove_all'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove all'),
+      '#access' => count($source_pids),
+      '#name' => 'source_bookmarks_remove_all',
+    );
+    $form_state['bookmark_id'] = $list_id;
+  }
+  else {
+    drupal_set_message(t('No default Bookmark list created for this user. Please contact the administrator.'), 'warning');
+  }
   return $form;
 }
 
