@@ -412,7 +412,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
     $tei_rdf = islandora_object_load($values['tei_rdf']);
     // get and clone all pages
     // $tei_rdf->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
-    
+    $tei_pages = array_keys(emicdora_get_members($tei_rdf->id, 'islandora:tei-rdfCModel', 'isDerivationOf'));
+
   }
   // Create a new TEI-RDF object.
   else {
