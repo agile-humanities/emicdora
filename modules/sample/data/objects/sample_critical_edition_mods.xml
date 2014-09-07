@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
-  <titleInfo>
-    <title>Legends of Vancouver</title>
-  </titleInfo>
-  <name>
-    <namePart>Dean Irvine</namePart>
-    <role>
-      <roleTerm authority="marcrelator" type="text">Editor</roleTerm>
-    </role>
-  </name>
-  <originInfo>
-    <publisher>Editing Modernism in Canada</publisher>
-    <dateCreated>01-2014</dateCreated>
-  </originInfo>
-  <abstract>Periodical and collected versions of legends.</abstract>
-  <note type="source note">Some versions taken from Internet Archive.</note>
-  <language>
-    <languageTerm type="text">English</languageTerm>
-  </language>
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+	<titleInfo>
+		<title>Legends of Vancouver</title>
+	</titleInfo>
+	<name>
+		<namePart>Dean Irvine</namePart>
+		<role>
+			<roleTerm authority="marcrelator" type="text">Editor</roleTerm>
+		</role>
+	</name>
+	<originInfo>
+		<publisher>Editing Modernism in Canada</publisher>
+		<dateCreated>01-2014</dateCreated>
+	</originInfo>
+	<abstract>Periodical and collected versions of legends.</abstract>
+	<note type="source note">Some versions taken from Internet Archive.</note>
+	<language>
+		<languageTerm type="text">English</languageTerm>
+	</language>
 </mods>

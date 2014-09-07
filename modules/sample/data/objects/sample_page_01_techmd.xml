@@ -1,143 +1,164 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fits xmlns="http://hul.harvard.edu/ois/xml/ns/fits/fits_output" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd" version="0.6.2" timestamp="3/27/14 4:27 PM">
-  <identification status="CONFLICT">
-    <identity format="Tagged Image File Format" mimetype="image/tiff" toolname="FITS" toolversion="0.6.2">
-      <tool toolname="Jhove" toolversion="1.5" />
-      <tool toolname="file utility" toolversion="5.09" />
-      <tool toolname="Exiftool" toolversion="9.06" />
-      <tool toolname="Droid" toolversion="3.0" />
-      <tool toolname="NLNZ Metadata Extractor" toolversion="3.4GA" />
-      <tool toolname="ffident" toolversion="0.2" />
-      <version toolname="Jhove" toolversion="1.5" status="CONFLICT">6.0</version>
-      <version toolname="Droid" toolversion="3.0" status="CONFLICT">3</version>
-      <version toolname="Droid" toolversion="3.0" status="CONFLICT">4</version>
-      <version toolname="Droid" toolversion="3.0" status="CONFLICT">5</version>
-      <externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/7</externalIdentifier>
-      <externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/8</externalIdentifier>
-      <externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/9</externalIdentifier>
-      <externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/10</externalIdentifier>
-    </identity>
-    <identity format="MPEG 1/2 Audio Layer 3" mimetype="audio/mpeg" toolname="FITS" toolversion="0.6.2">
-      <tool toolname="Droid" toolversion="3.0" />
-      <externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/134</externalIdentifier>
-    </identity>
-  </identification>
-  <fileinfo>
-    <size toolname="Jhove" toolversion="1.5">7295986</size>
-    <lastmodified toolname="Exiftool" toolversion="9.06" status="SINGLE_RESULT">2014:03:27 16:27:13+00:00</lastmodified>
-    <filepath toolname="OIS File Information" toolversion="0.1" status="SINGLE_RESULT">/tmp/islandora-5179.OBJ.tif</filepath>
-    <filename toolname="OIS File Information" toolversion="0.1" status="SINGLE_RESULT">/tmp/islandora-5179.OBJ.tif</filename>
-    <md5checksum toolname="OIS File Information" toolversion="0.1" status="SINGLE_RESULT">0ee2012b71e9e0b2e6edd9f71cfe4bc6</md5checksum>
-    <fslastmodified toolname="OIS File Information" toolversion="0.1" status="SINGLE_RESULT">1395937633000</fslastmodified>
-  </fileinfo>
-  <filestatus>
-    <well-formed toolname="Jhove" toolversion="1.5" status="SINGLE_RESULT">true</well-formed>
-    <valid toolname="Jhove" toolversion="1.5" status="SINGLE_RESULT">true</valid>
-  </filestatus>
-  <metadata>
-    <image>
-      <byteOrder toolname="Jhove" toolversion="1.5" status="SINGLE_RESULT">big endian</byteOrder>
-      <compressionScheme toolname="Jhove" toolversion="1.5" status="CONFLICT">Uncompressed</compressionScheme>
-      <compressionScheme toolname="NLNZ Metadata Extractor" toolversion="3.4GA" status="CONFLICT">65536</compressionScheme>
-      <imageWidth toolname="Jhove" toolversion="1.5" status="CONFLICT">1112</imageWidth>
-      <imageWidth toolname="NLNZ Metadata Extractor" toolversion="3.4GA" status="CONFLICT">72876032</imageWidth>
-      <imageHeight toolname="Jhove" toolversion="1.5" status="CONFLICT">1640</imageHeight>
-      <imageHeight toolname="NLNZ Metadata Extractor" toolversion="3.4GA" status="CONFLICT">107479040</imageHeight>
-      <colorSpace toolname="Jhove" toolversion="1.5">RGB</colorSpace>
-      <referenceBlackWhite toolname="Jhove" toolversion="1.5" status="SINGLE_RESULT">0.0 255.0 0.0 255.0 0.0 255.0</referenceBlackWhite>
-      <iccProfileName toolname="Exiftool" toolversion="9.06" status="SINGLE_RESULT">Adobe RGB (1998)</iccProfileName>
-      <orientation toolname="Jhove" toolversion="1.5" status="CONFLICT">normal*</orientation>
-      <orientation toolname="NLNZ Metadata Extractor" toolversion="3.4GA" status="CONFLICT">65536</orientation>
-      <samplingFrequencyUnit toolname="Jhove" toolversion="1.5" status="CONFLICT">in.</samplingFrequencyUnit>
-      <samplingFrequencyUnit toolname="Exiftool" toolversion="9.06" status="CONFLICT">inches</samplingFrequencyUnit>
-      <xSamplingFrequency toolname="Jhove" toolversion="1.5">150</xSamplingFrequency>
-      <ySamplingFrequency toolname="Jhove" toolversion="1.5">150</ySamplingFrequency>
-      <bitsPerSample toolname="Jhove" toolversion="1.5">8 8 8 8</bitsPerSample>
-      <samplesPerPixel toolname="Jhove" toolversion="1.5" status="CONFLICT">4</samplesPerPixel>
-      <samplesPerPixel toolname="NLNZ Metadata Extractor" toolversion="3.4GA" status="CONFLICT">262144</samplesPerPixel>
-      <extraSamples toolname="Exiftool" toolversion="9.06" status="SINGLE_RESULT">Associated Alpha</extraSamples>
-      <iccProfileVersion toolname="Exiftool" toolversion="9.06" status="SINGLE_RESULT">2.1.0</iccProfileVersion>
-      <standard>
-        <mix:mix xmlns:mix="http://www.loc.gov/mix/v20">
-          <mix:BasicDigitalObjectInformation>
-            <mix:byteOrder>big endian</mix:byteOrder>
-            <mix:Compression>
-              <mix:compressionScheme>Uncompressed</mix:compressionScheme>
-            </mix:Compression>
-          </mix:BasicDigitalObjectInformation>
-          <mix:BasicImageInformation>
-            <mix:BasicImageCharacteristics>
-              <mix:imageWidth>1112</mix:imageWidth>
-              <mix:imageHeight>1640</mix:imageHeight>
-              <mix:PhotometricInterpretation>
-                <mix:colorSpace>RGB</mix:colorSpace>
-                <mix:ColorProfile>
-                  <mix:IccProfile>
-                    <mix:iccProfileName>Adobe RGB (1998)</mix:iccProfileName>
-                    <mix:iccProfileVersion>2.1.0</mix:iccProfileVersion>
-                  </mix:IccProfile>
-                </mix:ColorProfile>
-                <mix:ReferenceBlackWhite>
-                  <mix:Component>
-                    <mix:componentPhotometricInterpretation>R</mix:componentPhotometricInterpretation>
-                    <mix:footroom>
-                      <mix:numerator>25500</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:footroom>
-                    <mix:headroom>
-                      <mix:numerator>0</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:headroom>
-                  </mix:Component>
-                  <mix:Component>
-                    <mix:componentPhotometricInterpretation>G</mix:componentPhotometricInterpretation>
-                    <mix:footroom>
-                      <mix:numerator>25500</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:footroom>
-                    <mix:headroom>
-                      <mix:numerator>0</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:headroom>
-                  </mix:Component>
-                  <mix:Component>
-                    <mix:componentPhotometricInterpretation>B</mix:componentPhotometricInterpretation>
-                    <mix:footroom>
-                      <mix:numerator>25500</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:footroom>
-                    <mix:headroom>
-                      <mix:numerator>0</mix:numerator>
-                      <mix:denominator>100</mix:denominator>
-                    </mix:headroom>
-                  </mix:Component>
-                </mix:ReferenceBlackWhite>
-              </mix:PhotometricInterpretation>
-            </mix:BasicImageCharacteristics>
-          </mix:BasicImageInformation>
-          <mix:ImageCaptureMetadata>
-            <mix:GeneralCaptureInformation />
-            <mix:orientation>normal*</mix:orientation>
-          </mix:ImageCaptureMetadata>
-          <mix:ImageAssessmentMetadata>
-            <mix:SpatialMetrics>
-              <mix:samplingFrequencyUnit>in.</mix:samplingFrequencyUnit>
-              <mix:xSamplingFrequency>
-                <mix:numerator>150</mix:numerator>
-                <mix:denominator>1</mix:denominator>
-              </mix:xSamplingFrequency>
-              <mix:ySamplingFrequency>
-                <mix:numerator>150</mix:numerator>
-                <mix:denominator>1</mix:denominator>
-              </mix:ySamplingFrequency>
-            </mix:SpatialMetrics>
-            <mix:ImageColorEncoding>
-              <mix:samplesPerPixel>4</mix:samplesPerPixel>
-            </mix:ImageColorEncoding>
-          </mix:ImageAssessmentMetadata>
-        </mix:mix>
-      </standard>
-    </image>
-  </metadata>
+<fits timestamp="3/27/14 4:27 PM" version="0.6.2"
+	xmlns="http://hul.harvard.edu/ois/xml/ns/fits/fits_output"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://hul.harvard.edu/ois/xml/ns/fits/fits_output http://hul.harvard.edu/ois/xml/xsd/fits/fits_output.xsd">
+	<identification status="CONFLICT">
+		<identity format="Tagged Image File Format" mimetype="image/tiff" toolname="FITS"
+			toolversion="0.6.2">
+			<tool toolname="Jhove" toolversion="1.5"/>
+			<tool toolname="file utility" toolversion="5.09"/>
+			<tool toolname="Exiftool" toolversion="9.06"/>
+			<tool toolname="Droid" toolversion="3.0"/>
+			<tool toolname="NLNZ Metadata Extractor" toolversion="3.4GA"/>
+			<tool toolname="ffident" toolversion="0.2"/>
+			<version status="CONFLICT" toolname="Jhove" toolversion="1.5">6.0</version>
+			<version status="CONFLICT" toolname="Droid" toolversion="3.0">3</version>
+			<version status="CONFLICT" toolname="Droid" toolversion="3.0">4</version>
+			<version status="CONFLICT" toolname="Droid" toolversion="3.0">5</version>
+			<externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/7</externalIdentifier>
+			<externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/8</externalIdentifier>
+			<externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/9</externalIdentifier>
+			<externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/10</externalIdentifier>
+		</identity>
+		<identity format="MPEG 1/2 Audio Layer 3" mimetype="audio/mpeg" toolname="FITS"
+			toolversion="0.6.2">
+			<tool toolname="Droid" toolversion="3.0"/>
+			<externalIdentifier toolname="Droid" toolversion="3.0" type="puid">fmt/134</externalIdentifier>
+		</identity>
+	</identification>
+	<fileinfo>
+		<size toolname="Jhove" toolversion="1.5">7295986</size>
+		<lastmodified status="SINGLE_RESULT" toolname="Exiftool" toolversion="9.06">2014:03:27
+			16:27:13+00:00</lastmodified>
+		<filepath status="SINGLE_RESULT" toolname="OIS File Information" toolversion="0.1"
+			>/tmp/islandora-5179.OBJ.tif</filepath>
+		<filename status="SINGLE_RESULT" toolname="OIS File Information" toolversion="0.1"
+			>/tmp/islandora-5179.OBJ.tif</filename>
+		<md5checksum status="SINGLE_RESULT" toolname="OIS File Information" toolversion="0.1"
+			>0ee2012b71e9e0b2e6edd9f71cfe4bc6</md5checksum>
+		<fslastmodified status="SINGLE_RESULT" toolname="OIS File Information" toolversion="0.1"
+			>1395937633000</fslastmodified>
+	</fileinfo>
+	<filestatus>
+		<well-formed status="SINGLE_RESULT" toolname="Jhove" toolversion="1.5">true</well-formed>
+		<valid status="SINGLE_RESULT" toolname="Jhove" toolversion="1.5">true</valid>
+	</filestatus>
+	<metadata>
+		<image>
+			<byteOrder status="SINGLE_RESULT" toolname="Jhove" toolversion="1.5">big endian</byteOrder>
+			<compressionScheme status="CONFLICT" toolname="Jhove" toolversion="1.5"
+				>Uncompressed</compressionScheme>
+			<compressionScheme status="CONFLICT" toolname="NLNZ Metadata Extractor" toolversion="3.4GA"
+				>65536</compressionScheme>
+			<imageWidth status="CONFLICT" toolname="Jhove" toolversion="1.5">1112</imageWidth>
+			<imageWidth status="CONFLICT" toolname="NLNZ Metadata Extractor" toolversion="3.4GA"
+				>72876032</imageWidth>
+			<imageHeight status="CONFLICT" toolname="Jhove" toolversion="1.5">1640</imageHeight>
+			<imageHeight status="CONFLICT" toolname="NLNZ Metadata Extractor" toolversion="3.4GA"
+				>107479040</imageHeight>
+			<colorSpace toolname="Jhove" toolversion="1.5">RGB</colorSpace>
+			<referenceBlackWhite status="SINGLE_RESULT" toolname="Jhove" toolversion="1.5">0.0 255.0 0.0
+				255.0 0.0 255.0</referenceBlackWhite>
+			<iccProfileName status="SINGLE_RESULT" toolname="Exiftool" toolversion="9.06">Adobe RGB
+				(1998)</iccProfileName>
+			<orientation status="CONFLICT" toolname="Jhove" toolversion="1.5">normal*</orientation>
+			<orientation status="CONFLICT" toolname="NLNZ Metadata Extractor" toolversion="3.4GA"
+				>65536</orientation>
+			<samplingFrequencyUnit status="CONFLICT" toolname="Jhove" toolversion="1.5"
+				>in.</samplingFrequencyUnit>
+			<samplingFrequencyUnit status="CONFLICT" toolname="Exiftool" toolversion="9.06"
+				>inches</samplingFrequencyUnit>
+			<xSamplingFrequency toolname="Jhove" toolversion="1.5">150</xSamplingFrequency>
+			<ySamplingFrequency toolname="Jhove" toolversion="1.5">150</ySamplingFrequency>
+			<bitsPerSample toolname="Jhove" toolversion="1.5">8 8 8 8</bitsPerSample>
+			<samplesPerPixel status="CONFLICT" toolname="Jhove" toolversion="1.5">4</samplesPerPixel>
+			<samplesPerPixel status="CONFLICT" toolname="NLNZ Metadata Extractor" toolversion="3.4GA"
+				>262144</samplesPerPixel>
+			<extraSamples status="SINGLE_RESULT" toolname="Exiftool" toolversion="9.06">Associated
+				Alpha</extraSamples>
+			<iccProfileVersion status="SINGLE_RESULT" toolname="Exiftool" toolversion="9.06"
+				>2.1.0</iccProfileVersion>
+			<standard>
+				<mix:mix xmlns:mix="http://www.loc.gov/mix/v20">
+					<mix:BasicDigitalObjectInformation>
+						<mix:byteOrder>big endian</mix:byteOrder>
+						<mix:Compression>
+							<mix:compressionScheme>Uncompressed</mix:compressionScheme>
+						</mix:Compression>
+					</mix:BasicDigitalObjectInformation>
+					<mix:BasicImageInformation>
+						<mix:BasicImageCharacteristics>
+							<mix:imageWidth>1112</mix:imageWidth>
+							<mix:imageHeight>1640</mix:imageHeight>
+							<mix:PhotometricInterpretation>
+								<mix:colorSpace>RGB</mix:colorSpace>
+								<mix:ColorProfile>
+									<mix:IccProfile>
+										<mix:iccProfileName>Adobe RGB (1998)</mix:iccProfileName>
+										<mix:iccProfileVersion>2.1.0</mix:iccProfileVersion>
+									</mix:IccProfile>
+								</mix:ColorProfile>
+								<mix:ReferenceBlackWhite>
+									<mix:Component>
+										<mix:componentPhotometricInterpretation>R</mix:componentPhotometricInterpretation>
+										<mix:footroom>
+											<mix:numerator>25500</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:footroom>
+										<mix:headroom>
+											<mix:numerator>0</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:headroom>
+									</mix:Component>
+									<mix:Component>
+										<mix:componentPhotometricInterpretation>G</mix:componentPhotometricInterpretation>
+										<mix:footroom>
+											<mix:numerator>25500</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:footroom>
+										<mix:headroom>
+											<mix:numerator>0</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:headroom>
+									</mix:Component>
+									<mix:Component>
+										<mix:componentPhotometricInterpretation>B</mix:componentPhotometricInterpretation>
+										<mix:footroom>
+											<mix:numerator>25500</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:footroom>
+										<mix:headroom>
+											<mix:numerator>0</mix:numerator>
+											<mix:denominator>100</mix:denominator>
+										</mix:headroom>
+									</mix:Component>
+								</mix:ReferenceBlackWhite>
+							</mix:PhotometricInterpretation>
+						</mix:BasicImageCharacteristics>
+					</mix:BasicImageInformation>
+					<mix:ImageCaptureMetadata>
+						<mix:GeneralCaptureInformation/>
+						<mix:orientation>normal*</mix:orientation>
+					</mix:ImageCaptureMetadata>
+					<mix:ImageAssessmentMetadata>
+						<mix:SpatialMetrics>
+							<mix:samplingFrequencyUnit>in.</mix:samplingFrequencyUnit>
+							<mix:xSamplingFrequency>
+								<mix:numerator>150</mix:numerator>
+								<mix:denominator>1</mix:denominator>
+							</mix:xSamplingFrequency>
+							<mix:ySamplingFrequency>
+								<mix:numerator>150</mix:numerator>
+								<mix:denominator>1</mix:denominator>
+							</mix:ySamplingFrequency>
+						</mix:SpatialMetrics>
+						<mix:ImageColorEncoding>
+							<mix:samplesPerPixel>4</mix:samplesPerPixel>
+						</mix:ImageColorEncoding>
+					</mix:ImageAssessmentMetadata>
+				</mix:mix>
+			</standard>
+		</image>
+	</metadata>
 </fits>
-
