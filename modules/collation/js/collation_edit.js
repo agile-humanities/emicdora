@@ -34,7 +34,7 @@
         merged_content = $(wrapped_content).parent().html();
         $(wrapped_content).unwrap();
       });
-      
+
       waitUntilExists("versionview-1010", function() {
         var $head = $("#emicdora_collatex_iframe").contents().find("head");
         $head.append($("<link/>", {
@@ -74,6 +74,12 @@
         function execute_callback(args) {
           var all_added;
           var all_deleted;
+          if (args.data.action == 'link') {
+            if (text_added.length < 1 || text_deleted.length < 1) {
+              alert('Text to link must be selected from both panes.')
+              return;
+            }
+          }
           if (args.data.action == 'save') {
             $(".merged").css('background-color', '');
             $("#save_changes").hide();
