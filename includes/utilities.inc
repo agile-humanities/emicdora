@@ -285,7 +285,6 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
       ${$tei_rdf_content_node->nodeName}->appendChild($tei_rdf_fragment);
     }
   }
-  $my_doc = $tei_document->saveHTML();
   return $tei_document->saveXML();
 }
 
@@ -446,16 +445,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
+              '@pid' => $object->id,
+              '@message' => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
-      '@trace' => $e->getTraceAsString(),
+          '@pid' => $object->id,
+          '@message' => $e->getMessage(),
+          '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -723,14 +722,4 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
-}
-
-function emicdora_get_associated_versions($source_object_id) {
-  $query = <<<EOT
-select $subject $title from <#ri>
-where ($subject <info:fedora/fedora-system:def/relations-external#isDerivationOf> <info:fedora/$source_object_id>
-and $subject <info:fedora/fedora-system:def/model#state> <info:fedora/fedora-system:def/model#Active>
-and $subject <info:fedora/fedora-system:def/model#hasModel> <info:fedora/islandora:versionCModel>
-and $subject <dc:title> \$title)
-EOT;
 }
