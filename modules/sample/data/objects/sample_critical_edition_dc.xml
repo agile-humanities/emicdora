@@ -1,10 +1,14 @@
-<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-  <dc:title>Legends of Vancouver</dc:title>
-  <dc:description>Periodical and collected versions of legends.</dc:description>
-  <dc:description>Some versions taken from Internet Archive.</dc:description>
-  <dc:publisher>Editing Modernism in Canada</dc:publisher>
-  <dc:contributor>Dean Irvine (Editor)</dc:contributor>
-  <dc:date>01-2014</dc:date>
-  <dc:identifier>islandora:4935</dc:identifier>
-  <dc:language>English</dc:language>
+<oai_dc:dc xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
+	http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+	<dc:title>Legends of Vancouver</dc:title>
+	<dc:description>Periodical and collected versions of legends.</dc:description>
+	<dc:description>Some versions taken from Internet Archive.</dc:description>
+	<dc:publisher>Editing Modernism in Canada</dc:publisher>
+	<dc:contributor>Dean Irvine (Editor)</dc:contributor>
+	<dc:date>01-2014</dc:date>
+	<dc:identifier>islandora:sample-critical_edition</dc:identifier>
+	<dc:language>English</dc:language>
 </oai_dc:dc>

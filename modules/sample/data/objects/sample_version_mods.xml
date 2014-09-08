@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
-  <titleInfo>
-    <title>The Legend of the Two Sisters</title>
-  </titleInfo>
-  <name type="personal">
-    <namePart>Pauline Johnson</namePart>
-    <role>
-      <roleTerm authority="marcrelator" type="text">Author</roleTerm>
-    </role>
-  </name>
-  <typeOfResource>text</typeOfResource>
-  <genre authority="marcgt">folklore</genre>
-  <originInfo>
-    <place>
-      <placeTerm type="text">Vancouver</placeTerm>
-    </place>
-    <copyrightDate>1908</copyrightDate>
-  </originInfo>
-  <relatedItem type="host">
-    <titleInfo>
-      <title>Mother's Magazine</title>
-    </titleInfo>
-    <originInfo>
-      <copyrightDate>1908</copyrightDate>
-    </originInfo>
-  </relatedItem>
-  <titleInfo type="alternative">
-    <title>Legend of the Two Sisters 1908</title>
-  </titleInfo>
+<mods xmlns="http://www.loc.gov/mods/v3" xmlns:mods="http://www.loc.gov/mods/v3"
+	xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-4.xsd">
+	<titleInfo>
+		<title>The Legend of the Two Sisters</title>
+	</titleInfo>
+	<name type="personal">
+		<namePart>Pauline Johnson</namePart>
+		<role>
+			<roleTerm authority="marcrelator" type="text">Author</roleTerm>
+		</role>
+	</name>
+	<typeOfResource>text</typeOfResource>
+	<genre authority="marcgt">folklore</genre>
+	<originInfo>
+		<place>
+			<placeTerm type="text">Vancouver</placeTerm>
+		</place>
+		<copyrightDate>1908</copyrightDate>
+	</originInfo>
+	<relatedItem type="host">
+		<titleInfo>
+			<title>Mother's Magazine</title>
+		</titleInfo>
+		<originInfo>
+			<copyrightDate>1908</copyrightDate>
+		</originInfo>
+	</relatedItem>
+	<titleInfo type="alternative">
+		<title>Legend of the Two Sisters 1908</title>
+	</titleInfo>
 </mods>

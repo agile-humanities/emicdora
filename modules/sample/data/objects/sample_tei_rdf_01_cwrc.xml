@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:id="struct_35" xmlns="http://www.tei-c.org/ns/1.0"
+	xmlns:xml="http://www.w3.org/XML/1998/namespace">
+	<teiHeader xml:id="struct_530">
+		<fileDesc xml:id="struct_531">
+			<titleStmt xml:id="struct_532">
+				<title xml:id="struct_533">Sample Document Title</title>
+			</titleStmt>
+			<publicationStmt xml:id="struct_534">
+				<p xml:id="struct_535"/>
+			</publicationStmt>
+			<sourceDesc sameAs="http://www.cwrc.ca" xml:id="struct_536">
+				<p xml:id="struct_537">Created from islandora book ingest unless otherwise noted.</p>
+			</sourceDesc>
+		</fileDesc>
+	</teiHeader>
+	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:w="http://cwrctc.artsrn.ualberta.ca/#"/>
+	<text xml:id="struct_538">
+		<body xml:id="struct_539">
+			<div xml:id="struct_540">
+				<head type="title" xml:id="struct_543">The Legend of the Two Sisters</head>
+				<byline xml:id="struct_544">By E. Pauline Johnson – Tekahionwake</byline>
+				<p xml:id="struct_541">You can see them from the heights, from the pleasure grounds, from
+					the gay thoroughfares, from the great hotel windows - those twin peaks of the twin
+					mountains that lift their pearly summits across the inlet which washes with its ceaseless
+					tides the margins of Vancouver, the beautiful city which is called 'The Sunset Gateway' of
+					the Dominion of Canada. Sometimes the smoke of forest fires blurs these twin peaks, until
+					they swim in a purple atmosphere too beautiful for words to paint. Sometimes the slanting
+					rains festoon their grey and gauzy veils about the crests, and the peaks fade into
+					inadequate outlines of soft shadows, melting, melting, <del xml:id="struct_2177">forever
+						melting</del>, into the distances. But for most days of the year, the sun circles the
+					twin glories with a sweep of gold, the moon washes them with a torrent of silver, and they
+					stand immovable through sun and shadow, smiling on one side above the waters of the
+					restless Pacific, on the other, above the depths and eternal silence of the Capilano
+					Canon. Throughout the British Darn Empire these peaks are known as 'The Lions of
+					Vancouver.' Their striking resemblance to Landseer's Lions at the base of Nelson's
+					Monument in Trafalgar Square, London, has won them this name. But the Indians of the coast
+					know nothing of the white man's appellation, and you must indeed get near to the heart of
+					some ancient Klootchman before she will consent to tell you the Legend of the Twin
+					Sisters. </p>
+				<p xml:id="struct_542">We had been driving for some time, the handsome chief of the
+					Capilanos sitting in the front seat of the light surrey, his slim, silent young daughter
+					beside him, I in the back seat, and at my side the quaint old Indian mother, who, from
+					time to time, told me the traditions of her people, in the half-halting broken English
+					that is never so beautiful as when it slips from an Indian tongue. At our feet were
+					baskets of exquisite weaver, all her handiwork, and that of her young daughter sitting
+					before us. With housewifely care she had stowed these away before starting for the drive,
+					for it was berry time, and she had no thought of leaving such precious muck-a-muck for the
+					foxes and birds, when her children and grandchildren had willing mouths to be filled. The
+					chief was an excellent provider, but 'Why not add to the store?' she remarked simply. 'One
+					must not be wasteful of these precious, God-given wild things.' So the baskets reposed
+					nearby, ready to be filled when opportunity afforded. The trail wound about the foot of a
+					cluster of mountains, following a riotous stream called the Capilano River, which brawled
+					and quarrelled, whispered and laughed among its rocks and boulders, tumbling head-long one
+					moment, the next circling into a deep, transparent pool where leaping salmon and shy
+					mountain trout glinted in the sunshine. 'So many things belong to this river,' said the
+					Klootchman in her pretty, stammering English, which I must eliminate if I am to make this
+					story lucid. So I must keep to the everyday phrases, and my readers must be the losers of
+					her fascinating expressions; but after all, it was her wonderful eyes and gestures that
+					really made the tale, and what use to attempt a description of these? It is impossible.
+					'Yes, the river holds many secrets,' she continued, 'secrets of strong men's battles and
+					many tragedies, but the mountains hold the secrets of an Indian mother's heart, and those
+					are the greatest secrets of all things.' Her voice fell to a whisper, but her speaking
+					eyes swept the distant summits with an understanding far subtler than sight. I did not
+					offer a reply, for I knew that in her own good time the Klootchman would catch the mood of
+					the mountains and impart to me some of their lore. The silence was long. Once or twice she
+					swept effective gestures that were filled with meaning. She wishes me to notice the crags
+					and ledges, haunts of the mountain sheep and wild goats, a winging hawk, a leaping trout,
+					the crimsoning o-lil-lies (Chinook for berries). Then as if from dreams she suddenly
+					awoke. 'You will want to know the secret that is held in the mountains, the secret of the
+					Indian mother's heart?' she asked. I nodded. I could see she liked that wordless reply,
+					for she placed her narrow brown hand on my arm, nor did she remove it during her entire
+					recital of The Legend of the Two Sisters'You see them - those two peaks - towering forever
+					and ever in that high place? Those are the Chief's Daughters, that every Indian mother
+					loves. You see them, but you may not know - you who have come from the Land of Morning,
+					the Land of Sunrise - for you have different customs, different traditions, from those of
+					our people in the Sunset Land. I say you may not know that when our daughters step from
+					childhood into the great world of womanhood, when the fitness for motherhood crowns them,
+					we coast Indians of the sunset country regard this occasion as one of extreme rejoicing,
+					great honour and unspeakable gladness. The being who possesses the possibility of some day
+					becoming a mother receives much honour in most nations, but to us, the Sunset Tribes of
+					Redmen, she is almost sacred. So, when our girls reach womanhood, we make it a great
+					occasion. The parents usually give a feast that lasts many days. The entire tribe is
+					bidden to this festival. More than that, when a great Tyee (Chinook for chief) celebrates
+					for his daughter, sometimes the tribes from far up the coast, from the far North, from
+					inland, from the mountain passes, and the Cariboo Country, are bidden as guests to the
+					feast. During these feast days the girl is placed in a high seat, an exalted position, for
+					is she not marriageable? and does not marriage mean motherhood? and is not motherhood the
+					most exalted position in the world? So we place the girl on a high elevation, for she must
+					know and realize her responsibility, she must recognize that she is the greatest factor in
+					the world, and she must sit in a high place as becomes her heritage as a woman, therefore
+					as a possible mother, for this is the law of our people - we of the Sunset Tribes. It was
+					years ago, hundreds of years - yes, thousands of years (the sweet old Klootchman
+					pronounced it 'Tousen off yea-rs.' It was the only sentence of her quaint, broken English
+					I was ever able to actually capture) - yes, more than thousands of years ago that the
+					great Tyee of our tribe had two daughters, young, livable, and oh! very beautiful. They
+					grew to womanhood the same time, and a mighty feast was to be given, such a feast as the
+					Coast had never yet seen. The only shadow on the joy of it all was war, for the tribe of
+					the great Tyee was at war with the Upper Coast Indians - those who lived north of what is
+					now named by the white men the Port of Prince Rupert.'Giant war canoes fretted the entire
+					coast line, war parties paddled their way up and down, war songs broke the silences of the
+					nights, strife, hatred, vengeance festered everywhere, like sores on the surface of the
+					earth. But the great Tyee snatched a week away from the bloodshed and battle, for he must
+					make this feast in his daughter's honour, nor permit any mere enemy to come between him
+					and the traditions of his race and household. So her turned deaf ears to their war songs,
+					he ignored their insulting paddle-dips, which encroached within his own coast waters, and
+					he prepared, as a great Tyee should, to celebrate in honour of his daughters. 'But five
+					suns before the feast these two maidens came to him, hand within hand. "Some day we may
+					mother a man-child," they said, "a man-child who may grow to be just such a great Tyee as
+					you are, oh, our father, and for this honour that may some day be ours, we have come to
+					crave a favour of you." '"What favour, children of mine, and of your mother? It is yours
+					for the asking, this day," he answered. "Will you, for our sakes, invite the hostile
+					tribe, the tribe you war upon, to our feast?" they asked. "To a peaceful feast, a feast in
+					the honour of women?" he exclaimed. "So we would have it," they replied. "And so shall it
+					be," he declared. "I can deny you nothing this day, and sometime your sons may be born to
+					bless this peace you have asked, and to bless their mothers' sire for giving it."'Then he
+					turned to the young men of the tribe and said, "Build fires this night on all the coast
+					headlines, fires of welcome. Go forth in your canoes, face the north, and greet the enemy,
+					and tell them that I, the Tyee of the Capilanos, bid them join me for a feast in honour of
+					my two daughters."'And when the Northern tribes got the invitation they flocked down the
+					coast to this feast of a great Peace. They brought their women and their children, they
+					brought game and fish and o-lil-lie, as gifts. Never was such a Potlatch (a gift feast),
+					never was such joyousness, such long, glad days, such soft, sweet nights. The war canoes
+					were emptied of deadly weapons and filled with the daily catch of salmon. The hostile war
+					songs ceased, and in their place were heard laughter and singing, and the play-games of
+					the children of two tribes which had been until now ancient enemies, and a great and
+					lasting brotherhood was sealed between them. The war songs were ended forever.' The
+					Klootchman's voice fell very low, and the last words were almost whispered. 'And what of
+					the two sweet daughters of the great Tyee?' I asked, slipping my hand in hers. 'They are
+					there,' she said, pointing to the twin peaks which rose far above us. 'The Great Spirit
+					made them immortal. They will always be there in that high place. Their offspring now rule
+					these tribes, for were not Peace and Brotherhood born of them? And there the two Sisters
+					have stood these thousands of years, and will stand for thousands of years to come,
+					guarding the Peace of the Pacific coast, and the serenity of the Capilano Canon.'</p>
+			</div>
+		</body>
+	</text>
+</TEI>
