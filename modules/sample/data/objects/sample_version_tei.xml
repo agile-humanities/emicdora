@@ -1,29 +1,278 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
-    <teiHeader>
-        <fileDesc>
-            <titleStmt>
-                <title/>
-            </titleStmt>
-            <publicationStmt>
-                <p/>
-            </publicationStmt>
-            <sourceDesc>
-                <p>Created from islandora book ingest unless otherwise noted.</p>
-            </sourceDesc>
-        </fileDesc>
-    </teiHeader>
+	<teiHeader>
+		<fileDesc>
+			<titleStmt>
+				<title/>
+			</titleStmt>
+			<publicationStmt>
+				<p/>
+			</publicationStmt>
+			<sourceDesc>
+				<p>Created from islandora book ingest unless otherwise noted.</p>
+			</sourceDesc>
+		</fileDesc>
+	</teiHeader>
 
-    <text>
-        <front/>
-        <body><div xml:id="struct_540">
-  <head xml:id="struct_543" type="title">The Legend of the Two Sisters</head>
-  <byline xml:id="struct_544">By E. Pauline Johnson &#x2013; Tekahionwake</byline>
-  <p xml:id="struct_541">You can see them from the heights, from the <placeName xml:id="struct_1797">pleasure grounds</placeName>, from the gay thoroughfares, from the great hotel windows - those twin peaks of the twin mountains that lift their pearly summits across the inlet which washes with its ceaseless tides the margins of Vancouver, the beautiful city which is called 'The Sunset Gateway' of the Dominion of <placeName xml:id="struct_1413">Canada</placeName>. Sometimes the smoke of forest fires blurs these twin peaks, until they swim in a purple atmosphere too beautiful for words to paint. Sometimes the slanting rains festoon their grey and gauzy veils about the crests, and the peaks fade into inadequate outlines of soft shadows, melting, melting, <del xml:id="struct_2177">forever melting</del>, into the distances. But for most days of the year, the sun circles the twin glories with a sweep of gold, the moon washes them with a torrent of silver, and they stand immovable through sun and shadow, smiling on one side above the waters of the restless Pacific, on the other, above the depths and eternal silence of the Capilano Canon. Throughout the British Darn Empire these peaks are known as 'The Lions of Vancouver.' Their striking resemblance to Landseer's Lions at the base of Nelson's Monument in Trafalgar Square, London, has won them this name. But the Indians of the coast know nothing of the white man's appellation, and you must indeed get near to the heart of some ancient Klootchman before she will consent to tell you the Legend of the Twin Sisters.&#xA0;</p>
-  <p xml:id="struct_542">We had been driving for some time, the handsome chief of the Capilanos sitting in the front seat of the light surrey, his slim, silent young daughter beside him, I in the back seat, and at my side the quaint old Indian mother, who, from time to time, told me the traditions of her people, in the half-halting broken English that is never so beautiful as when it slips from an Indian tongue. At our feet were baskets of exquisite weaver, all her handiwork, and that of her young daughter sitting before us. With housewifely care she had stowed these away before starting for the drive, for it was berry time, and she had no thought of leaving such precious muck-a-muck for the foxes and birds, when her children and grandchildren had willing mouths to be filled. The chief was an excellent provider, but 'Why not add to the store?' she remarked simply. 'One must not be wasteful of these precious, God-given wild things.' So the baskets reposed nearby, ready to be filled when opportunity afforded. The trail wound about the foot of a cluster of mountains, following a riotous stream called the Capilano River, which brawled and quarrelled, whispered and laughed among its rocks and boulders, tumbling head-long one moment, the next circling into a deep, transparent pool where leaping salmon and shy mountain trout glinted in the sunshine. 'So many things belong to this river,' said the Klootchman in her pretty, stammering English, which I must eliminate if I am to make this story lucid. So I must keep to the everyday phrases, and my readers must be the losers of her fascinating expressions; but after all, it was her wonderful eyes and gestures that really made the tale, and what use to attempt a description of these? It is impossible. 'Yes, the river holds many secrets,' she continued, 'secrets of strong men's battles and many tragedies, but the mountains hold the secrets of an Indian mother's heart, and those are the greatest secrets of all things.' Her voice fell to a whisper, but her speaking eyes swept the distant summits with an understanding far subtler than sight. I did not offer a reply, for I knew that in her own good time the Klootchman would catch the mood of the mountains and impart to me some of their lore. The silence was long. Once or twice she swept effective gestures that were filled with meaning. She wishes me to notice the crags and ledges, haunts of the mountain sheep and wild goats, a winging hawk, a leaping trout, the crimsoning o-lil-lies (Chinook for berries). Then as if from dreams she suddenly awoke. 'You will want to know the secret that is held in the mountains, the secret of the Indian mother's heart?' she asked. I nodded. I could see she liked that wordless reply, for she placed her narrow brown hand on my arm, nor did she remove it during her entire recital of The Legend of the Two Sisters'You see them - those two peaks - towering forever and ever in that high place? Those are the Chief's Daughters, that every Indian mother loves. You see them, but you may not know - you who have come from the Land of Morning, the Land of Sunrise - for you have different customs, different traditions, from those of our people in the Sunset Land. I say you may not know that when our daughters step from childhood into the great world of womanhood, when the fitness for motherhood crowns them, we coast Indians of the sunset country regard this occasion as one of extreme rejoicing, great honour and unspeakable gladness. The being who possesses the possibility of some day becoming a mother receives much honour in most nations, but to us, the Sunset Tribes of Redmen, she is almost sacred. So, when our girls reach womanhood, we make it a great occasion. The parents usually give a feast that lasts many days. The entire tribe is bidden to this festival. More than that, when a great Tyee (Chinook for chief) celebrates for his daughter, sometimes the tribes from far up the coast, from the far North, from inland, from the mountain passes, and the Cariboo Country, are bidden as guests to the feast. During these feast days the girl is placed in a high seat, an exalted position, for is she not marriageable? and does not marriage mean motherhood? and is not motherhood the most exalted position in the world? So we place the girl on a high elevation, for she must know and realize her responsibility, she must recognize that she is the greatest factor in the world, and she must sit in a high place as becomes her heritage as a woman, therefore as a possible mother, for this is the law of our people - we of the Sunset Tribes. It was years ago, hundreds of years - yes, thousands of years (the sweet old Klootchman pronounced it 'Tousen off yea-rs.' It was the only sentence of her quaint, broken English I was ever able to actually capture) - yes, more than thousands of years ago that the great Tyee of our tribe had two daughters, young, livable, and oh! very beautiful. They grew to womanhood the same time, and a mighty feast was to be given, such a feast as the Coast had never yet seen. The only shadow on the joy of it all was war, for the tribe of the great Tyee was at war with the Upper Coast Indians - those who lived north of what is now named by the white men the Port of Prince Rupert.'Giant war canoes fretted the entire coast line, war parties paddled their way up and down, war songs broke the silences of the nights, strife, hatred, vengeance festered everywhere, like sores on the surface of the earth. But the great Tyee snatched a week away from the bloodshed and battle, for he must make this feast in his daughter's honour, nor permit any mere enemy to come between him and the traditions of his race and household. So her turned deaf ears to their war songs, he ignored their insulting paddle-dips, which encroached within his own coast waters, and he prepared, as a great Tyee should, to celebrate in honour of his daughters. 'But five suns before the feast these two maidens came to him, hand within hand. "Some day we may mother a man-child," they said, "a man-child who may grow to be just such a great Tyee as you are, oh, our father, and for this honour that may some day be ours, we have come to crave a favour of you." '"What favour, children of mine, and of your mother? It is yours for the asking, this day," he answered. "Will you, for our sakes, invite the hostile tribe, the tribe you war upon, to our feast?" they asked. "To a peaceful feast, a feast in the honour of women?" he exclaimed. "So we would have it," they replied. "And so shall it be," he declared. "I can deny you nothing this day, and sometime your sons may be born to bless this peace you have asked, and to bless their mothers' sire for giving it."'Then he turned to the young men of the tribe and said, "Build fires this night on all the coast headlines, fires of welcome. Go forth in your canoes, face the north, and greet the enemy, and tell them that I, the Tyee of the Capilanos, bid them join me for a feast in honour of my two daughters."'And when the Northern tribes got the invitation they flocked down the coast to this feast of a great Peace. They brought their women and their children, they brought game and fish and o-lil-lie, as gifts. Never was such a Potlatch (a gift feast), never was such joyousness, such long, glad days, such soft, sweet nights. The war canoes were emptied of deadly weapons and filled with the daily catch of salmon. The hostile war songs ceased, and in their place were heard laughter and singing, and the play-games of the children of two tribes which had been until now ancient enemies, and a great and lasting brotherhood was sealed between them. The war songs were ended forever.' The Klootchman's voice fell very low, and the last words were almost whispered. 'And what of the two sweet daughters of the great Tyee?' I asked, slipping my hand in hers. 'They are there,' she said, pointing to the twin peaks which rose far above us. 'The Great Spirit made them immortal. They will always be there in that high place. Their offspring now rule these tribes, for were not Peace and Brotherhood born of them? And there the two Sisters have stood these thousands of years, and will stand for thousands of years to come, guarding the Peace of the Pacific coast, and the serenity of the Capilano Canon.'</p>
-</div><ab>ood, when the &#xFB01;tness for motherhood crowns<lb/>e coast Indians of the sunset country regard this<lb/>as one of extreme rejoicing, great honor and<lb/>ble gladness. The being who possesses the pos&#x2014;<lb/>of some day hecoming a mother receives much<lb/>in most nations, but to us, the Sunset Tribes of<lb/>she is almost sacred. So, when our girls reach<lb/>- d, we make it a great occasion. The parents<lb/>y give a feast that lasts many days. The entire<lb/>&#x2018;is bidden to this festival. More than that. when a<lb/>Tyce (Chinook for chief) celebrates for his daughter,<lb/>times the tribes from far up the coast, from the far<lb/>from inland, from the mountain pa -es. and the<lb/><lb/>&#x2019; boo Country, are bidden as guests to the feast. During<lb/>feast days the girl is placed in a high seat, an exalted<lb/>tion, for is 'le not nlarriageable? and does not mar&#xBB;<lb/>g , mean motherhood? and is not motherhood the most<lb/>&#xAB; ted position in the world? So we place the girl on a<lb/>j elevation, for she must know and realize her responsi&#x2014;<lb/>lty, she must recognize that she is the greatest factor<lb/>_ the world, and she must sit in a high place as becomes<lb/>heritage as a woman, therefore as a possible mother,<lb/>: this is the law of our pe0ple&#x2014;we of the Sunset Tribes.<lb/>' was years ago, hundreds of years&#x2014;yes, thousands of years<lb/>i e sweet old Klootchman pronounced it "Tousen o&#xFB01;<lb/>-rs." It was the only sentence of her quaint, broken<lb/>glish I was ever able to actually capture)&#x2014;yes, more<lb/>thousands of years ago that the great Tyee of our tribe<lb/><lb/>, d two daughters. young, lovable, and oh! very beau&#xBB;<lb/>_ ful. They grew to wom-<lb/>hood the same time. autl<lb/>mighty feast was to he<lb/>ven, such a feast as the<lb/>. st had never yet seen.<lb/>A e only shadow on the joy<lb/>f it all was war, for the<lb/>- ibe of the great Tyee<lb/>as at war with the Upper<lb/>Coast ln(liali~ihose who<lb/>,lived north of wllat is now<lb/>med by the white men<lb/>&#x2018;the Port of Prince Rupert.<lb/>' &#x201C;Giant war canoes fret-<lb/>ted the entire coast line,<lb/>war parties |):|ll(.llE(l their<lb/>&#x2018;way up and down, war ,<lb/>mugs broke the silences of &gt;<lb/>the nights, strife, hatred, -<lb/>vengeance festered every-<lb/>where, like sores on the<lb/>surface of the earth. But<lb/>The great Tyee snatched a<lb/><lb/>i<lb/><lb/> <lb/> <lb/> <lb/> <lb/><lb/>  <lb/>   <lb/>     <lb/> <lb/>   <lb/>  <lb/>  <lb/>  <lb/>  <lb/>    <lb/>   <lb/>  <lb/>      <lb/>     <lb/>    <lb/> <lb/>  <lb/>  <lb/> <lb/>   <lb/>   <lb/>    <lb/> <lb/>    <lb/>   <lb/>  <lb/><lb/>.daughters' honor, nor per<lb/>&#x2018;init any mere enemy to<lb/>come between him and the<lb/>&#x201C;traditions of his race and<lb/>household. So he tnrlletl<lb/>deaf ears to their war<lb/>tsougs, he ignored their IlI&#x2014;<lb/>suiting parldle-dips, which<lb/>,encroachcrl within his own<lb/><lb/>   <lb/><lb/>  <lb/> <lb/> <lb/> <lb/> <lb/> <lb/>  <lb/>  <lb/> <lb/> <lb/> <lb/> <lb/> <lb/>  <lb/> <lb/><lb/>it who: favor, cmltlren 0/ mlne! 1: in yours Iur the nmag ma day.&#x201D;<lb/><lb/>coast waters, and he prepared, as a great Tyee should, to<lb/>celebrate in honor of his daughters. -<lb/><lb/>"But live suns before the feast these two maidus came<lb/>to him, hand within hand. &#x2018; Some day we may nglrtber I<lb/>nian~chiltl,' they said, &#x2018;a manrchild who may to be<lb/>just such a great Tyee as you are, oh, our father, |_nd bar<lb/>this honor that may some day be ours, we have come to<lb/>crave a favor of you.&#x2018;<lb/><lb/>&#x201C; ' What favor, children of mine, and of your mnlher?<lb/>It is yours for the asking, this day,&#x2019; he answered.<lb/><lb/>&#x201C;Will you, for our sakes, invite the hostile tribe, the<lb/>tribe you war upon, to our feast?&#x2018; they asked.<lb/><lb/>&#x2018;&#x201C;To a peaceful feast, a feast in the honor of women?&#x2019;<lb/>he exclaimed.<lb/><lb/>~ &#x2018; So we would have it,&#x2019; they replied.<lb/><lb/>&#x201C; l .-\nd so shall it be,&#x2019; he declared &#x2018;I can deny you n0t|I~<lb/>ing this day. and sometime your sons may be born to bless<lb/>this peace you have asked. and to bless their mothers&#x2018; sire<lb/>for iving it.&#x2019;<lb/><lb/>&#x2018;hen he turned to the young men of the tribe and<lb/>said, &#x2018; Build &#xFB01;res this night on all the coast headlines, &#xFB01;res<lb/>of welcome. Go forth in your canoes, face the north, and<lb/>greet the enemy, and tell them that 1, the Tye&#xE9; of the<lb/>capilanos, bid them join me for a (east in honor of my<lb/>two daughters.&#x2019;<lb/><lb/>&#x201C;And when the Northern tribes got that invitation they<lb/>&#xFB02;ocked down the coast to this feast of a great Peace. They<lb/>brought their women and their children, they brought game<lb/>and fish alltl o&#x2014;l.il- e, as gifts. Never was such a Potlatch<lb/>(a gift feast), never was such joyousncss, such<lb/>lung, glad days, such soft. sweet nights. The war<lb/>canoes were emptied of deadly weapons and filled<lb/>with the daily catch of salmon. The hostile war<lb/>songs ceased, and in their place were heard laughter<lb/>and singing, and the play&#x2014;games of the children<lb/>of two tribes which had been until now ancient<lb/>enemies, and a great and lasting brotherhood<lb/>was sealed between them. The war<lb/>songs were ended forever."<lb/><lb/> <lb/><lb/>The Klomchman&#x2019;s voice fell very<lb/>low, and the last words were almost<lb/>whispered.<lb/><lb/>"And what of the two sweet daugh&#xBB;<lb/><lb/>ters of the great Tyec ?" I asked,<lb/>slipping my hand in hers.<lb/><lb/>" They are there," she said, point-<lb/>ing to the twin peaks<lb/>which rose far above us.<lb/>"The Great Spirit made<lb/>them immortal. They will<lb/>always he there in that<lb/><lb/>- week away from bloodshed high place. Their on. '<lb/>and battle, for he must spring now rule these<lb/>.make this feast in his tribes, for were not Peace<lb/><lb/>and Brotherhood bom of<lb/>them? And there the Two<lb/>Sisters have stood these<lb/>thousands of years, and<lb/>will stand for thousands of<lb/>years [0 come, guarding<lb/>the Peace of the Paci&#xFB01;c<lb/>coast, and the sere of<lb/>the Capilano Ca&#xFB01;on.&#x201D;<lb/><lb/> <lb/><lb/> <lb/><lb/> <lb/><lb/>&#x201C; lvlllc habit of obedience, fort-ed in upon the imnressihle<lb/><lb/>&#x2018;nature of a child, (I09)! not develop judgment am!<lb/>will, but does develop that fntul facility in following other<lb/>people&#x2018;: judgment and other people&#x2019;: wills which tends to<lb/>make us 1 helpless mob, more sheep. inxlend of wise. free,<lb/>slrong individuals. The bllhit of lilllml&#x2018; 'on to authority,<lb/>the long. l&#x2018;lcepl_ mprelued t&#x2018;0l\Vl('tl0n that to be good is to<lb/>give up, that there is virtue in the act of surrenderrihis in<lb/>one of the sources from which we cnntinllally replenish<lb/>bllmun wenlmenu, &#xFB01;nd &#xFB01;ll the world with an inert Inusn of<lb/>mindleutl, willrlesx folk, pushed and pulled about by those<lb/>whom they obey.<lb/><lb/>  <lb/><lb/> <lb/>   <lb/><lb/>&#x2018;Moreover, there is the opposite elrect&#x2014;the injurious<lb/>rt-at-lion rroro ob&lt;=lIiencw=&#x2014;nlmolot as common and hurttul :5<lb/>its full roltievernent; namely, that &#xFB01;erce, rebellious desire to<lb/>do eriir-tly the oppoirite of whul one is told. which is no<lb/>nein-er to calm judgment than the other.<lb/><lb/>"In obeying another will or in resisting another will. '<lb/>nothing is gained in wisdom. A hunnin creature in a sole<lb/>gov-ernin,v intelligence, and the rich years of childhood<lb/>should be passed in the guarded exercise of those powers.<lb/><lb/>~ It is a commonplace observation that the beat children,<lb/>i. e., the most submislive and obedient, do not nnrlre the but<lb/>men."&#x2014;&#x2014;&#x201C; vanmnmg !'hildren," ailrrnrn.<lb/><lb/>M .n lA\'
-      </ab>
-    </body>
-        <back/>
-    </text>
+	<text>
+		<front/>
+		<body>
+			<div xml:id="struct_540">
+				<head type="title" xml:id="struct_543">The Legend of the Two Sisters</head>
+				<byline xml:id="struct_544">By E. Pauline Johnson &#x2013; Tekahionwake</byline>
+				<p xml:id="struct_541">You can see them from the heights, from the <placeName
+						xml:id="struct_1797">pleasure grounds</placeName>, from the gay thoroughfares, from the
+					great hotel windows - those twin peaks of the twin mountains that lift their pearly
+					summits across the inlet which washes with its ceaseless tides the margins of Vancouver,
+					the beautiful city which is called 'The Sunset Gateway' of the Dominion of <placeName
+						xml:id="struct_1413">Canada</placeName>. Sometimes the smoke of forest fires blurs these
+					twin peaks, until they swim in a purple atmosphere too beautiful for words to paint.
+					Sometimes the slanting rains festoon their grey and gauzy veils about the crests, and the
+					peaks fade into inadequate outlines of soft shadows, melting, melting, <del
+						xml:id="struct_2177">forever melting</del>, into the distances. But for most days of the
+					year, the sun circles the twin glories with a sweep of gold, the moon washes them with a
+					torrent of silver, and they stand immovable through sun and shadow, smiling on one side
+					above the waters of the restless Pacific, on the other, above the depths and eternal
+					silence of the Capilano Canon. Throughout the British Darn Empire these peaks are known as
+					'The Lions of Vancouver.' Their striking resemblance to Landseer's Lions at the base of
+					Nelson's Monument in Trafalgar Square, London, has won them this name. But the Indians of
+					the coast know nothing of the white man's appellation, and you must indeed get near to the
+					heart of some ancient Klootchman before she will consent to tell you the Legend of the
+					Twin Sisters.&#xA0;</p>
+				<p xml:id="struct_542">We had been driving for some time, the handsome chief of the
+					Capilanos sitting in the front seat of the light surrey, his slim, silent young daughter
+					beside him, I in the back seat, and at my side the quaint old Indian mother, who, from
+					time to time, told me the traditions of her people, in the half-halting broken English
+					that is never so beautiful as when it slips from an Indian tongue. At our feet were
+					baskets of exquisite weaver, all her handiwork, and that of her young daughter sitting
+					before us. With housewifely care she had stowed these away before starting for the drive,
+					for it was berry time, and she had no thought of leaving such precious muck-a-muck for the
+					foxes and birds, when her children and grandchildren had willing mouths to be filled. The
+					chief was an excellent provider, but 'Why not add to the store?' she remarked simply. 'One
+					must not be wasteful of these precious, God-given wild things.' So the baskets reposed
+					nearby, ready to be filled when opportunity afforded. The trail wound about the foot of a
+					cluster of mountains, following a riotous stream called the Capilano River, which brawled
+					and quarrelled, whispered and laughed among its rocks and boulders, tumbling head-long one
+					moment, the next circling into a deep, transparent pool where leaping salmon and shy
+					mountain trout glinted in the sunshine. 'So many things belong to this river,' said the
+					Klootchman in her pretty, stammering English, which I must eliminate if I am to make this
+					story lucid. So I must keep to the everyday phrases, and my readers must be the losers of
+					her fascinating expressions; but after all, it was her wonderful eyes and gestures that
+					really made the tale, and what use to attempt a description of these? It is impossible.
+					'Yes, the river holds many secrets,' she continued, 'secrets of strong men's battles and
+					many tragedies, but the mountains hold the secrets of an Indian mother's heart, and those
+					are the greatest secrets of all things.' Her voice fell to a whisper, but her speaking
+					eyes swept the distant summits with an understanding far subtler than sight. I did not
+					offer a reply, for I knew that in her own good time the Klootchman would catch the mood of
+					the mountains and impart to me some of their lore. The silence was long. Once or twice she
+					swept effective gestures that were filled with meaning. She wishes me to notice the crags
+					and ledges, haunts of the mountain sheep and wild goats, a winging hawk, a leaping trout,
+					the crimsoning o-lil-lies (Chinook for berries). Then as if from dreams she suddenly
+					awoke. 'You will want to know the secret that is held in the mountains, the secret of the
+					Indian mother's heart?' she asked. I nodded. I could see she liked that wordless reply,
+					for she placed her narrow brown hand on my arm, nor did she remove it during her entire
+					recital of The Legend of the Two Sisters'You see them - those two peaks - towering forever
+					and ever in that high place? Those are the Chief's Daughters, that every Indian mother
+					loves. You see them, but you may not know - you who have come from the Land of Morning,
+					the Land of Sunrise - for you have different customs, different traditions, from those of
+					our people in the Sunset Land. I say you may not know that when our daughters step from
+					childhood into the great world of womanhood, when the fitness for motherhood crowns them,
+					we coast Indians of the sunset country regard this occasion as one of extreme rejoicing,
+					great honour and unspeakable gladness. The being who possesses the possibility of some day
+					becoming a mother receives much honour in most nations, but to us, the Sunset Tribes of
+					Redmen, she is almost sacred. So, when our girls reach womanhood, we make it a great
+					occasion. The parents usually give a feast that lasts many days. The entire tribe is
+					bidden to this festival. More than that, when a great Tyee (Chinook for chief) celebrates
+					for his daughter, sometimes the tribes from far up the coast, from the far North, from
+					inland, from the mountain passes, and the Cariboo Country, are bidden as guests to the
+					feast. During these feast days the girl is placed in a high seat, an exalted position, for
+					is she not marriageable? and does not marriage mean motherhood? and is not motherhood the
+					most exalted position in the world? So we place the girl on a high elevation, for she must
+					know and realize her responsibility, she must recognize that she is the greatest factor in
+					the world, and she must sit in a high place as becomes her heritage as a woman, therefore
+					as a possible mother, for this is the law of our people - we of the Sunset Tribes. It was
+					years ago, hundreds of years - yes, thousands of years (the sweet old Klootchman
+					pronounced it 'Tousen off yea-rs.' It was the only sentence of her quaint, broken English
+					I was ever able to actually capture) - yes, more than thousands of years ago that the
+					great Tyee of our tribe had two daughters, young, livable, and oh! very beautiful. They
+					grew to womanhood the same time, and a mighty feast was to be given, such a feast as the
+					Coast had never yet seen. The only shadow on the joy of it all was war, for the tribe of
+					the great Tyee was at war with the Upper Coast Indians - those who lived north of what is
+					now named by the white men the Port of Prince Rupert.'Giant war canoes fretted the entire
+					coast line, war parties paddled their way up and down, war songs broke the silences of the
+					nights, strife, hatred, vengeance festered everywhere, like sores on the surface of the
+					earth. But the great Tyee snatched a week away from the bloodshed and battle, for he must
+					make this feast in his daughter's honour, nor permit any mere enemy to come between him
+					and the traditions of his race and household. So her turned deaf ears to their war songs,
+					he ignored their insulting paddle-dips, which encroached within his own coast waters, and
+					he prepared, as a great Tyee should, to celebrate in honour of his daughters. 'But five
+					suns before the feast these two maidens came to him, hand within hand. "Some day we may
+					mother a man-child," they said, "a man-child who may grow to be just such a great Tyee as
+					you are, oh, our father, and for this honour that may some day be ours, we have come to
+					crave a favour of you." '"What favour, children of mine, and of your mother? It is yours
+					for the asking, this day," he answered. "Will you, for our sakes, invite the hostile
+					tribe, the tribe you war upon, to our feast?" they asked. "To a peaceful feast, a feast in
+					the honour of women?" he exclaimed. "So we would have it," they replied. "And so shall it
+					be," he declared. "I can deny you nothing this day, and sometime your sons may be born to
+					bless this peace you have asked, and to bless their mothers' sire for giving it."'Then he
+					turned to the young men of the tribe and said, "Build fires this night on all the coast
+					headlines, fires of welcome. Go forth in your canoes, face the north, and greet the enemy,
+					and tell them that I, the Tyee of the Capilanos, bid them join me for a feast in honour of
+					my two daughters."'And when the Northern tribes got the invitation they flocked down the
+					coast to this feast of a great Peace. They brought their women and their children, they
+					brought game and fish and o-lil-lie, as gifts. Never was such a Potlatch (a gift feast),
+					never was such joyousness, such long, glad days, such soft, sweet nights. The war canoes
+					were emptied of deadly weapons and filled with the daily catch of salmon. The hostile war
+					songs ceased, and in their place were heard laughter and singing, and the play-games of
+					the children of two tribes which had been until now ancient enemies, and a great and
+					lasting brotherhood was sealed between them. The war songs were ended forever.' The
+					Klootchman's voice fell very low, and the last words were almost whispered. 'And what of
+					the two sweet daughters of the great Tyee?' I asked, slipping my hand in hers. 'They are
+					there,' she said, pointing to the twin peaks which rose far above us. 'The Great Spirit
+					made them immortal. They will always be there in that high place. Their offspring now rule
+					these tribes, for were not Peace and Brotherhood born of them? And there the two Sisters
+					have stood these thousands of years, and will stand for thousands of years to come,
+					guarding the Peace of the Pacific coast, and the serenity of the Capilano Canon.'</p>
+			</div>
+			<ab>ood, when the &#xFB01;tness for motherhood crowns<lb/>e coast Indians of the sunset
+				country regard this<lb/>as one of extreme rejoicing, great honor and<lb/>ble gladness. The
+				being who possesses the pos&#x2014;<lb/>of some day hecoming a mother receives much<lb/>in
+				most nations, but to us, the Sunset Tribes of<lb/>she is almost sacred. So, when our girls
+				reach<lb/>- d, we make it a great occasion. The parents<lb/>y give a feast that lasts many
+				days. The entire<lb/>&#x2018;is bidden to this festival. More than that. when a<lb/>Tyce
+				(Chinook for chief) celebrates for his daughter,<lb/>times the tribes from far up the coast,
+				from the far<lb/>from inland, from the mountain pa -es. and the<lb/><lb/>&#x2019; boo
+				Country, are bidden as guests to the feast. During<lb/>feast days the girl is placed in a
+				high seat, an exalted<lb/>tion, for is 'le not nlarriageable? and does not mar&#xBB;<lb/>g ,
+				mean motherhood? and is not motherhood the most<lb/>&#xAB; ted position in the world? So we
+				place the girl on a<lb/>j elevation, for she must know and realize her
+				responsi&#x2014;<lb/>lty, she must recognize that she is the greatest factor<lb/>_ the
+				world, and she must sit in a high place as becomes<lb/>heritage as a woman, therefore as a
+				possible mother,<lb/>: this is the law of our pe0ple&#x2014;we of the Sunset Tribes.<lb/>'
+				was years ago, hundreds of years&#x2014;yes, thousands of years<lb/>i e sweet old Klootchman
+				pronounced it "Tousen o&#xFB01;<lb/>-rs." It was the only sentence of her quaint,
+				broken<lb/>glish I was ever able to actually capture)&#x2014;yes, more<lb/>thousands of
+				years ago that the great Tyee of our tribe<lb/><lb/>, d two daughters. young, lovable, and
+				oh! very beau&#xBB;<lb/>_ ful. They grew to wom-<lb/>hood the same time. autl<lb/>mighty
+				feast was to he<lb/>ven, such a feast as the<lb/>. st had never yet seen.<lb/>A e only
+				shadow on the joy<lb/>f it all was war, for the<lb/>- ibe of the great Tyee<lb/>as at war
+				with the Upper<lb/>Coast ln(liali~ihose who<lb/>,lived north of wllat is now<lb/>med by the
+				white men<lb/>&#x2018;the Port of Prince Rupert.<lb/>' &#x201C;Giant war canoes
+				fret-<lb/>ted the entire coast line,<lb/>war parties |):|ll(.llE(l their<lb/>&#x2018;way up
+				and down, war ,<lb/>mugs broke the silences of &gt;<lb/>the nights, strife, hatred,
+				-<lb/>vengeance festered every-<lb/>where, like sores on the<lb/>surface of the earth.
+				But<lb/>The great Tyee snatched a<lb/><lb/>i<lb/><lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/><lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/><lb/>.daughters' honor, nor per<lb/>&#x2018;init any mere enemy to<lb/>come between him
+				and the<lb/>&#x201C;traditions of his race and<lb/>household. So he tnrlletl<lb/>deaf ears
+				to their war<lb/>tsougs, he ignored their IlI&#x2014;<lb/>suiting parldle-dips,
+				which<lb/>,encroachcrl within his own<lb/><lb/>
+				<lb/><lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/>
+				<lb/><lb/>it who: favor, cmltlren 0/ mlne! 1: in yours Iur the nmag ma
+				day.&#x201D;<lb/><lb/>coast waters, and he prepared, as a great Tyee should,
+				to<lb/>celebrate in honor of his daughters. -<lb/><lb/>"But live suns before the feast these
+				two maidus came<lb/>to him, hand within hand. &#x2018; Some day we may nglrtber
+				I<lb/>nian~chiltl,' they said, &#x2018;a manrchild who may to be<lb/>just such a great Tyee
+				as you are, oh, our father, |_nd bar<lb/>this honor that may some day be ours, we have come
+				to<lb/>crave a favor of you.&#x2018;<lb/><lb/>&#x201C; ' What favor, children of mine, and
+				of your mnlher?<lb/>It is yours for the asking, this day,&#x2019; he
+				answered.<lb/><lb/>&#x201C;Will you, for our sakes, invite the hostile tribe, the<lb/>tribe
+				you war upon, to our feast?&#x2018; they asked.<lb/><lb/>&#x2018;&#x201C;To a peaceful
+				feast, a feast in the honor of women?&#x2019;<lb/>he exclaimed.<lb/><lb/>~ &#x2018; So we
+				would have it,&#x2019; they replied.<lb/><lb/>&#x201C; l .-\nd so shall it be,&#x2019; he
+				declared &#x2018;I can deny you n0t|I~<lb/>ing this day. and sometime your sons may be born
+				to bless<lb/>this peace you have asked. and to bless their mothers&#x2018; sire<lb/>for
+				iving it.&#x2019;<lb/><lb/>&#x2018;hen he turned to the young men of the tribe and<lb/>said,
+				&#x2018; Build &#xFB01;res this night on all the coast headlines, &#xFB01;res<lb/>of
+				welcome. Go forth in your canoes, face the north, and<lb/>greet the enemy, and tell them
+				that 1, the Tye&#xE9; of the<lb/>capilanos, bid them join me for a (east in honor of
+				my<lb/>two daughters.&#x2019;<lb/><lb/>&#x201C;And when the Northern tribes got that
+				invitation they<lb/>&#xFB02;ocked down the coast to this feast of a great Peace.
+				They<lb/>brought their women and their children, they brought game<lb/>and fish alltl
+				o&#x2014;l.il- e, as gifts. Never was such a Potlatch<lb/>(a gift feast), never was such
+				joyousncss, such<lb/>lung, glad days, such soft. sweet nights. The war<lb/>canoes were
+				emptied of deadly weapons and filled<lb/>with the daily catch of salmon. The hostile
+				war<lb/>songs ceased, and in their place were heard laughter<lb/>and singing, and the
+				play&#x2014;games of the children<lb/>of two tribes which had been until now
+				ancient<lb/>enemies, and a great and lasting brotherhood<lb/>was sealed between them. The
+				war<lb/>songs were ended forever."<lb/><lb/>
+				<lb/><lb/>The Klomchman&#x2019;s voice fell very<lb/>low, and the last words were
+				almost<lb/>whispered.<lb/><lb/>"And what of the two sweet daugh&#xBB;<lb/><lb/>ters of the
+				great Tyec ?" I asked,<lb/>slipping my hand in hers.<lb/><lb/>" They are there," she said,
+				point-<lb/>ing to the twin peaks<lb/>which rose far above us.<lb/>"The Great Spirit
+				made<lb/>them immortal. They will<lb/>always he there in that<lb/><lb/>- week away from
+				bloodshed high place. Their on. '<lb/>and battle, for he must spring now rule
+				these<lb/>.make this feast in his tribes, for were not Peace<lb/><lb/>and Brotherhood bom
+				of<lb/>them? And there the Two<lb/>Sisters have stood these<lb/>thousands of years,
+				and<lb/>will stand for thousands of<lb/>years [0 come, guarding<lb/>the Peace of the
+				Paci&#xFB01;c<lb/>coast, and the sere of<lb/>the Capilano Ca&#xFB01;on.&#x201D;<lb/><lb/>
+				<lb/><lb/>
+				<lb/><lb/>
+				<lb/><lb/>&#x201C; lvlllc habit of obedience, fort-ed in upon the
+				imnressihle<lb/><lb/>&#x2018;nature of a child, (I09)! not develop judgment am!<lb/>will,
+				but does develop that fntul facility in following other<lb/>people&#x2018;: judgment and
+				other people&#x2019;: wills which tends to<lb/>make us 1 helpless mob, more sheep. inxlend
+				of wise. free,<lb/>slrong individuals. The bllhit of lilllml&#x2018; 'on to
+				authority,<lb/>the long. l&#x2018;lcepl_ mprelued t&#x2018;0l\Vl('tl0n that to be good is
+				to<lb/>give up, that there is virtue in the act of surrenderrihis in<lb/>one of the sources
+				from which we cnntinllally replenish<lb/>bllmun wenlmenu, &#xFB01;nd &#xFB01;ll the world
+				with an inert Inusn of<lb/>mindleutl, willrlesx folk, pushed and pulled about by
+				those<lb/>whom they obey.<lb/><lb/>
+				<lb/><lb/>
+				<lb/>
+				<lb/><lb/>&#x2018;Moreover, there is the opposite elrect&#x2014;the injurious<lb/>rt-at-lion
+				rroro ob&lt;=lIiencw=&#x2014;nlmolot as common and hurttul :5<lb/>its full roltievernent;
+				namely, that &#xFB01;erce, rebellious desire to<lb/>do eriir-tly the oppoirite of whul one
+				is told. which is no<lb/>nein-er to calm judgment than the other.<lb/><lb/>"In obeying
+				another will or in resisting another will. '<lb/>nothing is gained in wisdom. A hunnin
+				creature in a sole<lb/>gov-ernin,v intelligence, and the rich years of childhood<lb/>should
+				be passed in the guarded exercise of those powers.<lb/><lb/>~ It is a commonplace
+				observation that the beat children,<lb/>i. e., the most submislive and obedient, do not
+				nnrlre the but<lb/>men."&#x2014;&#x2014;&#x201C; vanmnmg !'hildren," ailrrnrn.<lb/><lb/>M .n
+				lA\' </ab>
+		</body>
+		<back/>
+	</text>
 </TEI>

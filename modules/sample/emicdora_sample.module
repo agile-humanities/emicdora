@@ -66,7 +66,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   // TEI-RDF Object.
-  $tei_rdf_object = emicdora_create_required_object($connection, array(
+  $tei_rdf_01_object = emicdora_create_required_object($connection, array(
     'pid' => 'islandora:sample-tei-rdf-01',
     'label' => 'Sample TEI-RDF',
     'datastreams' => array(
@@ -74,7 +74,19 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
         'file' => "$object_path/sample_tei_rdf_01_rels_ext.rdf",
       ),
       'CWRC' => array(
-        'file' => "$object_path/sample_tei_rdf_01_tei_rdf.xml",
+        'file' => "$object_path/sample_tei_rdf_01_cwrc.xml",
+      ),
+    ),
+  ));
+  $tei_rdf_02_object = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:sample-tei-rdf-02',
+    'label' => 'Sample TEI-RDF',
+    'datastreams' => array(
+      'RELS-EXT' => array(
+        'file' => "$object_path/sample_tei_rdf_02_rels_ext.rdf",
+      ),
+      'CWRC' => array(
+        'file' => "$object_path/sample_tei_rdf_02_cwrc.xml",
       ),
     ),
   ));
@@ -126,6 +138,10 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       'RELS-EXT' => array(
         'file' => "$object_path/sample_book_rels_ext.rdf",
       ),
+      'TN' => array(
+        'file' => "$object_path/sample_book_tn.jpg",
+        'mimetype' => 'image/jpg',
+      ),
       'MODS' => array(
         'file' => "$object_path/sample_book_mods.xml",
       ),
@@ -175,6 +191,50 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
     ),
   ));
+  // Page Object.
+  $source_page_02_object = emicdora_create_required_object($connection, array(
+    'pid' => 'islandora:sample-page-02',
+    'label' => 'Sample Page',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$object_path/sample_page_02_tn.jpg",
+        'mimetype' => 'image/jpg',
+      ),
+      'HOCR' => array(
+        'file' => "$object_path/sample_page_02_hocr.html",
+        'mimetype' => 'text/html',
+      ),
+      'JP2' => array(
+        'file' => "$object_path/sample_page_02_jp2.jp2",
+        'mimetype' => 'image/jp2',
+      ),
+      'JPEG' => array(
+        'file' => "$object_path/sample_page_02_jpeg.jpg",
+        'mimetype' => 'image/jpg',
+      ),
+      'OBJ' => array(
+        'file' => "$object_path/sample_page_02_obj.tiff",
+        'mimetype' => 'image/tiff',
+      ),
+      'OCR' => array(
+        'file' => "$object_path/sample_page_02_ocr.txt",
+        'mimetype' => 'text/plain',
+      ),
+      'PDF' => array(
+        'file' => "$object_path/sample_page_02_pdf.pdf",
+        'mimetype' => 'application/pdf',
+      ),
+      'RELS-EXT' => array(
+        'file' => "$object_path/sample_page_02_rels_ext.rdf",
+      ),
+      'RELS-INT' => array(
+        'file' => "$object_path/sample_page_02_rels_int.rdf",
+      ),
+      'TECHMD' => array(
+        'file' => "$object_path/sample_page_02_techmd.xml",
+      ),
+    ),
+  ));
   // @todo Add Collation Objects, will also require some database manipulation.
   return array(
     'emicdora_sample' => array(
@@ -182,12 +242,14 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       'objects' => array(
         $critical_edition_object,
         $version_object,
-        $tei_rdf_object,
+        $tei_rdf_01_object,
+        $tei_rdf_02_object,
         $transcription_01_object,
         $transcription_02_object,
         $transcription_03_object,
         $source_book_object,
         $source_page_01_object,
+        $source_page_02_object,
       ),
     ),
   );
