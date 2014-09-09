@@ -72,7 +72,7 @@ function emicdora_versionable_object_form_source_autocomplete($type, $search) {
   $models = in_array($type, $models) ? array($type) : $models;
   $where_clause = '';
   foreach ($models as $model) {
-    $where_clause .=!empty($where_clause) ? 'UNION ' : '';
+    $where_clause .= !empty($where_clause) ? 'UNION ' : '';
     $where_clause .= "{ ?object fedora-model:hasModel <info:fedora/$model> . }\n";
   }
   $where_clause = substr($where_clause, 0, -1);
@@ -227,12 +227,6 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
           '#header' => array('PID', 'Version Title'),
           '#options' => $tei_rdf_objects,
           '#empty' => t('No TEI-RDF objects available. Please select "Create New"'),
-        ),
-        'tei_rdf_label' => array(
-          '#access' => $tei_rdf_source == 'new',
-          '#required' => TRUE,
-          '#type' => 'textfield',
-          '#title' => t('TEI-RDF Label'),
         ),
       ),
       'transcription_label' => array(
@@ -411,13 +405,12 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
     $tei_pages = array_keys(emicdora_get_members($tei_rdf->id, 'islandora:tei-rdfCModel', 'isDerivationOf'));
-    // Clone existing tei-rdf if selected
+    // Clone existing tei-rdf if selected.
     if (!empty($tei_pages)) {
       $batch = array(
         'title' => t('Cloning selected TEI-RDF Object.'),
         'file' => drupal_get_path('module', 'emicdora') . '/includes/ingest_versionable_object.form.inc',
         'progress_message' => t('@current of @total pages processed.', array('@total' => count($tei_pages))),
-        'finished' => 'emicdora_ingest_versionable_object_tei_rdf_batch_finished',
         'operations' => array(),
       );
       foreach ($tei_pages as $tei_page) {
@@ -483,54 +476,56 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       emicdora_add_cwrc_datastream($page);
       $ingest_objects['page'] = $page;
     }
-    // Create a new Transcription Object.
-    $transcription = emicdora_construct_transcription($versionable_object, $values['transcription_label']);
-    $ingest_objects['transcription'] = $transcription;
-    // Populate the Transcription Object.
-    switch ($values['transcription_source']) {
-      case 'tei-rdf':
-        $pages = ($values['tei_rdf_source'] == 'existing') ? islandora_paged_content_get_pages($tei_rdf) : islandora_paged_content_get_pages($source);
-        $pages = $values['limit_page_range'] ? array_splice($pages, $values['first'] - 1, $values['last']) : $pages;
-        if ($form_state['values']['tei_rdf_source'] == 'new' && !empty($pages)) {
-          // If there is already a batch in place we need to append to it,
-          // otherwise run from the existing object.
-          $batch = array(
-            'title' => t('Creating Transcription from TEI-RDF Object: @tei_rdf', array('@tei_rdf' => $versionable_object->label)),
-            'file' => drupal_get_path('module', 'emicdora') . '/includes/ingest_versionable_object.form.inc',
-            'progress_message' => t('@current of @total pages processed.', array('@total' => count($pages))),
-            'finished' => 'emicdora_ingest_versionable_object_transcription_batch_finished',
-            'operations' => array(),
+  }
+  // Create a new Transcription Object.
+  $transcription = emicdora_construct_transcription($versionable_object, $values['transcription_label']);
+  $ingest_objects['transcription'] = $transcription;
+  // Populate the Transcription Object.
+  switch ($values['transcription_source']) {
+    case 'tei-rdf':
+      $tei_rdf = $form_state['values']['tei_rdf'];
+      $tei_object = islandora_object_load($tei_rdf);
+      $pages = ($values['tei_rdf_source'] == 'existing') ? islandora_paged_content_get_pages($tei_object) : islandora_paged_content_get_pages($source);
+      $pages = $values['limit_page_range'] ? array_splice($pages, $values['first'] - 1, $values['last']) : $pages;
+      if (!empty($pages)) {
+        // If there is already a batch in place we need to append to it,
+        // otherwise run from the existing object.
+        $batch = array(
+          'title' => t('Creating Transcription from TEI-RDF Object: @tei_rdf', array('@tei_rdf' => $versionable_object->label)),
+          'file' => drupal_get_path('module', 'emicdora') . '/includes/ingest_versionable_object.form.inc',
+          'progress_message' => t('@current of @total pages processed.', array('@total' => count($pages))),
+          'finished' => 'emicdora_ingest_versionable_object_transcription_batch_finished',
+          'operations' => array(),
+        );
+        // If we are using a existing TEI-RDF use it's objects CWRC datastreams.
+        // Otherwise generate the CWRC datastream.
+        foreach (array_keys($pages) as $page) {
+          $batch['operations'][] = array(
+            'emicdora_ingest_versionable_object_transcription_batch_operation',
+            array($page),
           );
-          // If we are using a existing TEI-RDF use it's objects CWRC datastreams.
-          // Otherwise generate the CWRC datastream.
-          foreach (array_keys($pages) as $page) {
-            $batch['operations'][] = array(
-              'emicdora_ingest_versionable_object_transcription_batch_operation',
-              array($page),
-            );
-          }
-          batch_set($batch);
         }
-        else {
-          $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
-          $datastream->setContentFromString(t('Transcription'));
-          $transcription->ingestDatastream($datastream);
-        }
-        break;
-
-      case 'digital':
+        batch_set($batch);
+      }
+      else {
         $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
-        $datastream->setContentFromString($values['transcription']);
+        $datastream->setContentFromString(t('Transcription'));
         $transcription->ingestDatastream($datastream);
-        break;
+      }
+      break;
 
-      case 'upload':
-        $file = file_load($values['transcription_upload']);
-        $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
-        $datastream->setContentFromFile(drupal_realpath($file->uri), FALSE);
-        $transcription->ingestDatastream($datastream);
-        break;
-    }
+    case 'digital':
+      $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
+      $datastream->setContentFromString($values['transcription']);
+      $transcription->ingestDatastream($datastream);
+      break;
+
+    case 'upload':
+      $file = file_load($values['transcription_upload']);
+      $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
+      $datastream->setContentFromFile(drupal_realpath($file->uri), FALSE);
+      $transcription->ingestDatastream($datastream);
+      break;
   }
 }
 
@@ -640,20 +635,86 @@ function emicdora_copy_versionable_object_tei_rdf_page_batch_operation($page_pid
   $batch = &batch_get();
   $ingest_objects = &islandora_ingest_form_get_objects($batch['form_state']);
   $page_object = islandora_object_load($page_pid);
-  $tei_rdf_page = islandora_copy_object($page_object);
   $namespace = islandora_get_namespace($versionable_object);
-  $new_pid = $page_object->repository->api->m->getNextPid($namespace);
-  $tei_rdf_page->id = $new_pid;
-
+  $tuque = new IslandoraTuque();
+  $repository = $tuque->repository;
+  $tei_rdf_page = $repository->constructObject($namespace);
+  $derivation_results = $page_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+  $sequence_results = $page_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber');
+  $page_number_results = $page_object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageNumber');
 
   // Add all relationships.
-  $tei_rdf_page->relationships->changeObjectID($new_pid);
-  $tei_rdf_page->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object);
-  $tei_rdf_page->relationships->remove(ISLANDORA_RELS_EXT_URI, 'isPageOf');
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object);
-  //$ingest_objects[] = $tei_rdf_page;
-   $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
+  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF, $derivation_results[0]['object']['value']);
+  $tei_rdf_page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $sequence_results[0]['object']['value'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page_number_results[0]['object']['value'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', 1, RELS_TYPE_PLAIN_LITERAL);
+
+  $dsids = array('OCR', 'TN', 'CWRC');
+  foreach ($dsids as $dsid) {
+    if (isset($page_object[$dsid])) {
+      $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
+      $unique_id = uniqid();
+      $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
+      $filename = drupal_realpath($file->uri);
+      // Since the file must persist across multiple requests, we must not
+      // delete it, until it has successfully been ingested.
+      $page_object[$dsid]->getContent($filename);
+      $datastream->setContentFromFile($filename, FALSE);
+      $tei_rdf_page->ingestDatastream($datastream);
+    }
+  }
+  $ingest_objects[] = $tei_rdf_page;
+}
+
+/**
+ * Create editions of the given page object.
+ *
+ * @param array $page
+ *   A page from an array create by islandora_paged_content_get_pages.
+ * @param string $versionable_object
+ *   The parent TEI-RDF objects PID.
+ * @param array $context
+ *   The Drupal Batch context.
+ */
+function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $page, $versionable_object, array &$context) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $namespace = islandora_get_namespace($versionable_object);
+  $tei_rdf_page = islandora_get_tuque_connection()->repository->constructObject($namespace);
+  $tei_rdf_page->label = $page['label'];
+  // Add all relationships.
+  $tei_rdf_page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
+  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object);
+  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF, $page['pid']);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
+  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);
+  // Add a minimal set of datastreams from original page object.
+  $page = islandora_object_load($page['pid']);
+  $dsids = array('OCR', 'TN', 'CWRC');
+  foreach ($dsids as $dsid) {
+    if (isset($page[$dsid])) {
+      $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
+      $unique_id = uniqid();
+      $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
+      $filename = drupal_realpath($file->uri);
+      // Since the file must persist across multiple requests, we must not
+      // delete it, until it has successfully been ingested.
+      $page[$dsid]->getContent($filename);
+      $datastream->setContentFromFile($filename, FALSE);
+      $tei_rdf_page->ingestDatastream($datastream);
+    }
+  }
+  // Create new CWRC datastream if there is none.
+  if (!isset($tei_rdf_page['CWRC']) && isset($tei_rdf_page['OCR'])) {
+    emicdora_add_cwrc_datastream($tei_rdf_page);
+  }
+  $context['results']['pages'][] = $tei_rdf_page;
+  $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
 }
 
 /**
@@ -725,7 +786,7 @@ function emicdora_ingest_versionable_object_tei_rdf_batch_finished($success, arr
 }
 
 /**
- * Create editions of the given page object.
+ * Create transcription of the given page object.
  *
  * @param string $page
  *   The page object's PID.
