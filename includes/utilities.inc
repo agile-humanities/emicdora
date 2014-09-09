@@ -696,6 +696,20 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $pid,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
+  // Only show source objects.
+  if ($type == 'source') {
+    foreach (emicdora_source_content_models() as $content_model => $label) {
+      $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
+    }
+    $filters[] = format_string('!model:(!sources)', array(
+      '!sources' => implode(' OR ', $sources),
+      '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
+  }
+  // Only show versions objects.
+  else {
+    $filters[] = format_string('!model:("info:fedora/islandora:versionCModel")', array(
+      '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
+  }
   $qp->solrParams['fq'] = $filters;
   $qp->solrParams['fl'] = '*';
   $qp->solrParams['facet.limit'] = 100000;
