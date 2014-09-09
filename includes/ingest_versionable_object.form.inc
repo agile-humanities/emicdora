@@ -623,55 +623,6 @@ function emicdora_tei_rdf_ajax_container(array $form, array &$form_state) {
 }
 
 /**
- * Create editions of the given page object.
- *
- * @param array $page
- *   A page from an array create by islandora_paged_content_get_pages.
- * @param string $versionable_object
- *   The parent TEI-RDF objects PID.
- * @param array $context
- *   The Drupal Batch context.
- */
-function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation_x(array $page, $versionable_object, array &$context) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  module_load_include('inc', 'emicdora', 'includes/utilities');
-  $namespace = islandora_get_namespace($versionable_object);
-  $tei_rdf_page = islandora_get_tuque_connection()->repository->constructObject($namespace);
-  $tei_rdf_page->label = $page['label'];
-
-  // Add all relationships.
-  $tei_rdf_page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
-  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object);
-  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object);
-  $tei_rdf_page->relationships->add(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF, $page['pid']);
-  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
-  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page['page'], RELS_TYPE_PLAIN_LITERAL);
-  $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);
-  // Add a minimal set of datastreams from original page object.
-  $page = islandora_object_load($page['pid']);
-  $dsids = array('OCR', 'TN', 'CWRC');
-  foreach ($dsids as $dsid) {
-    if (isset($page[$dsid])) {
-      $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
-      $unique_id = uniqid();
-      $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
-      $filename = drupal_realpath($file->uri);
-      // Since the file must persist across multiple requests, we must not
-      // delete it, until it has successfully been ingested.
-      $page[$dsid]->getContent($filename);
-      $datastream->setContentFromFile($filename, FALSE);
-      $tei_rdf_page->ingestDatastream($datastream);
-    }
-  }
-  // Create new CWRC datastream if there is none.
-  if (!isset($tei_rdf_page['CWRC']) && isset($tei_rdf_page['OCR'])) {
-    emicdora_add_cwrc_datastream($tei_rdf_page);
-  }
-  $context['results']['pages'][] = $tei_rdf_page;
-  $context['results']['objects'][$tei_rdf_page->id] = $tei_rdf_page;
-}
-
-/**
  * Clones editions of the given page object.
  *
  * @param string $page_pid
