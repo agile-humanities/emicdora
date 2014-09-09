@@ -335,7 +335,7 @@ function emicdora_get_file_query($type) {
  *   current emicdora count
  */
 function emicdora_get_counter() {
-  module_load_include('inc', 'austese_collation', 'includes/emicdora');
+  module_load_include('inc', 'collation', 'includes/calliope');
   $query = emicdora_get_file_query('deleted');
   $file = emicdora_calliope_get_collation_file($query);
   return $file['emic_data']['emicdora_count'];
