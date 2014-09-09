@@ -15,8 +15,10 @@ function versionable_object_viewer_prepare_page_tei_consolidated($object) {
   module_load_include('inc', 'php_lib', 'DOMHelpers');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
   try {
+    $contents = $object['CWRC']->content;
+    $contents = preg_replace('/<\?xml-model .*\?>/', '', $contents);
     $doc = new DOMDocument();
-    $doc->loadXML($object['CWRC']->content);
+    $doc->loadXML($contents);
     $pretty_printed = dom_document_pretty_print($doc, TRUE);
 
     $return['body'] = $pretty_printed;
