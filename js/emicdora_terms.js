@@ -74,15 +74,14 @@
     // get modal height
     var modalHeight = $modal.height();
     // get modal height
-    var modalHeightCalc = scrollHeight + 98; // scroll + header & footer
+    var modalHeightCalc = scrollHeight + 150; // scroll + header & footer
 
     // if maximum height is smaller than the calculated height
     if (maxHeight < modalHeightCalc) {
       // @TODO, when fieldset is larger than $scroll, this gets set correctly and stays that way. When fieldset isn't quite that big and doesn't get this assigned, collapsing and expanding again, will cause the dialog to jump, because no fixed height is set.
-      if (scrollHeight > maxHeight - 98) {
-        scrollHeight = maxHeight - 98;
+      if (scrollHeight > maxHeight - 150) {
+        scrollHeight = maxHeight - 150;
       }
-
       $scroll.css({
         'height': scrollHeight + 'px', // 1) 494 2) 465
         'max-height': scrollHeight + 'px'
@@ -95,12 +94,10 @@
     if (dialogHeight > maxHeight) {
       dialogHeight = modalHeightCalc;
     }
-
     // apply dimensions
     $modal.dialog('option', 'width', maxWidth);
     $modal.dialog('option', 'height', dialogHeight);
     $modal.dialog('option', 'position', 'center');
-
   }
 
   // function for the dialog box window resize event
@@ -154,9 +151,8 @@
   $.fn.emicdoraTermsDialogValues = function(data) {
     // dialog ajax id
     var dialogAjaxId = data.id;
-
     // add values as JSON, so we can pass multi dimensional arrays
-    Drupal.ajax[dialogAjaxId].options.data._dialog_values = JSON.stringify(data.values);
+    Drupal.ajax[dialogAjaxId].options.data._table_rows = JSON.stringify(data.table_rows);
 	};
 
   // attach behaviors to make sure all javascript is added to the form in the dialog

@@ -172,7 +172,6 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       $form_state['solr_field_settings']['emicdora_' . $field_type][$solr_field] = $solr_field_settings;
     }
   }
-
   // 2. Triggered element (Add item or remove).
   if (isset($form_state['triggering_element']) &&
       $form_state['triggering_element']['#field_type'] == $field_type) {
@@ -236,12 +235,17 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
       // Get $solr_field.
       $term_label = $form_state['values']['emicdora_' . $field_type]['terms'][$field]['solr_field'];
       // Get dialog values from recent dialog submit.
-      $dialog_values = $form_state['input']['_dialog_values'] = json_decode($form_state['input']['_dialog_values'], TRUE);
+      $dialog_values = json_decode($form_state['input']['_table_rows'], TRUE);
+      // Strip out the data from the rows that were present in the tableselect.
+      foreach ($dialog_values as &$val) {
+        foreach ($val as $key => $data) {
+          $val[$key] = $data['data'];
+        }
+      }
       // Save the dialog values in the form state.
       $form_state['solr_field_settings']['emicdora_' . $field_type][$term_label] = emicdora_handle_solr_field_settings($dialog_values, $field_type);
     }
   }
-
   // Prepare fields array.
   if (isset($form_state['values']['emicdora_' . $field_type]['terms'])) {
     $fields = $form_state['values']['emicdora_' . $field_type]['terms'];
@@ -257,7 +261,7 @@ function emicdora_settings_fields(&$form_state, &$version_terms, $result_type, $
   else {
     $term = array();
     $count = count($fields);
-
+    $fields = array_values($fields);
     foreach ($fields as $key => $value) {
       if (!isset($value['solr_field'])) {
         continue;
@@ -437,13 +441,11 @@ function emicdora_update_fields_submit($form, &$form_state) {
  *   An array of AJAX commands.
  */
 function emicdora_settings_dialog($form, &$form_state) {
-
   $dialog_id = $form_state['dialog']['dialog_id'];
 
   $commands = array();
   // Close dialog.
   $commands[] = ajax_command_invoke('#emicdora-admin-dialog', 'dialog', array('close'));
-
   // Call function which attaches the dialog form values to
   // Drupal.ajax.{dialog-button-id}.options.data.
   // After triggering the dialog ajax callback, the dialog values will be added
@@ -451,6 +453,7 @@ function emicdora_settings_dialog($form, &$form_state) {
   $data = array(
     'id' => $dialog_id,
     'values' => $form_state['input'],
+    'table_rows' => $form_state['complete form']['options']['table_wrapper']['table']['#options'],
   );
   $commands[] = ajax_command_invoke(NULL, 'emicdoraTermsDialogValues', array($data));
   // Trigger dialog button.
@@ -469,19 +472,86 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
   module_load_include('inc', 'islandora_solr', 'includes/admin');
   form_load_include($form_state, 'inc', 'emicdora', 'includes/configure_links');
   $form_state['dialog'] = $variables;
-
+  $rows = array();
+  if (isset($form_state['rows'])) {
+    $rows = $form_state['rows'];
+  }
+  elseif (isset($variables['values']['fields'])) {
+    foreach ($variables['values']['fields'] as $field) {
+      $rows[$field['solr_field']] = array(
+        'solr_field' => array('data' => $field['solr_field']),
+        'value' => array('data' => $field['value']),
+      );
+    }
+  }
+  if (isset($form_state['triggering_element'])) {
+    if ($form_state['triggering_element']['#value'] == t('Add')) {
+      if (!empty($form_state['values']['label'])) {
+        $luke_result = islandora_solr_get_luke(NULL, $form_state['values']['label']);
+        if (empty($luke_result['fields'])) {
+          drupal_set_message(t('The field @field does not exist in Solr.', array('@field' => $form_state['values']['label'])), 'error');
+        }
+        else {
+          if (!isset($rows[$form_state['values']['label']])) {
+            if (empty($form_state['values']['value'])) {
+              drupal_set_message(t('The @field must not have an empty value.', array('@field' => $form_state['values']['label'])), 'error');
+            }
+            else {
+              $rows[$form_state['values']['label']] = array(
+                'solr_field' => array('data' => $form_state['values']['label']),
+                'value' => array('data' => $form_state['values']['value']),
+              );
+            }
+          }
+          else {
+            drupal_set_message(t('The field @field already exists in this configuration.', array('@field' => $form_state['values']['label'])), 'error');
+          }
+        }
+      }
+      else {
+        drupal_set_message(t('The Solr field value cannot be empty.'), 'error');
+      }
+    }
+    if ($form_state['triggering_element']['#value'] == t('Remove selected')) {
+      $to_remove = array_filter($form_state['values']['table']);
+      if (empty($to_remove)) {
+        drupal_set_message(t('Please select a field to remove.'), 'error');
+      }
+      else {
+        foreach ($to_remove as $pid) {
+          unset($rows[$pid]);
+        }
+      }
+    }
+  }
   $solr_field = $variables['solr_field'];
   $values = $variables['values'];
-
-  $permissions = isset($values['permissions']) ? $values['permissions'] : array();
-
-  $permissions_disable = _islandora_solr_permissions_disable();
-  $permissions_default = _islandora_solr_permissions_default();
-
   $form['options'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('scroll')),
     '#id' => 'emicdora-admin-dialog-form',
+  );
+  $form['options']['table_wrapper'] = array(
+    '#prefix' => '<div id="emicdora-solr-field-table">',
+    '#suffix' => '</div>',
+  );
+  $form['options']['table_wrapper']['table'] = array(
+    '#type' => 'tableselect',
+    '#header' => array(
+      'solr_field' => array('data' => t('Solr Field')),
+      'value' => array('data' => t('Value')),
+    ),
+    '#options' => $rows,
+    '#empty' => t('No fields defined for this configuration.'),
+  );
+  $form['options']['table_wrapper']['remove_selected'] = array(
+    '#type' => 'button',
+    '#value' => t('Remove selected'),
+    '#ajax' => array(
+      'wrapper' => 'emicdora-solr-field-table',
+      'callback' => 'emicdora_field_table_ajax',
+    ),
+    '#access' => !empty($rows),
   );
   $form['options']['label'] = array(
     '#type' => 'textfield',
@@ -498,18 +568,14 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
       '!url' => 'http://wiki.apache.org/solr/SolrQuerySyntax',
     )),
   );
-  $luke_result = islandora_solr_get_luke(NULL, $solr_field);
-  if (isset($luke_result['fields'][$solr_field]['type']) && $luke_result['fields'][$solr_field]['type'] == 'date') {
-    $form['options']['date_format'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Date format'),
-      '#default_value' => $values['date_format'] ? $values['date_format'] : '',
-      '#description' => t('The format of the date, as it will be displayed in the search results. Use <a href="!url" target="_blank">PHP date()</a> formatting.', array('!url' => 'http://lucene.apache.org/solr/api/org/apache/solr/util/DateMathParser.html')),
-    );
-  }
-
-  $form['options']['permissions_fieldset'] = islandora_solr_get_admin_permissions_fieldset($permissions, $permissions_default, $permissions_disable, TRUE);
-
+  $form['options']['add'] = array(
+    '#type' => 'button',
+    '#value' => t('Add'),
+    '#ajax' => array(
+      'wrapper' => 'emicdora-solr-field-table',
+      'callback' => 'emicdora_field_table_ajax',
+    ),
+  );
   $form['actions'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('form-buttons')),
@@ -531,7 +597,23 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
       'progress' => array('message' => 'Working', 'type' => 'throbber'),
     ),
   );
+  $form_state['rows'] = $rows;
   return $form;
+}
+
+/**
+ * AJAX callback to return the portion of the form to be re-rendered.
+ *
+ * @param array $form
+ *   An array representing a form within Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ *
+ * @return array
+ *   The portion of the form to be rendered.
+ */
+function emicdora_field_table_ajax($form, &$form_state) {
+  return $form['options']['table_wrapper'];
 }
 
 /**
@@ -545,48 +627,14 @@ function emicdora_settings_version_fields($form, &$form_state, $variables) {
 function emicdora_configure_version_links_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#array_parents'] == array('actions', 'submit')) {
     module_load_include('inc', 'islandora_solr', 'includes/luke');
-    $solr_url = variable_get('islandora_solr_url', 'localhost:8080/solr');
     $terms['version'] = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
     $terms['source'] = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
     foreach ($terms as $term_type => $fields) {
-      $form_field = "emicdora_{$term_type}_fields";
-      if (!isset($form_state['values'][$form_field]['terms'])) {
+      if (!isset($form_state['values']["emicdora_{$term_type}_fields"]['terms'])) {
         continue;
       }
-      foreach ($form_state['values'][$form_field]['terms'] as $display_label => $values) {
-        $solr_field = $values['solr_field'];
-        // Grab the stored values from the form state and combine them with the
-        // values.
-        if (isset($form_state['solr_field_settings'][$form_field])) {
-          $values = array_merge_recursive($values, $form_state['solr_field_settings'][$form_field][$solr_field]);
-        }
-        if (!isset($values['label'])) {
-          form_set_error("{$values['solr_field']}label", t('The @label Solr field contains an empty Solr field value.', array('@label' => $values['solr_field'])));
-        }
-        else {
-          $label = trim($values['label']);
-          if (empty($label)) {
-            form_set_error("{$values['solr_field']}label", t('The @label Solr field contains an empty Solr field value.', array('@label' => $values['solr_field'])));
-          }
-          else {
-            $luke = islandora_solr_get_luke($solr_url, $label);
-            if (empty($luke['fields'])) {
-              form_set_error("{$values['solr_field']}luke", t('The Solr field @val is not a valid Solr field under @display.', array(
-                '@val' => $label,
-                '@display' => $values['solr_field'],
-              )));
-            }
-          }
-        }
-        if (!isset($values['value'])) {
-          form_set_error("{$values['solr_field']}value", t('The @label value is empty.', array('@label' => $values['solr_field'])));
-        }
-        else {
-          $value = trim($values['value']);
-          if (empty($value)) {
-            form_set_error("{$values['solr_field']}value", t('The @label value is empty.', array('@label' => $values['solr_field'])));
-          }
-        }
+      elseif (empty($fields)) {
+        form_set_error($term_type, t('Configuration must be defined for fields in @type.', array('@type' => $term_type)));
       }
     }
   }
@@ -617,10 +665,15 @@ function emicdora_admin_settings_submit($form, $form_state) {
     }
     ksort($weights);
     foreach ($weights as $index => $weight) {
-      $solr_field_settings = array(
-        'label' => $values[$weight]['label'],
-        'value' => $values[$weight]['value'],
-      );
+      $solr_field_settings = array();
+      foreach ($values[$weight] as $label) {
+        foreach ($label as $field) {
+          $solr_field_settings['fields'][] = array(
+            'solr_field' => $field['solr_field'],
+            'value' => $field['value'],
+          );
+        }
+      }
       $fields = array(
         'solr_field' => $weight,
         'field_type' => 'unused',
@@ -800,23 +853,20 @@ function emicdora_get_form_function($field_type = NULL) {
  */
 function emicdora_handle_solr_field_settings($solr_field_settings = NULL, $field_type = NULL) {
   $to_return = FALSE;
-
   if (!empty($solr_field_settings) && !empty($field_type)) {
     switch ($field_type) {
       case 'version_fields':
-        $to_return = array(
-          'label' => trim($solr_field_settings['label']),
-          'value' => trim($solr_field_settings['value']),
-          'permissions' => $solr_field_settings['permissions'],
-        );
+        $to_return = array();
+        foreach ($solr_field_settings as $row) {
+          $to_return['fields'][] = $row;
+        }
         break;
 
       case 'source_fields':
-        $to_return = array(
-          'label' => trim($solr_field_settings['label']),
-          'value' => trim($solr_field_settings['value']),
-          'permissions' => $solr_field_settings['permissions'],
-        );
+        $to_return = array();
+        foreach ($solr_field_settings as $row) {
+          $to_return['fields'][] = $row;
+        }
         break;
     }
   }
