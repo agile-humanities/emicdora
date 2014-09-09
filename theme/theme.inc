@@ -34,9 +34,6 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
     $transcription = t("This file has no transcription datastream");
   }
   $variables['transcription'] = $transcription;
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
-  drupal_set_title($object->label);
 }
 
 /**
@@ -62,5 +59,5 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   ));
   // Returns all source object(s), this assumes that solr has been configured to
   // only display source objects, version objects, and critical editions.
-  $variables['browse_all_link'] = l(t('Browse All'), 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
+  $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH);
 }

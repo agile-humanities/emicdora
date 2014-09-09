@@ -4,7 +4,7 @@
 print '<div id ="emicdora_collation_container">';
 print '<div id="metadata"></div>
     <div id="uiplaceholder"></div>';
-if (user_access(EMICDORA_EDIT_COLLATION)) {
+if (user_access(COLLATION_EDIT_COLLATION)) {
   print '
   <input id="diff_l"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
   <input id="diff_r"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">

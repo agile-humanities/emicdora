@@ -136,7 +136,7 @@ function emicdora_is_source_content_model($content_model) {
  *   source content models.
  */
 function emicdora_is_source(AbstractObject $object) {
-  $source_content_models = emicdora_source_content_models();
+  $source_content_models = array_keys(emicdora_source_content_models());
   foreach ($object->models as $content_model) {
     if (in_array($content_model, $source_content_models)) {
       return TRUE;
@@ -755,4 +755,42 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
+}
+
+/**
+ * Fetches the source object the given version object was derived from.
+ *
+ * This function makes no checks to see if the object given is in fact a
+ * version. Or if the version in not valid (ex. is missing
+ * relationships).
+ *
+ * @param AbstractObject $version
+ *   The version object to get the source from.
+ *
+ * @return AbstractObject
+ *   The source object the given version object was derived from.
+ */
+function emicdora_get_version_source(AbstractObject $version) {
+  $results = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+  // Assumes the relation is always present and valid.
+  return islandora_object_load($results[0]['object']['value']);
+}
+
+/**
+ * Fetches the given transcription's objects parent version object.
+ *
+ * This function makes no checks to see if the object given is in fact a
+ * transcription. Or if the transcription in not valid (ex. is missing
+ * relationships).
+ *
+ * @param AbstractObject $transcription
+ *   The transcription object to get the version from.
+ *
+ * @return AbstractObject
+ *   The given transcription objects parent version object.
+ */
+function emicdora_get_transcription_version(AbstractObject $transcription) {
+  $results = $transcription->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  // Assumes the relation is always present and valid.
+  return islandora_object_load($results[0]['object']['value']);
 }

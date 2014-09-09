@@ -9,6 +9,8 @@ define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
+define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29');
+define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 
 /**
  * Implements hook_menu().
@@ -35,6 +37,7 @@ function emicdora_menu() {
     );
   }
   return $add_source_contextual_links + array(
+    // Administer the Emicdora Module.
     'admin/islandora/emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
       'description' => 'Configure Editing Modernism in Canada.',
@@ -44,10 +47,12 @@ function emicdora_menu() {
       'file' => 'includes/admin.form.inc',
       'type' => MENU_NORMAL_ITEM,
     ),
-    // Sources filtered by critical edition.
+    // Critical Edition Sources filtered by critical edition.
     'islandora/object/%islandora_object/sources' => array(
-      'title callback' => 'emicdora_sources_title',
-      'title arguments' => array(2),
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_sources', 2,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_critical_edition_sources',
       'page arguments' => array(2),
@@ -55,19 +60,36 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    // Versions filtered by critical edition.
+    // Critical Edition Versions.
     'islandora/object/%islandora_object/versions' => array(
-      'title callback' => 'emicdora_versions_title',
-      'title arguments' => array(2),
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_versions', 2,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_critical_edition_versions',
       'page arguments' => array(2),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
+    // Critical Edition Versions filtered by Source.
+    'islandora/object/%islandora_object/versions/%islandora_object' => array(
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_versions', 2, 4,
+      ),
+      'context' => MENU_CONTEXT_PAGE,
+      'page callback' => 'emicdora_critical_edition_versions',
+      'page arguments' => array(2, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    ),
+    // Critical Edition Transcription.
     'islandora/object/%islandora_object/transcription/%islandora_object' => array(
-      'title callback' => 'emicdora_transcription_title',
-      'title arguments' => array(2, 4),
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_transcription', 2, 4,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_transcription_view',
       'file' => 'includes/transcription_view.inc',
@@ -76,7 +98,10 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/transcription/%islandora_object/edit' => array(
-      'title' => 'Edit Transcription',
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_transcription', 2, 4,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'file' => 'includes/edit_transcription.form.inc',
       'page callback' => 'drupal_get_form',
@@ -85,8 +110,10 @@ function emicdora_menu() {
       'access arguments' => array(4, 'edit_transcription'),
     ),
     'islandora/object/%islandora_object/source/%islandora_object' => array(
-      'title callback' => 'emicdora_source_title',
-      'title arguments' => array(2, 4),
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_source', 2, 4,
+      ),
       'page callback' => 'islandora_view_object',
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
@@ -94,8 +121,10 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     ),
     'islandora/object/%islandora_object/version/%islandora_object' => array(
-      'title callback' => 'emicdora_version_title',
-      'title arguments' => array(2, 4),
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_version', 2, 4,
+      ),
       'page callback' => 'islandora_view_object',
       'page arguments' => array(2, 4),
       'type' => MENU_NORMAL_ITEM,
@@ -114,12 +143,12 @@ function emicdora_menu() {
     ),
     // Contextual Links for Blocks.
     'emicdora/contextual-links/apparatus/%islandora_object' => array(
-      'title' => 'Apparatus',
+      'title' => 'Critical Apparatus',
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/apparatus/%islandora_object/edit' => array(
-      'title' => 'Edit Apparatus',
+      'title' => 'Edit Critical Apparatus',
       'file' => 'includes/apparatus.form.inc',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_apparatus_form', 3),
@@ -267,13 +296,6 @@ function emicdora_menu() {
       'file' => 'includes/ingest_versionable_object.form.inc',
       'type' => MENU_CALLBACK,
     ),
-    'emicdora/editions' => array(
-      'title' => 'Show all Editions',
-      'page callback' => 'emicdora_show_all_editions',
-      'type' => MENU_NORMAL_ITEM,
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
-      'file' => 'includes/utilities.inc',
-    ),
     'emicdora/json/list' => array(
       'title' => 'Reconfigure inputs',
       'page callback' => 'emicdora_fix_calliope_inputs',
@@ -293,167 +315,37 @@ function emicdora_menu() {
 }
 
 /**
- * Set the page 'Title' and 'Subtitle' consistantly.
- *
- * @param string $title
- *   The text to use as the page title.
- *
- * @param string $subtitle
- *   The text to use as the page subtitle.
+ * Implements hook_menu_alter().
  */
-function emicdora_set_page_title_and_subtitle($title, $subtitle) {
-  drupal_set_title(t("<h1>@title</h1></br><h3>@subtitle</h3>", array(
-    '@title' => $title,
-    '@subtitle' => $subtitle,
-          )
-      ), PASS_THROUGH);
+function emicdora_menu_alter(array &$items) {
+  // We don't want the print icon on this site.
+  unset($items["islandora/object/%islandora_object/print_object"]);
+  // Prevent Islandora from overriding our breadcrumbs.
+  $item = &$items['islandora/object/%islandora_object'];
+  $item['title callback'] = 'emicdora_set_title_and_breadcrumbs_callback';
+  $item['title arguments'] = array(
+    'emicdora_set_title_and_breadcrumbs_object', 2,
+  );
 }
 
 /**
- * Callback to set /sources/ url page title and subtitle.
- *
- * @param AbstractObject $object
- *   The object being viewed.
+ * Implements hook_menu_breadcrumb_alter().
  */
-function emicdora_sources_title($object) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  $bc = islandora_get_breadcrumbs($object);
-
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-
-  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
-  $bc[] = t("Sources");
-
-  drupal_set_breadcrumb($bc);
-  emicdora_set_page_title_and_subtitle($object->label, t("Search Source(s)"));
-}
-
-/**
- * Callback to set /transcription/ url page title and subtitle.
- *
- * @param AbstractObject $critical_edition
- *   The critical edition object in the url.
- *
- * @param AbstractObject $transcription
- *   The transcription object in the url.
- */
-function emicdora_transcription_title($critical_edition, $transcription) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-
-  $trans_rels = $transcription->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-  $trans_rels = reset($trans_rels);
-  $version_pid = $trans_rels['object']['value'];
-  $version = islandora_object_load($version_pid);
-
-  $version_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
-  $version_rels = reset($version_rels);
-  $source_pid = $version_rels['object']['value'];
-  $source = islandora_object_load($source_pid);
-
-  $bc = islandora_get_breadcrumbs($version);
-
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-
-  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
-  $bc[] = l(filter_xss($source->label), "islandora/object/{$source->id}");
-  $bc[] = l(filter_xss($version->label), "islandora/object/{$version->id}");
-  $bc[] = t("@label", array("@label" => $transcription->label));
-
-  drupal_set_breadcrumb($bc);
-  emicdora_set_page_title_and_subtitle($critical_edition->label, $transcription->label);
-}
-
-/**
- * Callback to set /version/ url page title and subtitle.
- *
- * @param AbstractObject $critical_edition
- *   The critical edition object in the url.
- *
- * @param AbstractObject $version
- *   The version object in the url.
- */
-function emicdora_version_title($critical_edition, $version) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  // Get the source objects label.
-  $source_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
-  $source_rels = reset($source_rels);
-  $source_pid = $source_rels['object']['value'];
-  $source = islandora_object_load($source_pid);
-
-  $bc = islandora_get_breadcrumbs($version);
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-
-  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
-  $bc[] = l(filter_xss($source->label), "islandora/object/{$critical_edition->id}/source/$source->id");
-  $bc[] = t("@vlabel", array('@vlabel' => $version->label));
-  drupal_set_breadcrumb($bc);
-}
-
-/**
- * Callback to set /versions/ url page title and subtitle.
- *
- * @param AbstractObject $object
- *   The critical edition object in the url.
- */
-function emicdora_versions_title($object) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  module_load_include('inc', 'emicdora', 'includes/utilities');
-  $versions = emicdora_get_raw_objects($object, 'version');
-
-  $arr_vals = array_values($versions);
-  $versions = array_shift($arr_vals);
-  $bc = islandora_get_breadcrumbs($object);
-  array_shift($bc);
-  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
-  if (count($versions) > 0) {
-    // Use the first version to get the source.
-    $version = islandora_object_load($versions[0]);
-    $version_rels = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
-    $version_rels = reset($version_rels);
-    $source_pid = $version_rels['object']['value'];
-    $source = islandora_object_load($source_pid);
-    $bc[] = l(filter_xss($source->label), "islandora/object/{$object->id}/source/$source->id");
+function emicdora_menu_breadcrumb_alter(array &$active_trail, array $item) {
+  // We don't bother with breadcrumbs on any of the contextual link overlays.
+  if (drupal_match_path($item['path'], 'emicdora/contextual-links/*')) {
+    $active_trail = array();
   }
-  $bc[] = t("Versions");
-  array_shift($bc);
-  array_shift($bc);
-  drupal_set_breadcrumb($bc);
-  emicdora_set_page_title_and_subtitle($object->label, "Search Version(s)");
 }
 
 /**
- * Callback to set /source/ url page title and subtitle.
- *
- * @param AbstractObject $object
- *   The critical edition object in the url.
- *
- * @param AbstractObject $source
- *   The source object in the url.
+ * Implements hook_admin_paths().
  */
-function emicdora_source_title($object, $source) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  $bc = islandora_get_breadcrumbs($object);
-  array_shift($bc);
-  array_shift($bc);
-  array_shift($bc);
-
-  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
-  $bc[] = t("@label", array("@label" => $source->label));
-  drupal_set_breadcrumb($bc);
-  emicdora_set_page_title_and_subtitle($object->label, $source->label);
+function emicdora_admin_paths() {
+  // Show contextual link pages as overlays.
+  return array(
+    'emicdora/contextual-links/*' => TRUE,
+  );
 }
 
 /**
@@ -471,16 +363,6 @@ function emicdora_file_mimetype_mapping_alter(&$mapping) {
     $index = array_search($mime_type, $mapping['mimetypes']);
     $mapping['extensions'][$extension] = $index;
   }
-}
-
-/**
- * Implements hook_menu_alter().
- */
-function emicdora_menu_alter(array &$items) {
-  // We don't want the print icon on this site.
-  unset($items["islandora/object/%islandora_object/print_object"]);
-  // Prevent Islandora from overriding our breadcrumbs.
-  $items['islandora/object/%islandora_object']['title callback'] = 'emicdora_drupal_title';
 }
 
 /**
@@ -846,20 +728,6 @@ function emicdora_block_view($delta = '') {
       if ($is_table || $is_compare) {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
         $current_view = $is_table ? 'table' : 'compare';
-
-        module_load_include('inc', 'islandora', 'includes/breadcrumb');
-        module_load_include('inc', 'emicdora', 'includes/utilities');
-        $bc = islandora_get_breadcrumbs($critical_edition);
-
-        array_shift($bc);
-        array_shift($bc);
-        array_shift($bc);
-        $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-        $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
-        $bc[] = t("@mvd", array('@mvd' => $mvd));
-        emicdora_set_page_title_and_subtitle($critical_edition->label, $mvd);
-        drupal_set_breadcrumb($bc);
-
         $links = emicdora_collation_object_operations_block_links($critical_edition->id, $mvd, $current_view);
       }
 
@@ -888,7 +756,7 @@ function emicdora_block_view($delta = '') {
         if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
           $links[] = array(
             'title' => 'Edit',
-            'href' => "islandora/object/$versionable_object->id/tei_editor/edit",
+            'href' => "islandora/object/{$critical_edition->id}/version/{$versionable_object->id}/edit",
           );
         }
         $links[] = array(
@@ -962,24 +830,6 @@ function emicdora_block_view($delta = '') {
       break;
   }
   return $block;
-}
-
-/**
- * Title callback for drupal title.
- *
- * Changes the drupal title to be the objects label.
- * models that their modules want to provide a view for.
- *
- * @param AbstractObject $object
- *   The object to view.
- *
- * @return string
- *   The objects label.
- */
-function emicdora_drupal_title(AbstractObject $object) {
-  // We override what islandora does here so that we can set our own
-  // breadcrumbs.
-  return filter_xss($object->label);
 }
 
 /**
@@ -1155,25 +1005,13 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
 
-  $breadcrumbs = islandora_get_breadcrumbs($object);
-  // Discard "Home" as it's redundant.
-  array_shift($breadcrumbs);
-  // Discard "Islandora Repository" as we don't want user navigating to it.
-  array_shift($breadcrumbs);
-  array_shift($breadcrumbs);
-  $breadcrumbs[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-  $breadcrumbs[] = $object->label;
-  drupal_set_breadcrumb($breadcrumbs);
-  $title = isset($object->label) ? $object->label : t("Critical Edition");
-
   $content = "";
   $supplied_object = menu_get_object('islandora_object', 4);
   $content_models = array_keys(emicdora_source_content_models());
   $content_models[] = 'islandora:versionCModel';
 
-  $sol = isset($supplied_object->label) ? $supplied_object->label : t("Apparatus");
-  emicdora_set_page_title_and_subtitle($title, $sol);
-
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  emicdora_set_page_title_and_subtitle($object->label, t('Critical Apparatus'));
   if (!$supplied_object) {
     $content = emicdora_get_apparatus_as_content($object);
     return array('emicdora' => $content);
@@ -1420,17 +1258,17 @@ function emicdora_islandora_ingest_steps_alter(array &$steps, array &$form_state
 }
 
 /**
- * Implements hook_islandora_view_object().
+ * Acts as a delegator allowing us to specify title / breadcrumbs via callback.
+ *
+ * This function is meant to be used in the menu_hook's 'title callback'
+ * property, it allows use to have the functions for handling this logic in a
+ * different file other than the module file as it's getting rather bloated.
+ *
+ * @param string $callback
+ *   The function that will set the title and breadcrumbs.
  */
-function emicdora_islandora_view_object(AbstractObject $object) {
-  // Manually override the breadcrumbs for the Editions collection.
-  if (isset($object) && $object->id == 'islandora:editions') {
-    module_load_include('inc', 'islandora', 'includes/breadcrumb');
-    $bc = islandora_get_breadcrumbs($object);
-
-    array_shift($bc);
-    array_shift($bc);
-    $bc[] = l($object->label, "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
-    drupal_set_breadcrumb($bc);
-  }
+function emicdora_set_title_and_breadcrumbs_callback($callback) {
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  $args = func_get_args();
+  call_user_func_array($callback, array_slice($args, 1));
 }

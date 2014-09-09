@@ -46,8 +46,6 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
     $form_state['values']['source'] = $source_pid;
     unset($_GET['destination']);
   }
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($edition));
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $version = $edition->repository->constructObject(islandora_get_namespace($edition->id));

@@ -6,11 +6,14 @@
  */
 
 // Permissions.
-define('EMICDORA_EDIT_COLLATION', 'edit collation');
+define('COLLATION_EDIT_COLLATION', 'edit collation');
 
+/**
+ * Implements hook_permission().
+ */
 function emicdora_permission() {
   return array(
-    EMICDORA_EDIT_COLLATION => array(
+    COLLATION_EDIT_COLLATION => array(
       'title' => t('Edit collations'),
       'description' => t('Access CWRCWriter.'),
     ),
@@ -21,6 +24,7 @@ function emicdora_permission() {
  * Implements hook_menu().
  */
 function collation_menu() {
+
   return array(
     'collation/contextual-links/collation/%islandora_object' => array(
       'title' => 'Collations',
@@ -47,7 +51,10 @@ function collation_menu() {
       'file' => 'includes/mvd.inc',
     ),
     'islandora/object/%islandora_object/compare' => array(
-      'title' => 'Collations',
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_collation', 2,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_compare_view',
       'file' => 'includes/collation_view.inc',
@@ -63,7 +70,10 @@ function collation_menu() {
       'type' => MENU_CALLBACK,
     ),
     'islandora/object/%islandora_object/table' => array(
-      'title' => 'Collations',
+      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+      'title arguments' => array(
+        'emicdora_set_title_and_breadcrumbs_collation', 2,
+      ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_table_view',
       'file' => 'includes/collation_view.inc',
@@ -99,6 +109,26 @@ function collation_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 2),
     ),
+  );
+}
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ */
+function collation_menu_breadcrumb_alter(array &$active_trail, array $item) {
+  // We don't bother with breadcrumbs on any of the contextual link overlays.
+  if (drupal_match_path($item['path'], 'collation/contextual-links/*')) {
+    $active_trail = array();
+  }
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function collation_admin_paths() {
+  // Show contextual link pages as overlays.
+  return array(
+    'collation/contextual-links/*' => TRUE,
   );
 }
 
