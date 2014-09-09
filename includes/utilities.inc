@@ -515,7 +515,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) 
       $configs = emicdora_get_terms($object->id, 'version');
       $categories = array();
       foreach ($configs as $config) {
-        $categories[$config['solr_field']] = $config['solr_field_settings']['label'];
+        $categories[$config['solr_field']] = $config['solr_field'];
       }
       $source_content_models = array('islandora:versionCModel' => 0);
       break;
@@ -554,24 +554,24 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) 
         $version_facets = array();
         foreach ($configs as $config) {
           $version_facets[$config['solr_field']] = array(
-            'solr_field' => $config['solr_field_settings']['label'],
-            'solr_value' => $config['solr_field_settings']['value'],
+            'fields' => $config['solr_field_settings']['fields'],
           );
         }
         $matched = FALSE;
         $added = FALSE;
-        foreach ($version_facets as $label => $facet) {
-
-          if (isset($candidate[$facet['solr_field']])) {
-            if (is_array($candidate[$facet['solr_field']])) {
-              $search_array = array_map('strtolower', $candidate[$facet['solr_field']]);
-              if (in_array(strtolower($facet['solr_value']), $search_array)) {
-                $matched = TRUE;
+        foreach ($version_facets as $label => $fields) {
+          foreach ($fields as $solr_field => $value) {
+            if (isset($candidate[$solr_field])) {
+              if (is_array($candidate[$solr_field])) {
+                $search_array = array_map('strtolower', $candidate[$solr_field]);
+                if (in_array(strtolower($value), $search_array)) {
+                  $matched = TRUE;
+                }
               }
-            }
-            else {
-              if (strtolower($candidate[$facet['solr_field']]) == strtolower($facet['solr_value'])) {
-                $matched = TRUE;
+              else {
+                if (strtolower($candidate[$solr_field]) == strtolower($value)) {
+                  $matched = TRUE;
+                }
               }
             }
           }
@@ -590,8 +590,7 @@ function emicdora_get_raw_objects($object, $type = 'source', $source_id = NULL) 
         $version_facets = array();
         foreach ($configs as $config) {
           $version_facets[$config['solr_field']] = array(
-            'solr_field' => $config['solr_field_settings']['label'],
-            'solr_value' => $config['solr_field_settings']['value'],
+            'fields' => $config['solr_field_settings']['fields'],
           );
         }
         $type_parts = array();
@@ -697,25 +696,42 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $pid,
     '!membership' => variable_get('emicdora_critical_edition_membership_solr_field', 'RELS_EXT_isMemberOf_uri_ms')));
+  // Only show source objects.
+  if ($type == 'source') {
+    foreach (emicdora_source_content_models() as $content_model => $label) {
+      $sources[] = format_string('"info:fedora/!pid"', array('!pid' => $content_model));
+    }
+    $filters[] = format_string('!model:(!sources)', array(
+      '!sources' => implode(' OR ', $sources),
+      '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
+  }
+  // Only show versions objects.
+  else {
+    $filters[] = format_string('!model:("info:fedora/islandora:versionCModel")', array(
+      '!model' => variable_get('islandora_solr_content_model_field', 'RELS_EXT_hasModel_uri_ms')));
+  }
   $qp->solrParams['fq'] = $filters;
   $qp->solrParams['fl'] = '*';
   $qp->solrParams['facet.limit'] = 100000;
   $qp->solrParams['facet.mincount'] = variable_get('islandora_solr_facet_min_limit', '2');
   $qp->solrParams['facet.field'] = array();
   $configs = emicdora_get_terms($pid, $type);
-  $facets = array();
   $formatted_facets = array();
   foreach ($configs as $config) {
-    $facet_query = format_string('@solr_field:@solr_value', array(
-      '@solr_field' => $config['solr_field_settings']['label'],
-      '@solr_value' => islandora_solr_lesser_escape($config['solr_field_settings']['value']),
-    ));
-    $facets[] = $facet_query;
-    $formatted_facets[$facet_query] = array(
+    $facet = array();
+    foreach ($config['solr_field_settings']['fields'] as $field) {
+      $facet_query = format_string('@solr_field:@solr_value', array(
+        '@solr_field' => $field['solr_field'],
+        '@solr_value' => $field['value'],
+      ));
+      $facet[] = $facet_query;
+    }
+    $facets = implode(' AND ', $facet);
+    $formatted_facets[$facets] = array(
       'display_name' => $config['solr_field'],
     );
+    $qp->solrParams['facet.query'][] = $facets;
   }
-  $qp->solrParams['facet.query'] = $facets;
   $qp->executeQuery(FALSE);
   foreach ($qp->islandoraSolrResult['facet_counts']['facet_queries'] as $field_val => $count) {
     $formatted_facets[$field_val]['count'] = $count;
