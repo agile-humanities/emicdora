@@ -1411,3 +1411,14 @@ function emicdora_islandora_view_object(AbstractObject $object) {
     drupal_set_breadcrumb($bc);
   }
 }
+
+/*
+ * Implements hook_cmodel_pid_islandora_object_ingested().
+ */
+
+function emicdora_islandora_versioncmodel_islandora_object_ingested($object) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $parents = islandora_get_parents_from_rels_ext($object);
+  $parent = $parents[0];
+  drupal_goto("islandora/object/{$parent->id}/version/{$object->id}");
+}
