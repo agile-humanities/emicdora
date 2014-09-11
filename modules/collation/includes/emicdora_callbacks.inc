@@ -106,7 +106,9 @@ function emicdora_marshall_spans($type) {
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
     $text_value = $items->item(0)->nodeValue;
-    $marshalled_spans[$id] = $text_value;
+    if ($text_value) {
+      $marshalled_spans[$id] = $text_value;
+    }
   }
   return $marshalled_spans;
 }
@@ -138,14 +140,14 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
       $node_value = $node->nodeValue;
       $class = $node->getAttribute('class');
       if ($node_value) {
-        // Make an allowance for selected text being wholly enclosed in a
-        // merged span.
+        // Make an allowance for selected text being wholly enclosed in a span.
+
         if (strlen($identified_text) < strlen($content)) {
           if (emicdora_starts_with($content, $identified_text)) {
             $remainder = str_replace($identified_text, '', $content);
             $next = $node->nextSibling;
             $next->nodeValue = $remainder . $next->nodeValue;
-            $nodes_to_delete[] = $node;
+            $nodes_to_delete[$id] = $node;
             continue;
           }
           if (emicdora_ends_with($content, $identified_text)) {
@@ -161,7 +163,7 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
               $parent_node = $dom->getElementById($config[$type]);
               $parent_node->insertBefore($new_node, $node);
             }
-            $nodes_to_delete[] = $node;
+            $nodes_to_delete[$id] = $node;
             continue;
           }
           $string_parts = explode($identified_text, $content);
@@ -179,11 +181,11 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
           }
           $next = $node->nextSibling;
           $next->nodeValue = $string_parts[1] . $next->nodeValue;
-          $nodes_to_delete[] = $node;
+          $nodes_to_delete[$id] = $node;
           continue;
         }
         if ($node_value == $content) {
-          $nodes_to_delete[] = $node;
+          $nodes_to_delete[$id] = $node;
           continue;
         }
       }
@@ -209,7 +211,7 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
             $parent_node = $dom->getElementById($config[$type]);
             $parent_node->insertBefore($new_node, $node);
           }
-          $nodes_to_delete[] = $node;
+          $nodes_to_delete[$id] = $node;
         }
       }
     }
@@ -220,11 +222,17 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
     $counter = emicdora_get_counter();
   }
   $_POST['emicdora_counter'] = $counter;
-  $new_element->setAttribute('id', "{$prefix}e{$counter}");
+  $fresh_id = "{$prefix}e{$counter}";
+  $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', 'merged');
-  $parent_node = $dom->getElementById($config[$type]);
   $refnode = $dom->getElementById($id);
-  $parent_node->insertBefore($new_element, $refnode);
+  $delete_ids = array_keys($nodes_to_delete);
+  $ref_id = $refnode->getAttribute('id');
+  if (in_array($ref_id, $delete_ids)) {
+    $refnode = $nodes_to_delete[$delete_ids[0]];
+  }
+
+  $refnode->parentNode->insertBefore($new_element, $refnode);
   foreach ($nodes_to_delete as $victim) {
     $victim->parentNode->removeChild($victim);
   }
@@ -335,7 +343,7 @@ function emicdora_get_file_query($type) {
  *   current emicdora count
  */
 function emicdora_get_counter() {
-  module_load_include('inc', 'austese_collation', 'includes/emicdora');
+  module_load_include('inc', 'collation', 'includes/calliope');
   $query = emicdora_get_file_query('deleted');
   $file = emicdora_calliope_get_collation_file($query);
   return $file['emic_data']['emicdora_count'];

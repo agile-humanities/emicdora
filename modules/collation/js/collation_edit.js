@@ -12,17 +12,7 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
-      $(document).delegate('span.deleted', 'click', function() {
-        var qualifier = $(this).prev().attr('id').slice(1);
-        $('#diff_l').val($(this).text());
-        $('#diff_r').val($('#a' + qualifier).next().text());
-      });
-      $(document).delegate('span.added', 'click', function() {
-        var qualifier = $(this).prev().attr('id').slice(1);
-        $('#diff_r').val($(this).text());
-        $('#diff_l').val($('#d' + qualifier).next().text());
-      });
-      $(document).delegate('span.merged', 'click mouseup', function() {
+      $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
@@ -34,7 +24,7 @@
         merged_content = $(wrapped_content).parent().html();
         $(wrapped_content).unwrap();
       });
-      
+
       waitUntilExists("versionview-1010", function() {
         var $head = $("#emicdora_collatex_iframe").contents().find("head");
         $head.append($("<link/>", {
@@ -43,7 +33,9 @@
           type: "text/css"
         }
         ));
+        $('.emicdora_input').val('');
         $("#save_changes").hide();
+        // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
           selection_deleted = rangy.getSelection();
           text_deleted = selection_deleted.toString();
@@ -56,6 +48,7 @@
           }
           $("#diff_l").val(text_deleted);
         });
+        // // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
@@ -74,6 +67,12 @@
         function execute_callback(args) {
           var all_added;
           var all_deleted;
+          if (args.data.action == 'link') {
+            if (text_added.length < 1 || text_deleted.length < 1) {
+              alert('Text to link must be selected from both panes.')
+              return;
+            }
+          }
           if (args.data.action == 'save') {
             $(".merged").css('background-color', '');
             $("#save_changes").hide();
