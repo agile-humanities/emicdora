@@ -434,5 +434,10 @@
 
   $('#easy-ui-east').css('height', '445px');
   $('#easy-ui-west').css('height', '445px');
+  
+  // The panels will automatically set to fit, but we
+  // use these method to trigger the resize event.
+  $('#center_data').css('height', '472px');
+  $('#content_data').css('height', '472px');
   });
 })(jQuery);

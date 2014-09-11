@@ -35,7 +35,7 @@
           <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,split:true,border:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
           </div>
         </div>
-        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;maxWidth:700px;height:445px;">
+        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;height:100%;">
           <?php print $islandora_content; ?>
         </div>
         <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
@@ -44,9 +44,9 @@
               </ul>
           </div>
         </div>
-        <div id="center_data" class="easyui-panel" data-options="region:'center',iconCls:'icon-ok',collapsible:false">
-              <div id="content_data" class="easyui-panel" style="width:100%;height:100%;background:#fafafa;"
-				    data-options="iconCls:'icon-save',closable:true,collapsible:true,minimizable:true,maximizable:true,fit:true">
+        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:472px;">
+              <div id="content_data" class="easyui-panel" style="width:100%;height:472px;background:#fafafa;"
+				    data-options="fit:true">
 		     </div>
         </div>
     </div>
