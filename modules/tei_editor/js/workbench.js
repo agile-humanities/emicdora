@@ -10,25 +10,19 @@
  */
 (function ($) {
   'use strict';
-  Drupal.behaviors.emicdoraWorkbenchLink = {
+  Drupal.behaviors.emicdoraWorkbenchEntityLinks = {
     attach: function (context, settings) {
       $('.emicdora-workbench-entity-links').once().change(function(){
         var selected, collections;
         selected = $('.emicdora-workbench-entity-links option:selected').val();
         collections = {
-          person: 'cwrc:personEntityCollection',
-          organization: 'cwrc:organizationEntityCollection',
-          title: 'cwrc:titleEntityCollection',
-          place: 'cwrc:placeEntityCollection'
+          person: 'islandora_cwrc_writer_person_entity_collection',
+          organization: 'islandora_cwrc_writer_organization_entity_collection',
+          title: 'islandora_cwrc_writer_title_entity_collection',
+          place: 'islandora_cwrc_writer_place_entity_collection'
         };
         if (selected !== 'none') {
           window.location = Drupal.settings.basePath + 'islandora/object/' + collections[selected] + '/manage/overview/ingest';
-        }
-      });
-      $('.emicdora-workbench-source-links').once().change(function(){
-        var selected = $('.emicdora-workbench-source-links option:selected').val();
-        if (selected !== 'none') {
-          window.location = Drupal.settings.basePath + 'emicdora/source/add/' + selected + '/FALSE/TRUE';
         }
       });
     }

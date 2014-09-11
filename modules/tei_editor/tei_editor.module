@@ -9,69 +9,139 @@
  * Implements hook_menu().
  */
 function tei_editor_menu() {
-  $items['islandora/object/%islandora_object/version/%islandora_object/edit'] = array(
-    'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
-    'title arguments' => array(
-      'emicdora_set_title_and_breadcrumbs_version', 2, 4,
+  module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+  // @todo Move this to the workbench code.
+  $entity_content_models = islandora_cwrc_writer_valid_entity_types();
+  foreach ($entity_content_models as $label => $content_model) {
+    $url = "tei_editor/entity/add/{$content_model}";
+    $title = "Add New " . ucfirst($label);
+    $add_source_contextual_links[$url] = array();
+  }
+  return array(
+    'tei_editor/entity/add/%' => array(
+      'page callback' => 'tei_editor_add_entity',
+      'page arguments' => array(3),
+      'access arguments' => array(ISLANDORA_INGEST),
+      'type' => MENU_CALLBACK,
     ),
-    'page callback' => 'tei_editor_view_editor',
-    'page arguments' => array(4),
-    'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
-    'type' => MENU_NORMAL_ITEM,
+    'islandora/object/%islandora_object/version/%islandora_object/edit' => array(
+      'title callback' => 'emicdora_version_title',
+      'title arguments' => array(2, 4),
+      'page callback' => 'tei_editor',
+      'page arguments' => array(4),
+      'access callback' => 'islandora_object_access_callback',
+      // View permissions, but they may not be able to save.
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+      'type' => MENU_NORMAL_ITEM,
+    ),
   );
-  $items['islandora/tei_editor/setup/%islandora_object'] = array(
-    'title' => 'TEI Editor Setup',
-    'page callback' => 'tei_editor_setup',
-    'page arguments' => array(3),
-    'type' => MENU_CALLBACK,
-    'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 3),
-    'file' => 'includes/callbacks.inc',
-  );
-  $items['islandora/tei_editor/save_data/%islandora_object'] = array(
-    'title' => 'Save TEI Data',
-    'page callback' => 'tei_editor_savedata',
-    'page arguments' => array(3),
-    'type' => MENU_CALLBACK,
-    'file' => 'includes/callbacks.inc',
-    'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_ADD_DS, 3),
-  );
-  $items['islandora/tei_editor/setup_canvas/%islandora_object'] = array(
-    'title' => 'Shared Canvas Setup',
-    'page callback' => 'tei_editor_canvas_setup',
-    'page arguments' => array(3),
-    'type' => MENU_CALLBACK,
-    'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 3),
-    'file' => 'includes/callbacks.inc',
-  );
-  return $items;
 }
 
 /**
- * Page callback for the tei_editor.
+ * Implements hook_islandora_required_objects().
+ */
+function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
+  $module_path = drupal_get_path('module', 'tei_editor');
+
+  // CWRC Basic TEI Schema.
+  $tei_schema = $connection->repository->constructObject('islandora:emic-tei-schema');
+  $tei_schema->owner = 'fedoraAdmin';
+  $tei_schema->label = 'EMIC Basic TEI Schema';
+  $tei_schema->models = 'islandora:markupeditorschemaCModel';
+  $tei_schema->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:tei_schema_collection');
+  // Add the schema datastream.
+  $datastream = $tei_schema->constructDatastream('RDF-SCHEMA', 'M');
+  $datastream->label = 'RDF-SCHEMA';
+  $datastream->mimetype = 'application/xml';
+  $datastream->setContentFromFile("{$module_path}/data/objects/emic_tei_schema_rdf_schema.rng", FALSE);
+  $tei_schema->ingestDatastream($datastream);
+  // Add the CSS datastream.
+  $datastream = $tei_schema->constructDatastream('RDF-CSS', 'M');
+  $datastream->label = 'RDF-CSS';
+  $datastream->mimetype = 'text/css';
+  $datastream->setContentFromFile("{$module_path}/data/objects/emic_tei_schema_rdf_css.css", FALSE);
+  $tei_schema->ingestDatastream($datastream);
+  return array(
+    'tei_editor' => array(
+      'title' => 'EMiC TEI Editor',
+      'objects' => array(
+        $tei_schema,
+      ),
+    ),
+  );
+}
+
+/**
+ * Renders the tei_editor as an embedded iframe.
  *
- * @param AbstractObject $islandora_object
- *   The object the tei editor will operate on.
+ * @param AbstractObject $object
+ *   The islandora:versionCModel object to edit with the CWRC-Writer.
+ *
+ * @return array
+ *   The HTML representation of the manage object page.
+ */
+function tei_editor(AbstractObject $object) {
+  module_load_include('inc', 'tei_editor', 'includes/utilities');
+  $documents = tei_editor_get_page_pids($object);
+  $sources = tei_editor_fetch_sources($documents);
+  $module_path = drupal_get_path('module', 'tei_editor');
+  return array(
+    '#id' => '',
+    '#prefix' => '<div id="tei_editor_cwrc_writer_wrapper">',
+    '#suffix' => '</div>',
+    'cwrc_writer' => array(
+      '#theme' => 'islandora_cwrc_writer',
+      '#object' => $object,
+      '#documents' => $documents,
+      '#sources' => $sources,
+    ),
+    '#attached' => array(
+      'js' => array(
+        "$module_path/js/tei_editor.js",
+      ),
+      'css' => array(
+        "$module_path/css/tei_editor.cwrc.css",
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_islandora_cwrc_writer().
+ */
+function tei_editor_preprocess_islandora_cwrc_writer(array &$variables) {
+  // Add the Full window button to the CWRC-Writer. The required js for the
+  // behaviour is included at the time in which it's rendered.
+  $variables['header'][] = array(
+    '#markup' => '<span id="full-window-button" class="win-switch-full"></span>',
+  );
+}
+
+/**
+ * Creates a new Entity object for the given content model..
+ *
+ * @param string $content_model
+ *   The PID of the content model, for entity object to create.
  *
  * @return string
- *   An HTML string representing the themed output.
+ *   The ingest form form the given entity type.
  */
-function tei_editor_view_editor(AbstractObject $islandora_object) {
-  return theme('tei_editor_viewer', array('islandora_object' => $islandora_object));
-}
-
-/**
- * Implements hook_theme().
- */
-function tei_editor_theme($existing, $type, $theme, $path) {
-  return array(
-    'tei_editor_viewer' => array(
-      'file' => 'theme/theme.inc',
-      'template' => 'theme/tei-editor-viewer',
-      'variables' => array('islandora_object' => NULL, 'islandora_content' => NULL),
-    ),
-  );
+function tei_editor_add_entity($content_model) {
+  global $user;
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  module_load_include('inc', 'islandora', 'includes/ingest.form');
+  module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+  $entity_content_models = islandora_cwrc_writer_valid_entity_types();
+  $type = array_search($content_model, $entity_content_models);
+  drupal_set_title(t('Add New @type', array('@type' => ucfirst($type))));
+  $tuque = islandora_get_tuque_connection();
+  $object = $tuque->repository->constructObject('cwrc', TRUE);
+  $object->owner = $user->name;
+  $object->models = $content_model;
+  return drupal_get_form('islandora_ingest_form', array(
+    'book' => $object,
+    'models' => array($content_model),
+    'objects' => array($object),
+    'parent' => islandora_cwrc_writer_default_entity_collection($type),
+  ));
 }

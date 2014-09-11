@@ -1,0 +1,45 @@
+/**
+ * @file
+ * Styles for the CWRC-Writer.
+ */
+.tei-editor-full-window {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-top: 20;
+  top: 5px;
+  z-index: 10;
+  background: #fff;
+}
+
+.tei-editor-full-window #cwrc_wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  width: 100%;
+  z-index: 60;
+  background: #fff;
+}
+
+#full-window-button {
+  margin: 5px 10px;
+  cursor: pointer;
+  display: inline-block;
+  height: 24px;
+  text-indent: -9999px;
+  width: 24px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAABZUlEQVRIie1VPU8DMQxNT/1hN1Y6+zkRzPATuhQEC1gCgSgbRWpFRdlA8Fso8G/YWobcqddwuY/OtZQlid+zE/vZAHZdt4jsjYkYEd82+Zt6cHcSAy8MsKc7ETDzqAm8MGYedSJgtktVTdoSqGoCyFfHDOx7mqb9JvA0TfuA/WiVAbP9Cf5gUZeJqiYi8lKHUSa4UtWEyC0CknmMgMjNg4ifVTXJMr7eIgiqpUdkJz4a/AIYxAgADPwduxaRB2NMb3Pmq8tU1bmPws2Y7UHTH4jIIYBp1VMS8W2T/9721sJE3FnFdg/Ao4gcNfkD7pjITkypBzZnOM8bDXfFptcWvPlGkxURhjFwIgyZZZVLxGtZuwCMt6RCxF3kUhG0P6Yxgixzs1BWPAYuI2oq3wH4U1Xq5af8H9A2RlSuQ22pJ/Ha1WUefHYdOMx22XEmY9yWQMTdd57JYXXFrKiWnQjypXFwq03+f0e91EwvZ22WAAAAAElFTkSuQmCC);
+}
+
+.tei-editor-full-window #full-window-button {
+  margin-top: 5px;
+  cursor: pointer;
+  display: inline-block;
+  height: 24px;
+  text-indent: -9999px;
+  width: 24px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAABcklEQVRIie2Vv07DQAzGnbQPlrk5f/YJsoHUFeaCYAFLIBAwIkRFVRV167tQwQNRhYEEXa9/UFDYaumGc2z/4suXMxERMetenvuhmaUUGYDz2FebiD+LfWaW5rkfish+XeAA0E9AS2adZVnWDYrfA1puAgBaOoe7ep9lWZdZZ4CWgH4y6yE550eVo15jM0udw2Xt2wYAtBTxF2aWAjoOaznnR2RmqYhMliHyHu5/A6zLEZFJeOSJc/oYddIQEL65PhJRsvJxmHXeAuBtnVhIxD+01QGA+yjwWy3tAQJ1AWrbAv8KqJZtyt3ZzhqYc3z7XzJ1Tm/qwNP2fzR/shTMzIO2AMw8WAlu67Jj1vnKZRdNohY6WJ6MSTzVmPWjKSDOAfBCRAnluR+GD+pJlOd83QBwVR3xawR5pl5P+4AuquJPFEyiWl3bAJFaEhF5qgCLXk/7RETEzMciMi2KohMXcY5vNwF+dB5YURQdEZkCOCIi+gJ9nNa2g4feggAAAABJRU5ErkJggg==);
+}
