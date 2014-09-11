@@ -67,7 +67,7 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
   if (islandora_object_access(ISLANDORA_METADATA_EDIT, $object)) {
     $destination = drupal_get_destination();
     $links[] = array(
-      'title' => 'Edit Metatdata',
+      'title' => 'Edit',
       'href' => "islandora/object/$critical_edition_pid/transcription/$transcription_pid/edit",
       'query' => array(
         'destination' => $destination['destination'],
@@ -140,7 +140,7 @@ function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_
   if (islandora_object_access(ISLANDORA_METADATA_EDIT, $object)) {
     $destination = drupal_get_destination();
     $links[] = array(
-      'title' => 'Edit Metatdata',
+      'title' => 'Edit Metadata',
       'href' => "islandora/edit_form/$pid/MODS",
       'query' => array(
         'destination' => $destination['destination'],
