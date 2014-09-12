@@ -39,7 +39,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
       'TN' => array(
         'file' => "$object_path/sample_critical_edition_tn.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
     ) + $apparatus_datastreams,
   ));
@@ -61,7 +61,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
       'TN' => array(
         'file' => "$object_path/sample_version_tn.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
     ),
   ));
@@ -140,7 +140,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
       'TN' => array(
         'file' => "$object_path/sample_book_tn.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
       'MODS' => array(
         'file' => "$object_path/sample_book_mods.xml",
@@ -154,7 +154,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     'datastreams' => array(
       'TN' => array(
         'file' => "$object_path/sample_page_01_tn.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
       'HOCR' => array(
         'file' => "$object_path/sample_page_01_hocr.html",
@@ -166,7 +166,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
       'JPEG' => array(
         'file' => "$object_path/sample_page_01_jpeg.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
       'OBJ' => array(
         'file' => "$object_path/sample_page_01_obj.tiff",
@@ -198,7 +198,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     'datastreams' => array(
       'TN' => array(
         'file' => "$object_path/sample_page_02_tn.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
       'HOCR' => array(
         'file' => "$object_path/sample_page_02_hocr.html",
@@ -210,7 +210,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
       ),
       'JPEG' => array(
         'file' => "$object_path/sample_page_02_jpeg.jpg",
-        'mimetype' => 'image/jpg',
+        'mimetype' => 'image/jpeg',
       ),
       'OBJ' => array(
         'file' => "$object_path/sample_page_02_obj.tiff",
