@@ -207,31 +207,35 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   $transcription_datastream = $transcription->constructDatastream($datastream_id, $control_group);
   $transcription_datastream->mimetype = 'text/plain';
   $transcription_datastream->label = 'Transcription';
-  if ($content_source == 'tei_rdf' && isset($form_state['values']['restricted'])) {
-    $start_page = NULL;
-    $end_page = NULL;
+  if ($content_source == 'tei_rdf') {
+    // Cant trust form state data for page min/max range, so
+    // get it agian to be sure.
+    $page_results = islandora_paged_content_get_pages($versionable_object);
+    $start_page = 1;
+    $end_page = count($page_results);
     if ($form_state['values']['restricted']) {
       $start_page = $form_state['values']['first_page'];
       $end_page = $form_state['values']['last_page'];
     }
-    $tei_rdf = islandora_object_load($form_state['values']['versionable_object_pid']);
-    emicdora_add_derived_transcription($tei_rdf, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
+    islandora_add_object($transcription);
+    emicdora_add_derived_transcription($page_results, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page);
   }
+  else {
+    if ($content_source == 'file') {
+      $file = file_load($form_state['values']['file']);
+      $path = drupal_realpath($file->uri);
+      $transcription_datastream->setContentFromFile($path);
+      file_delete($file);
+    }
 
-  if ($content_source == 'file') {
-    $file = file_load($form_state['values']['file']);
-    $path = drupal_realpath($file->uri);
-    $transcription_datastream->setContentFromFile($path);
-    file_delete($file);
+    if ($content_source == 'none') {
+      $transcription_datastream->setContentFromstring($form_state['values']['none']);
+    }
+
+    $transcription->ingestDatastream($transcription_datastream);
+    islandora_add_object($transcription);
+    drupal_set_message(t("Transcription object created"));
   }
-
-  if ($content_source == 'none') {
-    $transcription_datastream->setContentFromstring($form_state['values']['none']);
-  }
-
-  $transcription->ingestDatastream($transcription_datastream);
-  islandora_add_object($transcription);
-  drupal_set_message(t("Transcription object created"));
 }
 
 /**
@@ -424,8 +428,8 @@ function islandora_critical_transcription_edit_form_submit($form, $form_state) {
 /**
  * Adds transcription from CWRC datastreams of CWRCWriter page objects.
  *
- * @param AbstractObject $tei_rdf_object
- *   Object representing TEI-RDF object
+ * @param AbstractObject $pages
+ *   An indexed array of pages
  * @param string $versionable_object_pid
  *   PID of Versionable Object
  * @param AbstractObject $transcription
@@ -433,15 +437,14 @@ function islandora_critical_transcription_edit_form_submit($form, $form_state) {
  * @param IslandoraFedoraDatastream $transcription_datastream
  *   Datastream object to be updated
  */
-function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object_pid, $transcription, $transcription_datastream, $start_page = NULL, $end_page = NULL) {
+function emicdora_add_derived_transcription($pages, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
-  $pages = array_keys(islandora_paged_content_get_pages($tei_rdf_object));
-  if ($start_page && $end_page) {
-    $offset = $start_page - 1;
-    $range = $end_page - $offset;
-    $pages = array_slice($pages, $offset, $range);
-  }
+
+  $offset = $start_page - 1;
+  $range = $end_page - $offset;
+  $pages = array_slice($pages, $offset, $range);
+
   $batch = array(
     'title' => t('Creating Transcription from TEI-RDF Object'),
     'operations' => array(),
@@ -453,7 +456,7 @@ function emicdora_add_derived_transcription($tei_rdf_object, $versionable_object
   $filename = file_create_filename($flat_pid . "tempcwrc", 'temporary://');
   foreach ($pages as $page) {
     $batch['operations'][] = array('emicdora_build_text_file', array(
-        'page_object' => islandora_object_load($page),
+        'page_object' => islandora_object_load($page['pid']),
         'filename' => $filename));
   }
   $batch['operations'][] = array('emicdora_transcription_file_add',
