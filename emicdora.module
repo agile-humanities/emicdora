@@ -1373,7 +1373,7 @@ function emicdora_forms($form_id, $args) {
 /**
  * Implements hook_CMODEL_PID_islandora_object_ingested().
  */
-function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(AbstractObject $object) {
+function emicdora_transcriptioncmodel_TRANSCRIPTION_islandora_object_ingested(AbstractObject $object, $datastream) {
   module_load_include('inc', 'collation', 'includes/calliope');
   emicdora_calliope_write_file($object->id);
 }
