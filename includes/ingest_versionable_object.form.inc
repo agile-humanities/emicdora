@@ -401,6 +401,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $ingest_objects = &islandora_ingest_form_get_objects($form_state);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
+
   // Link to an existing TEI-RDF Object.
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
@@ -527,6 +528,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $transcription->ingestDatastream($datastream);
       break;
   }
+  $shared_storage['destination_url'] = "islandora/object/$critical_edition/version/{$versionable_object->id}";
 }
 
 /**
