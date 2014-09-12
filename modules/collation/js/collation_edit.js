@@ -26,6 +26,7 @@
       });
 
       waitUntilExists("versionview-1010", function() {
+        $('.x-css-shadow').remove();
         var $head = $("#emicdora_collatex_iframe").contents().find("head");
         $head.append($("<link/>", {
           rel: "stylesheet",
