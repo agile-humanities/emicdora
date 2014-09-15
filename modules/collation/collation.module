@@ -5,6 +5,18 @@
  * Defines all the hooks this module implements.
  */
 
+// Permissions.
+define('EMICDORA_EDIT_COLLATION', 'edit collation');
+
+function emicdora_permission() {
+  return array(
+    EMICDORA_EDIT_COLLATION => array(
+      'title' => t('Edit collations'),
+      'description' => t('Access CWRCWriter.'),
+    ),
+  );
+}
+
 /**
  * Implements hook_menu().
  */
