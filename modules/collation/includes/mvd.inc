@@ -122,9 +122,10 @@ function emicdora_mvd_form_validate($form, $form_state) {
  * @param array $form_state
  *   Drupal Form State
  */
-function emicdora_mvd_form_submit($form, $form_state) {
+function emicdora_mvd_form_submit(&$form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   module_load_include('inc', 'islandora', 'includes/utilities');
+  unset($_GET['destination']);
   $transcriptions = array_filter($form_state['values']['transcriptions']);
   $critical_edition_pid = $form_state['values']['pid'];
   $mvd_title = $form_state['values']['mvd'];
@@ -132,6 +133,7 @@ function emicdora_mvd_form_submit($form, $form_state) {
   $filter = $form_state['values']['filter'];
   $success = emicdora_calliope_create_mvd($critical_edition_pid, $mvd_title, $mvd_description, $transcriptions, $filter);
   drupal_set_message(check_plain($success));
+  $form_state['redirect'] = array("islandora/object/$critical_edition_pid/compare/$mvd_title", array('fragment' => "$mvd_title/$critical_edition_pid"));
 }
 
 /**
