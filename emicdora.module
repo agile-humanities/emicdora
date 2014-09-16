@@ -461,7 +461,7 @@ function emicdora_file_mimetype_mapping_alter(&$mapping) {
  * Implements hook_menu_alter().
  */
 function emicdora_menu_alter(array &$items) {
-  // We don't want the pront icon on this site.
+  // We don't want the print icon on this site.
   unset($items["islandora/object/%islandora_object/print_object"]);
   // Prevent Islandora from overriding our breadcrumbs.
   $items['islandora/object/%islandora_object']['title callback'] = 'emicdora_drupal_title';
