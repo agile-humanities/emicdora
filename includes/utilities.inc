@@ -210,11 +210,13 @@ function emicdora_create_required_object(IslandoraTuque $connection, array $args
  *   PID of object
  * @param string $content_model
  *   Optional Content Model to restrict results.
+ * @param string $relationship
+ *   fedora relationship
  *
  * @return array
  *   associative array of PID => Content Model pairs.
  */
-function emicdora_get_members($object_pid, $content_model = NULL) {
+function emicdora_get_members($object_pid, $content_model = NULL, $relationship = 'isMemberOfCollection') {
   $qualifier = $content_model ? "fm:hasModel <info:fedora/$content_model>;" : "";
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
@@ -223,7 +225,7 @@ function emicdora_get_members($object_pid, $content_model = NULL) {
             FROM <#ri>
             WHERE {
               {?subject fm:state fm:Active;
-                        fr:isMemberOfCollection <info:fedora/$object_pid>;
+                        fr:$relationship <info:fedora/$object_pid>;
                         fm:hasModel ?object;
                         $qualifier
 
@@ -283,7 +285,6 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
       ${$tei_rdf_content_node->nodeName}->appendChild($tei_rdf_fragment);
     }
   }
-  $my_doc = $tei_document->saveHTML();
   return $tei_document->saveXML();
 }
 

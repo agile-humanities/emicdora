@@ -302,12 +302,11 @@ function emicdora_menu() {
  *   The text to use as the page subtitle.
  */
 function emicdora_set_page_title_and_subtitle($title, $subtitle) {
-  drupal_set_title(t("<h1>@title</h1></br><h3>@subtitle</h3>",
-    array(
-      '@title' => $title,
-      '@subtitle' => $subtitle,
-    )
-  ), PASS_THROUGH);
+  drupal_set_title(t("<h1>@title</h1></br><h3>@subtitle</h3>", array(
+    '@title' => $title,
+    '@subtitle' => $subtitle,
+          )
+      ), PASS_THROUGH);
 }
 
 /**
@@ -1186,7 +1185,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
     case 'islandora:versionCModel':
       $content = theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
       break;
-
   }
 
   return array('emicdora' => $content);
@@ -1373,7 +1371,7 @@ function emicdora_forms($form_id, $args) {
 /**
  * Implements hook_CMODEL_PID_islandora_object_ingested().
  */
-function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(AbstractObject $object) {
+function emicdora_transcriptioncmodel_TRANSCRIPTION_islandora_object_ingested(AbstractObject $object, $datastream) {
   module_load_include('inc', 'collation', 'includes/calliope');
   emicdora_calliope_write_file($object->id);
 }
@@ -1381,11 +1379,15 @@ function emicdora_islandora_transcriptioncmodel_islandora_object_ingested(Abstra
 /**
  * Implements hook_islandora_ingest_steps_alter().
  */
-function emicdora_islandora_ingest_steps_alter(array &$steps, array $form_state) {
-  $shared_storage = islandora_ingest_form_get_shared_storage($form_state);
+function emicdora_islandora_ingest_steps_alter(array &$steps, array &$form_state) {
+  $shared_storage = &islandora_ingest_form_get_shared_storage($form_state);
   if (isset($_POST['source'])) {
     $shared_storage['source'] = filter_xss($_POST['source']);
   }
+  if (isset($shared_storage['destination_url'])) {
+    $form_state['redirect'] = $shared_storage['destination_url'];
+  }
+
   if (!empty($steps['xml_form_builder_metadata_step']) && isset($shared_storage['source'])) {
     $source = islandora_object_load($shared_storage['source']);
     if (isset($source['MODS'])) {
@@ -1401,7 +1403,7 @@ function emicdora_islandora_ingest_steps_alter(array &$steps, array $form_state)
  */
 function emicdora_islandora_view_object(AbstractObject $object) {
   // Manually override the breadcrumbs for the Editions collection.
-  if (isset($object) &&  $object->id == 'islandora:editions') {
+  if (isset($object) && $object->id == 'islandora:editions') {
     module_load_include('inc', 'islandora', 'includes/breadcrumb');
     $bc = islandora_get_breadcrumbs($object);
 
