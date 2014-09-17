@@ -10,7 +10,8 @@
             $('.emicdora-workbench-source-links').change(function() {
                 var selected = $('.emicdora-workbench-source-links option:selected').val();
                 if (selected != 'none') {
-                  window.location = Drupal.settings.basePath + 'workbench/add/' + selected;
+                  window.location = Drupal.settings.basePath + 'emicdora/source/add/' + selected + '/FALSE/TRUE';
+
                 }
             });
         }

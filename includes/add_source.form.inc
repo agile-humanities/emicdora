@@ -20,7 +20,10 @@
  * @return array
  *   A Drupal Form for ingesting a new object of the given type.
  */
-function islandora_emicdora_add_source_form($form, $form_state, $content_model, $critical_edition) {
+function islandora_emicdora_add_source_form($form, $form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
+  if ($add_to_workbench == "TRUE") {
+    $add_to_workbench = TRUE;
+  }
   $mappings = islandora_simplified_ingest_get_mappings($content_model);
   drupal_add_css(
       drupal_get_path('module', 'emicdora') .
@@ -38,7 +41,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
   );
   $form['critical_edition_pid'] = array(
     '#type' => 'hidden',
-    '#value' => $critical_edition->id,
+    '#value' => is_object($critical_edition) ? $critical_edition->id : NULL,
   );
   if ($mappings['tn']) {
     $form = array_merge($form, emicdora_get_thumbnail_wrapper($upload_size));
@@ -59,7 +62,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
     '#type' => 'checkbox',
     '#suffix' => '</div>',
     '#title' => t("Add object to workbench?"),
-    '#default_value' => FALSE,
+    '#default_value' => $add_to_workbench,
     '#attributes' => array(
       'class' => array('workbench-check')),
   );
@@ -86,12 +89,15 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
 function islandora_emicdora_add_source_form_submit($form, $form_state) {
   global $user;
   module_load_include('inc', 'xml_form_builder', 'includes/associations');
+  module_load_include('inc', 'islandora_bookmark', 'includes/api');
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
   $mapping = islandora_simplified_ingest_get_mappings($form_state['values']['content_model']);
   $object = $repository->constructObject('islandora');
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $mapping['collection']);
-  $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $form_state['values']['critical_edition_pid']);
+  if ($form_state['values']['critical_edition_pid']) {
+    $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $form_state['values']['critical_edition_pid']);
+  }
   $xml_form = new XMLForm($form_state);
   $document = $xml_form->submit($form, $form_state);
   $associations = xml_form_builder_get_associations(array(), array($form_state['values']['content_model']), array());
@@ -140,6 +146,11 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
     }
   }
   islandora_add_object($object);
+  if ($form_state['values']['choice_wrapper']['workbench']) {
+    $list_id = islandora_bookmark_get_default_list();
+    $list = Bookmark::getList($list_id);
+    $list->addPid($object->id);
+  }
 }
 
 /**
@@ -385,7 +396,6 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE) {
   $callback = function ($element) use ($allowed_extensions) {
     $ext = pathinfo($element, PATHINFO_EXTENSION);
     $ext = drupal_strtolower($ext);
-
     // An allowed extension and does /not/ contain __MACOSX.
     return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
   };
