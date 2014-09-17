@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Menu callback and related helper functions for the workbench.
@@ -46,7 +47,7 @@ function emicdora_workbench_form($form, &$form_state) {
   $form['add_critical_edition'] = array(
     '#type' => 'submit',
     '#value' => t('Add Critical Edition'),
-    '#submit' => array('emicdora_workbench_add_critical_edition_redirect'),
+    // '#submit' => array('emicdora_workbench_add_critical_edition_redirect'),
     '#access' => user_access(ISLANDORA_INGEST),
     '#attributes' => array(
       'class' => array(
@@ -57,7 +58,6 @@ function emicdora_workbench_form($form, &$form_state) {
   $form['add_schema_transform'] = array(
     '#type' => 'submit',
     '#value' => t('Add New Schema / Transform'),
-    '#submit' => array('emicdora_workbench_add_schema_transform_redirect'),
     '#access' => user_access(ISLANDORA_INGEST),
     '#attributes' => array(
       'class' => array(
@@ -313,23 +313,32 @@ function emicdora_workbench_form_submit($form, &$form_state) {
     }
     emicdora_workbench_remove_individual_pid($pid, $list, $type);
   }
+  else {
+    if ($form_state['triggering_element']['#parents'] == $critical_selected_parents) {
+      $pids = array_filter($form_state['values']['critical_edition_bookmarks']['table']);
+      emicdora_workbench_remove_selected_pids($pids, $list, t('Critical Edition'));
+    }
 
-  if ($form_state['triggering_element']['#parents'] == $critical_selected_parents) {
-    $pids = array_filter($form_state['values']['critical_edition_bookmarks']['table']);
-    emicdora_workbench_remove_selected_pids($pids, $list, t('Critical Edition'));
-  }
+    if ($form_state['triggering_element']['#parents'] == $source_selected_parents) {
+      $pids = array_filter($form_state['values']['source_bookmarks']['table']);
+      emicdora_workbench_remove_selected_pids($pids, $list, t('Source'));
+    }
 
-  if ($form_state['triggering_element']['#parents'] == $source_selected_parents) {
-    $pids = array_filter($form_state['values']['source_bookmarks']['table']);
-    emicdora_workbench_remove_selected_pids($pids, $list, t('Source'));
-  }
+    if ($form_state['triggering_element']['#parents'] == $critical_all_parents) {
+      emicdora_workbench_remove_all_pids($list, t('Critical Edition'));
+    }
 
-  if ($form_state['triggering_element']['#parents'] == $critical_all_parents) {
-    emicdora_workbench_remove_all_pids($list, t('Critical Edition'));
-  }
+    if ($form_state['triggering_element']['#parents'] == $source_all_parents) {
+      emicdora_workbench_remove_all_pids($list, t('Source'));
+    }
 
-  if ($form_state['triggering_element']['#parents'] == $source_all_parents) {
-    emicdora_workbench_remove_all_pids($list, t('Source'));
+    if ($form_state['triggering_element']['#parents'] == array('add_critical_edition')) {
+      $form_state['redirect'] = 'workbench/add/islandora:criticalEditionContainerCModel';
+    }
+
+    if ($form_state['triggering_element']['#parents'] == array('add_schema_transform')) {
+      $form_state['redirect'] = 'islandora/object/islandora:tei_schema_collection/manage/overview/ingest';
+    }
   }
 }
 
