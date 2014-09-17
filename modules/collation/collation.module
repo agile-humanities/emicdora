@@ -5,6 +5,8 @@
  * Defines all the hooks this module implements.
  */
 
+define('EMICDORA_EDIT_COLLATION', 'edit collation');
+
 /**
  * Implements hook_menu().
  */
@@ -86,6 +88,18 @@ function collation_menu() {
       ),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 2),
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function emicdora_permission() {
+  return array(
+    EMICDORA_EDIT_COLLATION => array(
+      'title' => t('Edit Collations'),
+      'description' => t('Allows users to edit MVD collations'),
     ),
   );
 }
