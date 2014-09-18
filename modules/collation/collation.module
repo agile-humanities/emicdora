@@ -5,6 +5,7 @@
  * Defines all the hooks this module implements.
  */
 
+
 define('EMICDORA_EDIT_COLLATION', 'edit collation');
 
 /**
