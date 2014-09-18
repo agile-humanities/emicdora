@@ -137,7 +137,7 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
     $node = $dom->getElementById($id);
     if ($node) {
       $node_value = $node->nodeValue;
-      $class = $node->getAttribute('class');
+      $is_merged = ($node->getAttribute('class') == 'merged') ? TRUE : FALSE;
       if ($node_value) {
         // Make an allowance for selected text being wholly enclosed in a span.
         // Enclosed text will have prefix or suffix moved to adjacent spans.
@@ -192,16 +192,27 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
       }
       // If node value differs from content, node value must be adjusted.
       if ($node_value != $content) {
-        // If delimiter is empty, force string to next sibling.
+        // Merged spans which have been adjusted are always removed..
+        if ($is_merged) {
+          $nodes_to_delete[$id] = $node;
+        }
         $starts_with = emicdora_starts_with($node_value, $content);
-        $location = ($content) ? strpos($node_value, $content) : 1;
         $new_value = str_replace($content, '', $node_value);
+
         switch ($starts_with) {
-          case FALSE :
-            $node->nodeValue = $new_value;
+          case FALSE:
+
+            if ($is_merged) {
+              $previous = $node->previousSibling;
+              $previous->nodeValue = $previous->nodeValue . $new_value;
+            }
+            else {
+              $refnode = $node;
+              $node->nodeValue = $new_value;
+            }
             break;
 
-          case TRUE :
+          case TRUE:
             $refnode = $node;
             $next = $node->nextSibling;
             $current = $next->nodeValue;
