@@ -241,7 +241,6 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
     $refnode = $nodes_to_delete[$delete_ids[0]];
   }
   $wrapper_node = $dom->getElementById($config[$type]);
-  dsm( $dom->saveXML($wrapper_node));
   $refnode->parentNode->insertBefore($new_element, $refnode);
   foreach ($nodes_to_delete as $victim) {
     $victim->parentNode->removeChild($victim);
