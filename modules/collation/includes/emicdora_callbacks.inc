@@ -133,7 +133,6 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
-  $all_ids = array_keys($marshalled_content);
   foreach ($marshalled_content as $id => $content) {
     $node = $dom->getElementById($id);
     if ($node) {
@@ -141,8 +140,9 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
       $class = $node->getAttribute('class');
       if ($node_value) {
         // Make an allowance for selected text being wholly enclosed in a span.
-
-        if (strlen($identified_text) < strlen($content)) {
+        // Enclosed text will have prefix or suffix moved to adjacent spans.
+        $enclosed = strlen($identified_text) < strlen($content);
+        if ($enclosed) {
           if (emicdora_starts_with($content, $identified_text)) {
             $remainder = str_replace($identified_text, '', $content);
             $next = $node->nextSibling;
@@ -184,38 +184,45 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
           $nodes_to_delete[$id] = $node;
           continue;
         }
+        // Spans containing matched text are deleted.
         if ($node_value == $content) {
           $nodes_to_delete[$id] = $node;
           continue;
         }
       }
+      // If node value differs from content, node value must be adjusted.
       if ($node_value != $content) {
         // If delimiter is empty, force string to next sibling.
+        $starts_with = emicdora_starts_with($node_value, $content);
         $location = ($content) ? strpos($node_value, $content) : 1;
         $new_value = str_replace($content, '', $node_value);
-        if ($location > 0) {
-          $node->nodeValue = $new_value;
-        }
-        else {
-          $next = $node->nextSibling;
-          $current = $next->nodeValue;
-          $class = $next->getAttribute('class');
-          if ($class != 'merged') {
-            $next->nodeValue = $new_value . $current;
-          }
-          else {
-            $node->node_value = $new_value;
-            $new_node = $dom->createElement('span');
-            $new_node->nodeValue = $new_value;
-            $new_node->setAttribute('class', $type);
-            $parent_node = $dom->getElementById($config[$type]);
-            $parent_node->insertBefore($new_node, $node);
-          }
-          $nodes_to_delete[$id] = $node;
+        switch ($starts_with) {
+          case FALSE :
+            $node->nodeValue = $new_value;
+            break;
+
+          case TRUE :
+            $refnode = $node;
+            $next = $node->nextSibling;
+            $current = $next->nodeValue;
+            $class = $next->getAttribute('class');
+            if ($class != 'merged') {
+              $next->nodeValue = $new_value . $current;
+            }
+            else {
+              $node->node_value = $new_value;
+              $new_node = $dom->createElement('span');
+              $new_node->nodeValue = $new_value;
+              $new_node->setAttribute('class', $type);
+              $parent_node = $dom->getElementById($config[$type]);
+              $parent_node->insertBefore($new_node, $node);
+              $nodes_to_delete[$id] = $node;
+            }
         }
       }
     }
   }
+
   $new_element = $dom->createElement('span', $identified_text);
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {
@@ -225,19 +232,21 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', 'merged');
-  $refnode = $dom->getElementById($id);
+  if (!isset($refnode)) {
+    $refnode = $dom->getElementById($id);
+  }
   $delete_ids = array_keys($nodes_to_delete);
   $ref_id = $refnode->getAttribute('id');
   if (in_array($ref_id, $delete_ids)) {
     $refnode = $nodes_to_delete[$delete_ids[0]];
   }
-
+  $wrapper_node = $dom->getElementById($config[$type]);
+  dsm( $dom->saveXML($wrapper_node));
   $refnode->parentNode->insertBefore($new_element, $refnode);
   foreach ($nodes_to_delete as $victim) {
     $victim->parentNode->removeChild($victim);
   }
-  $node = $dom->getElementById($config[$type]);
-  return $dom->saveXML($node);
+  return $dom->saveXML($wrapper_node);
 }
 
 /**
