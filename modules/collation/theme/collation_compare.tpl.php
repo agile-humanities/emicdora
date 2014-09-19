@@ -8,7 +8,7 @@ if (user_access(EMICDORA_EDIT_COLLATION)) {
   print '
   <input id="diff_l"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
   <input id="diff_r"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
-  <button class = "emicdora_button" id="collation_link">Merge Text</button>
+  <button class = "emicdora_button" id="collation_link">Link Text</button>
   <br />
   <input id="merged_text"  type="text" style="width: 80%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
   <button class = "emicdora_button" id="collation_unlink" class="form-submit" type="submit" value="Unlink">Unlink</button><br/>
