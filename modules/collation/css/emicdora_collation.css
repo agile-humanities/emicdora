@@ -9,8 +9,9 @@
 .emicdora_button {
   width: 125px;
 }
+
 #boundlist-1034 {
- width:300px;
+  width:300px;
 }
 
 #menu-1033 {
@@ -18,12 +19,9 @@
 }
 
 #menu-1033-innerCt {
-    width:300px !important;
+  width:300px !important;
 }
+
 #menu-1033-targetEl {
   width:300px !important;
 }
-.x-css-shadow{
-
-}
-
