@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -286,6 +287,13 @@ function emicdora_menu() {
       'page arguments' => array('emicdora_coop'),
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'user_access',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
+    'emicdora/remove/source' => array(
+      'title' => 'Remove source object',
+      'page callback' => 'emicdora_remove_source',
+      'file' => 'includes/utilities.inc',
+      'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
   );

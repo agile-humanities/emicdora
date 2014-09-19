@@ -465,8 +465,8 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
               '@pid' => $object->id,
               '@message' => $e->getMessage(),
             )
-        ), 'error'
-    );
+            ), 'error'
+        );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
           '@pid' => $object->id,
@@ -755,4 +755,24 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
+}
+
+/**
+ * Removes source object from Critical Edition.
+ */
+function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+  $critical_edition = islandora_object_load($critical_edition_pid);
+  $source_object = islandora_object_load($source_object_pid);
+  $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
+  foreach ($versions as $version_pid) {
+    $version = islandora_object_load($version_pid);
+    $sources = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+    foreach ($sources as $source) {
+      if ($source['object']['value'] == $source_object_pid) {
+        $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+      }
+    }
+  }
+  drupal_goto("islandora/object/$critical_edition_pid");
 }

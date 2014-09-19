@@ -153,8 +153,8 @@ function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_
       $destination = "$destination/{$destination_params['path']}/{$destination_params['pid']}";
     }
     $links[] = array(
-      'title' => 'Delete',
-      'href' => "islandora/object/$pid/delete",
+      'title' => 'Remove',
+      'href' => "emicdora/remove/source/$critical_edition_pid/$pid",
       'query' => array(
         'destination' => $destination,
       ),
