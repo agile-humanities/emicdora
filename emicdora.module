@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -1427,15 +1426,31 @@ function emicdora_islandora_view_object(AbstractObject $object) {
  * Implements hook_form_islandora_delete_object_form_alter().
  */
 function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$form_state) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
   $object = $form_state['object'];
   if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
     $form['description']['#markup'] = t('This will remove the critical edition. This action cannot be undone.');
     $form['#submit'] = array('emicdora_delete_critical_edition_submit');
   }
+  if (in_array('islandora:bookCModel', $object->models)) {
+    $owners = islandora_get_parents_from_rels_ext($object);
+    $is_critical_edition = FALSE;
+    foreach ($owners as $owner) {
+      if (in_array('islandora:criticalEditionContainerCModel', $owner->models)) {
+        $is_critical_edition = TRUE;
+        $form['#submit'] = array();
+        $link = l($owner->label, "islandora/object/$owner->id");
+        drupal_set_message(t("@object is member of Critical Edition !pid and cannot be deleted.", array('@object' => $object->label, '!pid' => $link)));
+        //drupal_goto("islandora/object/{$object->id}");
+        //return;
+      }
+      $form['#submit'][] = 'emicdora_delete_versions_submit';
+    }
+  }
 }
 
 /**
- * Sever relationships to critical edition being deleted.
+ * Sever delete critical edition and relationships to member objects.
  *
  * @param array $form
  *   The Drupal form.
@@ -1451,4 +1466,28 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
     $member_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $object->id);
   }
   islandora_delete_object($object);
+}
+
+/**
+ * Sever delete critical edition and relationships to member objects.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_delete_versions_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $object = $form_state['object'];
+  $source_pid = $object->id;
+  $versions_query = <<<EOQ
+     SELECT ?pid ?label FROM <#ri> WHERE {
+      ?pid <fedora-rels-ext:isDerivationOf> <info:fedora/$source_pid> ;
+      <fedora-model:label> ?label
+}
+EOQ;
+  $versions = $object->repository->ri->sparqlQuery($versions_query);
+  foreach ($versions as $version) {
+    $pid = $result['pid']['value'];
+  }
 }
