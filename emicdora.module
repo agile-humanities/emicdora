@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -1440,9 +1441,9 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
         $is_critical_edition = TRUE;
         $form['#submit'] = array();
         $link = l($owner->label, "islandora/object/$owner->id");
-        drupal_set_message(t("@object is member of Critical Edition !pid and cannot be deleted.", array('@object' => $object->label, '!pid' => $link)));
-        //drupal_goto("islandora/object/{$object->id}");
-        //return;
+        drupal_set_message(t("@object is member of Critical Edition !pid and cannot be deleted.", array('@object' => filter_xss($object->label), '!pid' => filter_xss($link))));
+        drupal_goto("islandora/object/{$object->id}");
+        return;
       }
       $form['#submit'][] = 'emicdora_delete_versions_submit';
     }
@@ -1479,6 +1480,7 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
 function emicdora_delete_versions_submit(array $form, array &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $object = $form_state['object'];
+  $version_pids = array();
   $source_pid = $object->id;
   $versions_query = <<<EOQ
      SELECT ?pid ?label FROM <#ri> WHERE {
@@ -1488,6 +1490,64 @@ function emicdora_delete_versions_submit(array $form, array &$form_state) {
 EOQ;
   $versions = $object->repository->ri->sparqlQuery($versions_query);
   foreach ($versions as $version) {
-    $pid = $result['pid']['value'];
+    $version_pids[] = $version['pid']['value'];
   }
+  if (!empty($version_pids)) {
+    $batch = array(
+      'title' => t("Deleting associated versions and their related objects"),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+    );
+    foreach ($version_pids as $version_pid) {
+      $batch['operations'][] = array(
+        'emicdora_version_delete',
+        array($version_pid),
+      );
+    }
+    batch_set($batch);
+  }
+}
+
+/**
+ * Batch function to delete versions and their dependencies.
+ *
+ * @param string $version_pid
+ *   PID of version to be deleted.
+ */
+function emicdora_version_delete($version_pid) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $tei_rdf = islandora_object_load($version_pid);
+  $pages = islandora_paged_content_get_pages($tei_rdf);
+  if (!empty($pages)) {
+    $batch = array(
+      'title' => t("Deleting tei-rdf page objects"),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+    );
+    foreach ($pages as $page) {
+      $page_object = islandora_object_load($page['pid']);
+      $batch['operations'][] = array(
+        'emicdora_remove_objects',
+        array($page_object),
+      );
+    }
+    $batch['operations'][] = array(
+      'emicdora_remove_objects',
+      array($tei_rdf),
+    );
+    batch_set($batch);
+  }
+  else {
+    islandora_delete_object($tei_rdf);
+  }
+}
+
+/**
+ * Deletes object.
+ *
+ * @param AbstractObject $object
+ *   Object to be deleted.
+ */
+function emicdora_remove_objects($object) {
+  islandora_delete_object($object);
 }
