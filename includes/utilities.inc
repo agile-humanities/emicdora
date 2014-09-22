@@ -759,6 +759,11 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
 
 /**
  * Removes source object from Critical Edition.
+ *
+ * @param string $critical_edition_pid
+ *   PID of critical edition
+ * @param string $source_object_pid
+ *  PID of source object
  */
 function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
   $source_object = islandora_object_load($source_object_pid);
@@ -773,5 +778,19 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
       }
     }
   }
+  drupal_goto("islandora/object/$critical_edition_pid");
+}
+
+/**
+ * Reoves Version from Critical Edition
+ *
+ * @param string $critical_edition_pid
+ *   PID of Critical Edition
+ * @param string $version_object_pid
+ *   PID of Version Object.
+ */
+function emicdora_remove_version($critical_edition_pid, $version_object_pid) {
+  $version = islandora_object_load($version_object_pid);
+  $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
   drupal_goto("islandora/object/$critical_edition_pid");
 }

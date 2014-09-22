@@ -296,6 +296,13 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
+    'emicdora/remove/version' => array(
+      'title' => 'Remove version object',
+      'page callback' => 'emicdora_remove_version',
+      'file' => 'includes/utilities.inc',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
   );
 }
 
