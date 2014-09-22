@@ -86,7 +86,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
  * @param array $form_state
  *   The Drupal form state.
  */
-function islandora_emicdora_add_source_form_submit($form, $form_state) {
+function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   global $user;
   module_load_include('inc', 'xml_form_builder', 'includes/associations');
   module_load_include('inc', 'islandora_bookmark', 'includes/api');
@@ -102,12 +102,14 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
   $document = $xml_form->submit($form, $form_state);
   $associations = xml_form_builder_get_associations(array(), array($form_state['values']['content_model']), array());
   $created = xml_form_builder_update_object($object, $associations[0], $document, "Object");
+  // Set default label.
+  $label = t("New @type", array('@type' => $mapping['label']));
   $dc = DublinCore::importFromXMLString($object['DC']->content);
   if ($dc) {
     $dc = $dc->asArray();
     $label = $dc['dc:title']['value'];
   }
-  $object->label = $label ? $label : t("New @type", array('@type' => $mapping['label']));
+  $object->label = $label;
   $xacml = FALSE;
   if ($form_state['values']['choice_wrapper']['privacy']) {
     $xacml = new IslandoraXacml($object);
@@ -151,6 +153,7 @@ function islandora_emicdora_add_source_form_submit($form, $form_state) {
     $list = Bookmark::getList($list_id);
     $list->addPid($object->id);
   }
+  $form_state['redirect'] = "islandora/object/{$object->id}";
 }
 
 /**

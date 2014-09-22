@@ -45,7 +45,7 @@ function emicdora_menu() {
         'islandora_emicdora_add_source_form',
         $content_model,
       ),
-      'access arguments' => user_access(ISLANDORA_INGEST),
+      'access arguments' => array(ISLANDORA_INGEST),
     );
   }
   return $add_source_contextual_links + array(

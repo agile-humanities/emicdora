@@ -14,3 +14,7 @@
 .emicdora-workbench-bookmark table tbody .operations {
    width: 20%;
 }
+
+.emicdora-workbench-button,.emicdora-workbench-entity-links {
+  margin: 4px;
+}
