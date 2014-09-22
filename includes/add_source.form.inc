@@ -305,7 +305,7 @@ function emicdora_ingest_add_file($file, $dsid, $object) {
  */
 function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml) {
   $batch = array(
-    'title' => t('Adding pages to new textual content'),
+    'title' => t('Adding pages to new text object'),
     'operations' => array(),
     'file' => drupal_get_path('module', 'emicdora') . '/includes/add_source.form.inc',
     'progress_message' => t('@current of @total pages created.'),
