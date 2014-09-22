@@ -1516,19 +1516,29 @@ EOQ;
  */
 function emicdora_version_delete($version_pid) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $tei_rdf = islandora_object_load($version_pid);
-  $pages = islandora_paged_content_get_pages($tei_rdf);
-  if (!empty($pages)) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+
+  $version_object = islandora_object_load($version_pid);
+  $pages = islandora_paged_content_get_pages($version_object);
+  $transcription_data = emicdora_get_raw_objects($version_object, 'transcriptions');
+  $pids_to_delete = array();
+  foreach ($pages as $page) {
+    $pids_to_delete[] = $page['pid'];
+  }
+  foreach ($transcription_data as $transcription_datum) {
+    $pids_to_delete[] = $transcription_datum['pid'];
+  }
+  if (!empty($pids_to_delete)) {
     $batch = array(
-      'title' => t("Deleting tei-rdf page objects"),
+      'title' => t("Deleting version's child objects"),
       'progress_message' => t('Completed @current operations out of @total.'),
       'operations' => array(),
     );
-    foreach ($pages as $page) {
-      $page_object = islandora_object_load($page['pid']);
+    foreach ($pids_to_delete as $pid_to_delete) {
+      $deletion_object_object = islandora_object_load($pid_to_delete);
       $batch['operations'][] = array(
         'emicdora_remove_objects',
-        array($page_object),
+        array($deletion_object_object),
       );
     }
     $batch['operations'][] = array(
@@ -1538,7 +1548,7 @@ function emicdora_version_delete($version_pid) {
     batch_set($batch);
   }
   else {
-    islandora_delete_object($tei_rdf);
+    islandora_delete_object($version_object);
   }
 }
 
