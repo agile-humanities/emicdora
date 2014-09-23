@@ -875,14 +875,16 @@ function emicdora_block_view($delta = '') {
     case 'tei':
       if ($is_tei_editor || isset($versionable_object->id)) {
         $links = array();
-        $links[] = array(
-          'title' => 'Reading Transcription',
-          'href' => $path,
-        );
-        $links[] = array(
-          'title' => 'Diplomatic Transcription',
-          'href' => $path,
-        );
+        if ($is_tei_editor) {
+          $links[] = array(
+            'title' => 'Reading Transcription',
+            'href' => $path,
+          );
+          $links[] = array(
+            'title' => 'Diplomatic Transcription',
+            'href' => $path,
+          );
+        }
         if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
           $links[] = array(
             'title' => 'Edit',
