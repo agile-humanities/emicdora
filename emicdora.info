@@ -4,6 +4,7 @@ package = EMiC
 dependencies[] = islandora
 dependencies[] = islandora_paged_content
 dependencies[] = islandora_solr
+dependencies[] = islandora_bookmark
 version = 7.x-dev
 core = 7.x
 files[] = tests/emicdora_ingest_purge.test
