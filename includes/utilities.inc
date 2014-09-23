@@ -13,7 +13,7 @@
  */
 function emicdora_source_content_models() {
   return array(
-    'islandora:bookCModel' => t('Textual Content'),
+    'islandora:bookCModel' => t('Text'),
     'islandora:sp-audioCModel' => t('Audio'),
     'islandora:sp_videoCModel' => t('Video'),
     'islandora:sp_large_image_cmodel' => t('Image'),
@@ -57,9 +57,26 @@ function emicdora_get_source_type(AbstractObject $version_object) {
  */
 function emicdora_show_apparatus_block() {
   $path_parts = explode('/', $_GET['q']);
+  $acceptable = array(
+    'source',
+    'sources',
+    'version',
+    'versions',
+    'transcription',
+  );
+  $show_apparatus = FALSE;
+  if (!isset($path_parts[3])) {
+    $show_apparatus = TRUE;
+  }
+  else {
+    if (in_array($path_parts[3], $acceptable)) {
+      $show_apparatus = TRUE;
+    }
+  }
+
   $return = FALSE;
   // Ensure we are looking at the default edition view.
-  if (isset($path_parts[2]) && !isset($path_parts[3])) {
+  if (isset($path_parts[2]) && $show_apparatus) {
     // Confirm the given objects content model.
     $object = islandora_object_load($path_parts[2]);
     if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {

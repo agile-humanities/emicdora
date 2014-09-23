@@ -6,6 +6,8 @@
  */
 
 
+
+// Permissions.
 define('EMICDORA_EDIT_COLLATION', 'edit collation');
 
 /**

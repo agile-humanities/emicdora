@@ -9,6 +9,8 @@
  * Implements hook_preprocess_theme().
  */
 function collation_preprocess_collation_compare(array &$variables) {
+  $path_parts = explode('/', $_GET['q']);
+  $variables['display_type'] = $path_parts[3];
   module_load_include('inc', 'collation', 'includes/calliope');
   $path = drupal_get_path('module', 'collation');
   drupal_add_js("$path/js/collation_edit.js");

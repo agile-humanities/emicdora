@@ -34,6 +34,20 @@ function emicdora_menu() {
       'context' => MENU_CONTEXT_INLINE,
     );
   }
+  foreach ($source_content_models as $content_model => $label) {
+    $url = "emicdora/source/add/{$content_model}";
+    $title = "Add New {$label}";
+    $add_source_contextual_links[$url] = array(
+      'title' => $title,
+      'file' => 'includes/add_source.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array(
+        'islandora_emicdora_add_source_form',
+        $content_model,
+      ),
+      'access arguments' => array(ISLANDORA_INGEST),
+    );
+  }
   return $add_source_contextual_links + array(
     'admin/islandora/emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
@@ -245,7 +259,8 @@ function emicdora_menu() {
     ),
     'workbench' => array(
       'title' => 'My Workbench',
-      'page callback' => 'emicdora_workbench',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_workbench_form'),
       'file' => 'includes/workbench.inc',
       'type' => MENU_NORMAL_ITEM,
       'access callback' => 'user_access',
@@ -1413,5 +1428,20 @@ function emicdora_islandora_view_object(AbstractObject $object) {
     array_shift($bc);
     $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
     drupal_set_breadcrumb($bc);
+  }
+}
+
+/**
+ * Implements hook_islandora_object_ingested().
+ */
+function emicdora_islandora_object_ingested(AbstractObject $object) {
+  $path_parts = explode('/', $_GET['q']);
+  if (isset($path_parts[2]) && $path_parts[0] == 'workbench' && $path_parts[1] == 'add') {
+    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      module_load_include('inc', 'islandora_bookmark', 'includes/api');
+      $list_id = islandora_bookmark_get_default_list();
+      $list = Bookmark::getList($list_id);
+      $list->addPid($object->id);
+    }
   }
 }

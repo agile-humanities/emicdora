@@ -1,0 +1,20 @@
+.emicdora-workbench-bookmark table {
+    width: 100%;
+}
+
+.emicdora-workbench-bookmark th.select-all, .emicdora-workbench-bookmark td:first-child {
+   width: 1em;
+}
+
+.emicdora-workbench-button, #emicdora_add_entity, #emicdora_add_source {
+    display: inline-block;
+    padding: 0.25em;
+}
+
+.emicdora-workbench-bookmark table tbody .operations {
+   width: 20%;
+}
+
+.emicdora-workbench-button,.emicdora-workbench-entity-links {
+  margin: 4px;
+}

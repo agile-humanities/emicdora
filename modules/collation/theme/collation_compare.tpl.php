@@ -4,7 +4,7 @@
 print '<div id ="emicdora_collation_container">';
 print '<div id="metadata"></div>
     <div id="uiplaceholder"></div>';
-if (user_access(EMICDORA_EDIT_COLLATION)) {
+if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compare') {
   print '
   <input id="diff_l"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
   <input id="diff_r"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
@@ -14,11 +14,12 @@ if (user_access(EMICDORA_EDIT_COLLATION)) {
   <button class = "emicdora_button" id="collation_unlink" class="form-submit" type="submit" value="Unlink">Unlink</button><br/>
   <button class = "emicdora_button" id="save_changes">Save Changes</button><br />
   <p id ="emicdora_status"></p>
-    <div id="collatex_iframe">
-    <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
-  </div>
   ';
 }
-print '</div>';
+print '
+    <div id="collatex_iframe">
+      <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
+    </div>
+  </div>';
 ?>
 
