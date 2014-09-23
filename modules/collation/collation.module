@@ -53,7 +53,7 @@ function collation_menu() {
     'islandora/object/%islandora_object/compare' => array(
       'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
       'title arguments' => array(
-        'emicdora_set_title_and_breadcrumbs_collation', 2,
+        'emicdora_set_title_and_breadcrumbs_collation', 2, 4,
       ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_compare_view',
@@ -72,7 +72,7 @@ function collation_menu() {
     'islandora/object/%islandora_object/table' => array(
       'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
       'title arguments' => array(
-        'emicdora_set_title_and_breadcrumbs_collation', 2,
+        'emicdora_set_title_and_breadcrumbs_collation', 2, 4,
       ),
       'context' => MENU_CONTEXT_PAGE,
       'page callback' => 'emicdora_table_view',
@@ -81,33 +81,34 @@ function collation_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
-    'islandora/object/%islandora_object/refresh/%/%' => array(
+    'collation/%islandora_object/refresh/%/%' => array(
       'title' => 'Refresh Transcriptions',
       'page callback' => 'drupal_get_form',
       'file' => 'includes/mvd.inc',
       'page arguments' => array(
         'emicdora_mvd_operation_confirm_form',
-        2,
+        1,
         'refresh',
+        3,
         4,
-        5,
       ),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 2),
+      'access arguments' => array(ISLANDORA_PURGE, 1),
+      'tab_parent' => 'admin'
     ),
-    'islandora/object/%islandora_object/delete/%/%' => array(
+    'collation/%islandora_object/delete/%/%' => array(
       'title' => 'Delete Collation',
       'page callback' => 'drupal_get_form',
       'file' => 'includes/mvd.inc',
       'page arguments' => array(
         'emicdora_mvd_operation_confirm_form',
-        2,
+        1,
         'delete',
+        3,
         4,
-        5,
       ),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 2),
+      'access arguments' => array(ISLANDORA_PURGE, 1),
     ),
   );
 }
@@ -120,6 +121,13 @@ function collation_menu_breadcrumb_alter(array &$active_trail, array $item) {
   if (drupal_match_path($item['path'], 'collation/contextual-links/*')) {
     $active_trail = array();
   }
+  // Also on any of our custom admin interfaces.
+  if (drupal_match_path($item['path'], 'collation/*/refresh/*/*')) {
+    $active_trail = array();
+  }
+  if (drupal_match_path($item['path'], 'collation/*/delete/*/*')) {
+    $active_trail = array();
+  }
 }
 
 /**
@@ -129,6 +137,8 @@ function collation_admin_paths() {
   // Show contextual link pages as overlays.
   return array(
     'collation/contextual-links/*' => TRUE,
+    'collation/*/refresh/*/*' => TRUE,
+    'collation/*/delete/*/*' => TRUE,
   );
 }
 

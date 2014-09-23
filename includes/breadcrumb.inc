@@ -26,7 +26,13 @@ function emicdora_set_page_title_and_subtitle($title, $subtitle) {
 }
 
 /**
- * Generic callback that handles when we don't have any context.
+ * Generic callback that handles when we don't have a critical edition context.
+ *
+ * @param AbstractObject $object
+ *   The object in which we generate the breadcrumbs for.
+ *
+ * @param string $title
+ *   The title for the page, if not provided the object label is used.
  */
 function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $title = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
@@ -52,6 +58,12 @@ function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $titl
 
 /**
  * Gets the default breadcrumbs when the object is a source without any context.
+ *
+ * @param AbstractObject $source
+ *   The source object to get the default breadcrumbs for.
+ *
+ * @return array
+ *   The default breadcrumbs as required by drupal_set_breadcrumbs().
  */
 function emicdora_get_breadcrumbs_source(AbstractObject $source) {
   return array(
@@ -60,9 +72,14 @@ function emicdora_get_breadcrumbs_source(AbstractObject $source) {
   );
 }
 
-
 /**
  * Gets the minimal required breadcrumbs for Critical Edition pages.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object to get the default breadcrumbs for.
+ *
+ * @return array
+ *   The default breadcrumbs as required by drupal_set_breadcrumbs().
  */
 function emicdora_get_breadcrumbs_critical_edition(AbstractObject $critical_edition) {
   return array(
@@ -73,6 +90,12 @@ function emicdora_get_breadcrumbs_critical_edition(AbstractObject $critical_edit
 
 /**
  * Sets the title and breadcrumbs for the given Critical Edition and subtitle.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param string $subtitle
+ *   The subtitle to display.
  */
 function emicdora_set_title_and_breadcrumbs_critical_edition(AbstractObject $critical_edition, $subtitle = NULL) {
   $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
@@ -84,6 +107,12 @@ function emicdora_set_title_and_breadcrumbs_critical_edition(AbstractObject $cri
  * Sets the title / subtitle / breadcrumbs for the "Source" page.
  *
  * islandora/object/critical_edition:pid/source/source:pid.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $source
+ *   The source object used to generate the breadcrumbs and title.
  */
 function emicdora_set_title_and_breadcrumbs_source(AbstractObject $critical_edition, AbstractObject $source) {
   $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
@@ -96,6 +125,9 @@ function emicdora_set_title_and_breadcrumbs_source(AbstractObject $critical_edit
  * Sets the title / subtitle / breadcrumbs for the "Sources" page.
  *
  * islandora/object/critical_edition:pid/sources.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
  */
 function emicdora_set_title_and_breadcrumbs_sources(AbstractObject $critical_edition) {
   $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
@@ -108,6 +140,12 @@ function emicdora_set_title_and_breadcrumbs_sources(AbstractObject $critical_edi
  * Sets the title / subtitle / breadcrumbs for the "Version" page.
  *
  * islandora/object/critical_edition:pid/version/version:pid.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $version
+ *   The version object used to generate the breadcrumbs and title.
  */
 function emicdora_set_title_and_breadcrumbs_version(AbstractObject $critical_edition, AbstractObject $version) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
@@ -125,6 +163,12 @@ function emicdora_set_title_and_breadcrumbs_version(AbstractObject $critical_edi
  *
  * islandora/object/critical_edition:pid/versions
  * islandora/object/critical_edition:pid/versions/source:pid
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $source
+ *   The source object used to generate the breadcrumbs and title.
  */
 function emicdora_set_title_and_breadcrumbs_versions(AbstractObject $critical_edition, AbstractObject $source = NULL) {
   $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
@@ -140,6 +184,12 @@ function emicdora_set_title_and_breadcrumbs_versions(AbstractObject $critical_ed
  * Sets the title / subtitle / breadcrumbs for the "Transcription" page.
  *
  * islandora/object/critical_edition:pid/transcription/transcription:pid
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $transcription
+ *   The transcription object used to generate the breadcrumbs and title.
  */
 function emicdora_set_title_and_breadcrumbs_transcription(AbstractObject $critical_edition, AbstractObject $transcription) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
@@ -158,11 +208,18 @@ function emicdora_set_title_and_breadcrumbs_transcription(AbstractObject $critic
  * Sets the title / subtitle / breadcrumbs for the "Collation" page.
  *
  * islandora/object/critical_edition:pid/compare
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $label
+ *   The label of the collation object, to use as a subtitle.
  */
-function emicdora_set_title_and_breadcrumbs_collation(AbstractObject $critical_edition) {
+function emicdora_set_title_and_breadcrumbs_collation(AbstractObject $critical_edition, $label) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
-  $breadcrumbs[] = t('Collation');
+  $label = filter_xss($label);
+  $breadcrumbs[] = $label;
   drupal_set_breadcrumb($breadcrumbs);
-  emicdora_set_page_title_and_subtitle($critical_edition->label, t('Collation'));
+  emicdora_set_page_title_and_subtitle($critical_edition->label, $label);
 }
