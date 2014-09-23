@@ -763,7 +763,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  * @param string $critical_edition_pid
  *   PID of critical edition
  * @param string $source_object_pid
- *  PID of source object
+ *   PID of source object
  */
 function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
   $source_object = islandora_object_load($source_object_pid);
@@ -782,7 +782,7 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
 }
 
 /**
- * Reoves Version from Critical Edition
+ * Removes Version from Critical Edition.
  *
  * @param string $critical_edition_pid
  *   PID of Critical Edition

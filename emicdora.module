@@ -1470,6 +1470,9 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
       $form['#submit'][] = 'emicdora_delete_versions_submit';
     }
   }
+  if (in_array('islandora:transcriptionCModel', $object->models)) {
+    $form['#submit'] = array('emicdora_delete_transription_submit');
+  }
 }
 
 /**
@@ -1491,6 +1494,20 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
   islandora_delete_object($object);
 }
 
+/**
+ * Sever delete transcription objects and related mongo files.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_delete_transription_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'collation', 'includes/calliope');
+  $object = $form_state['object'];
+  emicdora_calliope_delete_file($object->id);
+  islandora_delete_object($object);
+}
 /**
  * Sever delete critical edition and relationships to member objects.
  *
@@ -1539,7 +1556,7 @@ EOQ;
 function emicdora_version_delete($version_pid) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/utilities');
-
+  module_load_include('inc', 'collation', 'includes/calliope');
   $version_object = islandora_object_load($version_pid);
   $pages = islandora_paged_content_get_pages($version_object);
   $transcription_data = emicdora_get_raw_objects($version_object, 'transcriptions');
@@ -1549,6 +1566,7 @@ function emicdora_version_delete($version_pid) {
   }
   foreach ($transcription_data as $transcription_datum) {
     $pids_to_delete[] = $transcription_datum['pid'];
+    emicdora_calliope_delete_file($transcription_datum['pid']);
   }
   if (!empty($pids_to_delete)) {
     $batch = array(
@@ -1597,4 +1615,3 @@ function emicdora_islandora_object_ingested(AbstractObject $object) {
     }
   }
 }
-
