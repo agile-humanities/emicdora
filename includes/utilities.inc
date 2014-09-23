@@ -13,7 +13,7 @@
  */
 function emicdora_source_content_models() {
   return array(
-    'islandora:bookCModel' => t('Textual Content'),
+    'islandora:bookCModel' => t('Text'),
     'islandora:sp-audioCModel' => t('Audio'),
     'islandora:sp_videoCModel' => t('Video'),
     'islandora:sp_large_image_cmodel' => t('Image'),
