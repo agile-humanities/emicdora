@@ -134,6 +134,9 @@ function emicdora_link($fixed_content, $marshalled_content, $type) {
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
   foreach ($marshalled_content as $id => $content) {
+    $position = array_search($id, array_keys($marshalled_content));
+    $is_first = ($position == 0) ? TRUE : FALSE;
+    $is_last = ($position == count($marshalled_content)) ? TRUE : FALSE;
     $node = $dom->getElementById($id);
     if ($node) {
       $node_value = $node->nodeValue;
@@ -327,13 +330,16 @@ function emicdora_update_collation($type) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
   $query = emicdora_get_file_query($type);
   $file = emicdora_calliope_get_collation_file($query);
-
+  $counter = 1;
+  if (isset($_POST['emicdora_counter']) && $_POST['emicdora_counter'] != 'undeclared') {
+    $counter = $_POST['emicdora_counter'];
+  }
   $file_params = array(
     'collation' => $file['emic_data']['collation'],
     'version1' => $file['emic_data']['version1'],
     'version2' => $file['emic_data']['version2'],
     'diff_kind' => $type,
-    'emicdora_count' => isset($_POST['emicdora_count']) ? $_POST['emicdora_count'] : 1,
+    'emicdora_count' => isset($_POST['emicdora_counter']) ? $_POST['emicdora_counter'] : 1,
   );
   $contents = emicdora_cleaned_post("all_$type");
   emicdora_calliope_write_collation($file_params, $contents);
