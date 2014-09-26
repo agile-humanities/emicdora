@@ -101,16 +101,6 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
  */
 function emicdora_collation_object_operations_block_links($critical_edition_pid, $mvd, $current_view) {
   $links[] = array(
-    'title' => 'Compare View',
-    'href' => "islandora/object/$critical_edition_pid/compare/$mvd",
-    'fragment' => "$mvd/$critical_edition_pid",
-  );
-  $links[] = array(
-    'title' => 'Table View',
-    'href' => "islandora/object/$critical_edition_pid/table/$mvd",
-    'fragment' => "$mvd/$critical_edition_pid",
-  );
-  $links[] = array(
     'title' => 'Refresh Transcriptions',
     'href' => "islandora/object/$critical_edition_pid/refresh/$mvd/$current_view",
   );
