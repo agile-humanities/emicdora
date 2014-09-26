@@ -19,6 +19,10 @@ if (user_access(EMICDORA_EDIT_COLLATION)) {
   <p id ="emicdora_status"></p>
     <div id="collatex_iframe">
     <input id="full-window-button" type="button" value="' . $full_window . '" />
+      <p>To use CollateX simply copy and paste desired text from windows above into each of the Witness boxes below.<br />
+      Press \'Collate\' to generate results.<br />
+      Press \'Add\' to open a fresh witness box to collate additional material.
+      </p>
     <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
   </div>
   ';
