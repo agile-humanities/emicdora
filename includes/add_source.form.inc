@@ -130,8 +130,9 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
 
     switch ($form_state['values']['content_model']) {
       case 'islandora:bookCModel':
+        $language = isset($form_state['values']['content_wrapper']['language']) ? $form_state['values']['content_wrapper']['language'] : FALSE;
         $uri = drupal_realpath($file->uri);
-        emicdora_add_zipped_pages($uri, $object->id, $xacml);
+        emicdora_add_zipped_pages($uri, $object->id, $xacml, $language);
         break;
 
       case 'islandora:sp-audioCModel':
@@ -204,6 +205,7 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
  *   Form definition
  */
 function emicdora_get_content_wrapper($mappings, $upload_size) {
+  module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $form['content_upload'] = array(
     '#type' => 'checkbox',
     '#title' => $mappings['prompt'],
@@ -228,6 +230,14 @@ function emicdora_get_content_wrapper($mappings, $upload_size) {
       'file_validate_extensions' => array($mappings['extensions']),
       'file_validate_size' => array($upload_size * 1024 * 1024),
     ),
+  );
+  $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array('eng' => t('English'));
+
+  $form['content_wrapper']['language'] = array(
+    '#title' => t('Select language for OCR creation'),
+    '#type' => 'select',
+    '#description' => t('Select language from source page for more accurate results.'),
+    '#options' => $languages,
   );
   return $form;
 }
@@ -317,7 +327,7 @@ function emicdora_ingest_add_file($file, $dsid, $object) {
  * @param string $pid
  *   PID of host book
  */
-function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml) {
+function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml, $language) {
   $batch = array(
     'title' => t('Adding pages to new text object'),
     'operations' => array(),
@@ -331,6 +341,7 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml) {
         'book' => $pid,
         'page_number' => $page_number,
         'xacml' => $xacml,
+        'language' => $language,
       ),
     );
     $page_number++;
@@ -350,7 +361,7 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml) {
  * @param bool $xacml
  *   Whether the pages need the base XACML policy or not.
  */
-function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
+function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $language) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   global $user;
 
@@ -358,6 +369,8 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
   $repository = $tuque->repository;
   $object = $repository->constructObject('islandora');
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
+  $book_object = islandora_object_load($book);
+  $object->label = "{$book_object->label} - page $page_number";
   $rels_ext = $object->relationships;
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isPageOf', $book);
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', (string) $page_number, TRUE);
@@ -365,6 +378,9 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
   islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'isSection', '1', TRUE);
   islandora_paged_content_set_relationship($rels_ext, FEDORA_RELS_EXT_URI, 'isMemberOf', $book);
   islandora_paged_content_update_datastream($object, $page, 'OBJ', NULL, NULL, 'M', FALSE);
+  if ($language) {
+    islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
+  }
   if ($xacml) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
@@ -382,8 +398,10 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml) {
  *   The PID of the book we are adding the pages to.
  * @param bool $xacml
  *   Whether the pages need the base XACML policy or not.
+ * @param bool $language
+ *   Slected language for OCR.
  */
-function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE) {
+function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE, $language = FALSE) {
   $zip = new ZipArchive();
   $zip->open($zip_uri);
   $tmp_dir = uniqid();
@@ -415,5 +433,5 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE) {
     return ($file_a < $file_b) ? -1 : 1;
   };
   usort($files_to_add, $comparator);
-  emicdora_batch_add_zipped_pages($files_to_add, $book_pid, $xacml);
+  emicdora_batch_add_zipped_pages($files_to_add, $book_pid, $xacml, $language);
 }
