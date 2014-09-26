@@ -326,6 +326,8 @@ function emicdora_ingest_add_file($file, $dsid, $object) {
  *   URIs of page source files
  * @param string $pid
  *   PID of host book
+ * @param string $language
+ *   Chosen language for OCR process
  */
 function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml, $language) {
   $batch = array(
@@ -360,6 +362,8 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml, $language)
  *   page number
  * @param bool $xacml
  *   Whether the pages need the base XACML policy or not.
+ * @param string $language
+ *   Chosen language for OCR process
  */
 function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $language) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
