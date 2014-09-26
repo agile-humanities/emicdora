@@ -25,6 +25,28 @@
         $(wrapped_content).unwrap();
       });
 
+      $('#full-window-button').click(function() {
+        $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
+        if ($(this).val() == Drupal.t('Full Window')) {
+          $('#admin-menu-wrapper').hide();
+          $(this).val(Drupal.t('Exit Full Window'));
+          $('#compareviewer-1009').hide();
+          $('.x-css-shadow').hide();
+          $('#cwrc_wrapper').css({
+            height: '100%',
+          });
+        }
+        else {
+          $(this).val(Drupal.t('Full Window'));
+          $('#compareviewer-1009').show();
+          $('#admin-menu-wrapper').show();
+          $('#cwrc_wrapper').css({
+            height: '600',
+          });
+        }
+        $('#cwrc_wrapper').layout().resizeAll();
+      });
+
       waitUntilExists("versionview-1010", function() {
         var $head = $("#emicdora_collatex_iframe").contents().find("head");
         $head.append($("<link/>", {
