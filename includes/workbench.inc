@@ -447,7 +447,7 @@ function emicdora_workbench_ingestible_content_models() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   return array(
     'islandora:criticalEditionContainerCModel' => t('Critical Edition'),
-  ) + emicdora_source_content_models();
+      ) + emicdora_source_content_models();
 }
 
 /**
@@ -466,6 +466,7 @@ function emicdora_workbench_ingest_form($content_model) {
   if (!in_array($content_model, array_keys($ingestible_content_models))) {
     drupal_not_found();
   }
+
   $label = $ingestible_content_models[$content_model];
   $collection = emicdora_get_default_collection($content_model);
   $tuque = islandora_get_tuque_connection();
@@ -479,4 +480,23 @@ function emicdora_workbench_ingest_form($content_model) {
     'parent' => $collection,
     'models' => array($content_model),
     'objects' => array($object)));
+}
+
+function emicdora_workbench_ingest_form_x($form, $form_state, $content_model, $content_model) {
+  $form['workbench'] = array(
+    '#type' => 'checkbox',
+    '#suffix' => '</div>',
+    '#title' => t("Add object to workbench?"),
+    '#default_value' => $add_to_workbench,
+    '#attributes' => array(
+      'class' => array('workbench-check')),
+  );
+  module_load_include('module', 'xml_form_builder');
+  $metadata = xml_form_builder_get_form($form, $form_state, 'islandora_ingest_form');
+  $form = array_merge_recursive($form, $metadata);
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t("Ingest @type object", array('@type' => $mappings['label'])),
+  );
+  return $form;
 }
