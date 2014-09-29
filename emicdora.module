@@ -350,7 +350,9 @@ function emicdora_sources_title($object) {
 
   array_shift($bc);
   array_shift($bc);
+  array_shift($bc);
 
+  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
   $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
   $bc[] = t("Sources");
 
@@ -384,10 +386,14 @@ function emicdora_transcription_title($critical_edition, $transcription) {
 
   array_shift($bc);
   array_shift($bc);
+  array_shift($bc);
+  array_shift($bc);
 
+  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
+  $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
   $bc[] = l(filter_xss($source->label), "islandora/object/{$source->id}");
   $bc[] = l(filter_xss($version->label), "islandora/object/{$version->id}");
-  $bc[] = l(filter_xss($transcription->label), "islandora/object/{$transcription->id}");
+  $bc[] = t("@label", array("@label" => $transcription->label));
 
   drupal_set_breadcrumb($bc);
   emicdora_set_page_title_and_subtitle($critical_edition->label, $transcription->label);
@@ -413,6 +419,11 @@ function emicdora_version_title($critical_edition, $version) {
   $bc = islandora_get_breadcrumbs($version);
   array_shift($bc);
   array_shift($bc);
+  array_shift($bc);
+  array_shift($bc);
+
+  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
+  $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
   $bc[] = l(filter_xss($source->label), "islandora/object/{$critical_edition->id}/source/$source->id");
   $bc[] = t("@vlabel", array('@vlabel' => $version->label));
   drupal_set_breadcrumb($bc);
@@ -432,6 +443,8 @@ function emicdora_versions_title($object) {
   $arr_vals = array_values($versions);
   $versions = array_shift($arr_vals);
   $bc = islandora_get_breadcrumbs($object);
+  array_shift($bc);
+  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
   $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
   if (count($versions) > 0) {
     // Use the first version to get the source.
@@ -463,8 +476,11 @@ function emicdora_source_title($object, $source) {
   $bc = islandora_get_breadcrumbs($object);
   array_shift($bc);
   array_shift($bc);
+  array_shift($bc);
+
+  $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
   $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
-  $bc[] = l(filter_xss($source->label), "islandora/object/{$object->id}/source/$source->id");
+  $bc[] = t("@label", array("@label" => $source->label));
   drupal_set_breadcrumb($bc);
   emicdora_set_page_title_and_subtitle($object->label, $source->label);
 }
@@ -866,9 +882,10 @@ function emicdora_block_view($delta = '') {
 
         array_shift($bc);
         array_shift($bc);
-
+        array_shift($bc);
+        $bc[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
         $bc[] = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
-        $bc[] = t("mvd", array('@mvd' => $mvd));
+        $bc[] = t("@mvd", array('@mvd' => $mvd));
         emicdora_set_page_title_and_subtitle($critical_edition->label, $mvd);
         drupal_set_breadcrumb($bc);
 
@@ -1174,6 +1191,8 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   array_shift($breadcrumbs);
   // Discard "Islandora Repository" as we don't want user navigating to it.
   array_shift($breadcrumbs);
+  array_shift($breadcrumbs);
+  $breadcrumbs[] = l(t("Editions"), "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
   $breadcrumbs[] = $object->label;
   drupal_set_breadcrumb($breadcrumbs);
   $title = isset($object->label) ? $object->label : t("Critical Edition");
@@ -1442,7 +1461,7 @@ function emicdora_islandora_view_object(AbstractObject $object) {
 
     array_shift($bc);
     array_shift($bc);
-    $bc[] = l(filter_xss($object->label), "islandora/object/{$object->id}");
+    $bc[] = l($object->label, "islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29");
     drupal_set_breadcrumb($bc);
   }
 }
