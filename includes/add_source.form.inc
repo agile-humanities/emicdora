@@ -46,7 +46,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
   if ($mappings['tn']) {
     $form = array_merge($form, emicdora_get_thumbnail_wrapper($upload_size));
   }
-  $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size));
+  $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size, $content_model));
   $form['choice_wrapper'] = array(
     '#type' => 'fieldset',
   );
@@ -197,7 +197,8 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
 }
 
 /**
- * Returns partial form defintition.
+
+ *
  *
  * @param int $upload_size
  *   Upload limit size
@@ -205,7 +206,21 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
  * @return array
  *   Form definition
  */
-function emicdora_get_content_wrapper($mappings, $upload_size) {
+
+/**
+ * Returns partial form definition.
+ *
+ * @param array $mappings
+ *   Parameter mappings
+ * @param int $upload_size
+ *   Upload size limit
+ * @param string $content_model
+ *   PID of content model
+ *
+ * @return array
+ *   Drupal partartial form
+ */
+function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
   module_load_include('inc', 'islandora_ocr', 'includes/utilities');
   $form['content_upload'] = array(
     '#type' => 'checkbox',
@@ -233,13 +248,14 @@ function emicdora_get_content_wrapper($mappings, $upload_size) {
     ),
   );
   $languages = module_exists('islandora_ocr') ? islandora_ocr_get_enabled_tesseract_languages() : array('eng' => t('English'));
-
-  $form['content_wrapper']['language'] = array(
-    '#title' => t('Select language for OCR creation'),
-    '#type' => 'select',
-    '#description' => t('Select language from source page for more accurate results.'),
-    '#options' => $languages,
-  );
+  if ($mappings['type'] == 'text') {
+    $form['content_wrapper']['language'] = array(
+      '#title' => t('Select language for OCR creation'),
+      '#type' => 'select',
+      '#description' => t('Select language from source page for more accurate results.'),
+      '#options' => $languages,
+    );
+  }
   return $form;
 }
 
@@ -257,6 +273,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:bookCModel' => array(
       'form' => 'EMiC Source MODS form',
       'label' => t('Text'),
+      'type' => 'text',
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
       'prompt' => t("Add zipped pages?"),
@@ -267,6 +284,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:sp_videoCModel' => array(
       'form' => 'EMiC Source MODS form',
       'label' => t('Video'),
+      'type' => 'video',
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
       'prompt' => t("Upload video file"),
@@ -277,6 +295,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:sp-audioCModel' => array(
       'form' => 'EMiC Source MODS form',
       'label' => t('Audio'),
+      'type' => 'audio',
       'collection' => 'islandora:co-op',
       'tn' => TRUE,
       'prompt' => t("Upload audio file"),
@@ -287,6 +306,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:sp_large_image_cmodel' => array(
       'form' => 'EMiC Source MODS form',
       'label' => t('Image'),
+      'type' => 'image',
       'collection' => 'islandora:co-op',
       'tn' => FALSE,
       'prompt' => t("Upload image file"),
