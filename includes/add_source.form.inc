@@ -63,6 +63,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
     '#suffix' => '</div>',
     '#title' => t("Add object to workbench?"),
     '#default_value' => $add_to_workbench,
+    '#disabled' => $add_to_workbench,
     '#attributes' => array(
       'class' => array('workbench-check')),
   );

@@ -179,7 +179,7 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
           return;
         }
       }
-      $contents = $file->getBytes();
+      $contents = nl2br($file->getBytes());
       $filename = $file->file['filename'];
       $file_label = str_replace('.', '_', pathinfo($filename, PATHINFO_FILENAME));
       $id_array[] = array('id' => $resource_id, 'name' => $file_label);

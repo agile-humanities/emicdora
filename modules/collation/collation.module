@@ -6,17 +6,9 @@
  */
 
 
+
 // Permissions.
 define('EMICDORA_EDIT_COLLATION', 'edit collation');
-
-function emicdora_permission() {
-  return array(
-    EMICDORA_EDIT_COLLATION => array(
-      'title' => t('Edit collations'),
-      'description' => t('Access CWRCWriter.'),
-    ),
-  );
-}
 
 /**
  * Implements hook_menu().
@@ -95,6 +87,18 @@ function collation_menu() {
 }
 
 /**
+ * Implements hook_permission().
+ */
+function emicdora_permission() {
+  return array(
+    EMICDORA_EDIT_COLLATION => array(
+      'title' => t('Edit Collations'),
+      'description' => t('Allows users to edit MVD collations'),
+    ),
+  );
+}
+
+/**
  * Implements hook_islandora_required_objects().
  */
 function collation_islandora_required_objects(IslandoraTuque $connection) {
@@ -167,7 +171,9 @@ function collation_block_view($delta = '') {
   }
   elseif (is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel')) {
     $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-    $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    if (!empty($parents)) {
+      $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    }
   }
 
   if (!isset($critical_edition)) {
