@@ -266,15 +266,6 @@ function emicdora_menu() {
       'access callback' => 'user_access',
       'access arguments' => array(ISLANDORA_INGEST),
     ),
-    'workbench/add/%' => array(
-      'title' => 'Add New Object',
-      'page callback' => 'emicdora_workbench_ingest_form',
-      'page arguments' => array(2),
-      'file' => 'includes/workbench.inc',
-      'type' => MENU_CALLBACK,
-      'access callback' => 'user_access',
-      'access arguments' => array(ISLANDORA_INGEST),
-    ),
     'islandora/emicdora_source/autocomplete/%/%' => array(
       'page callback' => 'emicdora_versionable_object_form_source_autocomplete',
       'page arguments' => array(3, 4),

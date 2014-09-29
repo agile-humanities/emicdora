@@ -47,7 +47,6 @@ function emicdora_workbench_form($form, &$form_state) {
   $form['add_critical_edition'] = array(
     '#type' => 'submit',
     '#value' => t('Add Critical Edition'),
-    // '#submit' => array('emicdora_workbench_add_critical_edition_redirect'),
     '#access' => user_access(ISLANDORA_INGEST),
     '#attributes' => array(
       'class' => array(
@@ -223,18 +222,6 @@ function emicdora_workbench_form($form, &$form_state) {
 }
 
 /**
- * Helper submit to redirect to the add Critical Edition form.
- *
- * @param array $form
- *   An array representing a form within Drupal.
- * @param array $form_state
- *   An array containing the Drupal form state.
- */
-function emicdora_workbench_add_critical_edition_redirect($form, &$form_state) {
-  $form_state['redirect'] = 'workbench/add/islandora:criticalEditionContainerCModel';
-}
-
-/**
  * Helper submit to redirect to the add Schema / Transform form.
  *
  * @param array $form
@@ -333,7 +320,7 @@ function emicdora_workbench_form_submit($form, &$form_state) {
     }
 
     if ($form_state['triggering_element']['#parents'] == array('add_critical_edition')) {
-      $form_state['redirect'] = 'workbench/add/islandora:criticalEditionContainerCModel';
+      $form_state['redirect'] = 'emicdora/source/add/islandora:criticalEditionContainerCModel/FALSE/TRUE';
     }
 
     if ($form_state['triggering_element']['#parents'] == array('add_schema_transform')) {
@@ -448,35 +435,4 @@ function emicdora_workbench_ingestible_content_models() {
   return array(
     'islandora:criticalEditionContainerCModel' => t('Critical Edition'),
   ) + emicdora_source_content_models();
-}
-
-/**
- * Display form for ingesting an object of the given content model.
- *
- * @param string $content_model
- *   The PID of the Content Model type to ingest.
- *
- * @return array
- *   A Drupal Form for ingesting a new object of the given type.
- */
-function emicdora_workbench_ingest_form($content_model) {
-  global $user;
-  module_load_include('inc', 'islandora', 'includes/ingest.form');
-  $ingestible_content_models = emicdora_workbench_ingestible_content_models();
-  if (!in_array($content_model, array_keys($ingestible_content_models))) {
-    drupal_not_found();
-  }
-  $label = $ingestible_content_models[$content_model];
-  $collection = emicdora_get_default_collection($content_model);
-  $tuque = islandora_get_tuque_connection();
-  $object = $tuque->repository->constructObject('islandora');
-  $object->owner = $user->name;
-  $object->label = t('New @type', array('@type' => $label));
-  $object->models = $content_model;
-  $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $collection);
-  drupal_set_title(t('Add New @type', array('@type' => $label)));
-  return drupal_get_form('islandora_ingest_form', array(
-    'parent' => $collection,
-    'models' => array($content_model),
-    'objects' => array($object)));
 }
