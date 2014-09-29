@@ -16,13 +16,21 @@
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-        $(".merged").css('background-color', '');
-        left.css("background-color", 'green');
-        right.css("background-color", 'green');
-        $('#merged_text').val($(left).text());
-        wrapped_content = left.wrap('<span/>');
-        merged_content = $(wrapped_content).parent().html();
-        $(wrapped_content).unwrap();
+
+        if (left.css("background-color") != 'transparent') {
+          merged_content = '';
+          $('#merged_text').val('');
+          $(".merged").css('background-color', '');
+        } else {
+          $(".merged").css('background-color', '');
+          left.css("background-color", 'green');
+          right.css("background-color", 'green');
+          $('#merged_text').val($(left).text());
+          wrapped_content = left.wrap('<span/>');
+          merged_content = $(wrapped_content).parent().html();
+          $(wrapped_content).unwrap();
+        }
+
       });
 
       $('#full-window-button').click(function() {
