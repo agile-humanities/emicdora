@@ -332,7 +332,7 @@ function emicdora_update_collation($type) {
   $file = emicdora_calliope_get_collation_file($query);
   $counter = 1;
   if (isset($_POST['emicdora_counter']) && $_POST['emicdora_counter'] != 'undeclared') {
-    $counter = $_POST['emicdora_counter'];
+    $counter = emicdora_cleaned_post('emicdora_counter');
   }
   $file_params = array(
     'collation' => $file['emic_data']['collation'],
