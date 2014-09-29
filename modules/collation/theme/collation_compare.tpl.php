@@ -7,8 +7,12 @@ print '<div id="metadata"></div>
     <div id="uiplaceholder"></div>';
 if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compare') {
   print '
-  <input id="diff_l"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
-  <input id="diff_r"  type="text" style="width: 40%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
+    <h3 class="ui-widget-header">Version 1</h3>
+    <div id="diff_l" class="ui-widget-content collation_resize emcidora_input">
+    </div>
+    <h3 class="ui-widget-header">Version 2</h3>
+    <div id="diff_r" class="ui-widget-content collation_resize emcidora_input">
+    </div>
   <button class = "emicdora_button" id="collation_link">Link Text</button>
   <br />
   <input id="merged_text"  type="text" style="width: 80%; -moz-user-select: text;" readonly="readonly" class="emicdora_input">
@@ -25,6 +29,7 @@ if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compa
       </p>
     <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
   </div>
+
   ';
 }
 print '

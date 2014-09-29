@@ -32,7 +32,7 @@
         }
 
       });
-
+      $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
         if ($(this).val() == Drupal.t('Full Window')) {
@@ -63,7 +63,7 @@
           type: "text/css"
         }
         ));
-        $('.emicdora_input').val('');
+        $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
@@ -76,7 +76,7 @@
             var elem = document.elementFromPoint(evt.clientX, evt.clientY);
             context_deleted = elem.outerHTML;
           }
-          $("#diff_l").val(text_deleted);
+          $("#diff_l").text(text_deleted);
         });
         // // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
@@ -89,7 +89,7 @@
             var elem = document.elementFromPoint(evt.clientX, evt.clientY);
             context_added = elem.outerHTML;
           }
-          $("#diff_r").val(text_added);
+          $("#diff_r").text(text_added);
         });
         $("#collation_link").click({action: 'link'}, execute_callback);
         $("#collation_unlink").click({action: 'unlink'}, execute_callback);
@@ -142,7 +142,9 @@
                 $('#versionview-1011-body').html($(results.new_added).html());
               }
               if (results.added == 'success') {
-                $(".emicdora_input").val('');
+                $(".emicdora_input").text('');
+                $('#diff_l').text("");
+                $('#diff_r').text("");
                 $("#emicdora_status").text("Changes saved.");
               }
             },
