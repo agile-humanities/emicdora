@@ -171,7 +171,9 @@ function collation_block_view($delta = '') {
   }
   elseif (is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel')) {
     $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-    $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    if (!empty($parents)) {
+      $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    }
   }
 
   if (!isset($critical_edition)) {
