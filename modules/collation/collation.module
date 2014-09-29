@@ -55,15 +55,6 @@ function collation_menu() {
       'access arguments' => array('edit_collations'),
       'type' => MENU_CALLBACK,
     ),
-    'islandora/object/%islandora_object/table' => array(
-      'title' => 'Collations',
-      'context' => MENU_CONTEXT_PAGE,
-      'page callback' => 'emicdora_table_view',
-      'file' => 'includes/collation_view.inc',
-      'page arguments' => array(2),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
-    ),
     'islandora/object/%islandora_object/refresh/%/%' => array(
       'title' => 'Refresh Transcriptions',
       'page callback' => 'drupal_get_form',

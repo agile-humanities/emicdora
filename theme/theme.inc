@@ -50,10 +50,11 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   drupal_set_breadcrumb(array());
   // Links for Add to COOP.
   $variables['add_source_links'] = array();
+
   foreach (emicdora_source_content_models() as $content_model => $label) {
     $variables['add_source_links'][] = array(
       'title' => t('Add @label', array('@label' => $label)),
-      'href' => "workbench/add/$content_model",
+      'href' => "emicdora/source/add/$content_model/FALSE/TRUE",
     );
   }
   $variables['coop_icon'] = theme_image(array(
