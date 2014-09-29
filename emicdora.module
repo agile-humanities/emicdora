@@ -1594,17 +1594,4 @@ function emicdora_version_delete($version_pid) {
 function emicdora_remove_objects($object) {
   islandora_delete_object($object);
 }
-/**
- * Implements hook_islandora_object_ingested().
- */
-function emicdora_islandora_object_ingested(AbstractObject $object) {
-  $path_parts = explode('/', $_GET['q']);
-  if (isset($path_parts[2]) && $path_parts[0] == 'workbench' && $path_parts[1] == 'add') {
-    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
-      module_load_include('inc', 'islandora_bookmark', 'includes/api');
-      $list_id = islandora_bookmark_get_default_list();
-      $list = Bookmark::getList($list_id);
-      $list->addPid($object->id);
-    }
-  }
-}
+
