@@ -8,7 +8,7 @@
   <div class="emicdora-add-to-coop">
     <div class="emicdora-add-to-coop-select">
       <label for="add-to-coop"><?php print t('Add to CO-OP'); ?></label>
-      <select id="add-to-coop" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+      <select id="add-to-coop">
         <option value="none"><?php print t('Select...'); ?></option>
         <?php foreach ($add_source_links as $item): ?>
           <option value="<?php print $item['href']; ?>"><?php print $item['title']; ?></option>
