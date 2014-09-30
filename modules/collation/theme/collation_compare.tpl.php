@@ -27,10 +27,6 @@ if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compa
   </div>
   ';
 }
-print '
-    <div id="collatex_iframe">
-      <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
-    </div>
-  </div>';
+print '</div>';
 ?>
 
