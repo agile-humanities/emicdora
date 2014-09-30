@@ -195,17 +195,6 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
 }
 
 /**
-
- *
- *
- * @param int $upload_size
- *   Upload limit size
- *
- * @return array
- *   Form definition
- */
-
-/**
  * Returns partial form definition.
  *
  * @param array $mappings

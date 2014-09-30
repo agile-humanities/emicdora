@@ -1594,4 +1594,3 @@ function emicdora_version_delete($version_pid) {
 function emicdora_remove_objects($object) {
   islandora_delete_object($object);
 }
-
