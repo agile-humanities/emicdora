@@ -127,6 +127,10 @@ function emicdora_collation_object_operations_block_links($critical_edition_pid,
  */
 function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_pid, $destination_params = FALSE) {
   $object = islandora_object_load($pid);
+  $type = 'source';
+  if (in_array('islandora:versionCModel', $object->models)) {
+    $type = 'version';
+  }
   if (islandora_object_access(ISLANDORA_METADATA_EDIT, $object)) {
     $destination = drupal_get_destination();
     $links[] = array(
@@ -143,8 +147,8 @@ function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_
       $destination = "$destination/{$destination_params['path']}/{$destination_params['pid']}";
     }
     $links[] = array(
-      'title' => 'Delete',
-      'href' => "islandora/object/$pid/delete",
+      'title' => 'Remove',
+      'href' => "emicdora/remove/$type/$critical_edition_pid/$pid",
       'query' => array(
         'destination' => $destination,
       ),

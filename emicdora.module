@@ -304,6 +304,20 @@ function emicdora_menu() {
       'access callback' => 'user_access',
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
+    'emicdora/remove/source' => array(
+      'title' => 'Remove source object',
+      'page callback' => 'emicdora_remove_source',
+      'file' => 'includes/utilities.inc',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
+    'emicdora/remove/version' => array(
+      'title' => 'Remove version object',
+      'page callback' => 'emicdora_remove_version',
+      'file' => 'includes/utilities.inc',
+      'type' => MENU_CALLBACK,
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
+    ),
   );
 }
 
@@ -875,14 +889,16 @@ function emicdora_block_view($delta = '') {
     case 'tei':
       if ($is_tei_editor || isset($versionable_object->id)) {
         $links = array();
-        $links[] = array(
-          'title' => 'Reading Transcription',
-          'href' => $path,
-        );
-        $links[] = array(
-          'title' => 'Diplomatic Transcription',
-          'href' => $path,
-        );
+        if ($is_tei_editor) {
+          $links[] = array(
+            'title' => 'Reading Transcription',
+            'href' => $path,
+          );
+          $links[] = array(
+            'title' => 'Diplomatic Transcription',
+            'href' => $path,
+          );
+        }
         if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
           $links[] = array(
             'title' => 'Edit',
@@ -1431,6 +1447,162 @@ function emicdora_islandora_view_object(AbstractObject $object) {
   }
 }
 
+/**
+ * Implements hook_form_islandora_delete_object_form_alter().
+ */
+function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$form_state) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $object = $form_state['object'];
+  if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+    $form['description']['#markup'] = t('This will remove the critical edition. This action cannot be undone.');
+    $form['#submit'] = array('emicdora_delete_critical_edition_submit');
+  }
+  if (in_array('islandora:bookCModel', $object->models)) {
+    $owners = islandora_get_parents_from_rels_ext($object);
+    $is_critical_edition = FALSE;
+    foreach ($owners as $owner) {
+      if (in_array('islandora:criticalEditionContainerCModel', $owner->models)) {
+        $is_critical_edition = TRUE;
+        $form['#submit'] = array();
+        $link = l($owner->label, "islandora/object/$owner->id");
+        drupal_set_message(t("@object is member of Critical Edition !pid and cannot be deleted.", array('@object' => filter_xss($object->label), '!pid' => filter_xss($link))));
+        drupal_goto("islandora/object/{$object->id}");
+        return;
+      }
+      $form['#submit'][] = 'emicdora_delete_versions_submit';
+    }
+  }
+  if (in_array('islandora:transcriptionCModel', $object->models)) {
+    $form['#submit'] = array('emicdora_delete_transription_submit');
+  }
+}
+
+/**
+ * Sever delete critical edition and relationships to member objects.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_delete_critical_edition_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $object = $form_state['object'];
+  $members = array_keys(emicdora_get_members($object->id));
+  foreach ($members as $member) {
+    $member_object = islandora_object_load($member);
+    $member_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $object->id);
+  }
+  islandora_delete_object($object);
+}
+
+/**
+ * Sever delete transcription objects and related mongo files.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_delete_transription_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'collation', 'includes/calliope');
+  $object = $form_state['object'];
+  emicdora_calliope_delete_file($object->id);
+  islandora_delete_object($object);
+}
+/**
+ * Sever delete critical edition and relationships to member objects.
+ *
+ * @param array $form
+ *   The Drupal form.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_delete_versions_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $object = $form_state['object'];
+  $version_pids = array();
+  $source_pid = $object->id;
+  $versions_query = <<<EOQ
+     SELECT ?pid ?label FROM <#ri> WHERE {
+      ?pid <fedora-rels-ext:isDerivationOf> <info:fedora/$source_pid> ;
+      <fedora-model:label> ?label
+}
+EOQ;
+  $versions = $object->repository->ri->sparqlQuery($versions_query);
+  foreach ($versions as $version) {
+    $version_pids[] = $version['pid']['value'];
+  }
+  if (!empty($version_pids)) {
+    $batch = array(
+      'title' => t("Deleting associated versions and their related objects"),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+    );
+    foreach ($version_pids as $version_pid) {
+      $batch['operations'][] = array(
+        'emicdora_version_delete',
+        array($version_pid),
+      );
+    }
+    batch_set($batch);
+  }
+}
+
+/**
+ * Batch function to delete versions and their dependencies.
+ *
+ * @param string $version_pid
+ *   PID of version to be deleted.
+ */
+function emicdora_version_delete($version_pid) {
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'collation', 'includes/calliope');
+  $version_object = islandora_object_load($version_pid);
+  $pages = islandora_paged_content_get_pages($version_object);
+  $transcription_data = emicdora_get_raw_objects($version_object, 'transcriptions');
+  $pids_to_delete = array();
+  foreach ($pages as $page) {
+    $pids_to_delete[] = $page['pid'];
+  }
+  foreach ($transcription_data as $transcription_datum) {
+    $pids_to_delete[] = $transcription_datum['pid'];
+    emicdora_calliope_delete_file($transcription_datum['pid']);
+  }
+  if (!empty($pids_to_delete)) {
+    $batch = array(
+      'title' => t("Deleting version's child objects"),
+      'progress_message' => t('Completed @current operations out of @total.'),
+      'operations' => array(),
+    );
+    foreach ($pids_to_delete as $pid_to_delete) {
+      $deletion_object_object = islandora_object_load($pid_to_delete);
+      $batch['operations'][] = array(
+        'emicdora_remove_objects',
+        array($deletion_object_object),
+      );
+    }
+    $batch['operations'][] = array(
+      'emicdora_remove_objects',
+      array($tei_rdf),
+    );
+    batch_set($batch);
+  }
+  else {
+    islandora_delete_object($version_object);
+  }
+}
+
+/**
+ * Deletes object.
+ *
+ * @param AbstractObject $object
+ *   Object to be deleted.
+ */
+function emicdora_remove_objects($object) {
+  islandora_delete_object($object);
+}
 /**
  * Implements hook_islandora_object_ingested().
  */

@@ -46,6 +46,7 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
   drupal_add_css("$module_path/css/emicdora.coop.css");
+  drupal_add_js("$module_path/js/coop.js");
   // No Breadcrumbs on this page.
   drupal_set_breadcrumb(array());
   // Links for Add to COOP.
