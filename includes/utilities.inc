@@ -767,6 +767,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  */
 function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
   $source_object = islandora_object_load($source_object_pid);
+  $critical_edition = islandora_object_load($critical_edition_pid);
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
   $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
   foreach ($versions as $version_pid) {
@@ -778,6 +779,7 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
       }
     }
   }
+  drupal_set_message(t("@source is no longer associated with @edition", array('@source' => $source_object->label, '@edition' => $critical_edition->label)));
   drupal_goto("islandora/object/$critical_edition_pid");
 }
 
@@ -791,6 +793,8 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
  */
 function emicdora_remove_version($critical_edition_pid, $version_object_pid) {
   $version = islandora_object_load($version_object_pid);
+  $critical_edition = islandora_object_load($critical_edition_pid);
   $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  drupal_set_message(t("@version is no longer associated with @edition", array('@version' => $version->label, '@edition' => $critical_edition->label)));
   drupal_goto("islandora/object/$critical_edition_pid");
 }

@@ -169,7 +169,10 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
       }
+      break;
 
+    case 'bulk_delete':
+      emicdora_calliope_delete_mvd($mvd['_id']);
       break;
 
     case 'delete':

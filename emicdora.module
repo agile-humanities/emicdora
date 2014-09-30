@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -1357,7 +1356,7 @@ function emicdora_islandora_solr_object_result_alter(&$search_results, $query_pr
  * @param string $permission
  *   Base fedora permission
  * @param AbstractObject $object
- *   Object represneting Critical Edition
+ *   Object representing Critical Edition
  *
  * @return bool
  *   Access allowed
@@ -1473,7 +1472,7 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
     }
   }
   if (in_array('islandora:transcriptionCModel', $object->models)) {
-    $form['#submit'] = array('emicdora_delete_transription_submit');
+    $form['#submit'] = array('emicdora_delete_transcription_submit');
   }
 }
 
@@ -1487,13 +1486,21 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
  */
 function emicdora_delete_critical_edition_submit(array $form, array &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'collation', 'includes/calliope');
+  module_load_include('inc', 'collation', 'includes/mvd');
+
   $object = $form_state['object'];
   $members = array_keys(emicdora_get_members($object->id));
   foreach ($members as $member) {
     $member_object = islandora_object_load($member);
     $member_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $object->id);
   }
+  $mvds = emicdora_calliope_find_mvds($object);
+  foreach ($mvds as $mvd_label => $params) {
+    emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
+  }
   islandora_delete_object($object);
+  $form_state['redirect'] = 'coop';
 }
 
 /**
@@ -1504,12 +1511,14 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
  * @param array $form_state
  *   The Drupal form state.
  */
-function emicdora_delete_transription_submit(array $form, array &$form_state) {
+function emicdora_delete_transcription_submit(array $form, array &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $object = $form_state['object'];
   emicdora_calliope_delete_file($object->id);
   islandora_delete_object($object);
+  drupal_set_message(t("Transcription has been deleted."));
 }
+
 /**
  * Sever delete critical edition and relationships to member objects.
  *
@@ -1601,8 +1610,11 @@ function emicdora_version_delete($version_pid) {
  *   Object to be deleted.
  */
 function emicdora_remove_objects($object) {
-  islandora_delete_object($object);
+  if ($object) {
+    islandora_delete_object($object);
+  }
 }
+
 /**
  * Implements hook_islandora_object_ingested().
  */
