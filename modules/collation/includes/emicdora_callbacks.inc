@@ -69,28 +69,45 @@ function emicdora_merge($fixed_content, $marshalled_content, $type) {
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
-  foreach ($marshalled_content as $id => $content) {
-    $position = array_search($id, array_keys($marshalled_content));
-    $is_first = ($position == 0) ? TRUE : FALSE;
-    $is_last = ($position == count($marshalled_content)) ? TRUE : FALSE;
-    $node = $dom->getElementById($id);
-    if ($node) {
-      $content = $marshalled_content[$id];
-      if ($is_first) {
-        if ($node->nodeValue != $content) {
-          $offset = strrpos($node->nodeValue, $content);
-          $node->nodevalue = substr($node->nodevalue, 0, $offset);
-          continue;
+  $first_id = $marshalled_content[0]['id'];
+  $last_id = $marshalled_content[count($marshalled_content) -1]['id'];
+
+  if (count($marshalled_content) > 1) {
+    foreach ($marshalled_content as $data) {
+      $id = $data['id'];
+      $node = $dom->getElementById($id);
+      if ($node) {
+        $selected = $data['text'];
+        if ($id == $first_id) {
+          if ($node->nodeValue != $selected) {
+            $offset = strrpos($node->nodeValue, $selected);
+            $node->nodevalue = substr($node->nodevalue, 0, $offset);
+            continue;
+          }
         }
-      }
-      if ($is_last) {
-        if ($node->nodeValue != $content) {
-          $node->nodevalue = preg_replace("/$content/", '', $node->nodeValue, 1);
-          continue;
+        if ($id == $last_id) {
+          if ($node->nodeValue != $selected) {
+            $new_val = preg_replace("/$selected/", '', $node->nodeValue, 1);
+            $node->nodevalue = preg_replace("/$selected/", '', $node->nodeValue, 1);
+            continue;
+          }
         }
+        $nodes_to_delete[] = $node;
       }
-      $nodes_to_delete[] = $node;
     }
+  } else {
+      $starts_with = emicdora_starts_with($content, $identified_text);
+      $ends_with = emicdora_ends_with($content, $identified_text);
+      if ($starts_with && $ends_with) {
+        $nodes_to_delete[] = $node;
+        continue;
+      }
+      if ($starts_with) {
+        $new_value = preg_replace("/$content/", '', $node->nodeValue, 1);
+        $new_element = emicdora_create_span($dom, $new_value, 'merge', $prefix);
+        $refnode->parentNode->insertBefore($new_element, $refnode);
+      }
+
   }
   $new_element = $dom->createElement('span', $identified_text);
   $counter = emicdora_cleaned_post('emicdora_counter');
@@ -156,7 +173,7 @@ function emicdora_marshall_spans($type) {
     $id = $items->item(0)->getAttribute('id');
     $text_value = $items->item(0)->nodeValue;
     if ($text_value) {
-      $marshalled_spans[$id] = $text_value;
+      $marshalled_spans[] = array('id' => $id, 'text' => $text_value);
     }
   }
   return $marshalled_spans;
@@ -514,4 +531,47 @@ function emicdora_get_config() {
     'added' => 'versionview-1011-body',
     'deleted' => 'versionview-1010-body',
   );
+}
+/**
+ * Determine if one string matches the start of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+
+function emicdora_starts_with($haystack, $needle) {
+  return $needle === "" || strpos($haystack, $needle) === 0;
+}
+
+/**
+ * Determine if one string matches the end of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+function emicdora_ends_with($haystack, $needle) {
+  return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+}
+
+function emicdora_create_span($dom, $contents, $class_name, $prefix) {
+  $new_element = $dom->createElement('span', $contents);
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared') {
+    $counter = emicdora_get_counter();
+  }
+  $_POST['emicdora_counter'] = $counter;
+  $fresh_id = "{$prefix}e{$counter}";
+  $new_element->setAttribute('id', $fresh_id);
+  $new_element->setAttribute('class', $class_name);
+  return $new_element;
 }
