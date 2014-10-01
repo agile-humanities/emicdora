@@ -52,7 +52,7 @@
             height: '600',
           });
         }
-        $('#cwrc_wrapper').layout().resizeAll();
+
       });
 
       waitUntilExists("versionview-1010", function() {
@@ -67,6 +67,7 @@
         $("#save_changes").hide();
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
+          $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
           text_deleted = selection_deleted.toString();
           if (selection_deleted.toHtml() !== '') {
@@ -80,6 +81,7 @@
         });
         // // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
+          $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
           if (selection_added.toHtml() !== '') {
@@ -110,7 +112,6 @@
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
           }
           else {
-            $("#emicdora_status").text("Unsaved changes");
             $("#save_changes").show();
             all_added = encodeURIComponent($("#versionview-1011").html());
             all_deleted = encodeURIComponent($("#versionview-1010").html());
@@ -145,7 +146,6 @@
                 $(".emicdora_input").text('');
                 $('#diff_l').text("");
                 $('#diff_r').text("");
-                $("#emicdora_status").text("Changes saved.");
               }
             },
             error: function(data, status, xhd) {
