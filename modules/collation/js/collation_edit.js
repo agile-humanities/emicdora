@@ -37,6 +37,7 @@
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
         if ($(this).val() == Drupal.t('Full Window')) {
           $('#admin-menu-wrapper').hide();
+          window.scrollTo(0, 0);
           $(this).val(Drupal.t('Exit Full Window'));
           $('#compareviewer-1009').hide();
           $('.x-css-shadow').hide();
