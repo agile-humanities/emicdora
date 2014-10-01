@@ -36,6 +36,7 @@
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
         if ($(this).val() == Drupal.t('Full Window')) {
+          window.scrollTo(0, 0);
           $('#admin-menu-wrapper').hide();
           $(this).val(Drupal.t('Exit Full Window'));
           $('#compareviewer-1009').hide();
@@ -52,11 +53,14 @@
             height: '600',
           });
         }
-        $('#cwrc_wrapper').layout().resizeAll();
       });
 
       waitUntilExists("versionview-1010", function() {
-        var $head = $("#emicdora_collatex_iframe").contents().find("head");
+        var contents = $("#emicdora_collatex_iframe").contents();
+        contents.find("#logo").hide();
+        contents.find("#examples").closest('.form-element').hide();
+        contents.find("#graphml").closest('.yui3-g').hide();
+        var $head = contents.find("head");
         $head.append($("<link/>", {
           rel: "stylesheet",
           href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
