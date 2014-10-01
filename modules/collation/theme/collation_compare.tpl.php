@@ -5,7 +5,7 @@ $full_window = t("Full Window");
 print '<div id ="emicdora_collation_container">';
 print '<div id="metadata"></div>
     <div id="uiplaceholder"></div>';
-if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compare') {
+if (user_access(COLLATION_EDIT_COLLATION) && $variables['display_type'] == 'compare') {
   print '
     <h3 id="top-label" class="ui-widget-header">Version 1</h3>
     <div id="diff_l" class="ui-widget-content collation_resize emcidora_input">
@@ -30,4 +30,3 @@ if (user_access(EMICDORA_EDIT_COLLATION) && $variables['display_type'] == 'compa
 }
 print '</div>';
 ?>
-
