@@ -68,7 +68,7 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
     $destination = drupal_get_destination();
     $links[] = array(
       'title' => 'Edit',
-      'href' => "islandora/object/$critical_edition_pid/transcription/$transcription_pid/edit",
+      'href' => "emicdora/contextual-links/transcription/$transcription_pid/edit",
       'query' => array(
         'destination' => $destination['destination'],
       ),
@@ -102,11 +102,11 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
 function emicdora_collation_object_operations_block_links($critical_edition_pid, $mvd, $current_view) {
   $links[] = array(
     'title' => 'Refresh Transcriptions',
-    'href' => "islandora/object/$critical_edition_pid/refresh/$mvd/$current_view",
+    'href' => "collation/$critical_edition_pid/refresh/$mvd/$current_view",
   );
   $links[] = array(
     'title' => 'Delete',
-    'href' => "islandora/object/$critical_edition_pid/delete/$mvd/$current_view",
+    'href' => "collation/$critical_edition_pid/delete/$mvd/$current_view",
   );
   return $links;
 }
