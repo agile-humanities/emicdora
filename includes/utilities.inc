@@ -13,7 +13,7 @@
  */
 function emicdora_source_content_models() {
   return array(
-    'islandora:bookCModel' => t('Textual Content'),
+    'islandora:bookCModel' => t('Text'),
     'islandora:sp-audioCModel' => t('Audio'),
     'islandora:sp_videoCModel' => t('Video'),
     'islandora:sp_large_image_cmodel' => t('Image'),
@@ -465,8 +465,8 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
               '@pid' => $object->id,
               '@message' => $e->getMessage(),
             )
-        ), 'error'
-    );
+            ), 'error'
+        );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
           '@pid' => $object->id,
@@ -755,6 +755,44 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
+}
+
+/**
+ * Removes source object from Critical Edition.
+ *
+ * @param string $critical_edition_pid
+ *   PID of critical edition
+ * @param string $source_object_pid
+ *   PID of source object
+ */
+function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+  $source_object = islandora_object_load($source_object_pid);
+  $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
+  foreach ($versions as $version_pid) {
+    $version = islandora_object_load($version_pid);
+    $sources = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+    foreach ($sources as $source) {
+      if ($source['object']['value'] == $source_object_pid) {
+        $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+      }
+    }
+  }
+  drupal_goto("islandora/object/$critical_edition_pid");
+}
+
+/**
+ * Removes Version from Critical Edition.
+ *
+ * @param string $critical_edition_pid
+ *   PID of Critical Edition
+ * @param string $version_object_pid
+ *   PID of Version Object.
+ */
+function emicdora_remove_version($critical_edition_pid, $version_object_pid) {
+  $version = islandora_object_load($version_object_pid);
+  $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  drupal_goto("islandora/object/$critical_edition_pid");
 }
 
 /**

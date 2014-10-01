@@ -16,13 +16,43 @@
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-        $(".merged").css('background-color', '');
-        left.css("background-color", 'green');
-        right.css("background-color", 'green');
-        $('#merged_text').val($(left).text());
-        wrapped_content = left.wrap('<span/>');
-        merged_content = $(wrapped_content).parent().html();
-        $(wrapped_content).unwrap();
+
+        if (left.css("background-color") != 'transparent') {
+          merged_content = '';
+          $('#merged_text').val('');
+          $(".merged").css('background-color', '');
+        } else {
+          $(".merged").css('background-color', '');
+          left.css("background-color", 'green');
+          right.css("background-color", 'green');
+          $('#merged_text').val($(left).text());
+          wrapped_content = left.wrap('<span/>');
+          merged_content = $(wrapped_content).parent().html();
+          $(wrapped_content).unwrap();
+        }
+
+      });
+
+      $('#full-window-button').click(function() {
+        $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
+        if ($(this).val() == Drupal.t('Full Window')) {
+          $('#admin-menu-wrapper').hide();
+          $(this).val(Drupal.t('Exit Full Window'));
+          $('#compareviewer-1009').hide();
+          $('.x-css-shadow').hide();
+          $('#cwrc_wrapper').css({
+            height: '100%',
+          });
+        }
+        else {
+          $(this).val(Drupal.t('Full Window'));
+          $('#compareviewer-1009').show();
+          $('#admin-menu-wrapper').show();
+          $('#cwrc_wrapper').css({
+            height: '600',
+          });
+        }
+        $('#cwrc_wrapper').layout().resizeAll();
       });
 
       waitUntilExists("versionview-1010", function() {

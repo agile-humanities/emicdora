@@ -24,7 +24,6 @@ function emicdora_permission() {
  * Implements hook_menu().
  */
 function collation_menu() {
-
   return array(
     'collation/contextual-links/collation/%islandora_object' => array(
       'title' => 'Collations',
@@ -68,18 +67,6 @@ function collation_menu() {
       'file' => 'includes/emicdora_callbacks.inc',
       'access arguments' => array('edit_collations'),
       'type' => MENU_CALLBACK,
-    ),
-    'islandora/object/%islandora_object/table' => array(
-      'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
-      'title arguments' => array(
-        'emicdora_set_title_and_breadcrumbs_collation', 2, 4,
-      ),
-      'context' => MENU_CONTEXT_PAGE,
-      'page callback' => 'emicdora_table_view',
-      'file' => 'includes/collation_view.inc',
-      'page arguments' => array(2),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
     ),
     'collation/%islandora_object/refresh/%/%' => array(
       'title' => 'Refresh Transcriptions',
@@ -215,7 +202,9 @@ function collation_block_view($delta = '') {
   }
   elseif (is_object($object) && emicdora_has_content_model($object, 'islandora:versionCModel')) {
     $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-    $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    if (!empty($parents)) {
+      $critical_edition = islandora_object_load($parents[0]['object']['value']);
+    }
   }
 
   if (!isset($critical_edition)) {
