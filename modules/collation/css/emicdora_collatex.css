@@ -1,17 +1,6 @@
-div#logo {
-  display: none;
-}
 body {
   width: 100%;
 }
 #input {
   height: auto !important;
-}
-
-div#input div.yui3-g:nth-child(3){
-   display: none;
-}
-
-div#output div.yui3-g{
-   display: none;
 }

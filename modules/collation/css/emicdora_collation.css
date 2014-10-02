@@ -71,6 +71,11 @@
   height: 150px;
   padding: 0.5em;
 }
+.merged_resize {
+  width: 102%;
+  height: 50px;
+  padding: 0.5em;
+}
 
 .emicdora_button {
 -moz-user-select: none;

@@ -15,7 +15,9 @@ if (user_access(COLLATION_EDIT_COLLATION) && $variables['display_type'] == 'comp
     </div>
   <button class = "emicdora_button" id="collation_link">Merge</button>
   <button class = "emicdora_button" id="collation_unlink" class="form-submit" type="submit" value="Variant">Variant</button><br/>
-
+    <h3 id="merged" class="ui-widget-header">Merged text</h3>
+    <div id="merged_text" class="ui-widget-content merged_resize emcidora_input"></div>
+  <button class = "emicdora_button" id="collation_unlink">Unlink</button><br/>
   <button class = "emicdora_button" id="save_changes">Save Changes</button><br />
     <div id="collatex_iframe">
     <input id="full-window-button" class="emicdora_button" type="button" value="' . $full_window . '" />

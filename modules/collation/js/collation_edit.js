@@ -25,7 +25,7 @@
           $(".merged").css('background-color', '');
           left.css("background-color", 'green');
           right.css("background-color", 'green');
-          $('#merged_text').val($(left).text());
+          $('#merged_text').text($(left).text());
           wrapped_content = left.wrap('<span/>');
           merged_content = $(wrapped_content).parent().html();
           $(wrapped_content).unwrap();
@@ -36,6 +36,7 @@
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
         if ($(this).val() == Drupal.t('Full Window')) {
+          window.scrollTo(0, 0);
           $('#admin-menu-wrapper').hide();
           window.scrollTo(0, 0);
           $(this).val(Drupal.t('Exit Full Window'));
@@ -53,11 +54,14 @@
             height: '600',
           });
         }
-
       });
 
       waitUntilExists("versionview-1010", function() {
-        var $head = $("#emicdora_collatex_iframe").contents().find("head");
+        var contents = $("#emicdora_collatex_iframe").contents();
+        contents.find("#logo").hide();
+        contents.find("#examples").closest('.form-element').hide();
+        contents.find("#graphml").closest('.yui3-g').hide();
+        var $head = contents.find("head");
         $head.append($("<link/>", {
           rel: "stylesheet",
           href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
@@ -138,6 +142,7 @@
             async: false,
             success: function(data, status, xhr) {
               var results = JSON.parse(data);
+              alert(results.message)
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
