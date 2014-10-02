@@ -36,13 +36,9 @@ function emicdora_set_page_title_and_subtitle($title, $subtitle) {
  */
 function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $title = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  // Only Source objects and Critical Editions should be visible outside the
-  // context of a Critical Edition.
-  if (emicdora_is_source($object)) {
-    drupal_set_breadcrumb(emicdora_get_breadcrumbs_source($object));
-    drupal_set_title(filter_xss($object->label));
-  }
-  else {
+  // Only Source objects and their children, as well as Critical Editions should
+  // be visible outside the context of a Critical Edition.
+  if (emicdora_is_critical_edition($object)) {
     drupal_set_breadcrumb(emicdora_get_breadcrumbs_critical_edition($object));
     // Hacking hack hack hack.. We need to check the menu paths as this callback
     // will be used for all sub tasks, etc.
@@ -53,6 +49,15 @@ function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $titl
     else {
       drupal_set_title(filter_xss($object->label));
     }
+  }
+  else {
+    // Either we are viewing a source object a child of a source object (page
+    // for example).
+    $breadcrumbs = emicdora_is_source($object) ?
+      emicdora_get_breadcrumbs_source($object) :
+      emicdora_get_breadcrumbs_source_child($object);
+    drupal_set_breadcrumb($breadcrumbs);
+    drupal_set_title(filter_xss($object->label));
   }
 }
 
@@ -70,6 +75,34 @@ function emicdora_get_breadcrumbs_source(AbstractObject $source) {
     l(t("COOP"), EMICDORA_SEARCH_COOP_PATH),
     filter_xss($source->label),
   );
+}
+
+/**
+ * Gets the default breadcrumbs when the object is a "child" of a source object.
+ *
+ * This is only viewable outside the context of the critical edition.
+ *
+ * @param AbstractObject $child
+ *   The child of a source object to get the default breadcrumbs for.
+ *
+ * @return array
+ *   The default breadcrumbs as required by drupal_set_breadcrumbs().
+ */
+function emicdora_get_breadcrumbs_source_child(AbstractObject $child) {
+  $query_string = <<<EOT
+select ?parent ?label from <#ri> where
+  (<info:fedora/{$child->id}> <fedora-rels-ext:isMemberOfCollection> ?parent
+    or <info:fedora/{$child->id}> <fedora-rels-ext:isMemberOf> ?parent
+    or <info:fedora/{$child->id}> <fedora-rels-ext:isPartOf> ?parent) and
+  ?parent <fedora-model:label> ?label
+EOT;
+  $results = $child->repository->ri->itqlQuery($query_string);
+  $breadcrumbs = array(l(t("COOP"), EMICDORA_SEARCH_COOP_PATH));
+  foreach ($results as $result) {
+    $breadcrumbs[] = l($result['label']['value'], "islandora/object/{$result['parent']['value']}");
+  }
+  $breadcrumbs[] = filter_xss($child->label);
+  return $breadcrumbs;
 }
 
 /**
