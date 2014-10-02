@@ -832,3 +832,17 @@ function emicdora_get_transcription_version(AbstractObject $transcription) {
   // Assumes the relation is always present and valid.
   return islandora_object_load($results[0]['object']['value']);
 }
+
+/**
+ * Checks if the given object has a source content model.
+ *
+ * @param AbstractObject $object
+ *   The object to check.
+ *
+ * @return bool
+ *   TRUE if one of the given object's content models belongs to the set of
+ *   source content models.
+ */
+function emicdora_is_critical_edition(AbstractObject $object) {
+  return in_array('islandora:criticalEditionContainerCModel', $object->models);
+}
