@@ -25,19 +25,20 @@
           $(".merged").css('background-color', '');
           left.css("background-color", 'green');
           right.css("background-color", 'green');
-          $('#merged_text').val($(left).text());
+          $('#merged_text').text($(left).text());
           wrapped_content = left.wrap('<span/>');
           merged_content = $(wrapped_content).parent().html();
           $(wrapped_content).unwrap();
         }
 
       });
-
+      $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
         if ($(this).val() == Drupal.t('Full Window')) {
           window.scrollTo(0, 0);
           $('#admin-menu-wrapper').hide();
+          window.scrollTo(0, 0);
           $(this).val(Drupal.t('Exit Full Window'));
           $('#compareviewer-1009').hide();
           $('.x-css-shadow').hide();
@@ -67,10 +68,11 @@
           type: "text/css"
         }
         ));
-        $('.emicdora_input').val('');
+        $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
+          $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
           text_deleted = selection_deleted.toString();
           if (selection_deleted.toHtml() !== '') {
@@ -80,10 +82,11 @@
             var elem = document.elementFromPoint(evt.clientX, evt.clientY);
             context_deleted = elem.outerHTML;
           }
-          $("#diff_l").val(text_deleted);
+          $("#diff_l").text(text_deleted);
         });
         // // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
+          $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
           if (selection_added.toHtml() !== '') {
@@ -93,7 +96,7 @@
             var elem = document.elementFromPoint(evt.clientX, evt.clientY);
             context_added = elem.outerHTML;
           }
-          $("#diff_r").val(text_added);
+          $("#diff_r").text(text_added);
         });
         $("#collation_link").click({action: 'link'}, execute_callback);
         $("#collation_unlink").click({action: 'unlink'}, execute_callback);
@@ -114,7 +117,6 @@
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
           }
           else {
-            $("#emicdora_status").text("Unsaved changes");
             $("#save_changes").show();
             all_added = encodeURIComponent($("#versionview-1011").html());
             all_deleted = encodeURIComponent($("#versionview-1010").html());
@@ -140,14 +142,16 @@
             async: false,
             success: function(data, status, xhr) {
               var results = JSON.parse(data);
+              alert(results.message)
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
                 $('#versionview-1011-body').html($(results.new_added).html());
               }
               if (results.added == 'success') {
-                $(".emicdora_input").val('');
-                $("#emicdora_status").text("Changes saved.");
+                $(".emicdora_input").text('');
+                $('#diff_l').text("");
+                $('#diff_r').text("");
               }
             },
             error: function(data, status, xhd) {
