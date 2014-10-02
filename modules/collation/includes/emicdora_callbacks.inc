@@ -88,7 +88,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type) {
         if ($id == $last_id) {
           if ($node->nodeValue != $selected) {
             $new_val = preg_replace("/$selected/", '', $node->nodeValue, 1);
-            $node->nodevalue = preg_replace("/$selected/", '', $node->nodeValue, 1);
+            $node->nodevalue = $new_val;
             continue;
           }
         }
