@@ -9,12 +9,15 @@
  * Implements hook_menu().
  */
 function tei_editor_menu() {
-  $items['islandora/object/%islandora_object/tei_editor/edit'] = array(
-    'title' => 'EMiCdora TEI Editor',
+  $items['islandora/object/%islandora_object/version/%islandora_object/edit'] = array(
+    'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
+    'title arguments' => array(
+      'emicdora_set_title_and_breadcrumbs_version', 2, 4,
+    ),
     'page callback' => 'tei_editor_view_editor',
-    'page arguments' => array(2),
+    'page arguments' => array(4),
     'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
+    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
     'type' => MENU_NORMAL_ITEM,
   );
   $items['islandora/tei_editor/setup/%islandora_object'] = array(

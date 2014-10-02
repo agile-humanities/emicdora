@@ -19,8 +19,6 @@
  *   An array containing the transcription form to be rendered.
  */
 function emicdora_edit_transcription_form($form, $form_state, AbstractObject $transcription) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($transcription));
   drupal_set_title(t('Edit @transcription', array('@transcription' => $transcription->label)));
   $content = "";
   if ($transcription['TRANSCRIPTION']) {

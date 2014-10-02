@@ -68,7 +68,7 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
     $destination = drupal_get_destination();
     $links[] = array(
       'title' => 'Edit',
-      'href' => "islandora/object/$critical_edition_pid/transcription/$transcription_pid/edit",
+      'href' => "emicdora/contextual-links/transcription/$transcription_pid/edit",
       'query' => array(
         'destination' => $destination['destination'],
       ),
@@ -101,22 +101,12 @@ function emicdora_transcription_object_operations_block_links($transcription_pid
  */
 function emicdora_collation_object_operations_block_links($critical_edition_pid, $mvd, $current_view) {
   $links[] = array(
-    'title' => 'Compare View',
-    'href' => "islandora/object/$critical_edition_pid/compare/$mvd",
-    'fragment' => "$mvd/$critical_edition_pid",
-  );
-  $links[] = array(
-    'title' => 'Table View',
-    'href' => "islandora/object/$critical_edition_pid/table/$mvd",
-    'fragment' => "$mvd/$critical_edition_pid",
-  );
-  $links[] = array(
     'title' => 'Refresh Transcriptions',
-    'href' => "islandora/object/$critical_edition_pid/refresh/$mvd/$current_view",
+    'href' => "collation/$critical_edition_pid/refresh/$mvd/$current_view",
   );
   $links[] = array(
     'title' => 'Delete',
-    'href' => "islandora/object/$critical_edition_pid/delete/$mvd/$current_view",
+    'href' => "collation/$critical_edition_pid/delete/$mvd/$current_view",
   );
   return $links;
 }
@@ -137,6 +127,10 @@ function emicdora_collation_object_operations_block_links($critical_edition_pid,
  */
 function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_pid, $destination_params = FALSE) {
   $object = islandora_object_load($pid);
+  $type = 'source';
+  if (in_array('islandora:versionCModel', $object->models)) {
+    $type = 'version';
+  }
   if (islandora_object_access(ISLANDORA_METADATA_EDIT, $object)) {
     $destination = drupal_get_destination();
     $links[] = array(
@@ -153,8 +147,8 @@ function emicdora_append_edit_and_delete_links(&$links, $pid, $critical_edition_
       $destination = "$destination/{$destination_params['path']}/{$destination_params['pid']}";
     }
     $links[] = array(
-      'title' => 'Delete',
-      'href' => "islandora/object/$pid/delete",
+      'title' => 'Remove',
+      'href' => "emicdora/remove/$type/$critical_edition_pid/$pid",
       'query' => array(
         'destination' => $destination,
       ),

@@ -136,7 +136,7 @@ function emicdora_is_source_content_model($content_model) {
  *   source content models.
  */
 function emicdora_is_source(AbstractObject $object) {
-  $source_content_models = emicdora_source_content_models();
+  $source_content_models = array_keys(emicdora_source_content_models());
   foreach ($object->models as $content_model) {
     if (in_array($content_model, $source_content_models)) {
       return TRUE;
@@ -465,8 +465,8 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
               '@pid' => $object->id,
               '@message' => $e->getMessage(),
             )
-        ), 'error'
-    );
+            ), 'error'
+        );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
           '@pid' => $object->id,
@@ -755,4 +755,94 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
     $formatted_facets[$field_val]['count'] = $count;
   }
   return $formatted_facets;
+}
+
+/**
+ * Removes source object from Critical Edition.
+ *
+ * @param string $critical_edition_pid
+ *   PID of critical edition
+ * @param string $source_object_pid
+ *   PID of source object
+ */
+function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+  $source_object = islandora_object_load($source_object_pid);
+  $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
+  foreach ($versions as $version_pid) {
+    $version = islandora_object_load($version_pid);
+    $sources = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+    foreach ($sources as $source) {
+      if ($source['object']['value'] == $source_object_pid) {
+        $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+      }
+    }
+  }
+  drupal_goto("islandora/object/$critical_edition_pid");
+}
+
+/**
+ * Removes Version from Critical Edition.
+ *
+ * @param string $critical_edition_pid
+ *   PID of Critical Edition
+ * @param string $version_object_pid
+ *   PID of Version Object.
+ */
+function emicdora_remove_version($critical_edition_pid, $version_object_pid) {
+  $version = islandora_object_load($version_object_pid);
+  $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+  drupal_goto("islandora/object/$critical_edition_pid");
+}
+
+/**
+ * Fetches the source object the given version object was derived from.
+ *
+ * This function makes no checks to see if the object given is in fact a
+ * version. Or if the version in not valid (ex. is missing
+ * relationships).
+ *
+ * @param AbstractObject $version
+ *   The version object to get the source from.
+ *
+ * @return AbstractObject
+ *   The source object the given version object was derived from.
+ */
+function emicdora_get_version_source(AbstractObject $version) {
+  $results = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+  // Assumes the relation is always present and valid.
+  return islandora_object_load($results[0]['object']['value']);
+}
+
+/**
+ * Fetches the given transcription's objects parent version object.
+ *
+ * This function makes no checks to see if the object given is in fact a
+ * transcription. Or if the transcription in not valid (ex. is missing
+ * relationships).
+ *
+ * @param AbstractObject $transcription
+ *   The transcription object to get the version from.
+ *
+ * @return AbstractObject
+ *   The given transcription objects parent version object.
+ */
+function emicdora_get_transcription_version(AbstractObject $transcription) {
+  $results = $transcription->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  // Assumes the relation is always present and valid.
+  return islandora_object_load($results[0]['object']['value']);
+}
+
+/**
+ * Checks if the given object has a source content model.
+ *
+ * @param AbstractObject $object
+ *   The object to check.
+ *
+ * @return bool
+ *   TRUE if one of the given object's content models belongs to the set of
+ *   source content models.
+ */
+function emicdora_is_critical_edition(AbstractObject $object) {
+  return in_array('islandora:criticalEditionContainerCModel', $object->models);
 }

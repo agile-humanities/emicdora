@@ -89,7 +89,7 @@ function emicdora_workbench_form($form, &$form_state) {
     '#title' => t('Add Source'),
     '#options' => array(
       'none' => t('-- Select --'),
-      'islandora:bookCModel' => t('Add Textual Content'),
+      'islandora:bookCModel' => t('Add Text'),
       'islandora:sp-audioCModel' => t('Add Audio'),
       'islandora:sp_videoCModel' => t('Add Video'),
       'islandora:sp_large_image_cmodel' => t('Add Image'),

@@ -15,26 +15,42 @@ function emicdora_collation_edit() {
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $results = array();
+  if (1 == 2) {
+    $results = array(
+      'message' => t("you trippin' bitch"),
+    );
+    echo json_encode($results);
+    exit();
+  }
   switch ($action) {
     case 'link':
       $marshalled_deleted = emicdora_marshall_spans('deleted');
       $marshalled_added = emicdora_marshall_spans('added');
-      $new_deleted = emicdora_link($fixed_deleted, $marshalled_deleted, 'deleted');
-      $new_added = emicdora_link($fixed_added, $marshalled_added, 'added');
-      $outputs = array(
-        'added' => $new_added,
-        'deleted' => $new_deleted,
-      );
-      $cleaned_doms = emicdora_cleanup_merged($outputs);
-      $added_node = $cleaned_doms['added']->getElementById($config['added']);
-      $deleted_node = $cleaned_doms['deleted']->getElementById($config['deleted']);
+      $merged_deleted = emicdora_check_merged($marshalled_deleted);
+      $merged_added = emicdora_check_merged($marshalled_added);
+      $new_deleted = emicdora_merge($fixed_deleted, $marshalled_deleted, 'deleted');
+      if ($merged_added || $merged_deleted) {
+        $results = array(
+          'message' => t("You have merged text in your selection.  Please unlink before resubmitting."),
+        );
+      }
+      else {
+        $new_added = emicdora_merge($fixed_added, $marshalled_added, 'added');
+        $outputs = array(
+          'added' => $new_added,
+          'deleted' => $new_deleted,
+        );
+        $cleaned_doms = emicdora_cleanup_merged($outputs);
+        $added_node = $cleaned_doms['added']->getElementById($config['added']);
+        $deleted_node = $cleaned_doms['deleted']->getElementById($config['deleted']);
 
-      $results = array(
-        'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
-        'new_added' => $cleaned_doms['added']->saveXML($added_node),
-        'emicdora_counter' => $_POST['emicdora_counter'] + 1,
-        'refresh' => 'refresh',
-      );
+        $results = array(
+          'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
+          'new_added' => $cleaned_doms['added']->saveXML($added_node),
+          'emicdora_counter' => $_POST['emicdora_counter'] + 1,
+          'refresh' => 'refresh',
+        );
+      }
       break;
 
     case 'unlink':
@@ -60,6 +76,94 @@ function emicdora_collation_edit() {
   if (!empty($results)) {
     echo json_encode($results);
   }
+}
+
+function emicdora_merge($fixed_content, $marshalled_content, $type) {
+  $identified_text = emicdora_cleaned_post("text_$type");
+  $prefix = $type[0];
+  $config = emicdora_get_config();
+  $dom = new DOMDocument();
+  $dom->loadHTML($fixed_content);
+  $nodes_to_delete = array();
+  $first_id = $marshalled_content[0]['id'];
+  $last_id = $marshalled_content[count($marshalled_content) - 1]['id'];
+
+  if (count($marshalled_content) > 1) {
+    foreach ($marshalled_content as $data) {
+      $id = $data['id'];
+      $node = $dom->getElementById($id);
+      if ($node) {
+        $node_value = $node->nodeValue;
+        $selected = $data['text'];
+        if ($id == $first_id) {
+          if ($node_value != $selected) {
+            $offset = strrpos($node->nodeValue, $selected);
+            $new_value = substr($node_value, 0, $offset);
+            $length = strlen($new_value);
+            // Strip linefeeds.
+            if ($length == 1 && ord($new_value[0]) == 10) {
+              $new_value = NULL;
+            }
+            if ($new_value) {
+              $node->nodevalue = $new_value;
+            }
+            else {
+              $nodes_to_delete[] = $node;
+            }
+            continue;
+          }
+        }
+        if ($id == $last_id) {
+          if ($node->nodeValue != $selected) {
+            $new_value = preg_replace("/$selected/", '', $node->nodeValue, 1);
+            $length = strlen($new_value);
+            // Strip linefeeds.
+            if ($length == 1 && ord($new_value[strlen($new_value) - 1]) == 10) {
+              $new_value = NULL;
+            }
+            if ($new_value != '') {
+              $node->nodevalue = $new_value;
+            }
+            else {
+              $nodes_to_delete[] = $node;
+            }
+            continue;
+          }
+        }
+        $nodes_to_delete[] = $node;
+      }
+    }
+  }
+  else {
+    $starts_with = emicdora_starts_with($content, $identified_text);
+    $ends_with = emicdora_ends_with($content, $identified_text);
+    if ($starts_with && $ends_with) {
+      $nodes_to_delete[] = $node;
+      continue;
+    }
+    if ($starts_with) {
+      $new_value = preg_replace("/$content/", '', $node->nodeValue, 1);
+      $new_element = emicdora_create_span($dom, $new_value, 'merge', $prefix);
+      $refnode->parentNode->insertBefore($new_element, $refnode);
+    }
+  }
+  $new_element = $dom->createElement('span', $identified_text);
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared') {
+    $counter = emicdora_get_counter();
+  }
+  $_POST['emicdora_counter'] = $counter;
+  $fresh_id = "{$prefix}e{$counter}";
+  $new_element->setAttribute('id', $fresh_id);
+  $new_element->setAttribute('class', 'merged');
+  $delete_ids = array_keys($nodes_to_delete);
+  $refnode = $nodes_to_delete[$delete_ids[0]];
+  $wrapper_node = $dom->getElementById($config[$type]);
+  $refnode->parentNode->insertBefore($new_element, $refnode);
+  foreach ($nodes_to_delete as $victim) {
+    $victim->parentNode->removeChild($victim);
+  }
+  return $dom->saveXML($wrapper_node);
 }
 
 /**
@@ -105,139 +209,17 @@ function emicdora_marshall_spans($type) {
     $dom->loadXML($candidate . '</span>');
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
+    $class = $items->item(0)->getAttribute('class');
     $text_value = $items->item(0)->nodeValue;
     if ($text_value) {
-      $marshalled_spans[$id] = $text_value;
+      $marshalled_spans[] = array(
+        'id' => $id,
+        'text' => $text_value,
+        'class' => $class,
+      );
     }
   }
   return $marshalled_spans;
-}
-
-/**
- * Updates div contents with incoming link request.
- *
- * @param xml $fixed_content
- *   Repaired content from viewer
- * @param array $marshalled_content
- *   id => tag content
- * @param string $type
- *   added or deleted
- *
- * @return xml
- *   new div contents
- */
-function emicdora_link($fixed_content, $marshalled_content, $type) {
-  $identified_text = emicdora_cleaned_post("text_$type");
-  $prefix = $type[0];
-  $config = emicdora_get_config();
-  $dom = new DOMDocument();
-  $dom->loadHTML($fixed_content);
-  $nodes_to_delete = array();
-  $all_ids = array_keys($marshalled_content);
-  foreach ($marshalled_content as $id => $content) {
-    $node = $dom->getElementById($id);
-    if ($node) {
-      $node_value = $node->nodeValue;
-      $class = $node->getAttribute('class');
-      if ($node_value) {
-        // Make an allowance for selected text being wholly enclosed in a span.
-
-        if (strlen($identified_text) < strlen($content)) {
-          if (emicdora_starts_with($content, $identified_text)) {
-            $remainder = str_replace($identified_text, '', $content);
-            $next = $node->nextSibling;
-            $next->nodeValue = $remainder . $next->nodeValue;
-            $nodes_to_delete[$id] = $node;
-            continue;
-          }
-          if (emicdora_ends_with($content, $identified_text)) {
-            $remainder = str_replace($identified_text, '', $content);
-            $previous = $node->previousSibling;
-            if ($previous) {
-              $previous->nodeValue = $previous->nodeValue . $remainder;
-            }
-            else {
-              $new_node = $dom->createElement('span');
-              $new_node->nodeValue = $remainder;
-              $new_node->setAttribute('class', $type);
-              $parent_node = $dom->getElementById($config[$type]);
-              $parent_node->insertBefore($new_node, $node);
-            }
-            $nodes_to_delete[$id] = $node;
-            continue;
-          }
-          $string_parts = explode($identified_text, $content);
-          $previous = $node->previousSibling;
-          $class = $previous->getAttribute('class');
-          if ($class != 'merged') {
-            $previous->nodeValue = $previous->nodeValue . $string_parts[0];
-          }
-          else {
-            $new_node = $dom->createElement('span');
-            $new_node->nodeValue = $string_parts[0];
-            $new_node->setAttribute('class', $type);
-            $parent_node = $dom->getElementById($config[$type]);
-            $parent_node->insertBefore($new_node, $node);
-          }
-          $next = $node->nextSibling;
-          $next->nodeValue = $string_parts[1] . $next->nodeValue;
-          $nodes_to_delete[$id] = $node;
-          continue;
-        }
-        if ($node_value == $content) {
-          $nodes_to_delete[$id] = $node;
-          continue;
-        }
-      }
-      if ($node_value != $content) {
-        // If delimiter is empty, force string to next sibling.
-        $location = ($content) ? strpos($node_value, $content) : 1;
-        $new_value = str_replace($content, '', $node_value);
-        if ($location > 0) {
-          $node->nodeValue = $new_value;
-        }
-        else {
-          $next = $node->nextSibling;
-          $current = $next->nodeValue;
-          $class = $next->getAttribute('class');
-          if ($class != 'merged') {
-            $next->nodeValue = $new_value . $current;
-          }
-          else {
-            $node->node_value = $new_value;
-            $new_node = $dom->createElement('span');
-            $new_node->nodeValue = $new_value;
-            $new_node->setAttribute('class', $type);
-            $parent_node = $dom->getElementById($config[$type]);
-            $parent_node->insertBefore($new_node, $node);
-          }
-          $nodes_to_delete[$id] = $node;
-        }
-      }
-    }
-  }
-  $new_element = $dom->createElement('span', $identified_text);
-  $counter = emicdora_cleaned_post('emicdora_counter');
-  if ($counter == 'undeclared') {
-    $counter = emicdora_get_counter();
-  }
-  $_POST['emicdora_counter'] = $counter;
-  $fresh_id = "{$prefix}e{$counter}";
-  $new_element->setAttribute('id', $fresh_id);
-  $new_element->setAttribute('class', 'merged');
-  $refnode = $dom->getElementById($id);
-  $delete_ids = array_keys($nodes_to_delete);
-  $ref_id = $refnode->getAttribute('id');
-  if (in_array($ref_id, $delete_ids)) {
-    $refnode = $nodes_to_delete[$delete_ids[0]];
-  }
-
-  $refnode->parentNode->insertBefore($new_element, $refnode);
-  foreach ($nodes_to_delete as $victim) {
-    $victim->parentNode->removeChild($victim);
-  }
-  $node = $dom->getElementById($config[$type]);
-  return $dom->saveXML($node);
 }
 
 /**
@@ -308,13 +290,16 @@ function emicdora_update_collation($type) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
   $query = emicdora_get_file_query($type);
   $file = emicdora_calliope_get_collation_file($query);
-
+  $counter = 1;
+  if (isset($_POST['emicdora_counter']) && $_POST['emicdora_counter'] != 'undeclared') {
+    $counter = emicdora_cleaned_post('emicdora_counter');
+  }
   $file_params = array(
     'collation' => $file['emic_data']['collation'],
     'version1' => $file['emic_data']['version1'],
     'version2' => $file['emic_data']['version2'],
     'diff_kind' => $type,
-    'emicdora_count' => isset($_POST['emicdora_count']) ? $_POST['emicdora_count'] : 1,
+    'emicdora_count' => isset($_POST['emicdora_counter']) ? $_POST['emicdora_counter'] : 1,
   );
   $contents = emicdora_cleaned_post("all_$type");
   emicdora_calliope_write_collation($file_params, $contents);
@@ -347,36 +332,6 @@ function emicdora_get_counter() {
   $query = emicdora_get_file_query('deleted');
   $file = emicdora_calliope_get_collation_file($query);
   return $file['emic_data']['emicdora_count'];
-}
-
-/**
- * Determine if one string matches the start of another.
- *
- * @param string $haystack
- *   String being searched
- * @param string $needle
- *   Substring being compared
- *
- * @return bool
- *   TRUE for match, FALSE for not
- */
-function emicdora_starts_with($haystack, $needle) {
-  return $needle === "" || strpos($haystack, $needle) === 0;
-}
-
-/**
- * Determine if one string matches the end of another.
- *
- * @param string $haystack
- *   String being searched
- * @param string $needle
- *   Substring being compared
- *
- * @return bool
- *   TRUE for match, FALSE for not
- */
-function emicdora_ends_with($haystack, $needle) {
-  return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
 /**
@@ -470,4 +425,67 @@ function emicdora_get_config() {
     'added' => 'versionview-1011-body',
     'deleted' => 'versionview-1010-body',
   );
+}
+
+/**
+ * Determine if one string matches the start of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+function emicdora_starts_with($haystack, $needle) {
+  return $needle === "" || strpos($haystack, $needle) === 0;
+}
+
+/**
+ * Determine if one string matches the end of another.
+ *
+ * @param string $haystack
+ *   String being searched
+ * @param string $needle
+ *   Substring being compared
+ *
+ * @return bool
+ *   TRUE for match, FALSE for not
+ */
+function emicdora_ends_with($haystack, $needle) {
+  return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+}
+
+function emicdora_create_span($dom, $contents, $class_name, $prefix) {
+  $new_element = $dom->createElement('span', $contents);
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared') {
+    $counter = emicdora_get_counter();
+  }
+  $_POST['emicdora_counter'] = $counter;
+  $fresh_id = "{$prefix}e{$counter}";
+  $new_element->setAttribute('id', $fresh_id);
+  $new_element->setAttribute('class', $class_name);
+  return $new_element;
+}
+
+/**
+ * Tests input array for merged class.
+ *
+ * @param array $input_array
+ *   Array to be tested
+ *
+ * @return boolean
+ *   TRUE is merged class is found
+ */
+function emicdora_check_merged($input_array) {
+  $merged = FALSE;
+  foreach ($input_array as $candidate) {
+    if ($candidate['class'] == 'merged') {
+      $merged = TRUE;
+      break;
+    }
+  }
+  return $merged;
 }
