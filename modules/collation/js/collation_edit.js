@@ -56,7 +56,7 @@
         }
       });
 
-      waitUntiExists('emicdora_collatex_iframe', function() {
+      waitUntilExists("versionview-1010", function() {
         var contents = $("#emicdora_collatex_iframe").contents();
         contents.find("#logo").hide();
         contents.find("#examples").closest('.form-element').hide();
@@ -68,9 +68,6 @@
           type: "text/css"
         }
         ));
-      });
-      waitUntilExists("versionview-1010", function() {
-
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
