@@ -15,13 +15,7 @@ function emicdora_collation_edit() {
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $results = array();
-  if (1 == 2) {
-    $results = array(
-      'message' => t("you trippin' bitch"),
-    );
-    echo json_encode($results);
-    exit();
-  }
+
   switch ($action) {
     case 'link':
       $marshalled_deleted = emicdora_marshall_spans('deleted');
