@@ -71,6 +71,19 @@ function emicdora_collation_edit() {
   }
 }
 
+/**
+ * Merges identified text.
+ *
+ * @param XML $fixed_content
+ *   Current pane contents
+ * @param array $marshalled_content
+ *   Array of span ids matched to span contents
+ * @param string $type
+ *   add or delete
+ *
+ * @return XML
+ *   Revised content
+ */
 function emicdora_merge($fixed_content, $marshalled_content, $type) {
   $identified_text = emicdora_cleaned_post("text_$type");
   $prefix = $type[0];
@@ -450,6 +463,21 @@ function emicdora_ends_with($haystack, $needle) {
   return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
 }
 
+/**
+ * Creates new EDomElement.
+ *
+ * @param DOMDocument $dom
+ *   Representation of current panel
+ * @param string $contents
+ *   Contents of new element
+ * @param string $class_name
+ *   class attribute for new element
+ * @param string $prefix
+ *   'a' or 'd'
+ *
+ * @return DOMElement
+ *   new Element
+ */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
   $new_element = $dom->createElement('span', $contents);
   $counter = emicdora_cleaned_post('emicdora_counter');
@@ -469,7 +497,7 @@ function emicdora_create_span($dom, $contents, $class_name, $prefix) {
  * @param array $input_array
  *   Array to be tested
  *
- * @return boolean
+ * @return bool
  *   TRUE is merged class is found
  */
 function emicdora_check_merged($input_array) {
