@@ -444,7 +444,7 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE, $languag
     $ext = drupal_strtolower($ext);
     // An allowed extension and does /not/ contain __MACOSX.
     return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
-      };
+  };
 
   $file_objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
   foreach ($file_objects as $file => $file_object) {

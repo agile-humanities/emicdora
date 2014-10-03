@@ -75,15 +75,15 @@ function emicdora_collation_edit() {
 /**
  * Merges identified text.
  *
- * @param xml $fixed_content
- *   Input xml
+ * @param XML $fixed_content
+ *   Current pane contents
  * @param array $marshalled_content
- *   array containing span id's and content.
+ *   Array of span ids matched to span contents
  * @param string $type
  *   add or delete
  *
- * @return xml
- *   Changed panle content
+ * @return XML
+ *   Revised content
  */
 function emicdora_merge($fixed_content, $marshalled_content, $type) {
   $identified_text = emicdora_cleaned_post("text_$type");
