@@ -19,10 +19,8 @@
  *   A Drupal Form for linking a new object of the given type.
  */
 function emicdora_link_source_form(array $form, array $form_state, AbstractObject $critical_edition) {
-  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   drupal_set_title(t('Link Existing Source to @label', array('@label' => $critical_edition->label)));
-  emicdora_set_source_breadcrumbs($critical_edition);
   $form_state['critical_edition'] = $critical_edition->id;
   $type = isset($form_state['values']['limit_results']) ? $form_state['values']['limit_results'] : NULL;
   $form['limit_results'] = array(
