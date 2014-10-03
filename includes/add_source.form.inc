@@ -44,8 +44,8 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
   if ($mappings['tn']) {
     $form = array_merge($form, emicdora_get_thumbnail_wrapper($upload_size));
   }
-  if($mappings['type'] != 'no_source') {
-      $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size, $content_model));
+  if ($mappings['type'] != 'no_source') {
+    $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size, $content_model));
   }
   $form['choice_wrapper'] = array(
     '#type' => 'fieldset',
@@ -440,10 +440,10 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE, $languag
   $zip->close();
   $allowed_extensions = array('tif', 'tiff', 'jpg', 'jpeg', 'jp2');
   $callback = function ($element) use ($allowed_extensions) {
-        $ext = pathinfo($element, PATHINFO_EXTENSION);
-        $ext = drupal_strtolower($ext);
-        // An allowed extension and does /not/ contain __MACOSX.
-        return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
+    $ext = pathinfo($element, PATHINFO_EXTENSION);
+    $ext = drupal_strtolower($ext);
+    // An allowed extension and does /not/ contain __MACOSX.
+    return in_array($ext, $allowed_extensions) && preg_match('/__MACOSX/', $element) === 0;
       };
 
   $file_objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($destination_dir), RecursiveIteratorIterator::SELF_FIRST);
@@ -453,10 +453,10 @@ function emicdora_add_zipped_pages($zip_uri, $book_pid, $xacml = FALSE, $languag
   $files_to_add = array_values(array_filter($unfiltered, $callback));
   // Sort files based on name.
   $comparator = function ($a, $b) {
-        $file_a = pathinfo($a, PATHINFO_FILENAME);
-        $file_b = pathinfo($b, PATHINFO_FILENAME);
-        return ($file_a < $file_b) ? -1 : 1;
-      };
+    $file_a = pathinfo($a, PATHINFO_FILENAME);
+    $file_b = pathinfo($b, PATHINFO_FILENAME);
+    return ($file_a < $file_b) ? -1 : 1;
+  };
   usort($files_to_add, $comparator);
   emicdora_batch_add_zipped_pages($files_to_add, $book_pid, $xacml, $language);
 }
