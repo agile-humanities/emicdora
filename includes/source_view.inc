@@ -15,8 +15,6 @@
  */
 function emicdora_critical_edition_sources(AbstractObject $object, $content_model = NULL) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
-  drupal_set_title(t("@edition - Source Objects", array('@edition' => $object->label)));
   // Only show members of the given critical edition.
   $filters[] = format_string('!membership:("info:fedora/!pid")', array(
     '!pid' => $object->id,
@@ -35,6 +33,5 @@ function emicdora_critical_edition_sources(AbstractObject $object, $content_mode
   }
   $_GET['f'] = array(implode(' AND ', $filters));
   $output = islandora_solr('*:*');
-  emicdora_set_source_breadcrumbs($object);
   return $output;
 }
