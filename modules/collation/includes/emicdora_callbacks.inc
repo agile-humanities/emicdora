@@ -15,6 +15,7 @@ function emicdora_collation_edit() {
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $results = array();
+
   switch ($action) {
     case 'link':
       $marshalled_deleted = emicdora_marshall_spans('deleted');
@@ -464,19 +465,19 @@ function emicdora_ends_with($haystack, $needle) {
 }
 
 /**
- * Creates new EDomElement.
+ * Creates new span to be inserted in DOM object.
  *
- * @param DOMDocument $dom
- *   Representation of current panel
+ * @param DOM $dom
+ *   DOM representing current panel
  * @param string $contents
- *   Contents of new element
+ *   Text value of new element
  * @param string $class_name
- *   class attribute for new element
+ *   Value of class attribute
  * @param string $prefix
  *   'a' or 'd'
  *
  * @return DOMElement
- *   new Element
+ *   Created element
  */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
   $new_element = $dom->createElement('span', $contents);
