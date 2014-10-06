@@ -34,9 +34,6 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
     $transcription = t("This file has no transcription datastream");
   }
   $variables['transcription'] = $transcription;
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($object));
-  drupal_set_title($object->label);
 }
 
 /**
@@ -51,8 +48,9 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   drupal_set_breadcrumb(array());
   // Links for Add to COOP.
   $variables['add_source_links'] = array();
-
-  foreach (emicdora_source_content_models() as $content_model => $label) {
+  $source_content_models = emicdora_source_content_models();
+  unset($source_content_models['islandora:criticalEditionContainerCModel']);
+  foreach ($source_content_models as $content_model => $label) {
     $variables['add_source_links'][] = array(
       'title' => t('Add @label', array('@label' => $label)),
       'href' => "emicdora/source/add/$content_model/FALSE/TRUE",
@@ -64,5 +62,5 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   ));
   // Returns all source object(s), this assumes that solr has been configured to
   // only display source objects, version objects, and critical editions.
-  $variables['browse_all_link'] = l(t('Browse All'), 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
+  $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH);
 }

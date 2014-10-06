@@ -17,9 +17,6 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
 
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
-  emicdora_set_source_breadcrumbs($object);
-  drupal_set_title($object->label);
 
   drupal_add_css(drupal_get_path('module', 'emicdora') . "/css/fix_textfield_width.css");
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
@@ -361,8 +358,6 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
  *   transcription object
  */
 function islandora_critical_transcription_edit_form($form, $form_state, $transcription) {
-  module_load_include('inc', 'islandora', 'includes/breadcrumb');
-  drupal_set_breadcrumb(islandora_get_breadcrumbs($transcription));
   drupal_set_title($transcription->label);
   $content = "";
   if ($transcription['TRANSCRIPTION']) {

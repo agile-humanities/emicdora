@@ -16,6 +16,8 @@
  *   The identifier of the Content Model type to ingest.
  * @param string $critical_edition
  *   The identifier of the critical edition the source will be linked to.
+ * @param bool $add_to_workbench
+ *   Indicator of whether ingested object should be added to the workbench
  *
  * @return array
  *   A Drupal Form for ingesting a new object of the given type.
@@ -30,10 +32,6 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
       '/css/emicdora_ingest.css'
   );
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-  $form['title'] = array(
-    '#type' => 'markup',
-    '#markup' => '<h1>' . t('Add new @type object', array('@type' => $mappings['label'])) . '</h1>',
-  );
 
   $form['content_model'] = array(
     '#type' => 'hidden',
@@ -46,7 +44,9 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
   if ($mappings['tn']) {
     $form = array_merge($form, emicdora_get_thumbnail_wrapper($upload_size));
   }
-  $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size, $content_model));
+  if ($mappings['type'] != 'no_source') {
+    $form = array_merge($form, emicdora_get_content_wrapper($mappings, $upload_size, $content_model));
+  }
   $form['choice_wrapper'] = array(
     '#type' => 'fieldset',
   );
@@ -197,17 +197,6 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
 }
 
 /**
-
- *
- *
- * @param int $upload_size
- *   Upload limit size
- *
- * @return array
- *   Form definition
- */
-
-/**
  * Returns partial form definition.
  *
  * @param array $mappings
@@ -313,6 +302,17 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'required' => TRUE,
       'upload_prompt' => t('Add image'),
       'extensions' => 'tiff tif',
+    ),
+    'islandora:criticalEditionContainerCModel' => array(
+      'form' => 'EMiC Critical Edition MODS form',
+      'label' => t('Critical Edition'),
+      'collection' => 'islandora:co-op',
+      'tn' => FALSE,
+      'prompt' => NULL,
+      'upload_prompt' => NULL,
+      'type' => 'no_source',
+      'extensions' => NULL,
+      'required' => FALSE,
     ),
   );
   return $mappings[$content_model];
