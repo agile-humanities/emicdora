@@ -20,6 +20,9 @@ function emicdora_workbench_form($form, &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_bookmark', 'includes/api');
   $source_content_models = emicdora_source_content_models();
+  if (isset($source_content_models['islandora:criticalEditionContainerCModel'])) {
+    unset($source_content_models['islandora:criticalEditionContainerCModel']);
+  }
   $add_source_links = array();
   foreach ($source_content_models as $content_model => $label) {
     $add_source_links[] = array(
