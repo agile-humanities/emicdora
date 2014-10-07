@@ -153,6 +153,9 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
     'metadata.name' => $mvd_label,
   );
   $mvds = emicdora_calliope_find_mvd($query);
+  if (empty($mvds)) {
+    return;
+  }
   $mvd = $mvds[0];
   $mvd_description = isset($mvd['metadata']['description']) ? $mvd['metadata']['description'] : t("No description");
 
