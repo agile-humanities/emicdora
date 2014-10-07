@@ -282,15 +282,6 @@ function emicdora_menu() {
       'access callback' => 'user_access',
       'access arguments' => array(ISLANDORA_INGEST),
     ),
-    'workbench/add/%' => array(
-      'title' => 'Add New Object',
-      'page callback' => 'emicdora_workbench_ingest_form',
-      'page arguments' => array(2),
-      'file' => 'includes/workbench.inc',
-      'type' => MENU_CALLBACK,
-      'access callback' => 'user_access',
-      'access arguments' => array(ISLANDORA_INGEST),
-    ),
     'islandora/emicdora_source/autocomplete/%/%' => array(
       'page callback' => 'emicdora_versionable_object_form_source_autocomplete',
       'page arguments' => array(3, 4),
@@ -1457,20 +1448,5 @@ function emicdora_version_delete($version_pid) {
 function emicdora_remove_objects($object) {
   if ($object) {
     islandora_delete_object($object);
-  }
-}
-
-/**
- * Implements hook_islandora_object_ingested().
- */
-function emicdora_islandora_object_ingested(AbstractObject $object) {
-  $path_parts = explode('/', $_GET['q']);
-  if (isset($path_parts[2]) && $path_parts[0] == 'workbench' && $path_parts[1] == 'add') {
-    if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
-      module_load_include('inc', 'islandora_bookmark', 'includes/api');
-      $list_id = islandora_bookmark_get_default_list();
-      $list = Bookmark::getList($list_id);
-      $list->addPid($object->id);
-    }
   }
 }
