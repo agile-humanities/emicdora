@@ -57,17 +57,6 @@
       });
 
       waitUntilExists("versionview-1010", function() {
-        var contents = $("#emicdora_collatex_iframe").contents();
-        contents.find("#logo").hide();
-        contents.find("#examples").closest('.form-element').hide();
-        contents.find("#graphml").closest('.yui3-g').hide();
-        var $head = contents.find("head");
-        $head.append($("<link/>", {
-          rel: "stylesheet",
-          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
-          type: "text/css"
-        }
-        ));
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
@@ -159,6 +148,19 @@
             },
           });
         }
+      });
+      $('#emicdora_collatex_iframe').load(function() {
+        var contents = $("#emicdora_collatex_iframe").contents();
+        contents.find("#logo").hide();
+        contents.find("#examples").closest('.form-element').hide();
+        contents.find("#graphml").closest('.yui3-g').hide();
+        var $head = contents.find("head");
+        $head.append($("<link/>", {
+          rel: "stylesheet",
+          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
+          type: "text/css"
+        }
+        ));
       });
     }
   };
