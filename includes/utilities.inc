@@ -17,7 +17,18 @@ function emicdora_source_content_models() {
     'islandora:sp-audioCModel' => t('Audio'),
     'islandora:sp_videoCModel' => t('Video'),
     'islandora:sp_large_image_cmodel' => t('Image'),
-    'islandora:criticalEditionContainerCModel' => t('Critical Edition'),
+  );
+}
+
+/**
+ * Defines all content models.
+ *
+ * @return array
+ *   All content models needing menu paths.
+ */
+function emicdora_get_all_content_models() {
+  return array_merge(emicdora_source_content_models(),
+      array('islandora:criticalEditionContainerCModel' => t('Critical Edition'))
   );
 }
 

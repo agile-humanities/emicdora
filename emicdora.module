@@ -17,7 +17,7 @@ define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_
  */
 function emicdora_menu() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $source_content_models = emicdora_source_content_models();
+  $source_content_models = emicdora_get_all_content_models();
   $add_source_contextual_links = array();
   foreach ($source_content_models as $content_model => $label) {
     $url = "emicdora/contextual-links/source/%islandora_object/add/{$content_model}";
