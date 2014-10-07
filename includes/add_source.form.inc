@@ -23,9 +23,7 @@
  *   A Drupal Form for ingesting a new object of the given type.
  */
 function islandora_emicdora_add_source_form($form, $form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
-  if ($add_to_workbench == "TRUE") {
-    $add_to_workbench = TRUE;
-  }
+  $add_to_workbench = $add_to_workbench == "TRUE" ? TRUE : FALSE;
   $mappings = islandora_simplified_ingest_get_mappings($content_model);
   drupal_add_css(
       drupal_get_path('module', 'emicdora') .

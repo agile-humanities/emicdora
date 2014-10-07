@@ -53,7 +53,7 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   foreach ($source_content_models as $content_model => $label) {
     $variables['add_source_links'][] = array(
       'title' => t('Add @label', array('@label' => $label)),
-      'href' => "emicdora/source/add/$content_model/FALSE/TRUE",
+      'href' => "emicdora/source/add/$content_model/FALSE/FALSE",
     );
   }
   $variables['coop_icon'] = theme_image(array(
