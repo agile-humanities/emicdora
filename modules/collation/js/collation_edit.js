@@ -32,6 +32,25 @@
         }
 
       });
+      $(document).delegate('span.variant', 'click', function() {
+        var qualifier = $(this).attr('id').slice(1);
+        left = $('#d' + qualifier);
+        right = $('#a' + qualifier);
+        if (left.css("background-color") != 'transparent') {
+          merged_content = '';
+          $('#merged_text').val('');
+          $(".variant").css('background-color', '');
+        } else {
+          $(".variant").css('background-color', '');
+          left.css("background-color", 'pink');
+          right.css("background-color", 'pink');
+          $('#merged_text').text($(left).text());
+          wrapped_content = left.wrap('<span/>');
+          merged_content = $(wrapped_content).parent().html();
+          $(wrapped_content).unwrap();
+        }
+
+      });
       $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
@@ -57,6 +76,23 @@
       });
 
       waitUntilExists("versionview-1010", function() {
+        $('#merge_label').click(function() {
+          $('#merge_container').toggle();
+        });
+        $('#unmerge_label').click(function() {
+          $('#unmerge_container').toggle();
+        });
+        var contents = $("#emicdora_collatex_iframe").contents();
+        contents.find("#logo").hide();
+        contents.find("#examples").closest('.form-element').hide();
+        contents.find("#graphml").closest('.yui3-g').hide();
+        var $head = contents.find("head");
+        $head.append($("<link/>", {
+          rel: "stylesheet",
+          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
+          type: "text/css"
+        }
+        ));
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
@@ -88,12 +124,13 @@
           $("#diff_r").text(text_added);
         });
         $("#collation_link").click({action: 'link'}, execute_callback);
+        $("#collation_variant").click({action: 'variant'}, execute_callback);
         $("#collation_unlink").click({action: 'unlink'}, execute_callback);
         $("#save_changes").click({action: 'save'}, execute_callback);
         function execute_callback(args) {
           var all_added;
           var all_deleted;
-          if (args.data.action == 'link') {
+          if (args.data.action == 'link' || args.data.action == 'variant') {
             if (text_added.length < 1 || text_deleted.length < 1) {
               alert('Text to link must be selected from both panes.')
               return;
@@ -131,11 +168,25 @@
             async: false,
             success: function(data, status, xhr) {
               var results = JSON.parse(data);
-              alert(results.message)
+              if (results.hasOwnProperty('message')) {
+                alert(results.message)
+              }
+
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
+                $('#versionview-1010-body span').each(function() {
+                  if ($(this).text().indexOf('<br>') >= 0) {
+                    ($(this).html($(this).text()));
+                  }
+                });
                 $('#versionview-1011-body').html($(results.new_added).html());
+                $('#versionview-1011-body span').each(function() {
+                  if ($(this).text().indexOf('<br>') >= 0) {
+                    ($(this).html($(this).text()));
+                  }
+                });
+                $('#merged_text').text("");
               }
               if (results.added == 'success') {
                 $(".emicdora_input").text('');
