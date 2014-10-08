@@ -1408,7 +1408,7 @@ function emicdora_version_delete($version_pid) {
   $version_object = islandora_object_load($version_pid);
   $pages = islandora_paged_content_get_pages($version_object);
   $transcription_data = emicdora_get_raw_objects($version_object, 'transcriptions');
-  $pids_to_delete = array();
+  $pids_to_delete = array($version_pid);
   foreach ($pages as $page) {
     $pids_to_delete[] = $page['pid'];
   }
