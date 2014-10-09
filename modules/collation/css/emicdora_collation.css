@@ -96,3 +96,10 @@ transition: box-shadow 0.1s linear 0s;
 vertical-align: baseline;
 white-space: nowrap;
 }
+
+.variant_selected {
+  background-color: pink;
+}
+.merged_selected {
+  background-color: lightblue;
+}

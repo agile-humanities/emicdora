@@ -20,11 +20,11 @@
         if (left.css("background-color") != 'transparent') {
           merged_content = '';
           $('#merged_text').val('');
-          $(".merged").css('background-color', '');
+          $(".merged").removeClass('merged_selected');
         } else {
-          $(".merged").css('background-color', '');
-          left.css("background-color", 'green');
-          right.css("background-color", 'green');
+          $(".merged").removeClass('merged_selected');
+          left.addClass('merged_selected');
+          right.addClass('merged_selected');
           $('#merged_text').text($(left).text());
           wrapped_content = left.wrap('<span/>');
           merged_content = $(wrapped_content).parent().html();
@@ -39,11 +39,11 @@
         if (left.css("background-color") != 'transparent') {
           merged_content = '';
           $('#merged_text').val('');
-          $(".variant").css('background-color', '');
+          $(".variant").removeClass('variant_selected');
         } else {
-          $(".variant").css('background-color', '');
-          left.css("background-color", 'pink');
-          right.css("background-color", 'pink');
+          $(".variant").removeClass('variant_selected');
+          left.addClass('variant_selected');
+          right.addClass('variant_selected');
           $('#merged_text').text($(left).text());
           wrapped_content = left.wrap('<span/>');
           merged_content = $(wrapped_content).parent().html();
