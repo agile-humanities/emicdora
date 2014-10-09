@@ -163,7 +163,7 @@
               merged_content: encodeURIComponent(merged_content),
               all_deleted: all_deleted,
               all_added: all_added,
-              emicdora_counter: emicdora_counter,
+              emicdora_counter: emicdora_counter
             },
             async: false,
             success: function(data, status, xhr) {
@@ -196,7 +196,7 @@
             },
             error: function(data, status, xhd) {
               console.log("The function execute_callback has failed");
-            },
+            }
           });
         }
       });
