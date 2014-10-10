@@ -13,11 +13,25 @@ define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 
 /**
+ * Implements hook_init().
+ */
+function emicdora_init() {
+  $path = drupal_get_path_alias(request_uri());
+  $path_parts = explode('/', $path);
+  if (isset($path_parts[3])) {
+    $object = islandora_object_load($path_parts[3]);
+  }
+  if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+    $GLOBALS['conf']['cache'] = FALSE;
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function emicdora_menu() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $source_content_models = emicdora_get_all_content_models();
+  $source_content_models = emicdora_source_content_models();
   $add_source_contextual_links = array();
   foreach ($source_content_models as $content_model => $label) {
     $url = "emicdora/contextual-links/source/%islandora_object/add/{$content_model}";
@@ -1408,7 +1422,7 @@ function emicdora_version_delete($version_pid) {
   $version_object = islandora_object_load($version_pid);
   $pages = islandora_paged_content_get_pages($version_object);
   $transcription_data = emicdora_get_raw_objects($version_object, 'transcriptions');
-  $pids_to_delete = array($version_pid);
+  $pids_to_delete = array();
   foreach ($pages as $page) {
     $pids_to_delete[] = $page['pid'];
   }
