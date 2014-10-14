@@ -41,6 +41,14 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
  */
 function emicdora_preprocess_emicdora_coop(array &$variables) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  $titles = emicdora_get_all('title');
+  foreach ($titles as $title) {
+    $title_urls[] = l($title, "mods_titleInfo_title_ms:($title) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)");
+  }
+  $authors = emicdora_get_all('author');
+  foreach ($titles as $title) {
+    $author_urls[] = l($title, "islandora/search/mods_name_personal_author_authority_marcrelator_namePart_ms:($title) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)");
+  }
   $module_path = drupal_get_path('module', 'emicdora');
   drupal_add_css("$module_path/css/emicdora.coop.css");
   drupal_add_js("$module_path/js/coop.js");
@@ -63,4 +71,5 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   // Returns all source object(s), this assumes that solr has been configured to
   // only display source objects, version objects, and critical editions.
   $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH);
+  $variables['browse_all_titles'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH);
 }
