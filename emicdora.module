@@ -1450,3 +1450,12 @@ function emicdora_remove_objects($object) {
     islandora_delete_object($object);
   }
 }
+
+/**
+ * Implements hook_block_save().
+ */
+function emicdora_block_save($delta, $edit) {
+  if ($delta == 'transcriptions') {
+    variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
+  }
+}
