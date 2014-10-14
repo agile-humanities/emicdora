@@ -16,12 +16,16 @@ define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_
  * Implements hook_init().
  */
 function emicdora_init() {
+  module_load_include('inc', 'islandora', 'inlcudes/utilities');
   $path = drupal_get_path_alias(request_uri());
   $path_parts = explode('/', $path);
+  $object = FALSE;
   if (isset($path_parts[3])) {
-    $object = islandora_object_load($path_parts[3]);
+    if (islandora_is_valid_pid($pid)) {
+      $object = islandora_object_load($path_parts[3]);
+    }
   }
-  if (isset($object) && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+  if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
     $GLOBALS['conf']['cache'] = FALSE;
   }
 }
