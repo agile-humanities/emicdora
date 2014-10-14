@@ -21,7 +21,7 @@ function emicdora_init() {
   if (isset($path_parts[3])) {
     $object = islandora_object_load($path_parts[3]);
   }
-  if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+  if (isset($object) && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
     $GLOBALS['conf']['cache'] = FALSE;
   }
 }
