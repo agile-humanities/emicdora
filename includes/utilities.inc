@@ -463,16 +463,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
+              '@pid' => $object->id,
+              '@message' => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
-      '@trace' => $e->getTraceAsString(),
+          '@pid' => $object->id,
+          '@message' => $e->getMessage(),
+          '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -876,8 +876,9 @@ function emicdora_get_all($type) {
   $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
 
   $qp->executeQuery(FALSE);
-      foreach($qp->islandoraSolrResult['response']['objects'] as $discovered) {
-        $results[] = $discovered['solr_doc'][$term][0];
-      }
+  $results = array();
+  foreach ($qp->islandoraSolrResult['response']['objects'] as $discovered) {
+    $results[] = $discovered['solr_doc'][$term][0];
+  }
   return $results;
 }
