@@ -70,11 +70,13 @@
   width: 102%;
   height: 150px;
   padding: 0.5em;
+  overflow: scroll;
 }
 .merged_resize {
   width: 102%;
   height: 50px;
   padding: 0.5em;
+  overflow: hidden;
 }
 
 .emicdora_button {
@@ -96,7 +98,9 @@ transition: box-shadow 0.1s linear 0s;
 vertical-align: baseline;
 white-space: nowrap;
 }
-
+.variant {
+  color: darkolivegreen;
+}
 .variant_selected {
   background-color: pink;
 }

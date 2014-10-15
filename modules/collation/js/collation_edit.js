@@ -76,6 +76,9 @@
       });
 
       waitUntilExists("versionview-1010", function() {
+
+        $('#merge_container').hide();
+        $('#unmerge_container').hide();
         $('#merge_label').click(function() {
           $('#merge_container').toggle();
         });
@@ -137,8 +140,11 @@
             }
           }
           if (args.data.action == 'save') {
+            if ( $("#save_changes").text() == 'Saving..') {
+              return;
+            }
+            $("#save_changes").text("Saving..")
             $(".merged").css('background-color', '');
-            $("#save_changes").hide();
             all_added = encodeURIComponent($("#versionview-1011-body").html());
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
           }
@@ -189,6 +195,8 @@
                 $('#merged_text').text("");
               }
               if (results.added == 'success') {
+                $("#save_changes").text("Save Changes")
+                $("#save_changes").hide();
                 $(".emicdora_input").text('');
                 $('#diff_l').text("");
                 $('#diff_r').text("");

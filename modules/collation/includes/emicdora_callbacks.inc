@@ -127,7 +127,8 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
         $count = count($string_parts);
         if ($count == 1) {
           $new_value = $string_parts[0];
-          $element = emicdora_create_span($dom, $new_value, $data['class'], "os$prefix");
+          $new_id = "os{$prefix}{$counter}";
+          $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
           if (emicdora_ends_with($current, $selected)) {
             // Inserted before current.
             $refnode = $node;

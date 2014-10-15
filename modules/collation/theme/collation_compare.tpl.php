@@ -24,7 +24,7 @@ if (user_access(COLLATION_EDIT_COLLATION) && $variables['display_type'] == 'comp
 
     <h3 id="merged" class="ui-widget-header">Merged text</h3>
     <div id="merged_text" class="ui-widget-content merged_resize emcidora_input"></div>
-  <button class = "emicdora_button" id="collation_unlink">Unlink</button><br/>
+  <button class = "emicdora_button" id="collation_unlink">Unmerge</button><br/>
   </div>
   <button class = "emicdora_button" id="save_changes">Save Changes</button><br />
     <div id="collatex_iframe">
