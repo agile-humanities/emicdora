@@ -13,6 +13,23 @@ define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 
 /**
+ * Implements hook_init().
+ */
+function emicdora_init() {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $path = drupal_get_path_alias(request_uri());
+  $path_parts = explode('/', $path);
+  if (isset($path_parts[3]) && islandora_is_valid_pid(urldecode($path_parts[3]))) {
+    $object = islandora_object_load($path_parts[3]);
+    if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      // This allows the RI to catch up when an object's associations change.
+      sleep(1);
+      $GLOBALS['conf']['cache'] = FALSE;
+    }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function emicdora_menu() {
