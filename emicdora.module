@@ -13,6 +13,23 @@ define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 
 /**
+ * Implements hook_init().
+ */
+function emicdora_init() {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  $path = drupal_get_path_alias(request_uri());
+  $path_parts = explode('/', $path);
+  if (isset($path_parts[3]) && islandora_is_valid_pid(urldecode($path_parts[3]))) {
+    $object = islandora_object_load($path_parts[3]);
+    if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      // This allows the RI to catch up when an object's associations change.
+      sleep(1);
+      $GLOBALS['conf']['cache'] = FALSE;
+    }
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function emicdora_menu() {
@@ -1193,7 +1210,7 @@ function emicdora_islandora_solr_object_result_alter(&$search_results, $query_pr
  * @param string $permission
  *   Base fedora permission
  * @param AbstractObject $object
- *   Object represneting Critical Edition
+ *   Object representing Critical Edition
  *
  * @return bool
  *   Access allowed
@@ -1309,7 +1326,7 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
     }
   }
   if (in_array('islandora:transcriptionCModel', $object->models)) {
-    $form['#submit'] = array('emicdora_delete_transription_submit');
+    $form['#submit'] = array('emicdora_delete_transcription_submit');
   }
 }
 
@@ -1323,13 +1340,21 @@ function emicdora_form_islandora_delete_object_form_alter(array &$form, array &$
  */
 function emicdora_delete_critical_edition_submit(array $form, array &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'collation', 'includes/calliope');
+  module_load_include('inc', 'collation', 'includes/mvd');
+
   $object = $form_state['object'];
   $members = array_keys(emicdora_get_members($object->id));
   foreach ($members as $member) {
     $member_object = islandora_object_load($member);
     $member_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $object->id);
   }
+  $mvds = emicdora_calliope_find_mvds($object);
+  foreach ($mvds as $mvd_label => $params) {
+    emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
+  }
   islandora_delete_object($object);
+  $form_state['redirect'] = 'coop';
 }
 
 /**
@@ -1340,12 +1365,14 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
  * @param array $form_state
  *   The Drupal form state.
  */
-function emicdora_delete_transription_submit(array $form, array &$form_state) {
+function emicdora_delete_transcription_submit(array $form, array &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $object = $form_state['object'];
   emicdora_calliope_delete_file($object->id);
   islandora_delete_object($object);
+  drupal_set_message(t("Transcription has been deleted."));
 }
+
 /**
  * Sever delete critical edition and relationships to member objects.
  *
@@ -1437,7 +1464,9 @@ function emicdora_version_delete($version_pid) {
  *   Object to be deleted.
  */
 function emicdora_remove_objects($object) {
-  islandora_delete_object($object);
+  if ($object) {
+    islandora_delete_object($object);
+  }
 }
 
 /**

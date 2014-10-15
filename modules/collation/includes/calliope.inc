@@ -104,7 +104,7 @@ function emicdora_calliope_delete_file($pid) {
     $grid = emicdora_calliope_create_mongo_grid();
     $query = array('_resourceid' => $pid);
     $record = $grid->findOne($query);
-    $id = $record->file['_id'];
+    $id = isset($record->file['_id']) ? $record->file['_id'] : FALSE;
     if ($id) {
       $grid->remove($query);
     }
