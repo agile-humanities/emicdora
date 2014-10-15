@@ -19,14 +19,11 @@ function emicdora_init() {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $path = drupal_get_path_alias(request_uri());
   $path_parts = explode('/', $path);
-  $object = FALSE;
-  if (isset($path_parts[3])) {
-    if (islandora_is_valid_pid(urldecode($path_parts[3]))) {
-      $object = islandora_object_load($path_parts[3]);
+  if (isset($path_parts[3]) && islandora_is_valid_pid(urldecode($path_parts[3]))) {
+    $object = islandora_object_load($path_parts[3]);
+    if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      $GLOBALS['conf']['cache'] = FALSE;
     }
-  }
-  if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
-    $GLOBALS['conf']['cache'] = FALSE;
   }
 }
 
