@@ -19,5 +19,8 @@
   </div>
   <p><?php print t('Welcome to the COOP. This is where all the source material for the Critical </br> Editions resides. We have grouped the content by various categories.'); ?></p>
   <?php print $browse_all_link; ?>
+  <?php print $variables['title_table']; ?>
+ <?php print $variables['collection_pager']; ?>
+  <?php print $variables['author_table']; ?>
   <div class="clearfix"></div>
 </div>

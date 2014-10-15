@@ -466,8 +466,8 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
               '@pid' => $object->id,
               '@message' => $e->getMessage(),
             )
-            ), 'error'
-        );
+        ), 'error'
+    );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
           '@pid' => $object->id,
@@ -846,4 +846,39 @@ function emicdora_get_transcription_version(AbstractObject $transcription) {
  */
 function emicdora_is_critical_edition(AbstractObject $object) {
   return in_array('islandora:criticalEditionContainerCModel', $object->models);
+}
+
+/**
+ * Retrieve all instances of a given term in Solr.
+ *
+ * @param string $type
+ *   Type of input
+ *
+ * @return array
+ *   Discovered results
+ */
+function emicdora_get_all($type) {
+  $mappings = array(
+    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
+    'title' => 'mods_titleInfo_title_ms',
+    'genre' => 'mods_genre_authority_marcgt_ms',
+  );
+  $filter = 'RELS_EXT_hasModel_uri_ms:("info:fedora/islandora:bookCModel" OR "info:fedora/islandora:sp-audioCModel" OR "info:fedora/islandora:sp_videoCModel" OR "info:fedora/islandora:sp_large_image_cmodel")';
+  $term = $mappings[$type];
+  $search_term = "+$term";
+  module_load_include('inc', 'emicdora', 'includes/db');
+  $qp = new IslandoraSolrQueryProcessor();
+  $page_model = '"info:fedora/islandora:pageCModel"';
+  $qp->buildQuery("$term:[* TO *] -RELS_EXT_hasModel_uri_ms:$page_model");
+  $qp->solrParams['fq'][] = $filter;
+  $qp->solrParams['fl'] = "PID $term";
+  $qp->solrParams['facet.limit'] = 100000;
+  $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
+
+  $qp->executeQuery(FALSE);
+  $results = array();
+  foreach ($qp->islandoraSolrResult['response']['objects'] as $discovered) {
+    $results[] = $discovered['solr_doc'][$term][0];
+  }
+  return $results;
 }
