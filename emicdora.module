@@ -22,6 +22,8 @@ function emicdora_init() {
   if (isset($path_parts[3]) && islandora_is_valid_pid(urldecode($path_parts[3]))) {
     $object = islandora_object_load($path_parts[3]);
     if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+      // This allows the RI to catch up when an object's associations change.
+      sleep(1);
       $GLOBALS['conf']['cache'] = FALSE;
     }
   }
