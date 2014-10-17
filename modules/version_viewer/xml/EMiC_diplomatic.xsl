@@ -55,7 +55,7 @@
   </xsl:template>
   <!-- Template: Text -->
   <xsl:template match="tei:text">
-    <div id="tei-text">
+    <div id="tei-text" class = "diplomatic_tei">
       <xsl:apply-templates/>
     </div>
   </xsl:template>
