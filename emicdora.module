@@ -832,6 +832,7 @@ function emicdora_block_view($delta = '') {
             );
           }
         }
+        $links = array_slice($links, 0, variable_get('emicdora_transcription_block_count', 10));
         $block['subject'] = t('Transcriptions');
         $block['content'] = array(
           '#theme' => 'links',
