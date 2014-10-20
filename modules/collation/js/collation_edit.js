@@ -107,8 +107,7 @@
             context_deleted = selection_deleted.toHtml();
           }
           if (context_deleted.indexOf('<span') === -1) {
-            var elem = document.elementFromPoint(evt.clientX, evt.clientY);
-            context_deleted = elem.outerHTML;
+            context_deleted = window.getSelection().anchorNode.parentNode.outerHTML;
           }
           $("#diff_l").text(text_deleted);
         });
@@ -121,8 +120,7 @@
             context_added = selection_added.toHtml();
           }
           if (context_added.indexOf('<span') === -1) {
-            var elem = document.elementFromPoint(evt.clientX, evt.clientY);
-            context_added = elem.outerHTML;
+            context_added = window.getSelection().anchorNode.parentNode.outerHTML;
           }
           $("#diff_r").text(text_added);
         });
@@ -140,7 +138,7 @@
             }
           }
           if (args.data.action == 'save') {
-            if ( $("#save_changes").text() == 'Saving..') {
+            if ($("#save_changes").text() == 'Saving..') {
               return;
             }
             $("#save_changes").text("Saving..")
