@@ -11,7 +11,7 @@
   -->
   <xsl:template match="/tei:TEI">
     <html>
-      <head>TEI</head>
+      <head></head>
       <body>
         <div id="tei-rdf-header" style="display:none;">
           <xsl:apply-templates select="rdf:RDF"/>
