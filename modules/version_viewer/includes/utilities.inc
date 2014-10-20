@@ -21,7 +21,12 @@
 function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') {
   module_load_include('inc', 'islandora', 'includes/authtokens');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-
+  $xsl_mapping = array(
+    'rd' => 'EMiC_reading.xsl',
+    'dt' => 'EMiC_diplomatic.xsl',
+  );
+  $type = isset($_GET['type']) ? $_GET['type'] : 'rd';
+  $xsl = $xsl_mapping[$type];
   global $base_url;
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   $tomcat_url = str_replace('/fedora', '', $islandora_url);
@@ -34,8 +39,9 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
       'token' => islandora_get_object_token($pid, $dsid),
     ),
   ));
-  $xslt_path = "$base_url/$path/xml/EMiC_test_XSLTv2.xsl";
-  $data = file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path");
+  $xslt_path = "$base_url/$path/xml/$xsl";
+  // Remove clear-stylesheet for prod.
+  $data = file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path&clear-stylesheet-cache=yes");
   return $data;
 }
 
