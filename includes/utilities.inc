@@ -27,8 +27,7 @@ function emicdora_source_content_models() {
  *   All content models needing menu paths.
  */
 function emicdora_get_all_content_models() {
-  return array_merge(emicdora_source_content_models(),
-      array('islandora:criticalEditionContainerCModel' => t('Critical Edition'))
+  return array_merge(emicdora_source_content_models(), array('islandora:criticalEditionContainerCModel' => t('Critical Edition'))
   );
 }
 
@@ -75,6 +74,7 @@ function emicdora_show_apparatus_block() {
     'version',
     'versions',
     'transcription',
+    'apparatus',
   );
   $show_apparatus = FALSE;
   if (!isset($path_parts[3])) {
@@ -364,29 +364,37 @@ EOD;
  * @return array
  *   array of form elements
  */
-function emicdora_get_apparatus_as_content($object) {
+function emicdora_get_apparatus_as_content($object, $dsid = NULL) {
   $path = drupal_get_path('module', 'emicdora');
-  drupal_add_js("$path/js/apparatus.js");
+  $dsid = isset($dsid) ? strtoupper($dsid) : NULL;
   $datastreams = emicdora_get_apparatus_datastreams($object);
-  $content = array(
-    'apparatus' => array(
-      '#type' => 'vertical_tabs',
+  if (count($datastreams) == 0) {
+    if (islandora_object_access(ISLANDORA_ADD_DS, $object)) {
+      $link = l(t("create one"), "emicdora/contextual-links/apparatus/{$object->id}/edit");
+      return t("No apparatus defined, please !link.", array('!link' => $link));
+    }
+    return t("No apparatus defined");
+  }
+  if ($dsid && isset($datastreams[$dsid])) {
+    $datastream = $datastreams[$dsid];
+  }
+  else {
+    $datastream = array_shift($datastreams);
+  }
+
+  // Do some shenanigans to make fragments nice.
+  $fragment = strtolower(preg_replace('/[\s,]+/', '_', $datastream->label));
+  $content['apparatus'][$datastream->id] = array(
+    '#title' => $datastream->label,
+    '#type' => 'fieldset',
+    '#id' => $fragment,
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    'markup' => array(
+      '#markup' => filter_xss($datastream->content),
     ),
   );
-  foreach ($datastreams as $dsid => $datastream) {
-    // Do some shenanigans to make fragments nice.
-    $fragment = strtolower(preg_replace('/[\s,]+/', '_', $datastream->label));
-    $content['apparatus'][$dsid] = array(
-      '#title' => $datastream->label,
-      '#type' => 'fieldset',
-      '#id' => $fragment,
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-      'markup' => array(
-        '#markup' => filter_xss($datastream->content),
-      ),
-    );
-  }
+
   return $content;
 }
 
