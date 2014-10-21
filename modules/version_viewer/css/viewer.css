@@ -36,10 +36,6 @@
   width:100% !important;
 }
 
-.canvas{
-  background: !important;
-}
-
 #critical-edition-viewer {
   border:none !important;
   margin: 0em !important;
@@ -84,4 +80,12 @@
 
 #center_data {
  position: relative !important
+}
+
+.emic_background {
+   background: url('images/bg-bar-emic.png') !important;
+}
+.panel-title {
+   background: url('images/bg-bar-emic.png') !important;
+   color:white;
 }

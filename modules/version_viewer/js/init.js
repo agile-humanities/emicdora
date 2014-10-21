@@ -27,14 +27,18 @@
     var is_toggled = false;
 
     // Setup the initial menu 'look'.
-    var btn_background_color = 'red';
+    var btn_background_color = '#fff';
     $('#wb_show_til').css('background-color', btn_background_color);
     $('#wb_show_til').addClass('annos');
     $('#wb_show_annos').css('background-color', btn_background_color);
     $('#wb_show_annos').addClass('annos');
-
     $('#wb_image').css('background-color', btn_background_color);
     $('#wb_reading').css('background-color', btn_background_color);
+
+    $('#wb_dt').css('background-color', btn_background_color);
+    $('#wb_tei_markup').css('background-color', btn_background_color);
+    $('#wb_meta').css('background-color', btn_background_color);
+    $('#wb_max_min').css('background-color', btn_background_color);
 
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.

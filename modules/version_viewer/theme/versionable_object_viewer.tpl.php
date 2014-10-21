@@ -6,7 +6,7 @@
  */
 ?>
     <div id="eui_window" class="easyui-layout" style="width:100%;height:550px;">
-        <div data-options="region:'north',onBeforeExpand:function(){return false}" style="height:50px">
+        <div id="viewer_title_bar" class ="emic_background" data-options="region:'north',onBeforeExpand:function(){return false}" style="height:50px">
             <div id="critical-edition-viewer">
                 <div style="float:left;">
                   <ul class="workbench_toolbar_lists action_img">
@@ -38,7 +38,7 @@
         <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;height:100%;">
           <?php print $islandora_content; ?>
         </div>
-        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
+        <div id="easy-ui-west" class="emic_background" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotation" style="width:150px;height:500px;">
           <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>
