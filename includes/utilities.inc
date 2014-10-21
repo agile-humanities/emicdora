@@ -70,11 +70,12 @@ function emicdora_get_source_type(AbstractObject $version_object) {
 function emicdora_show_apparatus_block() {
   $path_parts = explode('/', $_GET['q']);
   $acceptable = array(
+    'compare',
     'source',
     'sources',
+    'transcription',
     'version',
     'versions',
-    'transcription',
   );
   $show_apparatus = FALSE;
   if (!isset($path_parts[3])) {

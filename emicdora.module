@@ -680,11 +680,6 @@ function emicdora_block_view($delta = '') {
       if (!array_intersect($object->models, array('islandora:criticalEditionContainerCModel', 'islandora:versionCModel'))) {
         break;
       }
-
-      if (!$source_or_transcription_object && !$is_version_search && !in_array('islandora:versionCModel', $object->models)) {
-        break;
-      }
-
       if ($is_source) {
         $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
       }
@@ -811,16 +806,29 @@ function emicdora_block_view($delta = '') {
     case 'transcriptions':
       // @todo Remove hard coded links.
       // @todo Handle configured display number.
-      if ((!$is_critical_edition && !$is_versionable_object) || $is_sources_page || $is_source || $is_version_search) {
+      if ((!$is_critical_edition && !$is_versionable_object && !$is_transcript) || $is_sources_page || $is_source || $is_version_search) {
         break;
       }
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
-      if ($is_tei_editor || isset($versionable_object->id)) {
+      if ($is_tei_editor || isset($versionable_object->id) || $is_transcript) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         // Only show transcriptions relevant to the version we are on.
-        $transcription_data = emicdora_get_raw_objects($versionable_object, 'transcriptions');
+        if ($is_transcript) {
+          $transcription_data = array();
+          $versions = emicdora_get_raw_objects($critical_edition, 'version');
+          foreach ($versions as $type => $version_pids) {
+            foreach ($version_pids as $version_pid) {
+              $version = islandora_object_load($version_pid);
+              $transcription_data = array_merge($transcription_data, emicdora_get_raw_objects($version, 'transcriptions'));
+            }
+          }
+        }
+        else {
+          $transcription_data = emicdora_get_raw_objects($versionable_object, 'transcriptions');
+        }
+
         $links = array();
         foreach ($transcription_data as $pid => $transcriptions) {
           foreach ($transcriptions as $transcription) {
