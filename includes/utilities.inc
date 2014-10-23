@@ -473,16 +473,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
+              '@pid' => $object->id,
+              '@message' => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-      '@pid' => $object->id,
-      '@message' => $e->getMessage(),
-      '@trace' => $e->getTraceAsString(),
+          '@pid' => $object->id,
+          '@message' => $e->getMessage(),
+          '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -907,7 +907,7 @@ function emicdora_get_all($type) {
  * @param AbstractObject $source_object
  *   Tuque object representing source
  */
-function emicdora_contextual_redirect($object, $delta) {
+function emicdora_contextual_redirect($source_object, $delta) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
   $options = array('query' => array('destination' => $destination));
