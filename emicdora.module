@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -291,6 +290,85 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+    //  Context menus for source operations
+    'emicdora/contextual-links/source_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/edit' => array(
+      'title' => 'Edit Metadata',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/remove' => array(
+      'title' => 'Remove',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_remove_source',
+      'page arguments' => array(3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    //  Context menus for transcription operations
+    'emicdora/contextual-links/transcription_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/refresh' => array(
+      'title' => 'Refresh Transcriptions',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/delete' => array(
+      'title' => 'Delete',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_remove_source',
+      'page arguments' => array(3, 5),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    //  Context menus for collation operations
+    'emicdora/contextual-links/collation_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/collation_operations/%islandora_object/refresh_transcription' => array(
+      'title' => 'Refresh Transcriptions',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/collation_operations/%islandora_object/delete_mvd' => array(
+      'title' => 'Delete',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'drupal_get_form',
@@ -730,6 +808,7 @@ function emicdora_block_view($delta = '') {
       // This nested object is either a source, version or transcription.
       $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
+      $menu_path = '';
       if ($nested_object) {
         if (in_array('islandora:versionCModel', $nested_object->models)) {
           // If it's a version we need to get the source version from it.
@@ -747,6 +826,7 @@ function emicdora_block_view($delta = '') {
         }
         // It's a source object.
         else {
+          $menu_path = 'source_operations';
           $links = emicdora_source_object_operations_block_links($nested_object->id, $critical_edition->id);
         }
       }
@@ -754,16 +834,24 @@ function emicdora_block_view($delta = '') {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
         $current_view = $is_table ? 'table' : 'compare';
         $links = emicdora_collation_object_operations_block_links($critical_edition->id, $mvd, $current_view);
+        $menu_path = 'collation_operations';
       }
 
       if (!empty($links)) {
         $block['subject'] = t('Operations');
         $block['content'] = array(
-          array(
-            '#theme' => 'links',
-            '#links' => $links,
-          ),
+          '#theme' => 'links',
+          '#links' => $links,
         );
+        if ($menu_path) {
+          $chosen = $nested_object ? $nested_object : $critical_edition;
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              "emicdora/contextual-links/$menu_path",
+              array($chosen->id),
+            ),
+          );
+        }
       }
       break;
 

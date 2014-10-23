@@ -27,8 +27,7 @@ function emicdora_source_content_models() {
  *   All content models needing menu paths.
  */
 function emicdora_get_all_content_models() {
-  return array_merge(emicdora_source_content_models(),
-      array('islandora:criticalEditionContainerCModel' => t('Critical Edition'))
+  return array_merge(emicdora_source_content_models(), array('islandora:criticalEditionContainerCModel' => t('Critical Edition'))
   );
 }
 
@@ -474,16 +473,16 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
   catch (Exception $e) {
     drupal_set_message(t(
             'An error occured while creating the CWRC datastream on @pid with message: "@message"', array(
-              '@pid' => $object->id,
-              '@message' => $e->getMessage(),
+      '@pid' => $object->id,
+      '@message' => $e->getMessage(),
             )
         ), 'error'
     );
     watchdog(
         'islandora_critical_edition', 'An error occured while creating the CWRC datastream on @pid with message: "@message" and stack: @trace', array(
-          '@pid' => $object->id,
-          '@message' => $e->getMessage(),
-          '@trace' => $e->getTraceAsString(),
+      '@pid' => $object->id,
+      '@message' => $e->getMessage(),
+      '@trace' => $e->getTraceAsString(),
         ), WATCHDOG_ERROR
     );
   }
@@ -778,6 +777,10 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  *   PID of source object
  */
 function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+  $destination = $_GET['destination'];
+  $path_parts = explode('/', $destination);
+  $critical_edition_pid = $path_parts[2];
+  $source_object_pid = $path_parts[4];
   $source_object = islandora_object_load($source_object_pid);
   $critical_edition = islandora_object_load($critical_edition_pid);
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
@@ -896,4 +899,34 @@ function emicdora_get_all($type) {
     $results[] = $discovered['solr_doc'][$term][0];
   }
   return $results;
+}
+
+/**
+ * Rewrites the destination query.
+ *
+ * @param AbstractObject $source_object
+ *   Tuque object representing source
+ */
+function emicdora_contextual_redirect($object, $delta) {
+  $destination = $_GET['destination'];
+  $path_parts = explode('/', $destination);
+  $options = array('query' => array('destination' => $destination));
+  unset($_GET['destination']);
+  $pid = $object->id;
+  switch ($delta) {
+    case "edit":
+      drupal_goto("islandora/edit_form/$pid/MODS", $options);
+      break;
+
+    case "refresh_transcription":
+      $mvd = $path_parts[4];
+      drupal_goto("collation/$pid/refresh/$mvd/compare", $options);
+      break;
+
+    case "delete_mvd":
+      $path_parts = explode('/', $destination);
+      $mvd = $path_parts[4];
+      drupal_goto("collation/$pid/delete/$mvd/compare", $options);
+      break;
+  }
 }
