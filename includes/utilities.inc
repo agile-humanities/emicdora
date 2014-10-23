@@ -924,9 +924,13 @@ function emicdora_contextual_redirect($object, $delta) {
       break;
 
     case "delete_mvd":
-      $path_parts = explode('/', $destination);
       $mvd = $path_parts[4];
       drupal_goto("collation/$pid/delete/$mvd/compare", $options);
+      break;
+
+    case "delete_transcription";
+      $mvd = $path_parts[4];
+      drupal_goto("islandora/object/$pid/delete");
       break;
   }
 }

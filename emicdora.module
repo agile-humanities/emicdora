@@ -235,6 +235,7 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+    //to delete
     'emicdora/contextual-links/transcription/%islandora_object/edit' => array(
       'title' => 'Edit Transcription',
       'file' => 'includes/edit_transcription.form.inc',
@@ -322,21 +323,21 @@ function emicdora_menu() {
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
-    'emicdora/contextual-links/transcription_operations/%islandora_object/refresh' => array(
-      'title' => 'Refresh Transcriptions',
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/edit_transcription' => array(
+      'title' => 'Edit',
+      'file' => 'includes/edit_transcription.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_transcription_form', 3),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'edit_transcription'),
       'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
-    'emicdora/contextual-links/transcription_operations/%islandora_object/delete' => array(
+    'emicdora/contextual-links/transcription_operations/%islandora_object/delete_transcription' => array(
       'title' => 'Delete',
       'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_remove_source',
-      'page arguments' => array(3, 5),
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 3),
       'type' => MENU_LOCAL_TASK,
@@ -368,7 +369,6 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'drupal_get_form',
@@ -816,6 +816,7 @@ function emicdora_block_view($delta = '') {
           $source_rels = reset($source_rels);
           $source_pid = $source_rels['object']['value'];
           $links = emicdora_versionable_object_operations_block_links($nested_object->id, $critical_edition->id, $source_pid);
+          $menu_path = 'version_operations';
         }
         elseif (in_array('islandora:transcriptionCModel', $nested_object->models)) {
           // If it's a transcription we need to get the version from it.
@@ -823,6 +824,7 @@ function emicdora_block_view($delta = '') {
           $version_rels = reset($version_rels);
           $version_pid = $version_rels['object']['value'];
           $links = emicdora_transcription_object_operations_block_links($nested_object->id, $critical_edition->id, $version_pid);
+          $menu_path = "transcription_operations";
         }
         // It's a source object.
         else {
@@ -905,6 +907,7 @@ function emicdora_block_view($delta = '') {
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
       if ($is_tei_editor || isset($versionable_object->id)) {
+
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         // Only show transcriptions relevant to the version we are on.
@@ -926,6 +929,14 @@ function emicdora_block_view($delta = '') {
           '#theme' => 'links',
           '#links' => $links,
         );
+        if (isset($menu_path) && $menu_path) {
+          $block['content']['#contextual_links'] = array(
+            'emicdora' => array(
+              "emicdora/contextual-links/$menu_path",
+              array($chosen->id),
+            ),
+          );
+        }
         if ($is_versionable_object) {
           $block['content']['#contextual_links'] = array(
             'emicdora' => array(
