@@ -928,9 +928,14 @@ function emicdora_contextual_redirect($object, $delta) {
       drupal_goto("collation/$pid/delete/$mvd/compare", $options);
       break;
 
-    case "delete_transcription";
+    case "delete_transcription":
       $mvd = $path_parts[4];
       drupal_goto("islandora/object/$pid/delete");
       break;
+
+    case "edit_tei_rdf":
+      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}/edit");
+    default:
+      return "This function has not yet been implemented";
   }
 }
