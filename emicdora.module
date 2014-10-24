@@ -1305,9 +1305,10 @@ function emicdora_object_management_access($object, $context) {
     case 'show_viewer':
       $path_parts = explode('/', $_GET['q']);
       $action = end($path_parts);
-      if (in_array('islandora:versionCModel', $content_models) && $action == 'edit') {
+      if (in_array('islandora:versionCModel', $content_models) && $action == 'view_tei_rdf') {
         $access = TRUE;
       }
+      break;
 
     case 'display_consolidated_tei':
       if (in_array('islandora:versionCModel', $content_models) && islandora_object_access(ISLANDORA_ADD_DS, $object)) {
