@@ -371,7 +371,8 @@ function emicdora_cleanup_merged($inputs) {
       }
       $incomplete = TRUE;
       $previous_sibling = $item->previousSibling;
-      if ($previous_sibling) {
+      $node_type = get_class($previous_sibling);
+      if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
           $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
