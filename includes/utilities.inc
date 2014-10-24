@@ -912,7 +912,7 @@ function emicdora_contextual_redirect($source_object, $delta) {
   $path_parts = explode('/', $destination);
   $options = array('query' => array('destination' => $destination));
   unset($_GET['destination']);
-  $pid = $object->id;
+  $pid = $source_object->id;
   switch ($delta) {
     case "edit":
       drupal_goto("islandora/edit_form/$pid/MODS", $options);
@@ -935,6 +935,12 @@ function emicdora_contextual_redirect($source_object, $delta) {
 
     case "edit_tei_rdf":
       drupal_goto("islandora/object/$pid/version/{$path_parts[4]}/edit");
+      break;
+
+    case "view_tei_rdf":
+      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}");
+      break;
+
     default:
       return "This function has not yet been implemented";
   }
