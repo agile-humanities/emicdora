@@ -100,7 +100,8 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   $xml_form = new XMLForm($form_state);
   $document = $xml_form->submit($form, $form_state);
   $associations = xml_form_builder_get_associations(array(), array($form_state['values']['content_model']), array());
-  $created = xml_form_builder_update_object($object, $associations[0], $document, "Object");
+  $association = array_shift($associations);
+  $created = xml_form_builder_update_object($object, $association, $document, "Object");
   // Set default label.
   $label = t("New @type", array('@type' => $mapping['label']));
   $dc = DublinCore::importFromXMLString($object['DC']->content);
