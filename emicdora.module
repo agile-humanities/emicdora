@@ -397,9 +397,9 @@ function emicdora_menu() {
     'emicdora/contextual-links/version_operations/%islandora_object/consolidate_tei' => array(
       'title' => 'Consolidate TEI',
       'weight' => -30,
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
+      'file' => 'includes/consolidate_tei.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_consolidate_tei_form', 3),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 3),
       'type' => MENU_LOCAL_TASK,
