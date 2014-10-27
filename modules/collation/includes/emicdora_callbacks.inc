@@ -153,7 +153,8 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $new_element->setAttribute('class', $linkage_type);
   $delete_ids = array_keys($nodes_to_delete);
   if (!isset($refnode)) {
-    $refnode = $nodes_to_delete[$delete_ids[0]];
+    $refnode = reset($nodes_to_delete);
+
   }
   $wrapper_node = $dom->getElementById($config[$type]);
   $refnode->parentNode->insertBefore($new_element, $refnode);
