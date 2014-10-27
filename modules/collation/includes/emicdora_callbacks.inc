@@ -128,6 +128,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
         if ($count == 1) {
           $new_value = $string_parts[0];
           $new_id = "os{$prefix}{$counter}";
+          $test_node = $dom->getElementById($new_id);
           $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
           if (emicdora_ends_with($current, $selected)) {
             // Inserted before current.
@@ -154,7 +155,6 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $delete_ids = array_keys($nodes_to_delete);
   if (!isset($refnode)) {
     $refnode = reset($nodes_to_delete);
-
   }
   $wrapper_node = $dom->getElementById($config[$type]);
   $refnode->parentNode->insertBefore($new_element, $refnode);
@@ -234,6 +234,7 @@ function emicdora_marshall_spans($type) {
  */
 function emicdora_unlink($fixed_content, $type) {
   $merged_content = emicdora_cleaned_post('merged_content');
+  $merged_content = str_replace('<br>', '', $merged_content);
   $span_dom = new DOMDocument();
   $span_dom->loadXML($merged_content);
   $items = $span_dom->getElementsByTagName('span');
