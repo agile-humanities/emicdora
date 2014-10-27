@@ -43,7 +43,7 @@ function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $titl
     // Hacking hack hack hack.. We need to check the menu paths as this callback
     // will be used for all sub tasks, etc.
     $matches = array();
-    if (preg_match('/islandora\/object\/[^\/]+$/', current_path(), $matches)) {
+    if (preg_match('/islandora\/object\/[^\/]+$/', current_path(), $matches) || preg_match('/islandora\/object\/[^\/]+\/apparatus\/./', current_path(), $matches)) {
       emicdora_set_page_title_and_subtitle($object->label, t('Critical Apparatus'));
     }
     else {
