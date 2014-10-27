@@ -14,6 +14,10 @@ function emicdora_collation_edit() {
   $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared' || $counter = '') {
+    $counter = emicdora_get_counter();
+  }
   $results = array();
   $linkage_type = 'merged';
   switch ($action) {
@@ -52,10 +56,6 @@ function emicdora_collation_edit() {
     case 'unlink':
       $new_deleted = emicdora_unlink($fixed_deleted, 'deleted');
       $new_added = emicdora_unlink($fixed_added, 'added');
-      $counter = emicdora_cleaned_post('emicdora_counter');
-      if ($counter == 'undeclared' || $counter = '') {
-        $counter = emicdora_get_counter();
-      }
       $results = array(
         'new_deleted' => $new_deleted,
         'new_added' => $new_added,
@@ -104,8 +104,6 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
-  $first_id = $marshalled_content[0]['id'];
-  $last_id = $marshalled_content[count($marshalled_content) - 1]['id'];
 
   foreach ($marshalled_content as $data) {
     $id = $data['id'];
@@ -113,7 +111,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
     if ($node) {
       $current = $node->nodeValue;
       $selected = $data['text'];
-      if (strlen($identified_text < strlen($selected))) {
+      if (strlen($identified_text) < strlen($selected)) {
         $selected = $identified_text;
       }
 
@@ -127,7 +125,8 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
         $count = count($string_parts);
         if ($count == 1) {
           $new_value = $string_parts[0];
-          $new_id = "os{$prefix}{$counter}";
+          // Orphan only.
+          $new_id = "oo{$prefix}{$counter}";
           $test_node = $dom->getElementById($new_id);
           $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
           if (emicdora_ends_with($current, $selected)) {
@@ -140,11 +139,15 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
           $refnode->parentNode->insertBefore($element, $refnode);
         }
         else {
+          // Orphan prefix.
           $first_element = emicdora_create_span($dom, $string_parts[0], $data['class'], "op{$prefix}{$counter}");
           $node->parentNode->insertBefore($first_element, $node);
+          // Orphan suffix.
           $second_element = emicdora_create_span($dom, $string_parts[1], $data['class'], "os{$prefix}{$counter}");
           $node->parentNode->insertBefore($second_element, $node->nextSibling);
         }
+        $counter++;
+        $_POST['emicdora_counter'] = $counter;
       }
     }
   }
