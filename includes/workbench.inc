@@ -422,17 +422,3 @@ function emicdora_remove_pid_message($pids, $list_type) {
     )));
   }
 }
-
-/**
- * Defines the set of objects which are allowed to be ingestible.
- *
- * @return array
- *   An associative array where the key values are ingestible content models,
- *   and the values are human readable label for the content model.
- */
-function emicdora_workbench_ingestible_content_models() {
-  module_load_include('inc', 'emicdora', 'includes/utilities');
-  return array(
-    'islandora:criticalEditionContainerCModel' => t('Critical Edition'),
-  ) + emicdora_source_content_models();
-}
