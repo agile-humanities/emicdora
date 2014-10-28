@@ -953,6 +953,10 @@ function emicdora_contextual_redirect($source_object, $delta) {
       drupal_goto("islandora/object/$pid/version/{$destination_parts[4]}");
       break;
 
+    case "download_tei" :
+      drupal_goto("/islandora/object/{$get_parts[3]}/datastream/TEI/download");
+      break;
+
     default:
       return "This function has not yet been implemented";
   }
