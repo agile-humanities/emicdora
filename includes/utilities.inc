@@ -915,8 +915,13 @@ function emicdora_get_all($type) {
  *   Tuque object representing source
  */
 function emicdora_contextual_redirect($source_object, $delta) {
-  $destination = $_GET['destination'];
-  $path_parts = explode('/', $destination);
+  $destination = '';
+  if (isset($_GET['destination'])) {
+    $destination = $_GET['destination'];
+    $destination_parts = explode('/', $destination);
+  }
+  $get_parts = explode('/', $_GET['q']);
+
   $options = array('query' => array('destination' => $destination));
   unset($_GET['destination']);
   $pid = $source_object->id;
@@ -926,26 +931,26 @@ function emicdora_contextual_redirect($source_object, $delta) {
       break;
 
     case "refresh_transcription":
-      $mvd = $path_parts[4];
+      $mvd = $destination_parts[4];
       drupal_goto("collation/$pid/refresh/$mvd/compare", $options);
       break;
 
     case "delete_mvd":
-      $mvd = $path_parts[4];
+      $mvd = $destination_parts[4];
       drupal_goto("collation/$pid/delete/$mvd/compare", $options);
       break;
 
     case "delete_transcription":
-      $mvd = $path_parts[4];
+      $mvd = $destination_parts[4];
       drupal_goto("islandora/object/$pid/delete");
       break;
 
     case "edit_tei_rdf":
-      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}/edit");
+      drupal_goto("islandora/object/$pid/version/{$get_parts[3]}/edit");
       break;
 
     case "view_tei_rdf":
-      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}");
+      drupal_goto("islandora/object/$pid/version/{$destination_parts[4]}");
       break;
 
     default:

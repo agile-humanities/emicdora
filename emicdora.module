@@ -401,18 +401,18 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_consolidate_tei_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/version_operations/%islandora_object/upload_tei' => array(
       'title' => 'Upload TEI',
       'weight' => -25,
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
+      'file' => 'includes/upload_tei.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_emicdora_upload_tei_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -1302,10 +1302,12 @@ function emicdora_object_management_access($object, $context) {
       if (in_array('islandora:versionCModel', $content_models) && $action != 'edit') {
         $access = TRUE;
       }
+      break;
+
     case 'show_viewer':
       $path_parts = explode('/', $_GET['q']);
       $action = end($path_parts);
-      if (in_array('islandora:versionCModel', $content_models) && $action == 'view_tei_rdf') {
+      if (in_array('islandora:versionCModel', $content_models) && ($action == 'view_tei_rdf' || $action == 'edit')) {
         $access = TRUE;
       }
       break;
