@@ -784,6 +784,10 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  *   PID of source object
  */
 function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+  $destination = $_GET['destination'];
+  $path_parts = explode('/', $destination);
+  $critical_edition_pid = $path_parts[2];
+  $source_object_pid = $path_parts[4];
   $source_object = islandora_object_load($source_object_pid);
   $critical_edition = islandora_object_load($critical_edition_pid);
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
@@ -902,4 +906,49 @@ function emicdora_get_all($type) {
     $results[] = $discovered['solr_doc'][$term][0];
   }
   return $results;
+}
+
+/**
+ * Rewrites the destination query.
+ *
+ * @param AbstractObject $source_object
+ *   Tuque object representing source
+ */
+function emicdora_contextual_redirect($source_object, $delta) {
+  $destination = $_GET['destination'];
+  $path_parts = explode('/', $destination);
+  $options = array('query' => array('destination' => $destination));
+  unset($_GET['destination']);
+  $pid = $source_object->id;
+  switch ($delta) {
+    case "edit":
+      drupal_goto("islandora/edit_form/$pid/MODS", $options);
+      break;
+
+    case "refresh_transcription":
+      $mvd = $path_parts[4];
+      drupal_goto("collation/$pid/refresh/$mvd/compare", $options);
+      break;
+
+    case "delete_mvd":
+      $mvd = $path_parts[4];
+      drupal_goto("collation/$pid/delete/$mvd/compare", $options);
+      break;
+
+    case "delete_transcription":
+      $mvd = $path_parts[4];
+      drupal_goto("islandora/object/$pid/delete");
+      break;
+
+    case "edit_tei_rdf":
+      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}/edit");
+      break;
+
+    case "view_tei_rdf":
+      drupal_goto("islandora/object/$pid/version/{$path_parts[4]}");
+      break;
+
+    default:
+      return "This function has not yet been implemented";
+  }
 }
