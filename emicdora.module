@@ -385,11 +385,11 @@ function emicdora_menu() {
 
     'emicdora/contextual-links/version_operations/%islandora_object/update_ocr' => array(
       'title' => 'Update Source OCR',
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
+      'file' => 'includes/update_ocr.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_update_ocr_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
       'weight' => -35,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -936,7 +936,6 @@ function emicdora_block_view($delta = '') {
       }
 
       break;
-
 
     case 'transcriptions':
       // @todo Remove hard coded links.
