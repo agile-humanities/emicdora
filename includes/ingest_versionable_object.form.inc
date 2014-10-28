@@ -70,7 +70,7 @@ function emicdora_versionable_object_form_source_autocomplete($type, $search) {
   $models = in_array($type, $models) ? array($type) : $models;
   $where_clause = '';
   foreach ($models as $model) {
-    $where_clause .= !empty($where_clause) ? 'UNION ' : '';
+    $where_clause .= (!empty($where_clause)) ? 'UNION ' : '';
     $where_clause .= "{ ?object fedora-model:hasModel <info:fedora/$model> . }\n";
   }
   $where_clause = substr($where_clause, 0, -1);
