@@ -615,12 +615,9 @@ function emicdora_block_view($delta = '') {
         $links = array();
         foreach ($critical_edition as $dsid => $datastream) {
           if (emicdora_is_apparatus_supported_datastream($dsid)) {
-            // Do some shenanigans to make fragments nice.
-            $fragment = strtolower(preg_replace('/[\s,]+/', '_', $datastream->label));
             $links[] = array(
               'title' => $datastream->label,
-              'href' => "islandora/object/{$critical_edition->id}",
-              'fragment' => $fragment,
+              'href' => "islandora/object/{$critical_edition->id}/apparatus/$dsid",
               'attributes' => array('class' => array('apparatus_link')),
             );
           }
@@ -1032,8 +1029,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'islandora', 'includes/metadata');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/apparatus');
-
-  $content = "";
   $supplied_object = menu_get_object('islandora_object', 4);
   $content_models = array_keys(emicdora_source_content_models());
   $content_models[] = 'islandora:versionCModel';
@@ -1041,8 +1036,14 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_page_title_and_subtitle($object->label, t('Critical Apparatus'));
   if (!$supplied_object) {
-    $content = emicdora_get_apparatus_as_content($object);
+    $dsid = NULL;
+    $path_parts = explode('/', $_GET['q']);
+    if (isset($path_parts[3]) && $path_parts[3] == 'apparatus') {
+      $dsid = isset($path_parts[4]) ? $path_parts[4] : NULL;
+    }
+    $content = emicdora_get_apparatus_as_content($object, $dsid);
     return array('emicdora' => $content);
+
   }
 
   foreach ($content_models as $content_model) {
