@@ -15,7 +15,7 @@ function emicdora_collation_edit() {
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $counter = emicdora_cleaned_post('emicdora_counter');
-  if ($counter == 'undeclared' || $counter = '') {
+  if ($counter == 'undeclared' || $counter == '') {
     $counter = emicdora_get_counter();
   }
   $results = array();
@@ -31,6 +31,7 @@ function emicdora_collation_edit() {
       if ($merged_added || $merged_deleted) {
         $results = array(
           'message' => t("You have associated text in your selection.  Please unlink before resubmitting."),
+          'emicdora_counter' => $_POST['emicdora_counter'],
         );
       }
       else {
@@ -95,10 +96,12 @@ function emicdora_collation_edit() {
  */
 function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_type) {
   $identified_text = emicdora_cleaned_post("text_$type");
+  $created_elements = array();
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {
     $counter = emicdora_get_counter();
   }
+  $internal_counter = $counter;
   $prefix = $type[0];
   $config = emicdora_get_config();
   $dom = new DOMDocument();
@@ -140,14 +143,22 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
         }
         else {
           // Orphan prefix.
-          $first_element = emicdora_create_span($dom, $string_parts[0], $data['class'], "op{$prefix}{$counter}");
+          $prefix_id = "opref{$prefix}{$counter}";
+          if (in_array($prefix_id, $created_elements)) {
+            $prefix_id .= '-b';
+          }
+          $created_elements[] = $prefix_id;
+          $first_element = emicdora_create_span($dom, $string_parts[0], $data['class'], $prefix_id);
           $node->parentNode->insertBefore($first_element, $node);
           // Orphan suffix.
-          $second_element = emicdora_create_span($dom, $string_parts[1], $data['class'], "os{$prefix}{$counter}");
+          $suffix_id = "osuf{$prefix}{$counter}";
+          if (in_array($suffix_id, $created_elements)) {
+            $suffix_id .= '-b';
+          }
+          $created_elements[] = $suffix_id;
+          $second_element = emicdora_create_span($dom, $string_parts[1], $data['class'], $suffix_id);
           $node->parentNode->insertBefore($second_element, $node->nextSibling);
         }
-        $counter++;
-        $_POST['emicdora_counter'] = $counter;
       }
     }
   }
@@ -155,7 +166,6 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', $linkage_type);
-  $delete_ids = array_keys($nodes_to_delete);
   if (!isset($refnode)) {
     $refnode = reset($nodes_to_delete);
   }
