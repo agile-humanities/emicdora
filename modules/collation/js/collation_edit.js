@@ -139,7 +139,7 @@
             }
           }
           if (args.data.action == 'unlink') {
-            if ($('merged_text').text() == '') {
+            if ($('#merged_text').text() == '') {
               alert('No text selected to unmerge.')
               return;
             }
