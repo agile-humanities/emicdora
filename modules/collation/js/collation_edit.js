@@ -162,7 +162,6 @@
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
           $.ajax({
             url: callback_url,
-            dataType: "XML",
             type: "POST",
             data: {
               action: args.data.action,
