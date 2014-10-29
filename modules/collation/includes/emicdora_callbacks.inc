@@ -14,22 +14,29 @@ function emicdora_collation_edit() {
   $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared' || $counter == '') {
+    $counter = emicdora_get_counter();
+  }
   $results = array();
-
+  $linkage_type = 'merged';
   switch ($action) {
+    case 'variant':
+      $linkage_type = 'variant';
     case 'link':
       $marshalled_deleted = emicdora_marshall_spans('deleted');
       $marshalled_added = emicdora_marshall_spans('added');
       $merged_deleted = emicdora_check_merged($marshalled_deleted);
       $merged_added = emicdora_check_merged($marshalled_added);
-      $new_deleted = emicdora_merge($fixed_deleted, $marshalled_deleted, 'deleted');
       if ($merged_added || $merged_deleted) {
         $results = array(
-          'message' => t("You have merged text in your selection.  Please unlink before resubmitting."),
+          'message' => t("You have associated text in your selection.  Please unlink before resubmitting."),
+          'emicdora_counter' => $_POST['emicdora_counter'],
         );
       }
       else {
-        $new_added = emicdora_merge($fixed_added, $marshalled_added, 'added');
+        $new_deleted = emicdora_merge($fixed_deleted, $marshalled_deleted, 'deleted', $linkage_type);
+        $new_added = emicdora_merge($fixed_added, $marshalled_added, 'added', $linkage_type);
         $outputs = array(
           'added' => $new_added,
           'deleted' => $new_deleted,
@@ -53,7 +60,7 @@ function emicdora_collation_edit() {
       $results = array(
         'new_deleted' => $new_deleted,
         'new_added' => $new_added,
-        'emicdora_counter' => $_POST['emicdora_counter'] + 1,
+        'emicdora_counter' => $counter + 1,
         'refresh' => 'refresh',
       );
       break;
@@ -81,90 +88,88 @@ function emicdora_collation_edit() {
  *   Array of span ids matched to span contents
  * @param string $type
  *   add or delete
+ * @param string $linkage_type
+ *   'merge' or 'variant'
  *
  * @return XML
  *   Revised content
  */
-function emicdora_merge($fixed_content, $marshalled_content, $type) {
+function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_type) {
   $identified_text = emicdora_cleaned_post("text_$type");
+  $created_elements = array();
+  $counter = emicdora_cleaned_post('emicdora_counter');
+  if ($counter == 'undeclared') {
+    $counter = emicdora_get_counter();
+  }
   $prefix = $type[0];
   $config = emicdora_get_config();
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $nodes_to_delete = array();
-  $first_id = $marshalled_content[0]['id'];
-  $last_id = $marshalled_content[count($marshalled_content) - 1]['id'];
 
-  if (count($marshalled_content) > 1) {
-    foreach ($marshalled_content as $data) {
-      $id = $data['id'];
-      $node = $dom->getElementById($id);
-      if ($node) {
-        $node_value = $node->nodeValue;
-        $selected = $data['text'];
-        if ($id == $first_id) {
-          if ($node_value != $selected) {
-            $offset = strrpos($node->nodeValue, $selected);
-            $new_value = substr($node_value, 0, $offset);
-            $length = strlen($new_value);
-            // Strip linefeeds.
-            if ($length == 1 && ord($new_value[0]) == 10) {
-              $new_value = NULL;
-            }
-            if ($new_value) {
-              $node->nodevalue = $new_value;
-            }
-            else {
-              $nodes_to_delete[] = $node;
-            }
-            continue;
+  foreach ($marshalled_content as $data) {
+    $id = $data['id'];
+    $node = $dom->getElementById($id);
+    if ($node) {
+      $current = $node->nodeValue;
+      $selected = $data['text'];
+      if (strlen($identified_text) < strlen($selected)) {
+        $selected = $identified_text;
+      }
+
+      if ($current == $selected) {
+        $nodes_to_delete[$id] = $node;
+        continue;
+      }
+      if ($current != $selected) {
+        $nodes_to_delete[$id] = $node;
+        $string_parts = explode($selected, $current);
+        $count = count($string_parts);
+        if ($count == 1) {
+          $new_value = $string_parts[0];
+          // Orphan only.
+          $new_id = "oo{$prefix}{$counter}";
+          $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
+          if (emicdora_ends_with($current, $selected)) {
+            // Inserted before current.
+            $refnode = $node;
           }
-        }
-        if ($id == $last_id) {
-          if ($node->nodeValue != $selected) {
-            $new_value = preg_replace("/$selected/", '', $node->nodeValue, 1);
-            $length = strlen($new_value);
-            // Strip linefeeds.
-            if ($length == 1 && ord($new_value[strlen($new_value) - 1]) == 10) {
-              $new_value = NULL;
-            }
-            if ($new_value != '') {
-              $node->nodevalue = $new_value;
-            }
-            else {
-              $nodes_to_delete[] = $node;
-            }
-            continue;
+          else {
+            $refnode = $node->nextSibling;
           }
+          $refnode->parentNode->insertBefore($element, $refnode);
         }
-        $nodes_to_delete[] = $node;
+        else {
+          $prefix_text = emicdora_ends_with($current, $selected) ? substr($current, 0, -strlen($selected)) : reset($string_parts);
+          $suffix_text = emicdora_starts_with($current, $selected) ? substr($current, strlen($selected)) : end($string_parts);
+
+          // Orphan prefix.
+          $prefix_id = "opref{$prefix}{$counter}";
+          if (in_array($prefix_id, $created_elements)) {
+            $prefix_id .= '-b';
+          }
+          $created_elements[] = $prefix_id;
+          $first_element = emicdora_create_span($dom, $prefix_text, $data['class'], $prefix_id);
+          $node->parentNode->insertBefore($first_element, $node);
+          // Orphan suffix.
+          $suffix_id = "osuf{$prefix}{$counter}";
+          if (in_array($suffix_id, $created_elements)) {
+            $suffix_id .= '-b';
+          }
+          $created_elements[] = $suffix_id;
+          $second_element = emicdora_create_span($dom, $suffix_text, $data['class'], $suffix_id);
+          $node->parentNode->insertBefore($second_element, $node->nextSibling);
+        }
       }
     }
   }
-  else {
-    $starts_with = emicdora_starts_with($content, $identified_text);
-    $ends_with = emicdora_ends_with($content, $identified_text);
-    if ($starts_with && $ends_with) {
-      $nodes_to_delete[] = $node;
-      continue;
-    }
-    if ($starts_with) {
-      $new_value = preg_replace("/$content/", '', $node->nodeValue, 1);
-      $new_element = emicdora_create_span($dom, $new_value, 'merge', $prefix);
-      $refnode->parentNode->insertBefore($new_element, $refnode);
-    }
-  }
   $new_element = $dom->createElement('span', $identified_text);
-  $counter = emicdora_cleaned_post('emicdora_counter');
-  if ($counter == 'undeclared') {
-    $counter = emicdora_get_counter();
-  }
-  $_POST['emicdora_counter'] = $counter;
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
-  $new_element->setAttribute('class', 'merged');
-  $delete_ids = array_keys($nodes_to_delete);
-  $refnode = $nodes_to_delete[$delete_ids[0]];
+  $new_element->setAttribute('class', $linkage_type);
+  if (!isset($refnode)) {
+    $refnode = reset($nodes_to_delete);
+  }
   $wrapper_node = $dom->getElementById($config[$type]);
   $refnode->parentNode->insertBefore($new_element, $refnode);
   foreach ($nodes_to_delete as $victim) {
@@ -187,7 +192,6 @@ function emicdora_merge($fixed_content, $marshalled_content, $type) {
 function emicdora_fix_calliope($spans, $type) {
   $repaired = array();
   foreach ($spans as $index => $span) {
-    $span_pos = strpos(trim($span), '<span');
     if (strpos(trim($span), '<span') !== 0) {
       $repaired[$index] = "<span class='$type'>$span</span> ";
     }
@@ -212,8 +216,9 @@ function emicdora_marshall_spans($type) {
   $spans = array_filter(explode('</span>', $input));
   $marshalled_spans = array();
   foreach ($spans as $candidate) {
+    $fixed_span = str_replace('<br>', '<br />', $candidate) . '</span>';
     $dom = new DOMDocument();
-    $dom->loadXML($candidate . '</span>');
+    $dom->loadXML($fixed_span);
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
     $class = $items->item(0)->getAttribute('class');
@@ -242,6 +247,7 @@ function emicdora_marshall_spans($type) {
  */
 function emicdora_unlink($fixed_content, $type) {
   $merged_content = emicdora_cleaned_post('merged_content');
+  $merged_content = str_replace('<br>', '', $merged_content);
   $span_dom = new DOMDocument();
   $span_dom->loadXML($merged_content);
   $items = $span_dom->getElementsByTagName('span');
@@ -256,20 +262,8 @@ function emicdora_unlink($fixed_content, $type) {
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
   $element = $dom->getElementById($id);
-  $previous = $element->previousSibling;
-  $added = FALSE;
-  if ($previous) {
-    $class = $previous->getAttribute('class');
-    if ($class != 'merged') {
-      $previous->nodeValue = $previous->nodeValue . $element->nodeValue;
-      $added = TRUE;
-    }
-  }
-  if (!$added) {
-    $element->nextSibling->nodeValue = $element->nodeValue . $element->nextSibling->nodeValue;
-  }
-
-  $element->parentNode->removeChild($element);
+  $element->setAttribute('class', $type);
+  $element->removeAttribute('style');
   $node = $dom->getElementById($config[$type]);
   return $dom->saveXML($node);
 }
@@ -297,7 +291,7 @@ function emicdora_update_collation($type) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
   $query = emicdora_get_file_query($type);
   $file = emicdora_calliope_get_collation_file($query);
-  $counter = 1;
+  $counter = 0;
   if (isset($_POST['emicdora_counter']) && $_POST['emicdora_counter'] != 'undeclared') {
     $counter = emicdora_cleaned_post('emicdora_counter');
   }
@@ -392,7 +386,8 @@ function emicdora_cleanup_merged($inputs) {
       }
       $incomplete = TRUE;
       $previous_sibling = $item->previousSibling;
-      if ($previous_sibling) {
+      $node_type = get_class($previous_sibling);
+      if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
           $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
@@ -465,21 +460,22 @@ function emicdora_ends_with($haystack, $needle) {
 }
 
 /**
- * Creates new span to be inserted in DOM object.
+ * Creates new DomElement.
  *
- * @param DOM $dom
- *   DOM representing current panel
+ * @param DOMDocument $dom
+ *   Representation of current panel
  * @param string $contents
- *   Text value of new element
+ *   Contents of new element
  * @param string $class_name
- *   Value of class attribute
+ *   class attribute for new element
  * @param string $prefix
  *   'a' or 'd'
  *
  * @return DOMElement
- *   Created element
+ *   New element
  */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
+  $contents = nl2br($contents, FALSE);
   $new_element = $dom->createElement('span', $contents);
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {
@@ -504,7 +500,7 @@ function emicdora_create_span($dom, $contents, $class_name, $prefix) {
 function emicdora_check_merged($input_array) {
   $merged = FALSE;
   foreach ($input_array as $candidate) {
-    if ($candidate['class'] == 'merged') {
+    if ($candidate['class'] == 'merged' || $candidate['class'] == 'variant') {
       $merged = TRUE;
       break;
     }

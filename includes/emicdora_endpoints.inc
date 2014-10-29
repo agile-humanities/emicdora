@@ -15,6 +15,7 @@
  */
 function emicdora_fix_calliope_inputs($collation) {
   global $base_url;
+  $collation = str_replace(' ', '_', $collation);
   $mvd_url = variable_get('mvd_server_url', $base_url) . variable_get('austese_server_prefix', '');
   try {
     $json = file_get_contents("$mvd_url/json/list/$collation");
@@ -25,7 +26,8 @@ function emicdora_fix_calliope_inputs($collation) {
 
   $results = json_decode($json, TRUE);
   foreach ($results['versions'] as &$version) {
-    $version['longname'] = str_replace('/Base/', '', $version['version']);
+    $file_name = str_replace(' ', '_', $version['version']);
+    $version['longname'] = str_replace('/Base/', '', $file_name);
   }
   echo json_encode($results);
 }
