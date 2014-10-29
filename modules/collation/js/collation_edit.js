@@ -12,12 +12,13 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
+      var transparents = ['transparent', 'rgba(0, 0, 0, 0)', 'rgb(0, 0, 0)'];
       $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-
-        if (left.css("background-color") != 'transparent') {
+        leftcolor = left.css("background-color");
+        if ($.inArray(leftcolor, transparents) == -1) {
           merged_content = '';
           $('#merged_text').val('');
           $(".merged").removeClass('merged_selected');
@@ -138,7 +139,7 @@
             }
           }
           if (args.data.action == 'unlink') {
-            if ($('merged_text').text() == '') {
+            if ($('#merged_text').text() == '') {
               alert('No text selected to unmerge.')
               return;
             }
