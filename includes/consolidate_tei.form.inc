@@ -56,7 +56,7 @@ function emicdora_consolidate_tei_form_submit(array $form, array $form_state) {
   $batch = array(
     'title' => t('Consolidating TEI from TEI-RDF Page Objects'),
     'file' => drupal_get_path('module', 'emicdora') . '/includes/consolidate_tei.form.inc',
-    'progress_message' => t('@current of @total pages consolidated.', array('@total' => count($pages))),
+    'progress_message' => t('@current of @total operations completed.', array('@total' => count($pages) + 1)),
     'finished' => 'emicdora_consolidate_tei_batch_finished',
     'operations' => array(),
   );

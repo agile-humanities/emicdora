@@ -138,6 +138,12 @@
               return;
             }
           }
+          if (args.data.action == 'unlink') {
+            if ($('merged_text').text() == '') {
+              alert('No text selected to unmerge.')
+              return;
+            }
+          }
           if (args.data.action == 'save') {
             if ($("#save_changes").text() == 'Saving..') {
               return;

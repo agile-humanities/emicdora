@@ -291,6 +291,181 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
+  // Context menus for source operations.
+    'emicdora/contextual-links/source_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/edit' => array(
+      'title' => 'Edit Metadata',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/remove' => array(
+      'title' => 'Remove',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_remove_source',
+      'page arguments' => array(3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+  // Context menus for transcription operations.
+    'emicdora/contextual-links/transcription_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/edit_transcription' => array(
+      'title' => 'Edit',
+      'file' => 'includes/edit_transcription.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_edit_transcription_form', 3),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'edit_transcription'),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/delete_transcription' => array(
+      'title' => 'Delete',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+  // Context menus for version operations.
+    'emicdora/contextual-links/version_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/edit' => array(
+      'title' => 'Edit Metadata',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'weight' => -50,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/edit_tei_rdf' => array(
+      'title' => 'Edit TEI-RDF',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'show_editor'),
+      'weight' => -45,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/view_tei_rdf' => array(
+      'title' => 'Reading View',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'show_viewer'),
+      'weight' => -40,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
+
+    'emicdora/contextual-links/version_operations/%islandora_object/update_ocr' => array(
+      'title' => 'Update Source OCR',
+      'file' => 'includes/update_ocr.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_update_ocr_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'weight' => -35,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/consolidate_tei' => array(
+      'title' => 'Consolidate TEI',
+      'weight' => -30,
+      'file' => 'includes/consolidate_tei.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_consolidate_tei_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/upload_tei' => array(
+      'title' => 'Upload TEI',
+      'weight' => -25,
+      'file' => 'includes/upload_tei.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_emicdora_upload_tei_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/download_tei' => array(
+      'title' => 'Download TEI',
+      'weight' => -20,
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/delete_tei' => array(
+      'title' => 'Remove',
+      'weight' => -15,
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+  // Context menus for collation operations.
+    'emicdora/contextual-links/collation_operations/%islandora_object' => array(
+      'title' => 'Operations',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/collation_operations/%islandora_object/refresh_transcription' => array(
+      'title' => 'Refresh Transcriptions',
+      'weight' => -20,
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/collation_operations/%islandora_object/delete_mvd' => array(
+      'title' => 'Delete',
+      'weight' => 10,
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
     'workbench' => array(
       'title' => 'My Workbench',
       'page callback' => 'drupal_get_form',
@@ -492,15 +667,6 @@ function emicdora_block_info() {
       'visibility' => BLOCK_VISIBILITY_LISTED,
       'pages' => 'islandora/object/*',
       'weight' => -30,
-      'status' => 1,
-      'region' => 'sidebar_second',
-    ),
-    'tei' => array(
-      'info' => t('TEI'),
-      'cache' => DRUPAL_NO_CACHE,
-      'visibility' => BLOCK_VISIBILITY_LISTED,
-      'pages' => 'islandora/object/*',
-      'weight' => -20,
       'status' => 1,
       'region' => 'sidebar_second',
     ),
@@ -727,82 +893,48 @@ function emicdora_block_view($delta = '') {
       // This nested object is either a source, version or transcription.
       $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
+      $menu_path = '';
       if ($nested_object) {
         if (in_array('islandora:versionCModel', $nested_object->models)) {
           // If it's a version we need to get the source version from it.
           $source_rels = $nested_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
           $source_rels = reset($source_rels);
           $source_pid = $source_rels['object']['value'];
-          $links = emicdora_versionable_object_operations_block_links($nested_object->id, $critical_edition->id, $source_pid);
+          $menu_path = 'version_operations';
         }
         elseif (in_array('islandora:transcriptionCModel', $nested_object->models)) {
           // If it's a transcription we need to get the version from it.
           $version_rels = $nested_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
           $version_rels = reset($version_rels);
           $version_pid = $version_rels['object']['value'];
-          $links = emicdora_transcription_object_operations_block_links($nested_object->id, $critical_edition->id, $version_pid);
+          $menu_path = "transcription_operations";
         }
         // It's a source object.
         else {
-          $links = emicdora_source_object_operations_block_links($nested_object->id, $critical_edition->id);
+          $menu_path = 'source_operations';
         }
       }
       if ($is_table || $is_compare) {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
         $current_view = $is_table ? 'table' : 'compare';
-        $links = emicdora_collation_object_operations_block_links($critical_edition->id, $mvd, $current_view);
+        $menu_path = 'collation_operations';
       }
 
-      if (!empty($links)) {
-        $block['subject'] = t('Operations');
-        $block['content'] = array(
-          array(
-            '#theme' => 'links',
-            '#links' => $links,
+      $block['subject'] = t('Operations');
+      $block['content'] = array(
+        '#theme' => 'links',
+        '#links' => $links,
+      );
+      if ($menu_path) {
+        $chosen = $nested_object ? $nested_object : $critical_edition;
+        $block['content']['#contextual_links'] = array(
+          'emicdora' => array(
+            "emicdora/contextual-links/$menu_path",
+            array($chosen->id),
           ),
         );
       }
-      break;
 
-    case 'tei':
-      if ($is_tei_editor || isset($versionable_object->id)) {
-        $links = array();
-        if ($is_tei_editor) {
-          $links[] = array(
-            'title' => 'Reading Transcription',
-            'href' => $path,
-          );
-          $links[] = array(
-            'title' => 'Diplomatic Transcription',
-            'href' => $path,
-          );
-        }
-        if (module_exists('tei_editor') && isset($versionable_object) && islandora_object_access('ISLANDORA_METADATA_EDIT', $versionable_object)) {
-          $links[] = array(
-            'title' => 'Edit',
-            'href' => "islandora/object/{$critical_edition->id}/version/{$versionable_object->id}/edit",
-          );
-        }
-        $links[] = array(
-          'title' => 'Consolidate',
-          'href' => $path,
-        );
-        $links[] = array(
-          'title' => 'Upload',
-          'href' => $path,
-        );
-        $links[] = array(
-          'title' => 'Download',
-          'href' => $path,
-        );
-        $block['subject'] = t('TEI');
-        $block['content'] = array(
-          array(
-            '#theme' => 'links',
-            '#links' => $links,
-          ),
-        );
-      }
       break;
 
     case 'transcriptions':
@@ -814,6 +946,7 @@ function emicdora_block_view($delta = '') {
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
       if ($is_tei_editor || isset($versionable_object->id)) {
+
         module_load_include('inc', 'emicdora', 'includes/utilities');
         $versions = emicdora_get_raw_objects($critical_edition, 'version');
         // Only show transcriptions relevant to the version we are on.
@@ -1159,6 +1292,22 @@ function emicdora_object_management_access($object, $context) {
 
     case 'manage_apparatus':
       if (in_array('islandora:criticalEditionContainerCModel', $content_models) && islandora_object_access(ISLANDORA_ADD_DS, $object) && islandora_object_access(ISLANDORA_PURGE, $object)) {
+        $access = TRUE;
+      }
+      break;
+
+    case 'show_editor':
+      $path_parts = explode('/', $_GET['q']);
+      $action = end($path_parts);
+      if (in_array('islandora:versionCModel', $content_models) && $action != 'edit') {
+        $access = TRUE;
+      }
+      break;
+
+    case 'show_viewer':
+      $path_parts = explode('/', $_GET['q']);
+      $action = end($path_parts);
+      if (in_array('islandora:versionCModel', $content_models) && ($action == 'view_tei_rdf' || $action == 'edit')) {
         $access = TRUE;
       }
       break;
