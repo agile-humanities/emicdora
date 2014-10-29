@@ -311,7 +311,6 @@ function emicdora_menu() {
       'title' => 'Remove',
       'file' => 'includes/utilities.inc',
       'page callback' => 'emicdora_remove_source',
-      'page arguments' => array(3),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 3),
       'type' => MENU_LOCAL_TASK,
