@@ -15,7 +15,7 @@ function emicdora_permission() {
   return array(
     COLLATION_EDIT_COLLATION => array(
       'title' => t('Edit collations'),
-      'description' => t('Access CWRCWriter.'),
+      'description' => t('Enables editing of collations.'),
     ),
   );
 }
@@ -65,7 +65,8 @@ function collation_menu() {
       'title' => 'edit collation',
       'page callback' => 'emicdora_collation_edit',
       'file' => 'includes/emicdora_callbacks.inc',
-      'access arguments' => array('edit_collations'),
+      'access arguments' => array(COLLATION_EDIT_COLLATION),
+      'access callback' => 'user_access',
       'type' => MENU_CALLBACK,
     ),
     'collation/%islandora_object/refresh/%/%' => array(
