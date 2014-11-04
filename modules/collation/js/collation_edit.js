@@ -37,7 +37,8 @@
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-        if (left.css("background-color") != 'transparent') {
+        leftcolor = left.css("background-color");
+        if ($.inArray(leftcolor, transparents) == -1) {
           merged_content = '';
           $('#merged_text').val('');
           $(".variant").removeClass('variant_selected');
