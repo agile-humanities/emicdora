@@ -21,6 +21,8 @@
 function emicdora_apparatus_form(array $form, array $form_state, AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  emicdora_set_title_and_breadcrumbs_object($object);
   $form_state['pid'] = $object->id;
   $supported_datastreams = emicdora_apparatus_supported_datastreams();
   $default_selected_datastream = key($supported_datastreams);
