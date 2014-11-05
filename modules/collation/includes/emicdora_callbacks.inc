@@ -111,7 +111,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
     $id = $data['id'];
     $node = $dom->getElementById($id);
     if ($node) {
-      $current = $node->nodeValue;
+      $current = emicdora_get_innerHTML($node);
       $selected = $data['text'];
       if (strlen($identified_text) < strlen($selected)) {
         $selected = $identified_text;
@@ -222,7 +222,7 @@ function emicdora_marshall_spans($type) {
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
     $class = $items->item(0)->getAttribute('class');
-    $text_value = $items->item(0)->nodeValue;
+    $text_value = emicdora_get_innerHTML($items->item(0));
     if ($text_value) {
       $marshalled_spans[] = array(
         'id' => $id,
@@ -390,7 +390,7 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
-          $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
+          $previous_sibling->nodeValue = emicdora_get_innerHTML($previous_sibling) . emicdora_get_innerHTML($item);
           $item->parentNode->removeChild($item);
           $incomplete = FALSE;
         }
@@ -400,7 +400,7 @@ function emicdora_cleanup_merged($inputs) {
         if ($next_sibling) {
           $class = $next_sibling->getAttribute('class');
           if ($class != 'merged') {
-            $next_sibling->nodeValue = $item->nodeValue . $next_sibling->nodeValue;
+            $next_sibling->nodeValue = emicdora_get_innerHTML($item) . emicdora_get_innerHTML($next_sibling);
             $item->parentNode->removeChild($item);
             $incomplete = FALSE;
           }
@@ -506,4 +506,21 @@ function emicdora_check_merged($input_array) {
     }
   }
   return $merged;
+}
+
+/**
+ * Gets innerHTML of DOMElement
+ *
+ * @param DOMElement $element
+ *   Element being examined
+ *
+ * @return string
+ *   InnerHTML
+ */
+function emicdora_get_innerHTML($element) {
+  $html = '';
+  foreach ($element->childNodes as $child) {
+    $html .= $child->ownerDocument->saveXML( $child );
+  }
+  return $html;
 }
