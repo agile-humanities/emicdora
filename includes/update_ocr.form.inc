@@ -77,7 +77,7 @@ function emicdora_update_ocr_batch_operation($page) {
   $content = $sxml->text->body;
   if ($content) {
     $body = $content->asXML();
-    $body = preg_replace("/<[lb|ab].*?\/>/", "\n", $body);
+    $body = preg_replace("/<(lb|ab)[^(\/>)]*\/>/", "\n", $body);
     $body = preg_replace("/<\/line>/", "\n", $body);
     $body = preg_replace("/<\/ab>/", "\n", $body);
     $body = preg_replace("/<\/p>/", "\n", $body);
