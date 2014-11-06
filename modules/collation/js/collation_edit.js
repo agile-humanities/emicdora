@@ -227,7 +227,7 @@
               if (results.hasOwnProperty('message')) {
                 alert(results.message)
               }
-
+              variant_counts = emicdora_get_variants();
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
