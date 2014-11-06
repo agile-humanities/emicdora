@@ -167,6 +167,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', $linkage_type);
+  $new_element->setAttribute("data-$linkage_type", $counter);
   if (!isset($refnode)) {
     $refnode = reset($nodes_to_delete);
   }
@@ -390,7 +391,7 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
-          $previous_sibling->nodeValue = emicdora_get_innerHTML($previous_sibling) . emicdora_get_innerHTML($item);
+          $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
           $item->parentNode->removeChild($item);
           $incomplete = FALSE;
         }
@@ -506,21 +507,4 @@ function emicdora_check_merged($input_array) {
     }
   }
   return $merged;
-}
-
-/**
- * Gets innerHTML of DOMElement
- *
- * @param DOMElement $element
- *   Element being examined
- *
- * @return string
- *   InnerHTML
- */
-function emicdora_get_innerHTML($element) {
-  $html = '';
-  foreach ($element->childNodes as $child) {
-    $html .= $child->ownerDocument->saveXML( $child );
-  }
-  return $html;
 }

@@ -12,6 +12,15 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
+      var variant_selected = false;
+      function emicdora_get_variants() {
+        var variant_counts = $.map($('.variant'), function(el) {
+          return  $(el).data('variant');
+        });
+        $.unique(variant_counts);
+        return variant_counts.sort();
+      }
+      // Possible transparent backgrounds from different browsers/
       var transparents = ['transparent', 'rgba(0, 0, 0, 0)', 'rgb(0, 0, 0)'];
       $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
@@ -31,8 +40,8 @@
           merged_content = $(wrapped_content).parent().html();
           $(wrapped_content).unwrap();
         }
-
       });
+
       $(document).delegate('span.variant', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
@@ -42,10 +51,12 @@
           merged_content = '';
           $('#merged_text').val('');
           $(".variant").removeClass('variant_selected');
+          variant_selected = false;
         } else {
           $(".variant").removeClass('variant_selected');
           left.addClass('variant_selected');
           right.addClass('variant_selected');
+          variant_selected = $(this).data('variant');
           $('#merged_text').text($(left).text());
           wrapped_content = left.wrap('<span/>');
           merged_content = $(wrapped_content).parent().html();
@@ -118,14 +129,48 @@
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
+          console.log('text_added ' + text_added);
           if (selection_added.toHtml() !== '') {
             context_added = selection_added.toHtml();
+            console.log('context_added ' + context_added);
           }
           if (context_added.indexOf('<span') === -1) {
             context_added = window.getSelection().anchorNode.parentNode.outerHTML;
           }
           $("#diff_r").text(text_added);
         });
+
+        // Add functionality to arrow keys.
+        $(".emicdora_next_button").click(function() {
+          if (typeof(variant_counts) === 'undefined') {
+            var variant_counts = emicdora_get_variants();
+          }
+          current_index = $.inArray(variant_selected, variant_counts);
+          current_count = variant_counts[current_index];
+          next_index = (current_index === -1) ? 0 : ++current_index;
+          next_count = variant_counts[next_index];
+          current_selector = '"[data-variant=' + current_count + ']"';
+          next_selector = '"[data-variant=' + next_count + ']"';
+          $(current_selector).removeClass('variant_selected');
+          $(next_selector).addClass('variant_selected');
+          variant_selected = $(next_selector).data('variant');
+        });
+
+       $(".emicdora_previous_button").click(function() {
+          if (typeof(variant_counts) === 'undefined') {
+            var variant_counts = emicdora_get_variants();
+          }
+          current_index = $.inArray(variant_selected, variant_counts);
+          current_count = variant_counts[current_index];
+          previous_index = (current_index === -1) ? 0 : --current_index;
+          previous_count = variant_counts[previous_index];
+          current_selector = '"[data-variant=' + current_count + ']"';
+          previous_selector = '"[data-variant=' + previous_count + ']"';
+          $(current_selector).removeClass('variant_selected');
+          $(previous_selector).addClass('variant_selected');
+          variant_selected = $(previous_selector).data('variant');
+        });
+
         $("#collation_link").click({action: 'link'}, execute_callback);
         $("#collation_variant").click({action: 'variant'}, execute_callback);
         $("#collation_unlink").click({action: 'unlink'}, execute_callback);
