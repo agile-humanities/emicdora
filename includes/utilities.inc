@@ -783,18 +783,16 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  * @param string $source_object_pid
  *   PID of source object
  */
-function emicdora_remove_source($critical_edition_pid = NULL, $source_object_pid = NULL) {
+function emicdora_remove_source($source_object = NULL) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
   unset($_GET['destination']);
-  if (!$critical_edition_pid) {
-    $critical_edition_pid = $path_parts[2];
-  }
-  if (!$source_object_pid) {
-    $source_object_pid = $path_parts[4];
-  }
-  $source_object = islandora_object_load($source_object_pid);
+  $critical_edition_pid = $path_parts[2];
   $critical_edition = islandora_object_load($critical_edition_pid);
+  if (!$source_object) {
+    $source_object_pid = $path_parts[4];
+    $source_object = islandora_object_load($source_object_pid);
+  }
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
   $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
   foreach ($versions as $version_pid) {
@@ -807,8 +805,6 @@ function emicdora_remove_source($critical_edition_pid = NULL, $source_object_pid
     }
   }
   drupal_set_message(t("@source is no longer associated with @edition", array('@source' => $source_object->label, '@edition' => $critical_edition->label)));
-  // Drupal got will not work if $_GET['destination'] is set.
-  unset($_GET['destination']);
   drupal_goto("islandora/object/$critical_edition_pid");
 }
 
