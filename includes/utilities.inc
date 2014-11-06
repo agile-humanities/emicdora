@@ -783,7 +783,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  * @param string $source_object_pid
  *   PID of source object
  */
-function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+function emicdora_remove_source($critical_edition_pid = NULL, $source_object_pid = NULL) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
   $critical_edition_pid = $path_parts[2];
@@ -802,6 +802,8 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
     }
   }
   drupal_set_message(t("@source is no longer associated with @edition", array('@source' => $source_object->label, '@edition' => $critical_edition->label)));
+  // Drupal got will not work if $_GET['destination'] is set.
+  unset($_GET['destination']);
   drupal_goto("islandora/object/$critical_edition_pid");
 }
 
