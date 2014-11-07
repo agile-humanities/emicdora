@@ -845,7 +845,7 @@ function emicdora_block_view($delta = '') {
         break;
       }
 
-      if (!$source_or_transcription_object && !$is_version_search && !in_array('islandora:versionCModel', $object->models)) {
+      if (!$source_or_transcription_object && !$is_version_search && !in_array('islandora:versionCModel', $object->models) && !$is_critical_edition) {
         break;
       }
 
