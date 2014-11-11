@@ -75,6 +75,7 @@ function emicdora_show_apparatus_block() {
     'versions',
     'transcription',
     'apparatus',
+    'compare',
   );
   $show_apparatus = FALSE;
   if (!isset($path_parts[3])) {
