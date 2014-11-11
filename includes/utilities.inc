@@ -779,12 +779,10 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
 /**
  * Removes source object from Critical Edition.
  *
- * @param string $critical_edition_pid
- *   PID of critical edition
- * @param string $source_object_pid
+ * @param AbstractObject $source_object
  *   PID of source object
  */
-function emicdora_remove_source($source_object = NULL) {
+function emicdora_remove_source(AbstractObject $source_object = NULL) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
   unset($_GET['destination']);
@@ -800,7 +798,7 @@ function emicdora_remove_source($source_object = NULL) {
     $version = islandora_object_load($version_pid);
     $sources = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
     foreach ($sources as $source) {
-      if ($source['object']['value'] == $source_object_pid) {
+      if ($source['object']['value'] == $source_object->id) {
         $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
       }
     }
