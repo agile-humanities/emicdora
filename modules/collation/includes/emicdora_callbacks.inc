@@ -390,7 +390,21 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
-          $previous_sibling->nodeValue = emicdora_get_innerHTML($previous_sibling) . emicdora_get_innerHTML($item);
+          $temp_node = $previous_sibling->cloneNode(FALSE);
+          $temp_children = $temp_node->childNodes();
+          while ($temp_children->length > 0) {
+            $temp_node->removeChild($temp_children->item(0));
+          }
+          $previous_sibling_childen = $previous_sibling->childNodes;
+          $current_children = $item->childNodes;
+          foreach ($previous_sibling_childen as $child) {
+            $temp_node->appendChild($child);
+          }
+          foreach ($current_children as $child) {
+            $temp_node->appendChild($child);
+          }
+          $parent = $item->parentNode;
+          $parent->replaceChild($temp_node, $previous_sibling);
           $item->parentNode->removeChild($item);
           $incomplete = FALSE;
         }
@@ -400,7 +414,20 @@ function emicdora_cleanup_merged($inputs) {
         if ($next_sibling) {
           $class = $next_sibling->getAttribute('class');
           if ($class != 'merged') {
-            $next_sibling->nodeValue = emicdora_get_innerHTML($item) . emicdora_get_innerHTML($next_sibling);
+            $temp_node = $next_sibling->cloneNode(FALSE);
+            $temp_children = $temp_node->childNodes();
+            while ($temp_children->length > 0) {
+              $temp_node->removeChild($temp_children->item(0));
+            }
+            $next_sibling_childen = $next_sibling->childNodes;
+            $current_children = $item->childNodes;
+            foreach ($current_children as $child) {
+              $temp_node->appendChild($child);
+            }
+            foreach ($$next_sibling_childen as $child) {
+              $temp_node->appendChild($child);
+            }
+            $parent->replaceChild($temp_node, $next_sibling);
             $item->parentNode->removeChild($item);
             $incomplete = FALSE;
           }
@@ -520,7 +547,7 @@ function emicdora_check_merged($input_array) {
 function emicdora_get_innerHTML($element) {
   $html = '';
   foreach ($element->childNodes as $child) {
-    $html .= $child->ownerDocument->saveXML( $child );
+    $html .= $child->ownerDocument->saveXML($child);
   }
   return $html;
 }
