@@ -779,17 +779,15 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
 /**
  * Removes source object from Critical Edition.
  *
- * @param string $critical_edition_pid
- *   PID of critical edition
- * @param string $source_object_pid
- *   PID of source object
+ * @param AbstractObject $source_object
+ *   Source Object to be removed from Critical Edition.
  */
-function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
+function emicdora_remove_source(AbstractObject $source_object = NULL) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
+  // If $_GET['destination'] is set, page redirects will fail.
+  unset($_GET['destination']);
   $critical_edition_pid = $path_parts[2];
-  $source_object_pid = $path_parts[4];
-  $source_object = islandora_object_load($source_object_pid);
   $critical_edition = islandora_object_load($critical_edition_pid);
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
   $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
@@ -797,7 +795,7 @@ function emicdora_remove_source($critical_edition_pid, $source_object_pid) {
     $version = islandora_object_load($version_pid);
     $sources = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
     foreach ($sources as $source) {
-      if ($source['object']['value'] == $source_object_pid) {
+      if ($source['object']['value'] == $source_object->id) {
         $version->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
       }
     }
