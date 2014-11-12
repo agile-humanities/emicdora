@@ -70,27 +70,31 @@ function versionable_object_viewer_display_page_tei_rd(AbstractDatastream $datas
 
 function versionable_object_viewer_display_page_tei_dt(AbstractDatastream $datastream) {
   module_load_include('inc', 'islandora', 'includes/authtokens');
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $xsl = 'EMiC_diplomatic.xsl';
-
-  global $base_url;
-  $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
-  $tomcat_url = str_replace('/fedora', '', $islandora_url);
+  $path = drupal_get_path('module', 'versionable_object_viewer');
 
   $pid = $datastream->parent->id;
   $dsid = $datastream->id;
-
-  $path = drupal_get_path('module', 'versionable_object_viewer');
-  $xml_path = url("islandora/object/$pid/datastream/$dsid/view", array(
+  $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
+  $tomcat_url = str_replace('/fedora', '', $islandora_url);
+  $saxon_url = url("$tomcat_url/saxon/SaxonServlet", array(
     'absolute' => TRUE,
+    'external' => TRUE,
     'query' => array(
-      'token' => islandora_get_object_token($pid, $dsid),
+      'style' => file_create_url("$path/tei_transforms/tei2html.xslt"),
+      'source' => url("islandora/object/$pid/datastream/$dsid/view", array(
+        'absolute' => TRUE,
+        'query' => array(
+          'token' => islandora_get_object_token($pid, $dsid),
+        ),
+      )),
+      'type' => 'diplomatic',
+      'clear-stylesheet-cache' => 'yes',
+      'css_base' => file_create_url("$path/tei_transforms"),
     ),
   ));
-  $xslt_path = "$base_url/$path/xml/$xsl";
-  // Remove clear-stylesheet for prod.
-  $data = file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path&clear-stylesheet-cache=yes");
-  return $data;
+  $result = drupal_http_request($saxon_url);
+
+  return $result->data;
 }
 
 /**
