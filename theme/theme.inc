@@ -76,7 +76,9 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   ));
   // Returns all source object(s), this assumes that solr has been configured to
   // only display source objects, version objects, and critical editions.
-  $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH);
+  $label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
+  $options = array('query' => array('sort' => "$label asc"));
+  $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH, $options);
   $variables['title_table'] = $title_table;
   $variables['author_table'] = $author_table;
   $pager_1 = pager_default_initialize(count($title_urls), 20, 0);
