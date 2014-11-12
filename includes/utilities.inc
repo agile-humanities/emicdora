@@ -780,7 +780,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
  * Removes source object from Critical Edition.
  *
  * @param AbstractObject $source_object
- *   PID of source object
+ *   Sourec Object to be removed from Critical Edition
  */
 function emicdora_remove_source(AbstractObject $source_object = NULL) {
   $destination = $_GET['destination'];
