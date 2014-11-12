@@ -785,6 +785,7 @@ function emicdora_retrieve_user_created_facets($pid, $type) {
 function emicdora_remove_source(AbstractObject $source_object = NULL) {
   $destination = $_GET['destination'];
   $path_parts = explode('/', $destination);
+  // If $_GET['destination'] is set, page redirects will fail.
   unset($_GET['destination']);
   $critical_edition_pid = $path_parts[2];
   $critical_edition = islandora_object_load($critical_edition_pid);
