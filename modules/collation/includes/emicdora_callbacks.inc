@@ -424,7 +424,7 @@ function emicdora_cleanup_merged($inputs) {
             foreach ($current_children as $child) {
               $temp_node->appendChild($child);
             }
-            foreach ($$next_sibling_childen as $child) {
+            foreach ($next_sibling_childen as $child) {
               $temp_node->appendChild($child);
             }
             $parent->replaceChild($temp_node, $next_sibling);
@@ -503,6 +503,8 @@ function emicdora_ends_with($haystack, $needle) {
  */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
   $contents = nl2br($contents, FALSE);
+  // The collation viewer doesn't handle xhtml break tags well.
+  $contents = str_replace('<br/>', '<br>', $contents);
   $new_element = $dom->createElement('span', $contents);
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {
@@ -536,7 +538,7 @@ function emicdora_check_merged($input_array) {
 }
 
 /**
- * Gets innerHTML of DOMElement
+ * Gets innerHTML of DOMElement.
  *
  * @param DOMElement $element
  *   Element being examined
