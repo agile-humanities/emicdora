@@ -788,10 +788,6 @@ function emicdora_remove_source(AbstractObject $source_object = NULL) {
   unset($_GET['destination']);
   $critical_edition_pid = $path_parts[2];
   $critical_edition = islandora_object_load($critical_edition_pid);
-  if (!$source_object) {
-    $source_object_pid = $path_parts[4];
-    $source_object = islandora_object_load($source_object_pid);
-  }
   $source_object->relationships->remove(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
   $versions = array_keys(emicdora_get_members($critical_edition_pid, 'islandora:versionCModel'));
   foreach ($versions as $version_pid) {
