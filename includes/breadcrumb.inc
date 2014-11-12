@@ -72,7 +72,7 @@ function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $titl
  */
 function emicdora_get_breadcrumbs_source(AbstractObject $source) {
   return array(
-    l(t("COOP"), EMICDORA_SEARCH_COOP_PATH),
+    l(t("COOP"), EMICDORA_COOP_PATH),
     filter_xss($source->label),
   );
 }
