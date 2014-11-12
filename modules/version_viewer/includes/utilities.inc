@@ -65,20 +65,6 @@ function versionable_object_viewer_display_page_tei_rd(AbstractDatastream $datas
   ));
   $result = drupal_http_request($saxon_url);
 
-  drupal_add_css("$path/tei_transforms/stylesheets/screen.css", array(
-    'media' => 'screen, projection',
-  ));
-  drupal_add_css("$path/tei_transforms/stylesheets/print.css", array(
-    'media' => 'print',
-  ));
-  drupal_add_css("$path/tei_transforms/stylesheets/ie.css", array(
-    'media' => 'screen, projection',
-    'browsers' => array(
-      '!IE' => FALSE,
-      'IE' => TRUE,
-    ),
-  ));
-
   return $result->data;
 }
 
