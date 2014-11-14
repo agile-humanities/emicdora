@@ -12,24 +12,24 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
-      var transparents = ['transparent', 'rgba(0, 0, 0, 0)', 'rgb(0, 0, 0)'];
       $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-        leftcolor = left.css("background-color");
-        if ($.inArray(leftcolor, transparents) == -1) {
+        if ($(this).hasClass('merged_selected')) {
           merged_content = '';
           $('#merged_text').val('');
           $(".merged").removeClass('merged_selected');
         } else {
           $(".merged").removeClass('merged_selected');
-          left.addClass('merged_selected');
-          right.addClass('merged_selected');
-          $('#merged_text').text($(left).text());
-          wrapped_content = left.wrap('<span/>');
-          merged_content = $(wrapped_content).parent().html();
-          $(wrapped_content).unwrap();
+          if (left.hasClass('merged') && right.hasClass('merged')) {
+            left.addClass('merged_selected');
+            right.addClass('merged_selected');
+            $('#merged_text').text($(left).text());
+            wrapped_content = left.wrap('<span/>');
+            merged_content = $(wrapped_content).parent().html();
+            $(wrapped_content).unwrap();
+          }
         }
 
       });
@@ -37,8 +37,7 @@
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
-        leftcolor = left.css("background-color");
-        if ($.inArray(leftcolor, transparents) == -1) {
+        if ($(this).hasClass('variant_selected')) {
           merged_content = '';
           $('#merged_text').val('');
           $(".variant").removeClass('variant_selected');
