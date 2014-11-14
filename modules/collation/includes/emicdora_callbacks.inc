@@ -213,6 +213,12 @@ function emicdora_fix_calliope($spans, $type) {
  */
 function emicdora_marshall_spans($type) {
   $input = emicdora_cleaned_post("context_$type");
+  $tagname = "span";
+  $pattern = "/<$tagname ?.*>(.*)<\/$tagname>/";
+  preg_match($pattern, $input, $matches);
+  if (isset($matches[0])) {
+    $input = $matches[0];
+  }
   $spans = array_filter(explode('</span>', $input));
   $marshalled_spans = array();
   foreach ($spans as $candidate) {
