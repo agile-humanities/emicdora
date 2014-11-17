@@ -11,7 +11,7 @@ define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29');
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
-define('EMICDORA_COOP_PATH', 'COOP');
+define('EMICDORA_COOP_PATH', 'CO-OP');
 
 /**
  * Implements hook_init().
@@ -490,7 +490,7 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
-    'coop' => array(
+    'co-op' => array(
       'title' => 'CO-OP',
       'page callback' => 'theme',
       'page arguments' => array('emicdora_coop'),
