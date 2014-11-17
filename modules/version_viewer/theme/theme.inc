@@ -40,4 +40,17 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
   versionable_object_viewer_build_version_media_view($version_object, $variables);
 
+  drupal_add_css("$module_path/tei_transforms/stylesheets/screen.css", array(
+    'media' => 'screen, projection',
+  ));
+  drupal_add_css("$module_path/tei_transforms/stylesheets/print.css", array(
+    'media' => 'print',
+  ));
+  drupal_add_css("$module_path/tei_transforms/stylesheets/ie.css", array(
+    'media' => 'screen, projection',
+    'browsers' => array(
+      '!IE' => FALSE,
+      'IE' => TRUE,
+    ),
+  ));
 }

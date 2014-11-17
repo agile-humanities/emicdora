@@ -58,7 +58,7 @@ function versionable_object_viewer_build_transcription_data($object) {
     case "audio":
       $return['body'] = $transcriptions[$page - 1]['text'];
       $return['title'] = $transcriptions[$page - 1]['title'];
-      echo json_encode($return);
+      drupal_json_output($return);
       break;
 
     case "text":
@@ -73,19 +73,19 @@ function versionable_object_viewer_build_transcription_data($object) {
       $return['body'] = $tran_data;
       $return['title'] = $derivation_object->label . " (page $page)";
       $return['transcriptions'] = $transcriptions;
-      echo json_encode($return);
+      drupal_json_output($return);
       break;
 
     case "video":
       $return['body'] = $transcriptions[$page - 1]['text'];
       $return['title'] = $transcriptions[$page - 1]['title'];
-      echo json_encode($return);
+      drupal_json_output($return);
       break;
 
     case "image":
       $return['body'] = $transcriptions[$page - 1]['text'];
       $return['title'] = $transcriptions[$page - 1]['title'];
-      echo json_encode($return);
+      drupal_json_output($return);
       break;
 
   }
