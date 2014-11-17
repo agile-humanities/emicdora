@@ -491,7 +491,7 @@ function emicdora_menu() {
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
     'coop' => array(
-      'title' => 'COOP',
+      'title' => 'CO-OP',
       'page callback' => 'theme',
       'page arguments' => array('emicdora_coop'),
       'type' => MENU_NORMAL_ITEM,
