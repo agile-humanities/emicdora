@@ -6,7 +6,7 @@
  */
 ?>
     <div id="eui_window" class="easyui-layout" style="width:100%;height:550px;">
-        <div data-options="region:'north',onBeforeExpand:function(){return false}" style="height:50px">
+        <div data-options="region:'north',onBeforeExpand:function(){return false}" style="height:50px;border-style:solid #191972">
             <div id="critical-edition-viewer">
                 <div style="float:left;">
                   <ul class="workbench_toolbar_lists action_img">
@@ -32,20 +32,20 @@
 			</div>
         </div>
         <div id="easy-ui-south" data-options="region:'south',split:true,collapsible:false,minimized:true,border:true" style="height:500px;">
-          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;" data-options="fit:true,split:true,border:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
+          <div id="uimeta-wrapper" class="easyui-panel" style="width:auto;height:auto;border-style:solid #191972" data-options="fit:true,split:true,border:true,href:'<?php print $meta_source; ?>?pid=<?php print $islandora_object->id; ?>'">
           </div>
         </div>
-        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;height:100%;">
+        <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false" title="Source" style="width:200px;height:100%;border-style:solid #191972">
           <?php print $islandora_content; ?>
         </div>
-        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;">
-          <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;">
+        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" title="Annotations" style="width:150px;height:500px;border-style:solid #191972">
+          <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;border-style:solid #191972">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>
           </div>
         </div>
-        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:472px;">
-              <div id="content_data" class="easyui-panel" style="width:100%;height:472px;background:#fafafa;"
+        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:472px;border-style:solid #191972">
+              <div id="content_data" class="easyui-panel" style="width:100%;height:472px;background:#fafafa;border-style:solid #191972"
 				    data-options="fit:true">
 		     </div>
         </div>
