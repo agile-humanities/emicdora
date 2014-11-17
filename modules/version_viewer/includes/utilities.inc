@@ -58,7 +58,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
   $unwrapper_xslt = new XSLTProcessor();
   $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
   $tempfile = drupal_tempnam('public://', 'reading_tei');
-  $unwrapped = $unwrapper_xslt->transformToUri($wrapped, $tempfile);
+  $unwrapper_xslt->transformToUri($wrapped, $tempfile);
 
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   $tomcat_url = str_replace('/fedora', '', $islandora_url);
