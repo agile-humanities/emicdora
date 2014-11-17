@@ -12,7 +12,19 @@ define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29');
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 define('EMICDORA_COOP_PATH', 'COOP');
+define('EMICDORA_MANAGE_EDITION', 'manage critical edition');
 
+/**
+ * Implements hook_permission().
+ */
+function emicdora_permission() {
+  return array(
+    EMICDORA_MANAGE_EDITION => array(
+      'title' => t('Edit Critical Edition'),
+      'description' => t('Allows management and editing of Critical Edition.'),
+    ),
+  );
+}
 /**
  * Implements hook_init().
  */
@@ -191,7 +203,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_link_source_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -218,7 +230,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_link_version_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -267,7 +279,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_link_version_form', 3),
       'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'file' => 'includes/link_version.form.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -277,7 +289,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -287,7 +299,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -356,7 +368,7 @@ function emicdora_menu() {
       'page callback' => 'emicdora_contextual_redirect',
       'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'weight' => -50,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -390,7 +402,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_update_ocr_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'weight' => -35,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -402,7 +414,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_consolidate_tei_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -413,7 +425,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('islandora_emicdora_upload_tei_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_ADD_DS, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -424,7 +436,7 @@ function emicdora_menu() {
       'page callback' => 'emicdora_contextual_redirect',
       'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -452,7 +464,7 @@ function emicdora_menu() {
       'page callback' => 'emicdora_contextual_redirect',
       'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -1499,7 +1511,7 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
     emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
   }
   islandora_delete_object($object);
-  $form_state['redirect'] = 'coop';
+  $form_state['redirect'] = 'co-op';
 }
 
 /**

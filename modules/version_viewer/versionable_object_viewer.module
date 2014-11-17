@@ -4,6 +4,25 @@
  * @file
  * Defines all the hooks this module implements.
  */
+// Permissions.
+define('VERSIONABLE_OBJECT_VIEWER_VIEW', 'use version viewer');
+define('VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI', 'consolidate tei');
+
+/**
+ * Implements hook_permission().
+ */
+function versionable_object_viewer_permission() {
+  return array(
+    VERSIONABLE_OBJECT_VIEWER_VIEW => array(
+      'title' => t('View Versionable Objects'),
+      'description' => t('Enables version viewer.'),
+    ),
+    VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI => array(
+      'title' => t('Consolidate TEI'),
+      'description' => t('Consolidate page level TEI.'),
+    ),
+  );
+}
 
 /**
  * Implements hook_menu().
@@ -28,13 +47,13 @@ function versionable_object_viewer_menu() {
     'access callback' => 'islandora_object_access_callback',
     'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 2),
   );
-  $items['islandora/cwrc_viewer/detail_meta_data'] = array(
+  $items['islandora/cwrc_viewer/detail_metadata'] = array(
     'title' => 'Prepare Metadata view',
-    'page callback' => 'versionable_object_viewer_prepare_detail_meta_data',
+    'page callback' => 'versionable_object_viewer_prepare_detail_metadata',
     'type' => MENU_CALLBACK,
     'file' => 'includes/callbacks.inc',
     'access callback' => 'user_access',
-    'access arguments' => array(TRUE),
+    'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_VIEW),
   );
   $items['islandora/version_viewer/tei_markup/page/%islandora_object'] = array(
     'title' => 'Prepare Page consolidated TEI',
@@ -43,7 +62,7 @@ function versionable_object_viewer_menu() {
     'page arguments' => array(4),
     'type' => MENU_CALLBACK,
     'access callback' => 'islandora_object_access_callback',
-    'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 4),
+    'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI, 4),
   );
   return $items;
 }
@@ -100,9 +119,8 @@ function versionable_object_viewer_islandora_versionCModel_islandora_view_object
   drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
   drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
   // Theme our verionable object viewer.
-  return theme('versionable_object_viewer',
-    array(
-      'islandora_object' => $object,
-    )
+  return theme('versionable_object_viewer', array(
+    'islandora_object' => $object,
+      )
   );
 }

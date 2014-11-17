@@ -179,6 +179,10 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
     case 'delete':
       emicdora_calliope_delete_mvd($mvd['_id']);
       drupal_set_message(t("Collation successfully removed"));
+      // Redirect won't work if destination is set.
+      if (isset($_GET['destination'])) {
+        unset($_GET['destination']);
+      }
       drupal_goto("islandora/object/$critical_edition_pid");
       break;
 
