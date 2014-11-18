@@ -1499,7 +1499,7 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
     emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
   }
   islandora_delete_object($object);
-  $form_state['redirect'] = 'coop';
+  $form_state['redirect'] = 'co-op';
 }
 
 /**
