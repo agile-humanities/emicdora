@@ -9,5 +9,14 @@
   margin: 2em;
 }
 .emicdora-url-table {
-  width: 40%;
+  width: 100%;
+}
+.emicdora_title_cell {
+  width:90%;
+}
+.emicdora_header {
+  text-align: left;
+}
+.coop_browse_more{
+  text-align: right;
 }
