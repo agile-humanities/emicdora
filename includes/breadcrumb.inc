@@ -72,7 +72,7 @@ function emicdora_set_title_and_breadcrumbs_object(AbstractObject $object, $titl
  */
 function emicdora_get_breadcrumbs_source(AbstractObject $source) {
   return array(
-    l(t("COOP"), EMICDORA_SEARCH_COOP_PATH),
+    l(t("CO-OP"), EMICDORA_COOP_PATH),
     filter_xss($source->label),
   );
 }
@@ -97,7 +97,7 @@ select ?parent ?label from <#ri> where
   ?parent <fedora-model:label> ?label
 EOT;
   $results = $child->repository->ri->itqlQuery($query_string);
-  $breadcrumbs = array(l(t("COOP"), EMICDORA_SEARCH_COOP_PATH));
+  $breadcrumbs = array(l(t("CO-OP"), EMICDORA_SEARCH_COOP_PATH));
   foreach ($results as $result) {
     $breadcrumbs[] = l($result['label']['value'], "islandora/object/{$result['parent']['value']}");
   }

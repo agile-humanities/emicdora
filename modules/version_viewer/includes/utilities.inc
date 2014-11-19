@@ -19,18 +19,84 @@
  *   transformed xml
  */
 function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') {
-  module_load_include('inc', 'islandora', 'includes/authtokens');
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $xsl_mapping = array(
-    'rd' => 'EMiC_reading.xsl',
-    'dt' => 'EMiC_diplomatic.xsl',
+  $callable_mapping = array(
+    'rd' => 'versionable_object_viewer_display_page_tei_reading',
+    'dt' => 'versionable_object_viewer_display_page_tei_diplomatic',
   );
   $type = isset($_GET['type']) ? $_GET['type'] : 'rd';
-  $xsl = $xsl_mapping[$type];
+  $callable = $callable_mapping[$type];
+
+  return $callable($object[$dsid]);
+}
+
+/**
+ * Callback for versionable_object_viewer_display_page_tei for reading display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the reading display.
+ */
+function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
+  $path = drupal_get_path('module', 'versionable_object_viewer');
+
+  $input = new DOMDocument();
+  $input->loadXML($datastream->content);
+
+  $wrapper_xslt_doc = new DOMDocument();
+  $wrapper_xslt_doc->load("$path/tei_transforms/wrap.xslt");
+  $wrapper_xslt = new XSLTProcessor();
+  $wrapper_xslt->importStylesheet($wrapper_xslt_doc);
+  $wrapped = $wrapper_xslt->transformToDoc($input);
+
+  module_load_include('inc', 'versionable_object_viewer', 'includes/tei_refcounter');
+  \VersionableObjectViewer\count_refs($wrapped);
+
+  $unwrapper_xslt_doc = new DOMDocument();
+  $unwrapper_xslt_doc->load("$path/tei_transforms/unwrap.xslt");
+  $unwrapper_xslt = new XSLTProcessor();
+  $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
+  $tempfile = drupal_tempnam('public://', 'reading_tei');
+  $unwrapper_xslt->transformToUri($wrapped, $tempfile);
+
+  $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
+  $tomcat_url = str_replace('/fedora', '', $islandora_url);
+  $saxon_url = url("$tomcat_url/saxon/SaxonServlet", array(
+    'absolute' => TRUE,
+    'external' => TRUE,
+    'query' => array(
+      'style' => file_create_url("$path/tei_transforms/tei2html.xslt"),
+      'source' => file_create_url($tempfile),
+      'clear-stylesheet-cache' => 'yes',
+      'css_base' => file_create_url("$path/tei_transforms"),
+    ),
+  ));
+  $result = drupal_http_request($saxon_url);
+
+  return $result->data;
+}
+
+/**
+ * Callback for diplomatic display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the diplomatic display.
+ */
+function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
+  module_load_include('inc', 'islandora', 'includes/authtokens');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  $xsl = 'EMiC_diplomatic.xsl';
+
   global $base_url;
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   $tomcat_url = str_replace('/fedora', '', $islandora_url);
-  $pid = $object->id;
+
+  $pid = $datastream->parent->id;
+  $dsid = $datastream->id;
 
   $path = drupal_get_path('module', 'versionable_object_viewer');
   $xml_path = url("islandora/object/$pid/datastream/$dsid/view", array(
