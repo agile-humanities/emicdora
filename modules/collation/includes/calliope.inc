@@ -155,6 +155,7 @@ function emicdora_calliope_delete_mvd($id) {
  */
 function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL, $filter = "Empty") {
   global $base_url;
+  $br_token = ' !emicdora_br_token!';
   $mvd_url = "$base_url/calliope";
   $calliope_import_url = "$mvd_url/import/";
   $verb = t('created');
@@ -179,7 +180,9 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
           return;
         }
       }
+      // Use nl2br's ability to harvest all line endings.
       $contents = nl2br($file->getBytes());
+      $contents = str_replace('<br />', $br_token, $contents);
       $filename = $file->file['filename'];
       $file_label = str_replace('.', '_', pathinfo($filename, PATHINFO_FILENAME));
       $id_array[] = array('id' => $resource_id, 'name' => $file_label);

@@ -11,7 +11,7 @@ define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
 define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29');
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
-define('EMICDORA_COOP_PATH', 'COOP');
+define('EMICDORA_COOP_PATH', 'CO-OP');
 
 /**
  * Implements hook_init().
@@ -292,7 +292,7 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-  // Context menus for source operations.
+    // Context menus for source operations.
     'emicdora/contextual-links/source_operations/%islandora_object' => array(
       'title' => 'Operations',
       'page callback' => TRUE,
@@ -318,7 +318,7 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-  // Context menus for transcription operations.
+    // Context menus for transcription operations.
     'emicdora/contextual-links/transcription_operations/%islandora_object' => array(
       'title' => 'Operations',
       'page callback' => TRUE,
@@ -344,7 +344,7 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-  // Context menus for version operations.
+    // Context menus for version operations.
     'emicdora/contextual-links/version_operations/%islandora_object' => array(
       'title' => 'Operations',
       'page callback' => TRUE,
@@ -383,7 +383,6 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
-
     'emicdora/contextual-links/version_operations/%islandora_object/update_ocr' => array(
       'title' => 'Update Source OCR',
       'file' => 'includes/update_ocr.form.inc',
@@ -439,7 +438,7 @@ function emicdora_menu() {
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
-  // Context menus for collation operations.
+    // Context menus for collation operations.
     'emicdora/contextual-links/collation_operations/%islandora_object' => array(
       'title' => 'Operations',
       'page callback' => TRUE,
@@ -490,8 +489,8 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
-    'coop' => array(
-      'title' => 'COOP',
+    'co-op' => array(
+      'title' => 'CO-OP',
       'page callback' => 'theme',
       'page arguments' => array('emicdora_coop'),
       'type' => MENU_NORMAL_ITEM,
@@ -669,6 +668,15 @@ function emicdora_block_info() {
       'cache' => DRUPAL_NO_CACHE,
       'visibility' => BLOCK_VISIBILITY_LISTED,
       'pages' => 'islandora/object/*',
+      'weight' => -20,
+      'status' => 1,
+      'region' => 'sidebar_second',
+    ),
+    'critical_edition' => array(
+      'info' => t('Critical Editions'),
+      'cache' => DRUPAL_NO_CACHE,
+      'visibility' => BLOCK_VISIBILITY_LISTED,
+      'pages' => 'islandora/object/*',
       'weight' => -10,
       'status' => 1,
       'region' => 'sidebar_second',
@@ -698,6 +706,9 @@ function emicdora_block_configure($delta = '') {
         '#default_value' => variable_get('emicdora_transcription_block_count', 10),
         '#options' => drupal_map_assoc(array(5, 10, 15, 20, 25, 30)),
       );
+      break;
+
+    case 'critical_editon':
       break;
   }
   return $form;
@@ -744,7 +755,7 @@ function emicdora_block_view($delta = '') {
     }
   }
   if (!$is_critical_edition) {
-    if (!$is_versionable_object) {
+    if (!$is_versionable_object && $delta != 'critical_edition') {
       return array();
     }
     else {
@@ -792,6 +803,37 @@ function emicdora_block_view($delta = '') {
               array($critical_edition->id),
             ),
           ),
+        );
+      }
+      break;
+
+    case 'critical_edition':
+      $source_object = islandora_object_load($path_parts[2]);
+      $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+      $links = array();
+      $options = array(
+        'attributes' => array('class' => 'source_edition_links'),
+      );
+      foreach ($rels as $rel) {
+        $parent_edition = islandora_object_load($rel['object']['value']);
+        if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
+          $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
+        }
+      }
+      $total = count($links);
+      $current = pager_default_initialize($total, 5, $element = 0);
+      if ($total > 5) {
+        $links = array_slice($links, $current * 5, 5);
+      }
+      $output = "";
+      foreach ($links as $link) {
+        $output .= "$link<br />";
+      }
+      $output .= theme('pager', array('quantity' => $total));
+      if (count($links)) {
+        $block['subject'] = t('Critical Editions');
+        $block['content'] = array(
+          '#markup' => $output,
         );
       }
       break;
@@ -1170,7 +1212,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
     }
     $content = emicdora_get_apparatus_as_content($object, $dsid);
     return array('emicdora' => $content);
-
   }
 
   foreach ($content_models as $content_model) {
@@ -1499,7 +1540,7 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
     emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
   }
   islandora_delete_object($object);
-  $form_state['redirect'] = 'coop';
+  $form_state['redirect'] = 'co-op';
 }
 
 /**
