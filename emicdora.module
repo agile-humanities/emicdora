@@ -1368,7 +1368,7 @@ function emicdora_object_management_access($object, $context) {
       }
       break;
   }
-  return $access && islandora_object_access_callback(ISLANDORA_VIEW_OBJECTS, $object) && islandora_object_access(EMICDORA_MANAGE_EDITION, $object);
+  return $access && islandora_object_access_callback(ISLANDORA_VIEW_OBJECTS, $object);
 }
 
 /**
