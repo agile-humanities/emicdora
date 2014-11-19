@@ -47,7 +47,7 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   drupal_add_js("$module_path/js/coop.js");
   // No Breadcrumbs on this page.
   drupal_set_breadcrumb(array());
-  // Links for Add to COOP.
+  // Links for Add to CO-OP.
   $variables['add_source_links'] = array();
   $source_content_models = emicdora_source_content_models();
   unset($source_content_models['islandora:criticalEditionContainerCModel']);
