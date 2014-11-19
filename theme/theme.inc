@@ -41,20 +41,7 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
  */
 function emicdora_preprocess_emicdora_coop(array &$variables) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $titles = emicdora_get_all('title');
-  $title_urls = array();
-  foreach ($titles as $title) {
-    $escaped_title = "\"$title\"";
-    $title_urls[] = l($title, "islandora/search/mods_titleInfo_title_ms:($escaped_title) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)");
-  }
-  $title_table = emicdora_build_table($title_urls, t('Titles'));
-  $authors = emicdora_get_all('author');
-  $author_urls = array();
-  foreach ($authors as $author) {
-    $escaped_author = "\"$author\"";
-    $author_urls[] = l($author, "islandora/search/mods_name_personal_author_authority_marcrelator_namePart_ms:($escaped_author) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)");
-  }
-  $author_table = emicdora_build_table($author_urls, t('Authors'));
+  $display_count = 5;
   $module_path = drupal_get_path('module', 'emicdora');
   drupal_add_css("$module_path/css/emicdora.coop.css");
   drupal_add_js("$module_path/js/coop.js");
@@ -79,29 +66,39 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   $label = variable_get('islandora_solr_object_label_field', 'fgs_label_s');
   $options = array('query' => array('sort' => "$label asc"));
   $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH, $options);
-  $variables['title_table'] = $title_table;
-  $variables['author_table'] = $author_table;
-  $pager_1 = pager_default_initialize(count($title_urls), 20, 0);
-  $pager_2 = pager_default_initialize(count($author_urls), 20, 1);
-
-  $variables['collection_pager'] = theme('pager', array('quantity' => 2));
+  $variables['author_table'] = emicdora_build_topic_table('author', $display_count, 0);
+  $variables['genre_table'] = emicdora_build_topic_table('genre', $display_count, 1);
+  $variables['more_authors'] = l(t("View More »"), 'CO-OP/topics/author');
+  $variables['more_genres'] = l(t("View More »"), 'CO-OP/topics/genre');
 }
 
 /**
- * Builds display tabnles for urls.
+ * Builds tables for urls.
  *
  * @param array $urls
- *   URLS to be displayed
- * @param string $title
- *   header
+ *   URLs to be displayed
+ *
+ * @return HTML
+ *   Themed table
  */
-function emicdora_build_table($urls, $title) {
+function emicdora_build_table($urls) {
   $header = array(
-    array('data' => $title),
+    'title' => array('data' => t('Name'), 'class' => 'emicdora_header'),
+    'counter' => array('data' => t('Counter'), 'class' => 'emicdora_header'),
   );
+
   $rows = array();
-  foreach ($urls as $url) {
-    $row = array('data' => $url);
+  foreach ($urls as $data) {
+    $row = array(
+      'title' => array(
+        'data' => $data['url'],
+        'class' => 'emicdora_title_cell',
+      ),
+      'counter' => array(
+        'data' => $data['count'],
+        'class' => 'emicdora_count_cell',
+      ),
+    );
     $rows[] = array('data' => $row, 'class' => array('draggable'));
   }
 
@@ -113,6 +110,84 @@ function emicdora_build_table($urls, $title) {
       'class' => array('emicdora-url-table'),
     ),
   ));
-
   return $output;
+}
+
+/**
+ * Implements hook_preprocess_theme().
+ */
+function emicdora_preprocess_emicdora_coop_topic(array &$variables) {
+  $module_path = drupal_get_path('module', 'emicdora');
+  drupal_add_css("$module_path/css/emicdora.coop.css");
+  $type = $variables['type'];
+  $topic_mappings = array(
+    'author' => t("Author"),
+    'genre' => t("Genre"),
+  );
+  $topic = $topic_mappings[$type];
+  $variables['page_title'] = t("Browse by @genre", array("@genre" => $topic));
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $display_count = 20;
+  $variables['topic_table'] = emicdora_build_topic_table($type, $display_count, 0);
+}
+
+/**
+ * Redirects menu call to themed output.
+ *
+ * @param string $type
+ *   author or genre
+ *
+ * @return HTML
+ *   Themed output
+ */
+function emicdora_get_browse_view($type) {
+  return theme('emicdora_coop_topic', array('type' => $type));
+}
+
+/**
+ * Builds themed table for topic page.
+ *
+ * @param string $type
+ *   Author of Genre
+ * @param int $display_count
+ *   Number of entries to display
+ * @param int $element
+ *   Identifier to distinguish between multiple pagers
+ *
+ * @return HTML
+ *   THemed table
+ */
+function emicdora_build_topic_table($type, $display_count, $element) {
+  $results = emicdora_get_all($type);
+  $urls = array();
+  $total = count($urls);
+  $current_page = pager_default_initialize($total, $display_count, $element);
+  $offset = $current_page * $display_count;
+  $solr_term_mappings = array(
+    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
+    'genre' => 'mods_genre_authority_marcgt_ms',
+  );
+  $sort_term_mappings = array(
+    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_s',
+    'genre' => 'mods_genre_authority_marcgt_s',
+  );
+  $solr_term = $solr_term_mappings[$type];
+  $sort_term = $sort_term_mappings[$type];
+  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc"));
+  foreach ($results as $data) {
+    $label = $data['label'];
+    $escaped_label = "\"$label\"";
+    $urls[] = array(
+      'url' => l($label, "islandora/search/{$solr_term}:($escaped_label) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)", $options),
+      'count' => $data['count'],
+    );
+  }
+  $total = count($urls);
+
+  if ($total > $display_count) {
+    $urls = array_slice($urls, $current_page * $display_count, $display_count);
+  }
+  $table = emicdora_build_table($urls);
+  $table .= theme('pager', array('quantity' => $total, 'element' => $element));
+  return $table;
 }
