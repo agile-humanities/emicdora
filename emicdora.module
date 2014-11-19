@@ -1338,7 +1338,7 @@ function emicdora_object_management_access($object, $context) {
       break;
 
     case 'manage_apparatus':
-      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && islandora_object_access(EMICDORA_MANAGE_EDITION, $object) && islandora_object_access(ISLANDORA_PURGE, $object)) {
+      if (in_array('islandora:criticalEditionContainerCModel', $content_models) && islandora_object_access(ISLANDORA_PURGE, $object)) {
         $access = TRUE;
       }
       break;
