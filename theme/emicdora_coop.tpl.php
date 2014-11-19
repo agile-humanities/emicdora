@@ -15,7 +15,7 @@
         <?php endforeach; ?>
       </select>
     </div>
-    <?php print $coop_icon ?>
+    <?php print $coop_icon; ?>
   </div>
   <p><?php print t('Welcome to the CO-OP. This is where all the source material for the Critical </br> Editions resides. We have grouped the content by various categories.'); ?></p>
   <?php print $browse_all_link; ?>

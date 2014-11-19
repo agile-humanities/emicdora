@@ -173,7 +173,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
   );
   $solr_term = $solr_term_mappings[$type];
   $sort_term = $sort_term_mappings[$type];
-  $options = array('query' => array('sort' => "$sort_term asc"));
+  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc"));
   foreach ($results as $data) {
     $label = $data['label'];
     $escaped_label = "\"$label\"";

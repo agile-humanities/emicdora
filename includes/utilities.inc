@@ -890,14 +890,8 @@ function emicdora_get_all($type) {
     'title' => 'mods_titleInfo_title_ms',
     'genre' => 'mods_genre_authority_marcgt_ms',
   );
-  $sort_mappings = array(
-    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_s',
-    'title' => 'mods_titleInfo_title_s',
-    'genre' => 'mods_genre_authority_marcgt_s',
-  );
   $filter = 'RELS_EXT_hasModel_uri_ms:("info:fedora/islandora:bookCModel" OR "info:fedora/islandora:sp-audioCModel" OR "info:fedora/islandora:sp_videoCModel" OR "info:fedora/islandora:sp_large_image_cmodel")';
   $term = $mappings[$type];
-  module_load_include('inc', 'emicdora', 'includes/db');
   $qp = new IslandoraSolrQueryProcessor();
   $page_model = '"info:fedora/islandora:pageCModel"';
   $qp->buildQuery("$term:[* TO *] -RELS_EXT_hasModel_uri_ms:$page_model");
@@ -905,7 +899,7 @@ function emicdora_get_all($type) {
   $qp->solrParams['fl'] = "PID $term";
   $qp->solrParams['facet.limit'] = 100000;
   $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
-  $qp->solrParams['sort'] = "{$sort_mappings[$type]} asc";
+  $qp->solrParams['sort'] = "mods_titleInfo_title_s asc";
   $qp->solrParams['facet.mincount'] =1;
   $qp->executeQuery(FALSE);
 
@@ -914,6 +908,7 @@ function emicdora_get_all($type) {
     $results[] = array('label' => $value, 'count' => $count);
   }
   $_GET = $temp_get;
+  sort($results);
   return $results;
 }
 
@@ -965,7 +960,7 @@ function emicdora_contextual_redirect($source_object, $delta) {
     case "download_tei":
       drupal_goto("/islandora/object/{$get_parts[3]}/datastream/TEI/download");
       break;
-    
+
     default:
       return "This function has not yet been implemented";
   }
