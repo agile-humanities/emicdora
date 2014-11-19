@@ -52,7 +52,6 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
 
   module_load_include('inc', 'versionable_object_viewer', 'includes/tei_refcounter');
   \VersionableObjectViewer\count_refs($wrapped);
-
   $unwrapper_xslt_doc = new DOMDocument();
   $unwrapper_xslt_doc->load("$path/tei_transforms/unwrap.xslt");
   $unwrapper_xslt = new XSLTProcessor();
