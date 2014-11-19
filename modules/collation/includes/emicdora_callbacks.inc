@@ -167,6 +167,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', $linkage_type);
+  $new_element->setAttribute("data-$linkage_type", $counter);
   if (!isset($refnode)) {
     $refnode = reset($nodes_to_delete);
   }
@@ -396,6 +397,7 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
+
           $temp_node = $previous_sibling->cloneNode(FALSE);
           $temp_children = $temp_node->childNodes();
           while ($temp_children->length > 0) {
