@@ -208,7 +208,7 @@ function emicdora_get_browse_view($type) {
 function emicdora_build_topic_table($type, $display_count, $element) {
   $results = emicdora_get_all($type);
   $urls = array();
-  $total = count($urls);
+  $total = count($results);
   $current_page = pager_default_initialize($total, $display_count, $element);
   $solr_term_mappings = array(
     'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
