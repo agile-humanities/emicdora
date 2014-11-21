@@ -7,9 +7,8 @@
 
   Drupal.behaviors.emicdoraRedirect = {
     attach: function(context, settings) {
-      $(".return_button").click(function(){
+      $(".return_button").click(function() {
         var location = window.location.origin + Drupal.settings.basePath + 'islandora/object/' + Drupal.settings.critical_edition;
-        $(this).text('Added');
         window.location.replace(location);
       });
       $(".add_source").click(function() {
@@ -30,6 +29,11 @@
             if (results.hasOwnProperty('message')) {
               alert(results.message)
             }
+            if (results.hasOwnProperty('added')) {
+              var location = window.location.origin + Drupal.settings.basePath + 'islandora/object/' + results.added;
+              window.location.replace(location);
+            }
+
           },
           error: function(data, status, xhd) {
             console.log("The function execute_callback has failed");
