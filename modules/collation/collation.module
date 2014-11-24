@@ -4,15 +4,19 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 // Permissions.
 define('COLLATION_EDIT_COLLATION', 'edit collation');
+define('COLLATION_ADD_COLLATION', 'add collation');
 
 /**
  * Implements hook_permission().
  */
-function emicdora_permission() {
+function collation_permission() {
   return array(
+    COLLATION_ADD_COLLATION => array(
+      'title' => t('Add new collation'),
+      'description' => t('Enables creation of new collation from existing versions.'),
+    ),
     COLLATION_EDIT_COLLATION => array(
       'title' => t('Edit collations'),
       'description' => t('Enables editing of collations.'),
@@ -36,7 +40,7 @@ function collation_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_mvd_form', 3),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_METADATA_EDIT, 3),
+      'access arguments' => array(COLLATION_ADD_COLLATION, 3),
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -44,9 +48,8 @@ function collation_menu() {
       'title' => 'Collation',
       'page callback' => 'emicdora_mvd_crud',
       'type' => MENU_CALLBACK,
-      // @TODO: Make a real, split out permission for this once the enigmatic
-      // emicdora function is decoded.
-      'access callback' => TRUE,
+      'access callback' => 'user_access',
+      'access arguments' => array(COLLATION_EDIT_COLLATION),
       'file' => 'includes/mvd.inc',
     ),
     'islandora/object/%islandora_object/compare' => array(

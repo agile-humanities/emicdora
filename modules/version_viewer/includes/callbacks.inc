@@ -34,7 +34,7 @@ function versionable_object_viewer_prepare_page_tei_consolidated($object) {
 /**
  * Returns detail meta data for a posted pid object.
  */
-function versionable_object_viewer_prepare_detail_meta_data() {
+function versionable_object_viewer_prepare_detail_metadata() {
   module_load_include('inc', 'islandora', 'includes/metadata');
   $pid = html_entity_decode(stripslashes($_GET['pid']), ENT_QUOTES, 'UTF-8');
   $versionable_object = islandora_object_load($pid);

@@ -27,14 +27,13 @@
     var is_toggled = false;
 
     // Setup the initial menu 'look'.
-    var btn_background_color = 'red';
-    $('#wb_show_til').css('background-color', btn_background_color);
     $('#wb_show_til').addClass('annos');
-    $('#wb_show_annos').css('background-color', btn_background_color);
     $('#wb_show_annos').addClass('annos');
 
-    $('#wb_image').css('background-color', btn_background_color);
-    $('#wb_reading').css('background-color', btn_background_color);
+    $('#wb_image').addClass('img_selected');
+    $('#wb_reading').addClass('img_selected');
+    $('#wb_show_til').addClass('img_selected');
+    $('#wb_show_annos').addClass('img_selected');
 
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
@@ -220,6 +219,7 @@
       var is_selected = false;
       if ($(this).hasClass('img_selected')) {
         $(this).removeClass('img_selected');
+        is_selected = false;
       }
       else {
         $(this).addClass('img_selected');
@@ -229,42 +229,42 @@
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       switch ($(this).attr('id')) {
         case 'wb_meta':
-          $('#wb_meta').css('background-color', 'initial');
+          $('#wb_meta').removeClass('img_selected');
 
-          $('#wb_meta').css('background-color', btn_background_color);
+          $('#wb_meta').addClass('img_selected');
           $('#easy-ui-south').css('height', '500px');
           toggle_layout(is_selected, 'south', 'wb_meta');
           break;
         case 'wb_dt':
-          $('#wb_reading').css('background-color', 'initial');
-          $('#wb_tei_markup').css('background-color', 'initial');
-          $('#wb_dt').css('background-color', 'initial');
-          $('#wb_tei_markup').css('background-color', 'initial');
+          $('#wb_reading').removeClass('img_selected');
+          $('#wb_tei_markup').removeClass('img_selected');
+          $('#wb_dt').removeClass('img_selected');
+          $('#wb_tei_markup').removeClass('img_selected');
 
-          $('#wb_dt').css('background-color', btn_background_color);
+          $('#wb_dt').addClass('img_selected');
           var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=dt';
           add_tab("wb_dt_tab", url, 'diplomatic_tei');
           break;
         case 'wb_image':
-          $('#wb_image').css('background-color', 'initial');
-          $('#wb_image').css('background-color', btn_background_color);
-          toggle_layout(!is_selected, 'east', 'wb_image');
+//          $('#wb_image').removeClass('img_selected');
+//          $('#wb_image').addClass('img_selected');
+          toggle_layout(is_selected, 'east', 'wb_image');
           break;
         case 'wb_reading':
-          $('#wb_dt').css('background-color', 'initial');
-          $('#wb_tei_markup').css('background-color', 'initial');
-          $('#wb_reading').css('background-color', 'initial');
+          $('#wb_dt').removeClass('img_selected');
+          $('#wb_tei_markup').removeClass('img_selected');
+          $('#wb_reading').removeClass('img_selected');
 
-          $('#wb_reading').css('background-color', btn_background_color);
+          $('#wb_reading').addClass('img_selected');
           var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber) + '&type=rd';
           add_tab("wb_reading_tab", url, 'reading_tei');
           break;
         case 'wb_tei_markup':
-          $('#wb_reading').css('background-color', 'initial');
-          $('#wb_meta').css('background-color', 'initial');
-          $('#wb_dt').css('background-color', 'initial');
-          $('#wb_tei_markup').css('background-color', 'initial');
-          $('#wb_tei_markup').css('background-color', btn_background_color);
+          $('#wb_reading').removeClass('img_selected');
+          $('#wb_meta').removeClass('img_selected');
+          $('#wb_dt').removeClass('img_selected');
+          $('#wb_tei_markup').removeClass('img_selected');
+          $('#wb_tei_markup').addClass('img_selected');
           var pid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
           var url = Drupal.settings.basePath + 'islandora/version_viewer/tei_markup/page/' + pid;
           add_tab("wb_tei_markup_tab", url, "", "json", true);
@@ -275,7 +275,7 @@
 
           if ($(this).hasClass('annos')) {
             $(this).removeClass('annos');
-            $(this).css('background-color', 'initial');
+            $(this).removeClass('img_selected');
             if (ddt) {
               $('#' + ddt.domId).hide();
               if (ddt['children'].length > 0) {
@@ -291,7 +291,7 @@
           }
           else {
             $(this).addClass('annos');
-            $('#wb_show_annos').css('background-color', btn_background_color);
+            $('#wb_show_annos').addClass('img_selected');
             if (ddt) {
               $('#' + ddt.domId).show();
               if (ddt['children'].length > 0) {
@@ -310,7 +310,7 @@
           var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
           if ($(this).hasClass('annos')) {
             $(this).removeClass('annos');
-            $(this).css('background-color', 'initial');
+            $(this).removeClass('img_selected');
             if (ddt) {
               $('#' + ddt.domId).hide();
               if (ddt['children'].length > 0) {
@@ -320,7 +320,7 @@
           }
           else {
             $(this).addClass('annos');
-            $('#wb_show_til').css('background-color', btn_background_color);
+            $('#wb_show_til').addClass('img_selected');
             if (ddt) {
               $('#' + ddt.domId).show();
               if (ddt['children'].length > 0) {
@@ -393,7 +393,7 @@
     function toggle_layout(selected, region, selector) {
       if (!selected) {
         $('#eui_window').layout('collapse', region);
-        $('#' + selector).css('background-color', 'initial');
+        $('#' + selector).removeClass('img_selected');
         if (selector == "wb_show_annos") {
           var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
           $('#' + ddt.domId).show();
@@ -401,7 +401,7 @@
       }
       else {
         $('#eui_window').layout('expand', region);
-        $('#' + selector).css('background-color', btn_background_color);
+        $('#' + selector).addClass('img_selected');
         if (selector == "wb_show_annos") {
           var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
           $('#' + ddt.domId).hide();

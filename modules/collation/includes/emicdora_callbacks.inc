@@ -111,7 +111,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
     $id = $data['id'];
     $node = $dom->getElementById($id);
     if ($node) {
-      $current = $node->nodeValue;
+      $current = emicdora_get_innerHTML($node);
       $selected = $data['text'];
       if (strlen($identified_text) < strlen($selected)) {
         $selected = $identified_text;
@@ -167,6 +167,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', $linkage_type);
+  $new_element->setAttribute("data-$linkage_type", $counter);
   if (!isset($refnode)) {
     $refnode = reset($nodes_to_delete);
   }
@@ -213,6 +214,12 @@ function emicdora_fix_calliope($spans, $type) {
  */
 function emicdora_marshall_spans($type) {
   $input = emicdora_cleaned_post("context_$type");
+  $tagname = "span";
+  $pattern = "/<$tagname ?.*>(.*)<\/$tagname>/";
+  preg_match($pattern, $input, $matches);
+  if (isset($matches[0])) {
+    $input = $matches[0];
+  }
   $spans = array_filter(explode('</span>', $input));
   $marshalled_spans = array();
   foreach ($spans as $candidate) {
@@ -222,7 +229,7 @@ function emicdora_marshall_spans($type) {
     $items = $dom->getElementsByTagName('span');
     $id = $items->item(0)->getAttribute('id');
     $class = $items->item(0)->getAttribute('class');
-    $text_value = $items->item(0)->nodeValue;
+    $text_value = emicdora_get_innerHTML($items->item(0));
     if ($text_value) {
       $marshalled_spans[] = array(
         'id' => $id,
@@ -390,7 +397,22 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
-          $previous_sibling->nodeValue = $previous_sibling->nodeValue . $item->nodeValue;
+
+          $temp_node = $previous_sibling->cloneNode(FALSE);
+          $temp_children = $temp_node->childNodes();
+          while ($temp_children->length > 0) {
+            $temp_node->removeChild($temp_children->item(0));
+          }
+          $previous_sibling_childen = $previous_sibling->childNodes;
+          $current_children = $item->childNodes;
+          foreach ($previous_sibling_childen as $child) {
+            $temp_node->appendChild($child);
+          }
+          foreach ($current_children as $child) {
+            $temp_node->appendChild($child);
+          }
+          $parent = $item->parentNode;
+          $parent->replaceChild($temp_node, $previous_sibling);
           $item->parentNode->removeChild($item);
           $incomplete = FALSE;
         }
@@ -400,7 +422,20 @@ function emicdora_cleanup_merged($inputs) {
         if ($next_sibling) {
           $class = $next_sibling->getAttribute('class');
           if ($class != 'merged') {
-            $next_sibling->nodeValue = $item->nodeValue . $next_sibling->nodeValue;
+            $temp_node = $next_sibling->cloneNode(FALSE);
+            $temp_children = $temp_node->childNodes();
+            while ($temp_children->length > 0) {
+              $temp_node->removeChild($temp_children->item(0));
+            }
+            $next_sibling_childen = $next_sibling->childNodes;
+            $current_children = $item->childNodes;
+            foreach ($current_children as $child) {
+              $temp_node->appendChild($child);
+            }
+            foreach ($next_sibling_childen as $child) {
+              $temp_node->appendChild($child);
+            }
+            $parent->replaceChild($temp_node, $next_sibling);
             $item->parentNode->removeChild($item);
             $incomplete = FALSE;
           }
@@ -476,6 +511,8 @@ function emicdora_ends_with($haystack, $needle) {
  */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
   $contents = nl2br($contents, FALSE);
+  // The collation viewer doesn't handle xhtml break tags well.
+  $contents = str_replace('<br/>', '<br>', $contents);
   $new_element = $dom->createElement('span', $contents);
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {
@@ -506,4 +543,21 @@ function emicdora_check_merged($input_array) {
     }
   }
   return $merged;
+}
+
+/**
+ * Gets innerHTML of DOMElement.
+ *
+ * @param DOMElement $element
+ *   Element being examined
+ *
+ * @return string
+ *   InnerHTML
+ */
+function emicdora_get_innerHTML($element) {
+  $html = '';
+  foreach ($element->childNodes as $child) {
+    $html .= $child->ownerDocument->saveXML($child);
+  }
+  return $html;
 }

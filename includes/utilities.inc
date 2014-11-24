@@ -882,6 +882,9 @@ function emicdora_is_critical_edition(AbstractObject $object) {
  *   Discovered results
  */
 function emicdora_get_all($type) {
+  // Solr doesn't like having someone else tell if what $_GET['page'] means.
+  $temp_get = $_GET;
+  unset($_GET);
   $mappings = array(
     'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
     'title' => 'mods_titleInfo_title_ms',
@@ -889,8 +892,6 @@ function emicdora_get_all($type) {
   );
   $filter = 'RELS_EXT_hasModel_uri_ms:("info:fedora/islandora:bookCModel" OR "info:fedora/islandora:sp-audioCModel" OR "info:fedora/islandora:sp_videoCModel" OR "info:fedora/islandora:sp_large_image_cmodel")';
   $term = $mappings[$type];
-  $search_term = "+$term";
-  module_load_include('inc', 'emicdora', 'includes/db');
   $qp = new IslandoraSolrQueryProcessor();
   $page_model = '"info:fedora/islandora:pageCModel"';
   $qp->buildQuery("$term:[* TO *] -RELS_EXT_hasModel_uri_ms:$page_model");
@@ -898,12 +899,16 @@ function emicdora_get_all($type) {
   $qp->solrParams['fl'] = "PID $term";
   $qp->solrParams['facet.limit'] = 100000;
   $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
-
+  $qp->solrParams['sort'] = "mods_titleInfo_title_s asc";
+  $qp->solrParams['facet.mincount'] =1;
   $qp->executeQuery(FALSE);
+
   $results = array();
-  foreach ($qp->islandoraSolrResult['response']['objects'] as $discovered) {
-    $results[] = $discovered['solr_doc'][$term][0];
+  foreach ($qp->islandoraSolrResult['facet_counts']['facet_fields'][$term] as $value => $count) {
+    $results[] = array('label' => $value, 'count' => $count);
   }
+  $_GET = $temp_get;
+  sort($results);
   return $results;
 }
 

@@ -20,8 +20,8 @@
  */
 function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') {
   $callable_mapping = array(
-    'rd' => 'versionable_object_viewer_display_page_tei_rd',
-    'dt' => 'versionable_object_viewer_display_page_tei_dt',
+    'rd' => 'versionable_object_viewer_display_page_tei_reading',
+    'dt' => 'versionable_object_viewer_display_page_tei_diplomatic',
   );
   $type = isset($_GET['type']) ? $_GET['type'] : 'rd';
   $callable = $callable_mapping[$type];
@@ -29,7 +29,16 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
   return $callable($object[$dsid]);
 }
 
-function versionable_object_viewer_display_page_tei_rd(AbstractDatastream $datastream) {
+/**
+ * Callback for versionable_object_viewer_display_page_tei for reading display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the reading display.
+ */
+function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
   $path = drupal_get_path('module', 'versionable_object_viewer');
 
   $input = new DOMDocument();
@@ -43,13 +52,12 @@ function versionable_object_viewer_display_page_tei_rd(AbstractDatastream $datas
 
   module_load_include('inc', 'versionable_object_viewer', 'includes/tei_refcounter');
   \VersionableObjectViewer\count_refs($wrapped);
-
   $unwrapper_xslt_doc = new DOMDocument();
   $unwrapper_xslt_doc->load("$path/tei_transforms/unwrap.xslt");
   $unwrapper_xslt = new XSLTProcessor();
   $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
   $tempfile = drupal_tempnam('public://', 'reading_tei');
-  $unwrapped = $unwrapper_xslt->transformToUri($wrapped, $tempfile);
+  $unwrapper_xslt->transformToUri($wrapped, $tempfile);
 
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
   $tomcat_url = str_replace('/fedora', '', $islandora_url);
@@ -68,7 +76,16 @@ function versionable_object_viewer_display_page_tei_rd(AbstractDatastream $datas
   return $result->data;
 }
 
-function versionable_object_viewer_display_page_tei_dt(AbstractDatastream $datastream) {
+/**
+ * Callback for diplomatic display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the diplomatic display.
+ */
+function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
   module_load_include('inc', 'islandora', 'includes/authtokens');
   $path = drupal_get_path('module', 'versionable_object_viewer');
 
