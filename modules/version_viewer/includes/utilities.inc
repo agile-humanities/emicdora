@@ -38,7 +38,7 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
  * @return string
  *   A string of markup to use, representing the reading display.
  */
-function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
+function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream, $type = 'reading') {
   $path = drupal_get_path('module', 'versionable_object_viewer');
 
   $input = new DOMDocument();
@@ -56,6 +56,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
   $unwrapper_xslt_doc->load("$path/tei_transforms/unwrap.xslt");
   $unwrapper_xslt = new XSLTProcessor();
   $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
+  $unwrapper_xslt->setParameter('', 'type', $type);
   $tempfile = drupal_tempnam('public://', 'reading_tei');
   $unwrapper_xslt->transformToUri($wrapped, $tempfile);
 
@@ -69,6 +70,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
       'source' => file_create_url($tempfile),
       'clear-stylesheet-cache' => 'yes',
       'css_base' => file_create_url("$path/tei_transforms"),
+      'type' => $type,
     ),
   ));
   $result = drupal_http_request($saxon_url);
@@ -86,32 +88,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
  *   A string of markup to use, representing the diplomatic display.
  */
 function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
-  module_load_include('inc', 'islandora', 'includes/authtokens');
-  $path = drupal_get_path('module', 'versionable_object_viewer');
-
-  $pid = $datastream->parent->id;
-  $dsid = $datastream->id;
-  $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
-  $tomcat_url = str_replace('/fedora', '', $islandora_url);
-  $saxon_url = url("$tomcat_url/saxon/SaxonServlet", array(
-    'absolute' => TRUE,
-    'external' => TRUE,
-    'query' => array(
-      'style' => file_create_url("$path/tei_transforms/tei2html.xslt"),
-      'source' => url("islandora/object/$pid/datastream/$dsid/view", array(
-        'absolute' => TRUE,
-        'query' => array(
-          'token' => islandora_get_object_token($pid, $dsid),
-        ),
-      )),
-      'type' => 'diplomatic',
-      'clear-stylesheet-cache' => 'yes',
-      'css_base' => file_create_url("$path/tei_transforms"),
-    ),
-  ));
-  $result = drupal_http_request($saxon_url);
-
-  return $result->data;
+  return versionable_object_viewer_display_page_tei_reading($datastream, 'diplomatic');
 }
 
 /**
