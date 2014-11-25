@@ -30,15 +30,19 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
 }
 
 /**
- * Callback for versionable_object_viewer_display_page_tei for reading display.
+ * Render transcription markup.
  *
  * @param AbstractDatastream $datastream
- *   The datastrean to use to generate the display.
+ *   The datastream containing the TEI for which to produce a transcription.
+ * @param string $type
+ *   The type of transcription. At time of writing, we support:
+ *   - reading
+ *   - diplomatic
  *
  * @return string
- *   A string of markup to use, representing the reading display.
+ *   A string of HTML to output... Likely with significant styling.
  */
-function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream, $type = 'reading') {
+function versionable_object_viewer_render_transcription(AbstractDatastream $datastream, $type) {
   $path = drupal_get_path('module', 'versionable_object_viewer');
 
   $input = new DOMDocument();
@@ -79,6 +83,19 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
 }
 
 /**
+ * Callback for versionable_object_viewer_display_page_tei for reading display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the reading display.
+ */
+function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
+  return versionable_object_viewer_render_transcription($datastream, 'reading');
+}
+
+/**
  * Callback for diplomatic display.
  *
  * @param AbstractDatastream $datastream
@@ -88,7 +105,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
  *   A string of markup to use, representing the diplomatic display.
  */
 function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
-  return versionable_object_viewer_display_page_tei_reading($datastream, 'diplomatic');
+  return versionable_object_viewer_render_transcription($datastream, 'diplomatic');
 }
 
 /**
