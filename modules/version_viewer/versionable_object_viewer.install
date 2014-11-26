@@ -4,3 +4,67 @@
  * @file
  * Install hooks for this module.
  */
+
+/**
+ * Implements hook_schema().
+ */
+function versionable_object_viewer_schema() {
+  $schema['versionable_object_access'] = array(
+    'description' => 'Table that stores access rights to versions.',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version.',
+      ),
+      'allowed_users' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Serialized array of allowed users.',
+      ),
+      'allowed_roles' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Serialized array of allowed roles.',
+      ),
+    ),
+    'primary key' => array('pid'),
+  );
+
+  $schema['versionable_object_custom_config'] = array(
+    'description' => 'Table that stores custom display configuraions.',
+    'fields' => array(
+      'cid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for each configuration.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version configuration is associated with.',
+      ),
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Configuration label.',
+      ),
+      'description' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Configuration description.',
+      ),
+      'xslt' => array(
+        'type' => 'blob',
+        'description' => 'xslt for transform.',
+      ),
+      'css' => array(
+        'type' => 'blob',
+        'description' => 'CSS to display this config.',
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+  return $schema;
+}

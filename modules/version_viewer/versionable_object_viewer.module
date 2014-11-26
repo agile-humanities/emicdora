@@ -7,6 +7,7 @@
 // Permissions.
 define('VERSIONABLE_OBJECT_VIEWER_VIEW', 'use version viewer');
 define('VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI', 'consolidate tei');
+define('VERSIONABLE_OBJECT_VIEWER_MANAGE', 'manage version viewer');
 
 /**
  * Implements hook_permission().
@@ -20,6 +21,10 @@ function versionable_object_viewer_permission() {
     VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI => array(
       'title' => t('Consolidate TEI'),
       'description' => t('Consolidate page level TEI.'),
+    ),
+    VERSIONABLE_OBJECT_VIEWER_MANAGE => array(
+      'title' => t('Manage Viewer Configuration'),
+      'description' => t('Manage annotation access and configuration of Viewer.'),
     ),
   );
 }
@@ -63,6 +68,31 @@ function versionable_object_viewer_menu() {
     'type' => MENU_CALLBACK,
     'access callback' => 'islandora_object_access_callback',
     'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI, 4),
+  );
+  $items['islandora/version_viewer/annotation/%islandora_object'] = array(
+    'title' => 'Manage Annotation Access',
+    'file' => 'includes/annotation_configuration.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_emicdora_annotation_availability', 3),
+    'type' => MENU_CALLBACK,
+    'access callback' => 'islandora_object_access_callback',
+    'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_VIEW, 3),
+  );
+  $items['islandora/version_viewer/configuration/delete'] = array(
+    'title' => 'Delete Custom Configuration',
+    'file' => 'includes/annotation_configuration.inc',
+    'page callback' => 'versionable_object_viewer_delete_config',
+    'type' => MENU_CALLBACK,
+    'access callback' => 'user_access',
+    'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_MANAGE),
+  );
+  $items['islandora/version_viewer/configuration/download'] = array(
+    'title' => 'Download files',
+    'file' => 'includes/annotation_configuration.inc',
+    'page callback' => 'versionable_object_viewer_download',
+    'type' => MENU_CALLBACK,
+    'access callback' => 'user_access',
+    'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_MANAGE),
   );
   return $items;
 }
