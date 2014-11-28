@@ -29,6 +29,7 @@ transition: box-shadow 0.1s linear 0s;
 vertical-align: baseline;
 white-space: nowrap;
 width: 200px;
+margin-right: 50px;
 }
 .config_url {
   margin-right: 30px;

@@ -76,6 +76,7 @@ function tei_editor_canvas_setup(AbstractObject $fedora_object) {
 
     $results = islandora_image_annotation_canvas_init($page_object->id);
     $results['position'] = $position;
+    $results['islandora_get_annotation'] = '/versionable_object_viewer/anno/get_annotation/';
     $results['pages'] = $pages;
   }
   drupal_json_output($results);

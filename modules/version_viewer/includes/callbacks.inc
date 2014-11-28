@@ -87,7 +87,6 @@ function versionable_object_viewer_build_transcription_data($object) {
       $return['title'] = $transcriptions[$page - 1]['title'];
       drupal_json_output($return);
       break;
-
   }
 }
 
@@ -107,9 +106,37 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
   $tree_data = versionable_object_viewer_flatten_rdf_annos($rdf_annotations);
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
+  $restrained = FALSE;
   if (isset($anno_pids['pids'])) {
+    $version_pid = $_SESSION['emicdora_version_pid'];
+    $query = db_select('versionable_object_access')
+        ->fields('versionable_object_access', array(
+          'pid',
+          'allowed_users',
+          'allowed_roles',
+            )
+        )
+        ->condition('pid', $version_pid, '=');
+    $row = $query->execute()->fetchObject();
     $size = count($tree_data);
-    foreach ($anno_pids['pids'] as $plain_annotation) {
+    foreach ($anno_pids['pids'] as $key => $plain_annotation) {
+      $annotation = islandora_object_load($plain_annotation['id']);
+      if (is_object($row)) {
+        $restrained = TRUE;
+        $users = unserialize($row->allowed_users);
+        $roles = unserialize($row->allowed_roles);
+        $owner = user_load_by_name($annotation->owner);
+        $owner_roles = isset($owner->roles) ? $owner->roles : array();
+      }
+      if ($restrained) {
+        $user_blocked = in_array($owner->name, $users) ? FALSE : TRUE;
+        $role_blocked = count(array_intersect($roles, $owner_roles) < 1) ? FALSE : TRUE;
+        if ($user_blocked && $role_blocked) {
+          unset($anno_pids['pids'][$key]);
+          $size = count($tree_data);
+          continue;
+        }
+      }
       if ($plain_annotation['type'] != "TextImageLink") {
         if (!isset($tree_data[$size])) {
           $tree_data[$size] = array(
@@ -162,8 +189,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
           ),
         );
         array_push(
-          $tree_data[$size]["children"],
-          $child
+            $tree_data[$size]["children"], $child
         );
       }
     }

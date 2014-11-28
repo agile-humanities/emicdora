@@ -40,10 +40,8 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
  */
 function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
   $path = drupal_get_path('module', 'versionable_object_viewer');
-
   $input = new DOMDocument();
   $input->loadXML($datastream->content);
-
   $wrapper_xslt_doc = new DOMDocument();
   $wrapper_xslt_doc->load("$path/tei_transforms/wrap.xslt");
   $wrapper_xslt = new XSLTProcessor();
@@ -143,7 +141,6 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
               $json_anno->{'annotationId'} = (string) $label['annotationId'];
             }
           }
-
         }
         array_push($entities, $json_anno);
       }
@@ -491,8 +488,7 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
         "attributes" => $rdf_anno,
       );
       array_push(
-        $tree_data["textimagelink"]["children"],
-        $child
+          $tree_data["textimagelink"]["children"], $child
       );
     }
     else {
@@ -514,8 +510,7 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
         "attributes" => $rdf_anno,
       );
       array_push(
-        $tree_data['entity']["children"],
-        $child
+          $tree_data['entity']["children"], $child
       );
     }
   }
@@ -526,4 +521,56 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
   }
   unset($tree_data['entity'], $tree_data['textimagelink']);
   return $tree_data;
+}
+
+/**
+ * Retrieves and filters annotation data for the editor.
+ *
+ * Called with /versionable_object_viewer/anno/get_annotation/.
+ *
+ * @param string $pid
+ *   The pid of an object
+ *
+ * @param urn $urn
+ *   Urn.
+ */
+function versionable_object_viewer_get_annotation($pid, $urn = NULL) {
+  $show = TRUE;
+  module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
+  if (isset($urn)) {
+    $pid = islandora_image_annotation_canvas_get_pid_from_urn($urn);
+  }
+  $annotation = islandora_object_load($pid);
+  $version_pid = $_SESSION['emicdora_version_pid'];
+  $query = db_select('versionable_object_access')
+      ->fields('versionable_object_access', array(
+        'pid',
+        'allowed_users',
+        'allowed_roles',
+          )
+      )
+      ->condition('pid', $version_pid, '=');
+  $row = $query->execute()->fetchObject();
+  if (is_object($row)) {
+    $show = FALSE;
+    $users = unserialize($row->allowed_users);
+    $roles = unserialize($row->allowed_roles);
+    $owner = user_load_by_name($annotation->owner);
+    $owner_roles = $owner->roles;
+    if (in_array($owner->name, $users)) {
+      $show = TRUE;
+    }
+    if (count(array_intersect($roles, $owner_roles)) > 1) {
+      $show = TRUE;
+    }
+  }
+  if ($show) {
+    $xml = islandora_image_annotation_get_annotation_data($pid);
+    $results = islandora_image_annotation_shared_transform_annotation_list($xml, 'rdf');
+    // Remove the doc type declarations.
+    $results = preg_replace('/<\?xml.*?\?>/', '', $results);
+    $results = preg_replace('/<!DOCTYPE.*?>/', '', $results);
+    $results = htmlspecialchars_decode($results);
+    drupal_json_output($results);
+  }
 }

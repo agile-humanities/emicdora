@@ -32,7 +32,7 @@ function versionable_object_viewer_schema() {
   );
 
   $schema['versionable_object_custom_config'] = array(
-    'description' => 'Table that stores custom display configuraions.',
+    'description' => 'Table that stores custom display configurations.',
     'fields' => array(
       'cid' => array(
         'type' => 'serial',
@@ -65,6 +65,22 @@ function versionable_object_viewer_schema() {
       ),
     ),
     'primary key' => array('cid'),
+  );
+  $schema['versionable_object_config_choice'] = array(
+    'description' => 'Table that stores chosen configuration.',
+    'fields' => array(
+      'cid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The chosen configurations unique identifier.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version configuration is associated with.',
+      ),
+    ),
+    'primary key' => array('cid', 'pid'),
   );
   return $schema;
 }
