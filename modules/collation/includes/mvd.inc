@@ -103,15 +103,14 @@ function emicdora_mvd_form_validate($form, $form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $critical_edition_object = islandora_object_load($form_state['values']['pid']);
   $mvds = emicdora_calliope_find_mvds($critical_edition_object);
-  $match = FALSE;
+  // The use of # in the name will cause lookup errors when you try and load
+  // the collation.
+  if (strpos($form_state['values']['mvd'], "#") !== FALSE) {
+    form_set_error('mvd', t('A collation name cannot contain a number sign "&#35;".'));
+  }
   foreach ($mvds as $mvd) {
     if ($mvd['name'] == $form_state['values']['mvd']) {
       form_set_error('mvd', t('A collation with this name is already associated with this critical edition.'));
-    }
-    // The use of # in the name will cause lookup errors when you try and load
-    // the collation.
-    elseif (strpos($mvd['name'], "#") !== FALSE) {
-      form_set_error('mvd', t('A collation name cannot contain a number sign "&#35;".'));
     }
   }
 }
