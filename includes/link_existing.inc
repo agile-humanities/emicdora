@@ -149,7 +149,7 @@ function emicdora_add_source_to_edition() {
   }
   $results = array(
     'message' => $message,
-    'added' => $critical_edition_pid,
+    'added' => "$critical_edition_pid/source/$source_pid",
   );
   echo json_encode($results);
 }
