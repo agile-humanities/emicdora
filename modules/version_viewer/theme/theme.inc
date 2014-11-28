@@ -36,7 +36,8 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $variables['content_model_type'] = emicdora_get_source_type($version_object);
   $variables['transcription_source'] = url("islandora/object/$version_object->id/get_transcription_data");
   $variables['meta_source'] = url("islandora/cwrc_viewer/detail_metadata");
-
+  $version = $variables['islandora_object'];
+  $_SESSION['emicdora_version_pid'] = $version->id;
   drupal_add_js(array('versionable_object_viewer' => array('trans_url' => $variables['transcription_source'])), 'setting');
   versionable_object_viewer_build_version_media_view($version_object, $variables);
 
