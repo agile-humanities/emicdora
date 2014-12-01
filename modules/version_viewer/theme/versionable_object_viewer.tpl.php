@@ -17,7 +17,7 @@
   					<li id="wb_meta" title="Detail Metadata" class="work_action_img detail-meta data_anchor"></li>
   					<li id="wb_show_annos" title="Show/Hide annotations" data-value="0" class="work_action_img anno-entity-switch switch"></li>
   					<li id="wb_show_til" title="Show/Hide Text Image Links" data-value="0" class="work_action_img til-switch switch"></li>
-  					<li id="wb_max_min" title="Maximize Viewer" data-value="0" class="work_action_img win-switch-full switch"></li>
+  					<li id="wb_max_min" title="Maximize Viewer" data-value="0" class="work_action_img win-switch-full switch BRicon full"></li>
   				  </ul>
                 </div>
                   <div id="ui-easy-paginator" class="easyui-pagination"

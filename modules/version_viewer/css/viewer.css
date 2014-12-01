@@ -62,75 +62,176 @@
 }
 /* END VIEWER 'Internet Archive Bookreader' STYLE */
 
+/* Full Window toggle customizations */
 .win-switch-full {
   cursor: pointer;
   display: inline-block;
   height: 27px;
   text-indent: -9999px;
   width: 27px;
-  background-color: white;
-  background-position: .07em .07em !important;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAABZUlEQVRIie1VPU8DMQxNT/1hN1Y6+zkRzPATuhQEC1gCgSgbRWpFRdlA8Fso8G/YWobcqddwuY/OtZQlid+zE/vZAHZdt4jsjYkYEd82+Zt6cHcSAy8MsKc7ETDzqAm8MGYedSJgtktVTdoSqGoCyFfHDOx7mqb9JvA0TfuA/WiVAbP9Cf5gUZeJqiYi8lKHUSa4UtWEyC0CknmMgMjNg4ifVTXJMr7eIgiqpUdkJz4a/AIYxAgADPwduxaRB2NMb3Pmq8tU1bmPws2Y7UHTH4jIIYBp1VMS8W2T/9721sJE3FnFdg/Ao4gcNfkD7pjITkypBzZnOM8bDXfFptcWvPlGkxURhjFwIgyZZZVLxGtZuwCMt6RCxF3kUhG0P6Yxgixzs1BWPAYuI2oq3wH4U1Xq5af8H9A2RlSuQ22pJ/Ha1WUefHYdOMx22XEmY9yWQMTdd57JYXXFrKiWnQjypXFwq03+f0e91EwvZ22WAAAAAElFTkSuQmCC);
+  background-position: -366px -6px;
 }
 
-.win-switch-norm {
+.win-switch-norm{
   cursor: pointer;
   display: inline-block;
   height: 27px;
   text-indent: -9999px;
   width: 27px;
-  background-color: white;
-  background-position: .07em .07em !important;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAABcklEQVRIie2Vv07DQAzGnbQPlrk5f/YJsoHUFeaCYAFLIBAwIkRFVRV167tQwQNRhYEEXa9/UFDYaumGc2z/4suXMxERMetenvuhmaUUGYDz2FebiD+LfWaW5rkfish+XeAA0E9AS2adZVnWDYrfA1puAgBaOoe7ep9lWZdZZ4CWgH4y6yE550eVo15jM0udw2Xt2wYAtBTxF2aWAjoOaznnR2RmqYhMliHyHu5/A6zLEZFJeOSJc/oYddIQEL65PhJRsvJxmHXeAuBtnVhIxD+01QGA+yjwWy3tAQJ1AWrbAv8KqJZtyt3ZzhqYc3z7XzJ1Tm/qwNP2fzR/shTMzIO2AMw8WAlu67Jj1vnKZRdNohY6WJ6MSTzVmPWjKSDOAfBCRAnluR+GD+pJlOd83QBwVR3xawR5pl5P+4AuquJPFEyiWl3bAJFaEhF5qgCLXk/7RETEzMciMi2KohMXcY5vNwF+dB5YURQdEZkCOCIi+gJ9nNa2g4feggAAAABJRU5ErkJggg==);
+  background-position: -406px -6px !important;
+}
+
+
+.win-switch-full:hover{
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  text-indent: -9999px;
+  width: 27px;
+  background-position: -406px -6px !important;
+}
+
+.win-switch-norm:hover{
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  text-indent: -9999px;
+  width: 27px;
+  background-position: -406px -6px !important;
+}
+
+.win-switch-norm.img_selected{
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  text-indent: -9999px;
+  width: 27px;
+  background-position:  -406px -6px !important;
+}
+
+.win-switch-full.img_selected {
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  text-indent: -9999px;
+  width: 27px;
+  background-position: -406px -6px !important;
+}
+/* Full Window toggle customizations END*/
+
+/**
+* Pagination hover customizations.
+**/
+a:not(.l-btn-plain-disabled) span.pagination-next:hover{
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../js/jquery/jquery-easyui/themes/default/images/pagination_icons_hover.png") !important;
+  background-origin: padding-box;
+  background-position: 48px 0px center !important;
+  background-repeat: no-repeat;
+  background-size: auto auto;
+}
+
+a:not(.l-btn-plain-disabled) span.pagination-last:hover{
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../js/jquery/jquery-easyui/themes/default/images/pagination_icons_hover.png") !important;
+  background-origin: padding-box;
+  background-position: 64px 0px center !important;
+  background-repeat: no-repeat;
+  background-size: auto auto;
+}
+
+a:not(.l-btn-plain-disabled) span.pagination-prev:hover{
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../js/jquery/jquery-easyui/themes/default/images/pagination_icons_hover.png") !important;
+  background-origin: padding-box;
+  background-position: 16px 0px center !important;
+  background-repeat: no-repeat;
+  background-size: auto auto;
+}
+
+a:not(.l-btn-disabled) span.pagination-first:hover{
+  background-attachment: scroll;
+  background-clip: border-box;
+  background-color: rgba(0, 0, 0, 0);
+  background-image: url("../js/jquery/jquery-easyui/themes/default/images/pagination_icons_hover.png") !important;
+  background-origin: padding-box;
+  background-position: 0px 0px center !important;
+  background-repeat: no-repeat;
+  background-size: auto auto;
 }
 
 .work_action_img{text-decoration:none; text-align:center; 
  padding:0px 0px; 
- border:solid 2px #004F72 !important; 
+ font:23px Arial, Helvetica, sans-serif; 
+ font-weight:bold; 
+  -webkit-border-radius:4px;
+ -moz-border-radius:4px; 
+ border-radius: 4px !important;
+ border:solid 2px transparent !important;
+ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1982A5', endColorstr='#1982A5',GradientType=0 ); 
+ background-image: linear-gradient(top, #a8d2e0 0% ,#1982A5 100%);
+  }.work_action_img:hover{
+ padding:0px 0px;
+ border:solid 2px #ffffff !important;
+ background-color: white !important;
  -webkit-border-radius:4px;
  -moz-border-radius:4px; 
  border-radius: 4px; 
  font:23px Arial, Helvetica, sans-serif; 
  font-weight:bold; 
- background-color: white !important;
  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1982A5', endColorstr='#1982A5',GradientType=0 ); 
- background-image: linear-gradient(top, #a8d2e0 0% ,#1982A5 100%);   
- -webkit-box-shadow:0px 0px 2px #bababa, inset 0px 0px 5px #ffffff; 
- -moz-box-shadow: 0px 0px 2px #bababa,  inset 0px 0px 5px #ffffff;  
- box-shadow:0px 0px 2px #bababa, inset 0px 0px 5px #ffffff;  
-  
-  }.work_action_img:hover{
- padding:0px 0px; 
- border:solid 2px #004F72 !important; 
+ background-image: linear-gradient(top, #3BA4C7 0% ,#1982A5 100%);
+ -webkit-box-shadow:inset 0,0,0px 0,0,0px 5,17,-1px #ffffff,#ffffff,#ffffff;  -moz-box-shadow:inset 0px 0px -1px #ffffff;  box-shadow:inset 0px 0px -1px #ffffff;  
+ }
+ 
+ .BRicon:hover{
+ padding:0px 0px;
+ border:solid 2px #ffffff !important;
+ background-color: transparent !important;
  -webkit-border-radius:4px;
  -moz-border-radius:4px; 
  border-radius: 4px; 
- font:20px Arial, Helvetica, sans-serif; 
+ font:23px Arial, Helvetica, sans-serif; 
  font-weight:bold; 
- background-color: white !important;
  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1982A5', endColorstr='#1982A5',GradientType=0 ); 
- background-image: linear-gradient(top, #3BA4C7 0% ,#1982A5 100%);   
- -webkit-box-shadow:0px 0px 2px #bababa, inset 0px 0px 17px #ffffff; 
- -moz-box-shadow: 0px 0px 2px #bababa,  inset 0px 0px 17px #ffffff;  
- box-shadow:0px 0px 2px #bababa, inset 0px 0px 17px #ffffff;  
-  
+/*  background-image: linear-gradient(top, #3BA4C7 0% ,#1982A5 100%); */
+ -webkit-box-shadow:inset 0,0,0px 0,0,0px 5,17,-1px #ffffff,#ffffff,#ffffff;  -moz-box-shadow:inset 0px 0px -1px #ffffff;  box-shadow:inset 0px 0px -1px #ffffff;  
+ }
+ 
+.BRicon.full.img_selected{
+ padding:0px 0px;
+ border:solid 2px #ffffff !important;
+ background-color: transparent !important;
+ -webkit-border-radius:4px;
+ -moz-border-radius:4px; 
+ border-radius: 4px; 
+ font:23px Arial, Helvetica, sans-serif; 
+ font-weight:bold; 
+ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1982A5', endColorstr='#1982A5',GradientType=0 ); 
+/*  background-image: linear-gradient(top, #3BA4C7 0% ,#1982A5 100%); */
+ -webkit-box-shadow:inset 0,0,0px 0,0,0px 5,17,-1px #ffffff,#ffffff,#ffffff;  -moz-box-shadow:inset 0px 0px -1px #ffffff;  box-shadow:inset 0px 0px -1px #ffffff;  
  }
  
  .work_action_img.img_selected{
  padding:0px 0px; 
- border:solid 2px #ffffff !important; 
+ border:solid 2px #ffffff !important;
+ background-color: white !important;
  -webkit-border-radius:4px;
  -moz-border-radius:4px; 
  border-radius: 4px; 
  font:23px Arial, Helvetica, sans-serif; 
  font-weight:bold; 
- background-color: white !important;
  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1982A5', endColorstr='#1982A5',GradientType=0 ); 
  background-image: linear-gradient(top, #3BA4C7 0% ,#1982A5 100%);   
  -webkit-box-shadow:inset 0,0,0px 0,0,0px 5,17,-1px #ffffff,#ffffff,#ffffff;  -moz-box-shadow:inset 0px 0px -1px #ffffff;  box-shadow:inset 0px 0px -1px #ffffff;  
-  
  }
- 
+
 #uitree-wrapper{
   width:auto !important;
   overflow:auto !important;
@@ -162,6 +263,9 @@
   padding: 0px 0px 0px 0px !important;
 }
 
+.workbench_toolbar_lists action_img li{
+/*   padding-left: 5px !important; */
+}
 #ui-easy-paginator {
   margin-top: 0.0em !important;
 }
