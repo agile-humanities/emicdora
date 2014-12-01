@@ -103,10 +103,10 @@ function emicdora_mvd_form_validate($form, $form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $critical_edition_object = islandora_object_load($form_state['values']['pid']);
   $mvds = emicdora_calliope_find_mvds($critical_edition_object);
-  // The use of # in the name will cause lookup errors when you try and load
-  // the collation.
-  if (strpos($form_state['values']['mvd'], "#") !== FALSE) {
-    form_set_error('mvd', t('A collation name cannot contain a number sign "&#35;".'));
+  // Collation name cannot contain special characters but allow _ and space.
+  // Note: when saved space gets translated to _.
+  if (!preg_match('/^[a-z A-Z_0-9]+$/', $form_state['values']['mvd'])) {
+    form_set_error('mvd', t('A collation name cannot contain any special characters.'));
   }
   foreach ($mvds as $mvd) {
     if ($mvd['name'] == $form_state['values']['mvd']) {
