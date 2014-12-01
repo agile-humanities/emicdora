@@ -1,12 +1,6 @@
 (function($) {
   $(document).ready(function() {
 
-    $(window).resize(function(){
-      $('#eui_window').panel('resize',{
-        width: $(this).parent().width(),
-        height: $(this).parent().width()
-      });
-    });
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
