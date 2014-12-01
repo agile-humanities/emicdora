@@ -25,6 +25,7 @@ function emicdora_permission() {
     ),
   );
 }
+
 /**
  * Implements hook_init().
  */
@@ -199,9 +200,9 @@ function emicdora_menu() {
     ),
     'emicdora/contextual-links/source/%islandora_object/link' => array(
       'title' => 'Add Existing',
-      'file' => 'includes/link_source.form.inc',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('emicdora_link_source_form', 3),
+      'file' => 'includes/link_existing.inc',
+      'page callback' => 'emicdora_add_existing',
+      'page arguments' => array(3),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'type' => MENU_LOCAL_TASK,
@@ -524,6 +525,14 @@ function emicdora_menu() {
       'type' => MENU_CALLBACK,
       'access arguments' => array(ISLANDORA_VIEW_OBJECTS),
     ),
+    'emicdora/add_source_callback' => array(
+      'title' => 'Add Source to Critical Edition',
+      'page callback' => 'emicdora_add_source_to_edition',
+      'file' => 'includes/link_existing.inc',
+      'type' => MENU_CALLBACK,
+      'access callback' => 'user_access',
+      'access arguments' => array(EMICDORA_MANAGE_EDITION),
+    ),
   );
 }
 
@@ -635,6 +644,16 @@ function emicdora_theme() {
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_coop_topic',
       'variables' => array('type' => 'author'),
+    ),
+    'emicdora_add_source_item' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/emicdora_add_source_item',
+      'variables' => array('islandora_object' => NULL, 'item_details' => NULL),
+    ),
+    'emicdora_add_source_page' => array(
+      'file' => 'theme/theme.inc',
+      'template' => 'theme/emicdora_add_source_page',
+      'variables' => array('islandora_object' => NULL),
     ),
   );
 }
@@ -801,8 +820,6 @@ function emicdora_block_view($delta = '') {
     $critical_edition = $object;
   }
   // Build the block uses paths relative to our current path.
-  $path = current_path();
-
   $block = array();
   switch ($delta) {
     case 'critical_apparatus':
