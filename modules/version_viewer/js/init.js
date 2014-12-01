@@ -1,7 +1,12 @@
 (function($) {
   $(document).ready(function() {
 
-
+    $(window).resize(function(){
+      $('#eui_window').panel('resize',{
+        width: $(this).parent().width(),
+        height: $(this).parent().width()
+      });
+    });
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
@@ -420,8 +425,6 @@
       var children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
       show_annotations(children);
-      $('#center_data').css('height', '472px');
-      $('#content_data').css('height', '472px');
     };
 
     $('#easy-ui-east').panel({
@@ -449,7 +452,10 @@
 
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
-    $('#center_data').css('height', '472px');
     $('#content_data').css('height', '472px');
+    $('#content_data').layout('resize', {
+      width:'99%',
+      height:auto
+    })
   });
 })(jQuery);

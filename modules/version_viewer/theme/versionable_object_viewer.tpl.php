@@ -44,8 +44,8 @@
               </ul>
           </div>
         </div>
-        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:472px;border-style:solid #191972">
-              <div id="content_data" class="easyui-panel" style="width:100%;height:472px;background:#fafafa;border-style:solid #191972"
+        <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:auto;border-style:solid #191972">
+              <div id="content_data" class="easyui-panel" style="width:100%;height:auto;background:#fafafa;border-style:solid #191972"
 				    data-options="fit:true">
 		     </div>
         </div>
