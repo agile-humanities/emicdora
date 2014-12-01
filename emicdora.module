@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -1703,4 +1702,16 @@ function emicdora_block_save($delta, $edit) {
   if ($delta == 'transcriptions') {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
   }
+}
+
+/**
+ * Implements hook_islandora_object_alter.
+ */
+function emicdora_islandora_object_alter(AbstractObject $object, array &$context) {
+  if (!$object['MODS']) {
+    return;
+  }
+  module_load_include('inc', 'emicdora', 'includes/nonsort');
+  $mods = $object['MODS']->content;
+  $object['MODS']->content = emicdora_adjust_titleinfo($mods);
 }
