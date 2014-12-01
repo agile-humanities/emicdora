@@ -98,7 +98,7 @@ function versionable_object_viewer_build_transcription_data($object) {
  * @param AbstractObject $derivation_object
  *   The versionable objects source object to use.
  */
-function versionable_object_viewer_build_tree($object, $derivation_object) {
+function versionable_object_viewer_build_tree($object, $derivation_object, $version_pid = NULL) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
@@ -108,7 +108,6 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   $restrained = FALSE;
   if (isset($anno_pids['pids'])) {
-    $version_pid = $_SESSION['emicdora_version_pid'];
     $query = db_select('versionable_object_access')
         ->fields('versionable_object_access', array(
           'pid',

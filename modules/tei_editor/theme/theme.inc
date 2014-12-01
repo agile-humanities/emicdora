@@ -66,7 +66,6 @@ function tei_editor_preprocess_tei_editor_viewer(&$variables) {
   islandora_image_annotation_include_common_js();
   islandora_image_annotation_include_common_css();
   $version = $variables['islandora_object'];
-  $_SESSION['emicdora_version_pid'] = $version->id;
   drupal_add_js($islandora_markup_editor_path . '/CWRC-Writer/src/js/lib/jquery/jquery-ui-1.10.3.custom.js');
 }
 

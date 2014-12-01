@@ -184,15 +184,15 @@ function versionable_object_viewer_svg_data($anno_svg) {
 /**
  * Builds viewer for Media objects.
  *
- * @param AbstractObject $reference_object
- *   Object representing object from which this Versionable object is derived
+ * @param AbstractObject $version
+ *   Object representing Versionable object
  * @param array $variables
  *   Theme variables
  *
  * @return array
  *   Theme variables
  */
-function versionable_object_viewer_build_version_media_view($reference_object, &$variables) {
+function versionable_object_viewer_build_version_media_view($version, &$variables) {
   module_load_include('inc', 'islandora', 'includes/solution_packs');
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
@@ -206,7 +206,7 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
   );
   drupal_add_js(array('versionable_object_viewer' => array('mode' => $variables['content_model_type'])), 'setting');
   if ($variables['content_model_type'] == 'audio') {
-    $data = $reference_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+    $data = $version->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
     $source = islandora_object_load($data[0]['object']['value']);
     $variables['show_components']['w'] = 'true';
     if (isset($source['PROXY_MP3'])) {
@@ -236,11 +236,11 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     elseif (isset($source['PROXY_MP3']) && islandora_datastream_access(ISLANDORA_VIEW_OBJECTS, $source['PROXY_MP3'])) {
       $variables['islandora_content'] = l($source->label, $audio_params['url']);
     }
-    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($version);
   }
   if ($variables['content_model_type'] == 'video') {
     $variables['show_components']['w'] = 'true';
-    $data = $reference_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+    $data = $version->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
     $source = islandora_object_load($data[0]['object']['value']);
 
     $video_params = versionable_object_viewer_get_video_params($source);
@@ -249,17 +249,17 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     if ($viewer) {
       $variables['islandora_content'] = $viewer;
     }
-    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($version);
   }
   if ($variables['content_model_type'] == 'image') {
 
     $variables['show_components']['w'] = 'true';
     $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
-    $data = $reference_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+    $data = $version->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
     $source = islandora_object_load($data[0]['object']['value']);
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
-    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($reference_object);
+    $variables['pager_data'] = versionable_object_viewer_get_transcription_text($version);
     drupal_add_js(array('islandora_image_annotation' => array('PID' => $source->id)), 'setting');
 
     islandora_image_annotation_include_common_js();
@@ -286,7 +286,7 @@ function versionable_object_viewer_build_version_media_view($reference_object, &
     $variables['pager_data'] = $pids;
     drupal_add_js(array('versionable_object_viewer' => array('tei_rdf_pids' => $pids)), 'setting');
     drupal_add_js(array('versionable_object_viewer' => array('pids' => $derivation_pids)), 'setting');
-    $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data");
+    $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data/{$version->id}");
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
     drupal_add_js(array('islandora_image_annotation' => array('PID' => $derivation_pids[0])), 'setting');
     islandora_image_annotation_include_common_js();
