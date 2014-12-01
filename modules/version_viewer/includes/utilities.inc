@@ -61,7 +61,7 @@ function versionable_object_viewer_render_transcription(AbstractDatastream $data
   $unwrapper_xslt = new XSLTProcessor();
   $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
   $unwrapper_xslt->setParameter('', 'type', $type);
-  $tempfile = drupal_tempnam('public://', 'reading_tei');
+  $tempfile = drupal_tempnam('public://', 'tei');
   $unwrapper_xslt->transformToUri($wrapped, $tempfile);
 
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
