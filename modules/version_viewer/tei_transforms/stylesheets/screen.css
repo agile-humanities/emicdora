@@ -87,175 +87,181 @@
   z-index: 2;
   top: 0;
 }
-/* line 54, ../sass/_tei.scss */
+/* line 52, ../sass/_tei.scss */
 .tei > div > div.line-magic .mod .class--place--superlinear, .tei > div > div.line-magic .mod .class--place--sublinear, .tei > div > div.line-magic .seg .class--place--superlinear, .tei > div > div.line-magic .seg .class--place--sublinear {
   display: none;
 }
-/* line 58, ../sass/_tei.scss */
+/* line 56, ../sass/_tei.scss */
 .tei > div > div.line-magic .class--place--superlinear, .tei > div > div.line-magic .class--place--sublinear {
   visibility: hidden;
 }
-/* line 62, ../sass/_tei.scss */
+/* line 60, ../sass/_tei.scss */
 .tei > div > div.super-magic {
   position: absolute;
   top: -1em;
   left: 0;
   z-index: 1;
-}
-/* line 67, ../sass/_tei.scss */
-.tei > div > div.super-magic * {
   visibility: hidden;
 }
-/* line 70, ../sass/_tei.scss */
+/* line 65, ../sass/_tei.scss */
 .tei > div > div.super-magic .class--place--superlinear {
   visibility: visible;
 }
-/* line 74, ../sass/_tei.scss */
+/* line 73, ../sass/_tei.scss */
+.tei > div > div.super-magic .mod .class--place--intralinear, .tei > div > div.super-magic .mod .class--place--sublinear, .tei > div > div.super-magic .seg .class--place--intralinear, .tei > div > div.super-magic .seg .class--place--sublinear {
+  display: none;
+}
+/* line 78, ../sass/_tei.scss */
 .tei > div > div.sub-magic {
   top: 1em;
   left: 0;
   position: absolute;
   z-index: 1;
-}
-/* line 79, ../sass/_tei.scss */
-.tei > div > div.sub-magic * {
   visibility: hidden;
 }
-/* line 82, ../sass/_tei.scss */
+/* line 83, ../sass/_tei.scss */
 .tei > div > div.sub-magic .class--place--sublinear {
   visibility: visible;
 }
-/* line 88, ../sass/_tei.scss */
+/* line 91, ../sass/_tei.scss */
+.tei > div > div.sub-magic .mod .class--place--intralinear, .tei > div > div.sub-magic .mod .class--place--superlinear, .tei > div > div.sub-magic .seg .class--place--intralinear, .tei > div > div.sub-magic .seg .class--place--superlinear {
+  display: none;
+}
+/* line 97, ../sass/_tei.scss */
+.tei > div * {
+  visibility: inherit;
+}
+/* line 102, ../sass/_tei.scss */
 .tei .byline {
   display: block;
   text-indent: 0.5in;
   font-style: italic;
   margin-bottom: 0.5em;
 }
-/* line 96, ../sass/_tei.scss */
+/* line 110, ../sass/_tei.scss */
 .tei .class--rend--bold {
   font-weight: bold;
 }
-/* line 99, ../sass/_tei.scss */
+/* line 113, ../sass/_tei.scss */
 .tei .class--rend--italic {
   font-style: italic;
 }
-/* line 102, ../sass/_tei.scss */
+/* line 116, ../sass/_tei.scss */
 .tei .class--rend--underline {
   text-decoration: underline;
 }
-/* line 105, ../sass/_tei.scss */
+/* line 119, ../sass/_tei.scss */
 .tei .class--rend--center {
   text-align: center;
 }
-/* line 108, ../sass/_tei.scss */
+/* line 122, ../sass/_tei.scss */
 .tei .class--rend--right {
   text-align: right;
 }
-/* line 111, ../sass/_tei.scss */
+/* line 125, ../sass/_tei.scss */
 .tei .class--rend--left {
   text-align: left;
 }
-/* line 114, ../sass/_tei.scss */
+/* line 128, ../sass/_tei.scss */
 .tei .class--rend--small-caps {
   font-variant: small-caps;
 }
-/* line 117, ../sass/_tei.scss */
-.tei .class--rend--strikethrough {
+/* line 131, ../sass/_tei.scss */
+.tei .class--rend--strikethrough, .tei:not(.reading) .del {
   text-decoration: line-through;
   color: #7f7f7f;
 }
-/* line 121, ../sass/_tei.scss */
+/* line 135, ../sass/_tei.scss */
 .tei .class--rend--superscript {
   vertical-align: super;
   font-size: smaller;
 }
-/* line 125, ../sass/_tei.scss */
+/* line 139, ../sass/_tei.scss */
 .tei .class--rend--subscript {
   vertical-align: sub;
   font-size: smaller;
 }
-/* line 132, ../sass/_tei.scss */
+/* line 146, ../sass/_tei.scss */
 .tei q.class--style--single:before, .tei q.class--style--single:after {
   content: "'";
 }
-/* line 137, ../sass/_tei.scss */
+/* line 151, ../sass/_tei.scss */
 .tei q:not(.class--style--single):before, .tei q:not(.class--style--single):after {
   content: '"';
 }
-/* line 142, ../sass/_tei.scss */
+/* line 156, ../sass/_tei.scss */
 .tei .unclear, .tei .damage {
   color: #7f7f7f;
 }
-/* line 149, ../sass/_tei.scss */
+/* line 163, ../sass/_tei.scss */
 .tei .unclear.class--rend--illegible:before, .tei .unclear.class--rend--inaudible:before, .tei .unclear.class--reason--illegible:before, .tei .unclear.class--reason--inaudible:before, .tei .damage.class--rend--illegible:before, .tei .damage.class--rend--inaudible:before, .tei .damage.class--reason--illegible:before, .tei .damage.class--reason--inaudible:before {
   content: "<";
 }
-/* line 152, ../sass/_tei.scss */
+/* line 166, ../sass/_tei.scss */
 .tei .unclear.class--rend--illegible:after, .tei .unclear.class--rend--inaudible:after, .tei .unclear.class--reason--illegible:after, .tei .unclear.class--reason--inaudible:after, .tei .damage.class--rend--illegible:after, .tei .damage.class--rend--inaudible:after, .tei .damage.class--reason--illegible:after, .tei .damage.class--reason--inaudible:after {
   content: ">";
 }
-/* line 158, ../sass/_tei.scss */
+/* line 172, ../sass/_tei.scss */
 .tei .head, .tei .label {
   font-size: larger;
 }
-/* line 161, ../sass/_tei.scss */
+/* line 175, ../sass/_tei.scss */
 .tei .label {
   margin-top: .5em;
   text-indent: 0;
 }
-/* line 167, ../sass/_tei.scss */
+/* line 181, ../sass/_tei.scss */
 .tei .hi {
   background-color: yellow;
 }
-/* line 177, ../sass/_tei.scss */
+/* line 191, ../sass/_tei.scss */
 .tei .class--rend--no-indent,
 .tei .class--rend--no_indent {
   display: block;
   text-indent: 0in;
 }
-/* line 181, ../sass/_tei.scss */
+/* line 195, ../sass/_tei.scss */
 .tei .class--rend--indent1 {
   display: block;
   text-indent: 0.5in;
 }
-/* line 184, ../sass/_tei.scss */
+/* line 198, ../sass/_tei.scss */
 .tei .class--rend--indent2 {
   display: block;
   text-indent: 1in;
 }
-/* line 187, ../sass/_tei.scss */
+/* line 201, ../sass/_tei.scss */
 .tei .class--rend--indent3 {
   display: block;
   text-indent: 1.5in;
 }
-/* line 190, ../sass/_tei.scss */
+/* line 204, ../sass/_tei.scss */
 .tei .class--rend--indent4 {
   display: block;
   text-indent: 2in;
 }
-/* line 194, ../sass/_tei.scss */
+/* line 208, ../sass/_tei.scss */
 .tei .listBibl .bibl {
   padding-left: 0.5in;
   text-indent: -0.5in;
 }
-/* line 200, ../sass/_tei.scss */
+/* line 214, ../sass/_tei.scss */
 .tei .list {
   list-style-position: inside;
 }
-/* line 203, ../sass/_tei.scss */
+/* line 217, ../sass/_tei.scss */
 .tei .list.class--type--ordered {
   list-style-type: decimal;
 }
-/* line 206, ../sass/_tei.scss */
+/* line 220, ../sass/_tei.scss */
 .tei .list.class--type--bulleted {
   list-style-type: disc;
 }
-/* line 211, ../sass/_tei.scss */
+/* line 225, ../sass/_tei.scss */
 .tei ul.lg.class--type--stanza > li {
   text-indent: 0.5in;
 }
-/* line 232, ../sass/_tei.scss */
+/* line 246, ../sass/_tei.scss */
 .tei .class--place--left_margin {
   margin-left: -19.28571%;
   float: left;
@@ -264,7 +270,7 @@
   width: 17.14286%;
   word-wrap: break-word;
 }
-/* line 235, ../sass/_tei.scss */
+/* line 249, ../sass/_tei.scss */
 .tei .class--place--right_margin {
   margin-right: -19.28571%;
   float: right;
@@ -273,30 +279,42 @@
   width: 17.14286%;
   word-wrap: break-word;
 }
-/* line 239, ../sass/_tei.scss */
+/* line 253, ../sass/_tei.scss */
 .tei *:not(dt) > a.note.class--place--footnote {
   vertical-align: super;
   font-size: smaller;
 }
-/* line 244, ../sass/_tei.scss */
+/* line 258, ../sass/_tei.scss */
 .tei footer {
   border-top: thin solid black;
   margin-top: 1em;
   padding-top: 1em;
 }
-/* line 249, ../sass/_tei.scss */
+/* line 263, ../sass/_tei.scss */
 .tei footer dl dt {
   float: left;
   clear: left;
 }
-/* line 253, ../sass/_tei.scss */
+/* line 267, ../sass/_tei.scss */
 .tei footer dl dd {
   margin-left: 0.5in;
   text-indent: -0.5in;
   float: left;
 }
-/* line 257, ../sass/_tei.scss */
+/* line 271, ../sass/_tei.scss */
 .tei footer dl dd:before {
   content: ":";
   padding-right: 0.25in;
+}
+/* line 279, ../sass/_tei.scss */
+.tei ul .item {
+  display: list-item;
+}
+/* line 284, ../sass/_tei.scss */
+.tei.reading .seg.class--rend--undone {
+  color: black;
+}
+/* line 292, ../sass/_tei.scss */
+.tei:not(.reading) .seg.class--rend--undone {
+  color: green;
 }

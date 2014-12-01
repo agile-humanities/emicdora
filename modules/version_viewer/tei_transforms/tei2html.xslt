@@ -7,16 +7,15 @@
   <xsl:import href="./reorder-line-content.xslt"/>
   <xsl:output method="xml" indent="yes" encoding="UTF-8"/>
 
-  <xsl:param name="reading_transcript" select="true()"/>
+  <xsl:param name="type">reading</xsl:param>
   <xsl:variable name="footnotes" select="//tei:note[@place='footnote']"/>
 
   <xsl:template match="/">
     <div class="tei">
       <xsl:attribute name="class">
         <xsl:text>tei</xsl:text>
-        <xsl:if test="$reading_transcript">
-          <xsl:text> reading</xsl:text>
-        </xsl:if>
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="$type"/>
       </xsl:attribute>
 
       <div>
@@ -193,10 +192,20 @@
 
   <xsl:template match="tei:choice" mode="#all">
     <xsl:choose>
-      <xsl:when test="$reading_transcript">
+      <xsl:when test="$type = 'reading'">
         <xsl:choose>
           <xsl:when test="tei:reg | tei:expan | tei:corr">
             <xsl:apply-templates select="(tei:reg | tei:expan | tei:corr)[1]" mode="#current"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:apply-templates select="tei:*[1]" mode="#current"/>
+          </xsl:otherwise>
+        </xsl:choose>
+      </xsl:when>
+      <xsl:when test="$type = 'diplomatic'">
+        <xsl:choose>
+          <xsl:when test="tei:orig | tei:abbr | tei:sic">
+            <xsl:apply-templates select="(tei:orig | tei:abbr | tei:sic)[1]" mode="#current"/>
           </xsl:when>
           <xsl:otherwise>
             <xsl:apply-templates select="tei:*[1]" mode="#current"/>

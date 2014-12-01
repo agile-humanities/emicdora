@@ -46,11 +46,9 @@ $line_height: 3em;
       z-index: 2;
       top: 0;
       .mod, .seg {
-        // XXX: Normally, these elements will be moved to the end of
-        // block-level elements, to the different sub/super/intralinear
-        // overlays all line up... When things are contained in non-block
-        // element, we can't reliably move them around, so let's just make
-        // 'em completely invisible.
+        // XXX: These elements are copied to the end of to maintain the total
+        // "length" of the line... As such, the "in-line" copy here needs to go
+        // away.
         .class--place--superlinear, .class--place--sublinear {
           display: none;
         }
@@ -64,11 +62,17 @@ $line_height: 3em;
       top: -($line_height / 3);
       left: 0;
       z-index: 1;
-      * {
-        visibility: hidden;
-      }
       .class--place--superlinear {
         visibility: visible;
+      }
+      visibility: hidden;
+      .mod, .seg {
+        // XXX: These elements are copied to the end of to maintain the total
+        // "length" of the line... As such, the "in-line" copy here needs to go
+        // away.
+        .class--place--intralinear, .class--place--sublinear {
+          display: none;
+        }
       }
     }
     & > div.sub-magic {
@@ -76,12 +80,22 @@ $line_height: 3em;
       left: 0;
       position: absolute;
       z-index: 1;
-      * {
-        visibility: hidden;
-      }
       .class--place--sublinear {
         visibility: visible;
       }
+      visibility: hidden;
+      .mod, .seg {
+        // XXX: These elements are copied to the end of to maintain the total
+        // "length" of the line... As such, the "in-line" copy here needs to go
+        // away.
+        .class--place--intralinear, .class--place--superlinear {
+          display: none;
+        }
+      }
+    }
+
+    * {
+      visibility: inherit;
     }
   }
 
@@ -259,6 +273,24 @@ $line_height: 3em;
           padding-right: .5 * $indent;
         }
       }
+    }
+  }
+
+  ul .item {
+    display: list-item;
+  }
+
+  &.reading {
+    .seg.class--rend--undone {
+      color: black;
+    }
+  }
+  &:not(.reading) {
+    .del {
+      @extend .class--rend--strikethrough;
+    }
+    .seg.class--rend--undone {
+      color: green;
     }
   }
 }
