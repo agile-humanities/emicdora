@@ -110,13 +110,7 @@ function emicdora_mvd_form_validate($form, $form_state) {
     }
   }
   // Check to make sure at least two files are selected for the Collation.
-  $transcription_count = 0;
-  foreach ($form_state['values']['transcriptions'] as $transcription_selected) {
-    if ($transcription_selected) {
-      $transcription_count++;
-    }
-  }
-  if ($transcription_count < 2) {
+  if (count(array_filter($form_state['values']['transcriptions'])) < 2) {
     form_set_error('transcriptions', t('A minimum of two transcriptions are required to create a collation.'));
   }
 }
