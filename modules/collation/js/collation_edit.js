@@ -12,6 +12,14 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
+      var variant_selected = false;
+      function emicdora_get_variants() {
+        var variant_counts = $.map($('.variant'), function(el) {
+          return  $(el).data('variant');
+        });
+        $.unique(variant_counts);
+        return variant_counts.sort();
+      }
       $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
@@ -135,30 +143,34 @@
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
-          current_index = $.inArray(variant_selected, variant_counts);
-          current_count = variant_counts[current_index];
-          next_index = (current_index === -1) ? 0 : ++current_index;
-          next_count = variant_counts[next_index];
-          current_selector = '"[data-variant=' + current_count + ']"';
-          next_selector = '"[data-variant=' + next_count + ']"';
-          $(current_selector).removeClass('variant_selected');
-          $(next_selector).addClass('variant_selected');
-          variant_selected = $(next_selector).data('variant');
+          if (variant_counts.length > 0) {
+            current_index = $.inArray(variant_selected, variant_counts);
+            current_count = variant_counts[current_index];
+            next_index = (current_index === -1) ? 0 : ++current_index;
+            next_count = variant_counts[next_index];
+            current_selector = '"[data-variant=' + current_count + ']"';
+            next_selector = '"[data-variant=' + next_count + ']"';
+            $(current_selector).removeClass('variant_selected');
+            $(next_selector).addClass('variant_selected');
+            variant_selected = $(next_selector).data('variant');
+          }
         });
 
        $(".emicdora_previous_button").click(function() {
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
-          current_index = $.inArray(variant_selected, variant_counts);
-          current_count = variant_counts[current_index];
-          previous_index = (current_index === -1) ? 0 : --current_index;
-          previous_count = variant_counts[previous_index];
-          current_selector = '"[data-variant=' + current_count + ']"';
-          previous_selector = '"[data-variant=' + previous_count + ']"';
-          $(current_selector).removeClass('variant_selected');
-          $(previous_selector).addClass('variant_selected');
-          variant_selected = $(previous_selector).data('variant');
+          if (variant_counts.length > 0) {
+            current_index = $.inArray(variant_selected, variant_counts);
+            current_count = variant_counts[current_index];
+            previous_index = (current_index === -1) ? 0 : --current_index;
+            previous_count = variant_counts[previous_index];
+            current_selector = '"[data-variant=' + current_count + ']"';
+            previous_selector = '"[data-variant=' + previous_count + ']"';
+            $(current_selector).removeClass('variant_selected');
+            $(previous_selector).addClass('variant_selected');
+            variant_selected = $(previous_selector).data('variant');
+          }
         });
 
         $("#collation_link").click({action: 'link'}, execute_callback);
