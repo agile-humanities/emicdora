@@ -113,6 +113,10 @@ function emicdora_mvd_form_validate($form, $form_state) {
       form_set_error('mvd', t('A collation with this name is already associated with this critical edition.'));
     }
   }
+  // Check to make sure at least two files are selected for the Collation.
+  if (count(array_filter($form_state['values']['transcriptions'])) < 2) {
+    form_set_error('transcriptions', t('A minimum of two transcriptions are required to create a collation.'));
+  }
 }
 
 /**
