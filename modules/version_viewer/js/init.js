@@ -231,7 +231,7 @@
           $('#wb_meta').removeClass('img_selected');
 
           $('#wb_meta').addClass('img_selected');
-          $('#easy-ui-south').css('height', '500px');
+          $('#easy-ui-south').css('height', '623');
           toggle_layout(is_selected, 'south', 'wb_meta');
           break;
         case 'wb_dt':
@@ -441,10 +441,15 @@
       }
     });
     
+    $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
-    $('#easy-ui-east').css('height', '445px');
-    $('#easy-ui-west').css('height', '445px');
-    $('#content_data').css('height', '472px');
+    $('#eui_window').layout('resize', {
+        width:'100%',
+        height:'729px',
+      });
+    $('#easy-ui-east').css('height', '623px');
+    $('#easy-ui-west').css('height', '623px');
+    
   });
 })(jQuery);

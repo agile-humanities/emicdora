@@ -7,13 +7,28 @@
             $('#admin-menu-wrapper').hide();
             $("#wb_max_min").removeClass("win-switch-full").addClass("win-switch-norm");
             $("#wb_max_min").attr('title', "Minimize Viewer");
-            $('#eui_window').layout();
+            $('#eui_window').css('max-height', 'none');
+            var element = $('#eui_window').detach();
+            $('body').append(element);
+            $('#eui_window').layout('resize', {
+              width:'100%',
+              height:'100%',
+            });
         }
         else {
           $('#admin-menu-wrapper').show();
           $("#wb_max_min").removeClass("win-switch-norm").addClass("win-switch-full");
           $("#wb_max_min").attr('title', "Maximize Viewer");
-          $('#eui_window').layout();
+          
+          var element = $('#eui_window').detach();
+          $('#content').append(element);
+          $('#eui_window').css('max-height', '729px');
+          $('#eui_window').layout('resize', {
+              width:'100%',
+              height:'550px',
+            });
+
+          $(window).trigger('resize');
         }
       });
     }
