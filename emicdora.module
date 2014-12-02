@@ -1704,3 +1704,32 @@ function emicdora_block_save($delta, $edit) {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
   }
 }
+
+/**
+ * Implements hook_islandora_object_alter().
+ */
+function emicdora_islandora_object_alter(AbstractObject $object, array &$context) {
+  if (!$object['MODS'] || $context['action'] != 'ingest') {
+    return;
+  }
+  module_load_include('inc', 'emicdora', 'includes/nonsort');
+  $mods = $object['MODS']->content;
+  $altered_content = emicdora_adjust_titleinfo($mods);
+  if ($altered_content) {
+    $object['MODS']->content = emicdora_adjust_titleinfo($mods);
+  }
+}
+
+/**
+ * Implements hook_islandora_datastream_modified().
+ */
+function emicdora_islandora_datastream_modified(AbstractObject $object, AbstractDatastream $datastream) {
+  if ($datastream->id == 'MODS') {
+    module_load_include('inc', 'emicdora', 'includes/nonsort');
+    $mods = $object['MODS']->content;
+    $altered_content = emicdora_adjust_titleinfo($mods);
+    if ($altered_content) {
+      $object['MODS']->content = emicdora_adjust_titleinfo($mods);
+    }
+  }
+}
