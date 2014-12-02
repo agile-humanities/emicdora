@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
@@ -1705,13 +1706,30 @@ function emicdora_block_save($delta, $edit) {
 }
 
 /**
- * Implements hook_islandora_object_alter.
+ * Implements hook_islandora_object_alter().
  */
 function emicdora_islandora_object_alter(AbstractObject $object, array &$context) {
-  if (!$object['MODS']) {
+  if (!$object['MODS'] || $context['action'] != 'ingest') {
     return;
   }
   module_load_include('inc', 'emicdora', 'includes/nonsort');
   $mods = $object['MODS']->content;
-  $object['MODS']->content = emicdora_adjust_titleinfo($mods);
+  $altered_content = emicdora_adjust_titleinfo($mods);
+  if ($altered_content) {
+    $object['MODS']->content = emicdora_adjust_titleinfo($mods);
+  }
+}
+
+/**
+ * Implements hook_islandora_datastream_modified().
+ */
+function emicdora_islandora_datastream_modified(AbstractObject $object, AbstractDatastream $datastream) {
+  if ($datastream->id == 'MODS') {
+    module_load_include('inc', 'emicdora', 'includes/nonsort');
+    $mods = $object['MODS']->content;
+    $altered_content = emicdora_adjust_titleinfo($mods);
+    if ($altered_content) {
+      $object['MODS']->content = emicdora_adjust_titleinfo($mods);
+    }
+  }
 }

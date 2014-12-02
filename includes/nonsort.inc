@@ -20,26 +20,30 @@ function emicdora_adjust_titleinfo($xml) {
   $str_xml = FALSE;
   $simple_mods = simplexml_load_string($xml);
   // If non sort has been manually set, we'll leave it alone.
-  if ($simple_mods->titleInfo->nonSort) {
-    return;
+  if ($simple_mods->titleInfo->nonSort && (string) $simple_mods->titleInfo->nonSort != '') {
+    return FALSE;
   }
   if ($simple_mods->titleInfo) {
     if ($simple_mods->titleInfo->title) {
       $result = emicdora_find_nonsort_patten($simple_mods->titleInfo->title);
       if ($result) {
+        if ($simple_mods->titleInfo->nonSort) {
+          unset($simple_mods->titleInfo->nonSort);
+        }
         $simple_mods->titleInfo->title = $result['title'];
         $simple_mods->titleInfo->addChild("nonSort", $result['nonSort']);
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = FALSE;
+        $dom->formatOutput = TRUE;
+        $dom->loadXML($simple_mods->asXML());
+        $str_xml = str_replace("<@attributes/>", "", $dom->saveXML());
+        return $str_xml;
+      }
+      else {
+        return FALSE;
       }
     }
   }
-
-  // Let's format this nicely.
-  $dom = new DOMDocument();
-  $dom->preserveWhiteSpace = FALSE;
-  $dom->formatOutput = TRUE;
-  $dom->loadXML($simple_mods->asXML());
-  $str_xml = str_replace("<@attributes/>", "", $dom->saveXML());
-  return $str_xml;
 }
 
 /**
@@ -69,4 +73,3 @@ function emicdora_find_nonsort_patten($title) {
   }
   return $arr;
 }
-

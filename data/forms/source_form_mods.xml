@@ -130,7 +130,7 @@
             </properties>
             <children/>
           </element>
-                    <element name="nonSort">
+          <element name="nonSort">
             <properties>
               <type>textfield</type>
               <access>TRUE</access>
