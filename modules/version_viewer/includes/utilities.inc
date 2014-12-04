@@ -131,7 +131,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
   $xml = simplexml_load_string(reset($rdf)->asXML());
   // Fetches each annotation.
   $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
-  foreach($annotations as $annotation) {
+  foreach ($annotations as $annotation) {
     $body = $annotation->xpath('oa:hasBody/@rdf:resource');
     $body = (string) reset($body);
     $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
@@ -142,23 +142,23 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $selector = (string) reset($selector);
     $selection = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/rdf:value");
     $selection = (string) reset($selection);
-    $cwrcInfo = $annotation->xpath('cw:cwrcInfo');
-    $cwrcInfo = json_decode((string) reset($cwrcInfo));
-    $cwrcAttributes = $annotation->xpath('cw:cwrcAttributes');
-    $cwrcAttributes = json_decode((string) reset($cwrcAttributes));
+    $cwrc_info = $annotation->xpath('cw:cwrcInfo');
+    $cwrc_info = json_decode((string) reset($cwrc_info));
+    $cwrc_attributes = $annotation->xpath('cw:cwrcAttributes');
+    $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
     // JS code expects the following variables to be in these places.
-    $cwrcAttributes->cwrcInfo = $cwrcInfo;
-    $cwrcAttributes->attributes->uuid = $cwrcAttributes->attributes->id;
+    $cwrc_attributes->cwrcInfo = $cwrc_info;
+    $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     $entities[] = array(
       'id' => $matches[1],
       'type' => $type,
-      'text' => $cwrcInfo->name,
+      'text' => $cwrc_info->name,
       'attributes' => array(
         'annotationId' => $matches[1],
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
-        'cwrcAttributes' => $cwrcAttributes,
+        'cwrcAttributes' => $cwrc_attributes,
       ),
     );
   }

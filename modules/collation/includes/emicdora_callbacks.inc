@@ -223,7 +223,9 @@ function emicdora_marshall_spans($type) {
   $spans = array_filter(explode('</span>', $input));
   $marshalled_spans = array();
   foreach ($spans as $candidate) {
+    // @codingStandardsIgnoreStart
     $fixed_span = str_replace('<br>', '<br />', $candidate) . '</span>';
+    // @codingStandardsIgnoreEnd
     $dom = new DOMDocument();
     $dom->loadXML($fixed_span);
     $items = $dom->getElementsByTagName('span');
@@ -254,7 +256,9 @@ function emicdora_marshall_spans($type) {
  */
 function emicdora_unlink($fixed_content, $type) {
   $merged_content = emicdora_cleaned_post('merged_content');
+  // @codingStandardsIgnoreStart
   $merged_content = str_replace('<br>', '', $merged_content);
+  // @codingStandardsIgnoreEnd
   $span_dom = new DOMDocument();
   $span_dom->loadXML($merged_content);
   $items = $span_dom->getElementsByTagName('span');
@@ -512,7 +516,9 @@ function emicdora_ends_with($haystack, $needle) {
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
   $contents = nl2br($contents, FALSE);
   // The collation viewer doesn't handle xhtml break tags well.
+  // @codingStandardsIgnoreStart
   $contents = str_replace('<br/>', '<br>', $contents);
+  // @codingStandardsIgnoreEnd
   $new_element = $dom->createElement('span', $contents);
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared') {

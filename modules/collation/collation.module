@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 // Permissions.
 define('COLLATION_EDIT_COLLATION', 'edit collation');
 define('COLLATION_ADD_COLLATION', 'add collation');
@@ -85,7 +86,7 @@ function collation_menu() {
       ),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 1),
-      'tab_parent' => 'admin'
+      'tab_parent' => 'admin',
     ),
     'collation/%islandora_object/delete/%/%' => array(
       'title' => 'Delete Collation',

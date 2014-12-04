@@ -328,6 +328,7 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
  *   Blank TEI
  */
 function emicdora_get_blank_tei($title) {
+  // @ignore style_lowercase_html:function
   // @codingStandardsIgnoreStart
   $tei = <<<EOD
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
@@ -352,7 +353,7 @@ function emicdora_get_blank_tei($title) {
     </text>
 </TEI>
 EOD;
-// @codingStandardsIgnoreEnd
+  // @codingStandardsIgnoreEnd
   return $tei;
 }
 
@@ -404,6 +405,7 @@ function emicdora_get_apparatus_as_content($object, $dsid = NULL) {
  *   PIDs of currently associated versionable objects
  */
 function emicdora_get_source_autocomplete() {
+  // @ignore style_lowercase_html:function
   $tuque = islandora_get_tuque_connection();
   $query = "PREFIX fm: <" . FEDORA_MODEL_URI . ">
             PREFIX fr: <" . FEDORA_RELS_EXT_URI . ">
@@ -433,6 +435,7 @@ function emicdora_get_source_autocomplete() {
  *   The list of critical editions.
  */
 function emicdora_get_critical_editions(AbstractObject $fedora_object) {
+  // @ignore style_lowercase_html:function
   $edition_pids = array();
 
   $query = "
@@ -680,6 +683,7 @@ function emicdora_generate_tei_from_ocr(AbstractObject $object) {
  *   The plain text to be wrapped in a TEI document.
  */
 function emicdora_wrap_plain_text_in_tei($content = 'Blank Page') {
+  // @ignore style_lowercase_html:function
   $markup_editor_module_path = drupal_get_path('module', 'islandora_markup_editor');
   $schema = file_create_url("$markup_editor_module_path/CWRC-Writer/src/schema/CWRC-TEIBasic.rng");
   $prefix = '<?xml version="1.0" encoding="UTF-8"?>

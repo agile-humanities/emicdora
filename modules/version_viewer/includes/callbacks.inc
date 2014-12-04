@@ -107,11 +107,11 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
   $tree_data = versionable_object_viewer_flatten_rdf_annos($rdf_annotations);
   $text_to_image_annotations = array();
-  foreach($tree_data as $folder) {
-    foreach($folder['children'] as $child) {
-      $cwrcAttributes = $child['attributes']['cwrcAttributes'];
-      if (isset($cwrcAttributes->attributes->id)) {
-        $text_to_image_annotations[] = $cwrcAttributes->attributes->id;
+  foreach ($tree_data as $folder) {
+    foreach ($folder['children'] as $child) {
+      $cwrc_attributes = $child['attributes']['cwrcAttributes'];
+      if (isset($cwrc_attributes->attributes->id)) {
+        $text_to_image_annotations[] = $cwrc_attributes->attributes->id;
       }
     }
   }

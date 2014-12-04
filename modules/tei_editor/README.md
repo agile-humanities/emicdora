@@ -39,4 +39,3 @@ The tests for this module will not run through Drupal’s UI. They will work usi
 ## License
 
 [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
-

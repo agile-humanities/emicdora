@@ -37,7 +37,7 @@ EOT;
   $results = $connection->repository->ri->sparqlQuery($query);
   $documents = array();
   $sources = array();
-  foreach($results as $result) {
+  foreach ($results as $result) {
     $documents[] = $result['document']['value'];
     $sources[] = $result['source']['value'];
   }
