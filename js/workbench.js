@@ -12,24 +12,28 @@
   'use strict';
   Drupal.behaviors.emicdoraWorkbenchLink = {
     attach: function (context, settings) {
-      $('.emicdora-workbench-entity-links').once().change(function(){
-        var selected, collections;
-        selected = $('.emicdora-workbench-entity-links option:selected').val();
-        collections = {
-          person: 'cwrc:personEntityCollection',
-          organization: 'cwrc:organizationEntityCollection',
-          title: 'cwrc:titleEntityCollection',
-          place: 'cwrc:placeEntityCollection'
-        };
-        if (selected !== 'none') {
-          window.location = Drupal.settings.basePath + 'islandora/object/' + collections[selected] + '/manage/overview/ingest';
-        }
+      $('.emicdora-workbench-entity-links').once('emicdora-workbench-entity-links', function() {
+        $(this).change(function(){
+          var selected, collections;
+          selected = $('.emicdora-workbench-entity-links option:selected').val();
+          collections = {
+            person: 'cwrc:personEntityCollection',
+            organization: 'cwrc:organizationEntityCollection',
+            title: 'cwrc:titleEntityCollection',
+            place: 'cwrc:placeEntityCollection'
+          };
+          if (selected !== 'none') {
+            window.location = Drupal.settings.basePath + 'islandora/object/' + collections[selected] + '/manage/overview/ingest';
+          }
+        });
       });
-      $('.emicdora-workbench-source-links').once().change(function(){
-        var selected = $('.emicdora-workbench-source-links option:selected').val();
-        if (selected !== 'none') {
-          window.location = Drupal.settings.basePath + 'emicdora/source/add/' + selected + '/FALSE/TRUE';
-        }
+      $('.emicdora-workbench-source-links').once('emicdora-workbench-source-links', function () {
+        $(this).change(function(){
+          var selected = $('.emicdora-workbench-source-links option:selected').val();
+          if (selected !== 'none') {
+            window.location = Drupal.settings.basePath + 'emicdora/source/add/' + selected + '/FALSE/TRUE';
+          }
+        });
       });
     }
   };
