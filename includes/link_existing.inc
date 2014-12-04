@@ -134,11 +134,12 @@ function emicdora_add_source_to_edition() {
   $source_pid = urldecode(filter_xss($_POST['source_pid']));
   $critical_edition_pid = urldecode(filter_xss($_POST['critical_edition_pid']));
   $source_object = islandora_object_load($source_pid);
+  $results = array();
   if ($source_object) {
     $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
     foreach ($rels as $rel) {
       if ($rel['object']['value'] == $critical_edition_pid) {
-        $message = t("@label is already associated with this Critical Edition", array('@label' => $source_object->label));
+        $results['message'] = t("@label is already associated with this Critical Edition", array('@label' => $source_object->label));
       }
     }
     if (!isset($message)) {
@@ -147,9 +148,6 @@ function emicdora_add_source_to_edition() {
     }
 
   }
-  $results = array(
-    'message' => $message,
-    'added' => "$critical_edition_pid/source/$source_pid",
-  );
+  $results['added'] = "$critical_edition_pid/source/$source_pid";
   echo json_encode($results);
 }

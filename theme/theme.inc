@@ -141,7 +141,7 @@ function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
   $return_label = t("Return to @label", array('@label' => $object->label));
   $variables['return_button'] = "<button class = 'emicdora_button return'>$return_label</button>";
   $title = isset($variables['title']) ? $variables['title'] : NULL;
-  $display_count = 5;
+  $display_count = 2;
   $element = 0;
   $count_data = emicdora_get_all_source_objects($object->id, 0, 0, $title);
   $total = $count_data['count'];
@@ -166,7 +166,7 @@ function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
     $output .= $item;
   }
   $variables['item_table'] = $output;
-  $variables['pager'] = theme('pager', array('quantity' => $total, 'element' => $element));
+  $variables['pager'] = theme('pager', array('quantity' => 10, 'element' => $element));
 }
 
 /**
