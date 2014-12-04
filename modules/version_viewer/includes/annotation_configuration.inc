@@ -20,14 +20,11 @@
  */
 function islandora_emicdora_annotation_availability(array $form, array $form_state, AbstractObject $version, $critical_edition_pid = NULL) {
   drupal_add_css(drupal_get_path('module', 'versionable_object_viewer') . '/css/annotation_access.css');
-  $limit = 10;
   $total = db_select('versionable_object_custom_config')
       ->fields('versionable_object_custom_config')
       ->countQuery()
       ->execute()
       ->fetchField();
-  $current_page = pager_default_initialize($total, $limit);
-  $offset = $current_page * $limit;
   $query = db_select('versionable_object_access')
       ->fields('versionable_object_access', array(
         'pid',
@@ -49,7 +46,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
 
   $query = db_select('versionable_object_custom_config', 'v')
       ->fields('v')
-      ->range($offset, $limit);
+      ->extend('PagerDefault')->limit(10);
   $configs = $query->execute()->fetchAll();
 
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
@@ -183,7 +180,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     $form['select_config']['table_wrapper']['config_table'] = $table_element;
     $form['select_config']['table_wrapper']['pager'] = array(
       '#type' => 'markup',
-      '#markup' => theme('pager'),
+      '#markup' => theme('pager', array('quantity' => 10)),
     );
 
     $form['select_config']['cancel'] = array(
