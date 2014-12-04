@@ -1,7 +1,6 @@
 (function($) {
   $(document).ready(function() {
 
-
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
@@ -232,7 +231,7 @@
           $('#wb_meta').removeClass('img_selected');
 
           $('#wb_meta').addClass('img_selected');
-          $('#easy-ui-south').css('height', '500px');
+          $('#easy-ui-south').css('height', '623');
           toggle_layout(is_selected, 'south', 'wb_meta');
           break;
         case 'wb_dt':
@@ -420,8 +419,6 @@
       var children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
       show_annotations(children);
-      $('#center_data').css('height', '472px');
-      $('#content_data').css('height', '472px');
     };
 
     $('#easy-ui-east').panel({
@@ -443,13 +440,16 @@
         }
       }
     });
-
-    $('#easy-ui-east').css('height', '445px');
-    $('#easy-ui-west').css('height', '445px');
-
+    
+    $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
-    $('#center_data').css('height', '472px');
-    $('#content_data').css('height', '472px');
+    $('#eui_window').layout('resize', {
+        width:'100%',
+        height:'729px',
+      });
+    $('#easy-ui-east').css('height', '623px');
+    $('#easy-ui-west').css('height', '623px');
+    
   });
 })(jQuery);
