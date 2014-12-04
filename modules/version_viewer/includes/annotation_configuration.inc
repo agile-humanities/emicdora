@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Forms to configure annotion availability.
+ * Forms to configure annotation availability.
  */
 
 /**
@@ -28,8 +28,6 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       ->fetchField();
   $current_page = pager_default_initialize($total, $limit);
   $offset = $current_page * $limit;
-
-  $pager = theme('pager', array('quantity' => $total));
   $query = db_select('versionable_object_access')
       ->fields('versionable_object_access', array(
         'pid',
@@ -60,7 +58,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $users = array();
   $result = db_query('SELECT u.uid, u.name FROM {users} u');
   foreach ($result as $user) {
-    $user->uid == 0 ? $users['anonymous'] = 'anonymous' : $users[$user->name] = $user->name;
+    $user->uid == 0 ? $users['anonymous'] = variable_get('anonymous', t('Anonymous')) : $users[$user->name] = $user->name;
     if ($user->uid == 1) {
       $admin_user = $user->name;
       $form_state['islandora_xacml']['admin_user'] = $user->name;
@@ -70,7 +68,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $roles = array();
   $result = db_query('SELECT r.rid, r.name FROM {role} r');
   foreach ($result as $role) {
-    $role->rid == 0 ? $roles['anonymous'] = 'anonymous' : $roles[$role->name] = $role->name;
+    $role->rid == 0 ? $roles['anonymous'] = variable_get('anonymous', t('Anonymous')) : $roles[$role->name] = $role->name;
   }
 
   $form = array();
@@ -151,8 +149,15 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       ),
     );
     foreach ($configs as $config) {
-      $css = l(t("View CSS"), "islandora/version_viewer/configuration/download/{$config->cid}/css");
-      $xslt = l(t("View XSLT"), "islandora/version_viewer/configuration/download/{$config->cid}/xslt");
+      $css = t("Default");
+      $xslt = t("Default");
+      if ($config->css) {
+        $css = l(t("View CSS"), "islandora/version_viewer/configuration/download/{$config->cid}/css");
+      }
+      if ($config->xslt) {
+        $xslt = l(t("View XSLT"), "islandora/version_viewer/configuration/download/{$config->cid}/xslt");
+      }
+
       $delete = l(t("Delete"), "islandora/version_viewer/configuration/delete/$config->cid/{$version->id}");
       $rows[$config->cid] = array(
         'label' => $config->label,
@@ -178,7 +183,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     $form['select_config']['table_wrapper']['config_table'] = $table_element;
     $form['select_config']['table_wrapper']['pager'] = array(
       '#type' => 'markup',
-      '#markup' => $pager,
+      '#markup' => theme('pager'),
     );
 
     $form['select_config']['cancel'] = array(
@@ -266,17 +271,14 @@ function islandora_emicdora_annotation_availability_validate(array $form, array 
   switch ($action) {
     case 'save':
       if (empty($form_state['values']['access']['users']) && empty($form_state['values']['access']['roles'])) {
-        form_set_error('users', t('Please select at least one entry from either Uers or Roles'));
+        form_set_error('users', t('Please select at least one entry from either Users or Roles'));
       }
 
       break;
 
     case 'create':
-      if (empty($form_state['values']['custom_forms']['custom_css'])) {
-        form_set_error('custom_css', t('CSS file is required.'));
-      }
-      if (empty($form_state['values']['custom_forms']['custom_xslt'])) {
-        form_set_error('custom_xslt', t('XSLT file is required.'));
+      if (empty($form_state['values']['custom_forms']['custom_css']) && empty($form_state['values']['custom_forms']['custom_xslt'])) {
+        form_set_error('custom_css', t('CSS or XSLT file is required.'));
       }
       if (empty($form_state['values']['custom_forms']['config_label'])) {
         form_set_error('config_label', t('Label is required.'));
@@ -302,7 +304,7 @@ function islandora_emicdora_annotation_availability_submit(array $form, array $f
   switch ($action) {
     case 'cancel':
 
-      drupal_goto("islandora/object/$critical_edition_pid/version/$version_pid");
+      $form_state['redirect'] = "islandora/object/$critical_edition_pid/version/$version_pid";
       break;
 
     case 'save':
@@ -323,10 +325,17 @@ function islandora_emicdora_annotation_availability_submit(array $form, array $f
       break;
 
     case 'create':
-      $css_file = file_load($form_state['values']['custom_forms']['custom_css']);
-      $css = file_get_contents(drupal_realpath($css_file->uri));
-      $xslt_file = file_load($form_state['values']['custom_forms']['custom_xslt']);
-      $xslt = file_get_contents(drupal_realpath($xslt_file->uri));
+      $css = NULL;
+      if ($form_state['values']['custom_forms']['custom_css']) {
+        $css_file = file_load($form_state['values']['custom_forms']['custom_css']);
+        $css = file_get_contents(drupal_realpath($css_file->uri));
+      }
+      $xslt = NULL;
+      if ($form_state['values']['custom_forms']['custom_xslt']) {
+        $xslt_file = file_load($form_state['values']['custom_forms']['custom_xslt']);
+        $xslt = file_get_contents(drupal_realpath($xslt_file->uri));
+      }
+
       $label = $form_state['values']['custom_forms']['config_label'];
       $description = $form_state['values']['custom_forms']['config_description'];
       $cid = db_insert('versionable_object_custom_config')
@@ -341,7 +350,7 @@ function islandora_emicdora_annotation_availability_submit(array $form, array $f
           ->execute();
       versionable_object_viewer_config_upsert($version_pid, $cid);
       drupal_set_message(t('Configuration saved and associated with this version.'));
-      drupal_goto("islandora/object/$critical_edition_pid/version/$version_pid");
+      $form_state['redirect'] = "islandora/object/$critical_edition_pid/version/$version_pid";
       break;
   }
 }

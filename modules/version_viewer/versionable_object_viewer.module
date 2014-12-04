@@ -96,12 +96,6 @@ function versionable_object_viewer_menu() {
     'access callback' => 'user_access',
     'access arguments' => array(VERSIONABLE_OBJECT_VIEWER_MANAGE),
   );
-    $items['versionable_object_viewer/anno/get_annotation'] = array(
-    'page callback' => 'versionable_object_viewer_get_annotation',
-    'type' => MENU_CALLBACK,
-    'access arguments' => array(ISLANDORA_IMAGE_ANNOTATION_VIEW),
-    'file' => 'includes/utilities.inc',
-  );
   return $items;
 }
 
