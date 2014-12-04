@@ -10,18 +10,25 @@
  *
  * @param AbstractObject $object
  *   The islandora:versionCModel object whose page PIDs will be returned.
+ * @param int $limit
+ *   Limit the number of results.
  *
  * @return array
  *   An array of zero or more PID's
  */
-function tei_editor_get_page_pids(AbstractObject $object) {
+function tei_editor_get_page_pids(AbstractObject $object, $limit = NULL) {
+  $limit = is_int($limit) ? "LIMIT $limit" : '';
   $query = <<<EOT
 PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
-SELECT ?pid
+PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+SELECT ?pid ?sequenceNumber
 WHERE {
   ?pid <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}> ;
-       <fedora-model:hasModel> <info:fedora/islandora:tei-rdfCModel> .
+       <fedora-model:hasModel> <info:fedora/islandora:tei-rdfCModel> ;
+       <islandora-rels-ext:isSequenceNumber> ?sequenceNumber .
 }
+ORDER BY ?sequenceNumber
+$limit
 EOT;
   $connection = islandora_get_tuque_connection();
   $results = $connection->repository->ri->sparqlQuery($query);
@@ -42,7 +49,7 @@ EOT;
  *   The PID if found, otherwise NULL;
  */
 function tei_editor_get_first_page_pid(AbstractObject $object) {
-  $pids = tei_editor_get_page_pids($object);
+  $pids = tei_editor_get_page_pids($object, 1);
   return array_shift($pids);
 }
 
