@@ -67,13 +67,12 @@ function emicdora_workbench_form($form, &$form_state) {
   $form['add_entities'] = array(
     '#type' => 'select',
     '#title' => t('Add Entity'),
-    // @TODO: Make these paths point at something real.
     '#options' => array(
       'none' => t('-- Select --'),
       'person' => t('Add Person Entity'),
-      'event' => t('Add Event Entity'),
-      'place' => t('Add Place Entity'),
       'organization' => t('Add Organization Entity'),
+      'title' => t('Add Title Entity'),
+      'place' => t('Add Place Entity'),
     ),
     '#attributes' => array(
       'class' => array(

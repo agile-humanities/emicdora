@@ -462,6 +462,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       // Add all relationships.
       $page->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:tei-rdfCModel');
       $page->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $versionable_object->id);
+      $page->relationships->add(FEDORA_RELS_EXT_URI, 'isDerivationOf', $source->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageOf', $versionable_object->id);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSequenceNumber', 1, RELS_TYPE_PLAIN_LITERAL);
       $page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', 1, RELS_TYPE_PLAIN_LITERAL);
