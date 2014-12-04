@@ -30,15 +30,19 @@ function versionable_object_viewer_display_page_tei($object, $dsid = 'TEI_RDF') 
 }
 
 /**
- * Callback for versionable_object_viewer_display_page_tei for reading display.
+ * Render transcription markup.
  *
  * @param AbstractDatastream $datastream
- *   The datastrean to use to generate the display.
+ *   The datastream containing the TEI for which to produce a transcription.
+ * @param string $type
+ *   The type of transcription. At time of writing, we support:
+ *   - reading
+ *   - diplomatic
  *
  * @return string
- *   A string of markup to use, representing the reading display.
+ *   A string of HTML to output... Likely with significant styling.
  */
-function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
+function versionable_object_viewer_render_transcription(AbstractDatastream $datastream, $type) {
   $path = drupal_get_path('module', 'versionable_object_viewer');
   $input = new DOMDocument();
   $input->loadXML($datastream->content);
@@ -54,7 +58,8 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
   $unwrapper_xslt_doc->load("$path/tei_transforms/unwrap.xslt");
   $unwrapper_xslt = new XSLTProcessor();
   $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
-  $tempfile = drupal_tempnam('public://', 'reading_tei');
+  $unwrapper_xslt->setParameter('', 'type', $type);
+  $tempfile = drupal_tempnam('public://', 'tei');
   $unwrapper_xslt->transformToUri($wrapped, $tempfile);
 
   $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
@@ -67,11 +72,25 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
       'source' => file_create_url($tempfile),
       'clear-stylesheet-cache' => 'yes',
       'css_base' => file_create_url("$path/tei_transforms"),
+      'type' => $type,
     ),
   ));
   $result = drupal_http_request($saxon_url);
 
   return $result->data;
+}
+
+/**
+ * Callback for versionable_object_viewer_display_page_tei for reading display.
+ *
+ * @param AbstractDatastream $datastream
+ *   The datastrean to use to generate the display.
+ *
+ * @return string
+ *   A string of markup to use, representing the reading display.
+ */
+function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $datastream) {
+  return versionable_object_viewer_render_transcription($datastream, 'reading');
 }
 
 /**
@@ -84,28 +103,7 @@ function versionable_object_viewer_display_page_tei_reading(AbstractDatastream $
  *   A string of markup to use, representing the diplomatic display.
  */
 function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
-  module_load_include('inc', 'islandora', 'includes/authtokens');
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-  $xsl = 'EMiC_diplomatic.xsl';
-
-  global $base_url;
-  $islandora_url = variable_get('islandora_base_url', 'http://localhost:8080/fedora');
-  $tomcat_url = str_replace('/fedora', '', $islandora_url);
-
-  $pid = $datastream->parent->id;
-  $dsid = $datastream->id;
-
-  $path = drupal_get_path('module', 'versionable_object_viewer');
-  $xml_path = url("islandora/object/$pid/datastream/$dsid/view", array(
-    'absolute' => TRUE,
-    'query' => array(
-      'token' => islandora_get_object_token($pid, $dsid),
-    ),
-  ));
-  $xslt_path = "$base_url/$path/xml/$xsl";
-  // Remove clear-stylesheet for prod.
-  $data = file_get_contents("$tomcat_url/saxon/SaxonServlet?source=$xml_path&style=$xslt_path&clear-stylesheet-cache=yes");
-  return $data;
+  return versionable_object_viewer_render_transcription($datastream, 'diplomatic');
 }
 
 /**

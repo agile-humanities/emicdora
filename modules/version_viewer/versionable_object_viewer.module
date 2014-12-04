@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 // Permissions.
 define('VERSIONABLE_OBJECT_VIEWER_VIEW', 'use version viewer');
 define('VERSIONABLE_OBJECT_VIEWER_CONSOLIDATE_TEI', 'consolidate tei');

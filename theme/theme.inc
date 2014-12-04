@@ -132,6 +132,54 @@ function emicdora_preprocess_emicdora_coop_topic(array &$variables) {
 }
 
 /**
+ * Implements hook_preprocess_theme().
+ */
+function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
+  module_load_include('inc', 'emicdora', 'includes/link_existing');
+
+  $object = $variables['object'];
+  $return_label = t("Return to @label", array('@label' => $object->label));
+  $variables['return_button'] = "<button class = 'emicdora_button return'>$return_label</button>";
+  $title = isset($variables['title']) ? $variables['title'] : NULL;
+  $display_count = 5;
+  $element = 0;
+  $count_data = emicdora_get_all_source_objects($object->id, 0, 0, $title);
+  $total = $count_data['count'];
+  $current_page = pager_default_initialize($total, $display_count, $element);
+  $start = $current_page * $display_count;
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $module_path = drupal_get_path('module', 'emicdora');
+  drupal_add_css("$module_path/css/emicdora.coop.css");
+  drupal_add_js("$module_path/js/emicdora_add_source_callback.js");
+  $critical_edition = $variables['object'];
+  drupal_add_css("$module_path/css/emicdora.coop.css");
+  drupal_add_js(
+      array(
+        'critical_edition' => $critical_edition->id,
+      ), 'setting'
+  );
+  $source_data = emicdora_get_all_source_objects($object->id, $start, $display_count, $title);
+  $source_objects = $source_data['results'];
+  $output = "";
+  foreach ($source_objects as $item_details) {
+    $item = theme('emicdora_add_source_item', array('object' => $object, 'item_details' => $item_details));
+    $output .= $item;
+  }
+  $variables['item_table'] = $output;
+  $variables['pager'] = theme('pager', array('quantity' => $total, 'element' => $element));
+}
+
+/**
+ * Implements hook_preprocess_theme().
+ */
+function emicdora_preprocess_emicdora_add_source_item(array &$variables) {
+  $module_path = drupal_get_path('module', 'emicdora');
+  drupal_add_css("$module_path/css/emicdora.coop.css");
+
+  $variables['item_table'] = emicdora_item_table($variables['item_details']);
+}
+
+/**
  * Redirects menu call to themed output.
  *
  * @param string $type
@@ -162,17 +210,11 @@ function emicdora_build_topic_table($type, $display_count, $element) {
   $urls = array();
   $total = count($results);
   $current_page = pager_default_initialize($total, $display_count, $element);
-  $offset = $current_page * $display_count;
   $solr_term_mappings = array(
     'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
     'genre' => 'mods_genre_authority_marcgt_ms',
   );
-  $sort_term_mappings = array(
-    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_s',
-    'genre' => 'mods_genre_authority_marcgt_s',
-  );
   $solr_term = $solr_term_mappings[$type];
-  $sort_term = $sort_term_mappings[$type];
   $options = array('query' => array('sort' => "mods_titleInfo_title_s asc"));
   foreach ($results as $data) {
     $label = $data['label'];
@@ -182,12 +224,84 @@ function emicdora_build_topic_table($type, $display_count, $element) {
       'count' => $data['count'],
     );
   }
-  $total = count($urls);
-
   if ($total > $display_count) {
     $urls = array_slice($urls, $current_page * $display_count, $display_count);
   }
   $table = emicdora_build_table($urls);
   $table .= theme('pager', array('quantity' => $total, 'element' => $element));
   return $table;
+}
+
+/**
+ * Build source table.
+ *
+ * @param array $item_details
+ *   Values for table items
+ *
+ * @return HTML
+ *   Themed table
+ */
+function emicdora_item_table($item_details) {
+  $header = NULL;
+  $rows = array();
+  $image = theme_image(array(
+    'path' => "islandora/object/{$item_details['pid']}/datastream/TN/view",
+    'alt' => '',
+    'height' => '90px',
+    'width' => '90px',
+    'attributes' => array('class' => 'emicdora_thumbnail'),
+  ));
+
+  $add_class = !$item_details['added'] ? 'add_source' : NULL;
+  $label = !$item_details['added'] ? t("Add") : t("Added");
+  $button = "<button class = 'emicdora_button $add_class' target='{$item_details['pid']}'>$label</button>";
+  $rows[] = array(
+    'image' => array(
+      'data' => $image,
+      'class' => 'emicdora_cell_image',
+      'rowspan' => 2,
+    ),
+    'title' => array(
+      'data' => t('Title'),
+      'class' => 'emicdora_cell_title',
+    ),
+    'label' => array(
+      'data' => $item_details['title'],
+      'class' => 'emicdora_cell_label',
+    ),
+  );
+  $rows[] = array(
+    'title' => array(
+      'data' => t('Type'),
+      'class' => 'emicdora_cell_title',
+    ),
+    'label' => array(
+      'data' => $item_details['type'],
+      'class' => 'emicdora_cell_label',
+    ),
+  );
+  $rows[] = array(
+    'image' => array(
+      'data' => $button,
+      'class' => 'emicdora_cell_image',
+    ),
+    'title' => array(
+      'data' => t('Genre'),
+      'class' => 'emicdora_cell_title',
+    ),
+    'label' => array(
+      'data' => $item_details['genre'],
+      'class' => 'emicdora_cell_label',
+    ),
+  );
+
+  $output = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No results found.'),
+    'attributes' => array(
+      'class' => array('emicdora-link-source-table'),
+    ),
+  ));
+  return $output;
 }
