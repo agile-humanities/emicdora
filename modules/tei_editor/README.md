@@ -5,24 +5,18 @@
 Editing Modernism in Canada - TEI Editor
 
 This module extends Emicdora to allow for editing of TEI-RDF objects via the
-[Islandora Markup Editor](https://github.com/discoverygarden/islandora_markup_editor)
-module, which itself relies on the CWRC-Writer.
+CWRC-Writer.
 
 ## Requirements
 
 This module requires the following modules/libraries:
 
-* [Islandora Markup Editor](https://github.com/discoverygarden/islandora_markup_editor)
-* [Islandora Image Annotation](https://github.com/islandora/islandora_image_annotation)
-* [Islandora Paged Content](https://github.com/islandora/islandora_paged_content)
+* [Emicdora](https://github.com/discoverygarden/emicdora)
+* [Islandora CWRC Writer](https://github.com/discoverygarden/islandora_cwrc_writer)
 
 ## Installation
 
 Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.More detailed information can be found in the 'Set XACML Policies' in the [Installing Fedora](https://wiki.duraspace.org/display/ISLANDORA713/Installing+Fedora) chapter of the documentation.
-
-## Configuration
-
-@todo Document.
 
 ## Troubleshooting/Issues
 
@@ -45,4 +39,3 @@ The tests for this module will not run through Drupal’s UI. They will work usi
 ## License
 
 [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
-

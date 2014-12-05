@@ -118,31 +118,47 @@ function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastrea
  *   The array of rdf data entries.
  */
 function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
-  $dom = new DomDocument();
-  @$dom->loadXml($object[$dsid]->content);
-
-  @$xml = simplexml_load_string($dom->saveXML());
-
-  $destinations = $dom->getElementsByTagName("Description");
   $entities = array();
-
-  foreach ($destinations as $destination) {
-    foreach ($destination->childNodes as $child) {
-      // Read the CDATA section for annotation specifics.
-      if ($child->nodeType == XML_CDATA_SECTION_NODE) {
-        $json_anno = json_decode($child->textContent);
-        $labels = $xml->xpath('//*[@annotationId]');
-        foreach ($labels as $label) {
-          // For non TextImgLink annotations.
-          if (isset($json_anno->hasTarget)) {
-            if (strpos($json_anno->hasTarget->hasSelector->{'rdf:value'}, (string) $label['annotationId']) !== FALSE) {
-              $json_anno->{'annotationId'} = (string) $label['annotationId'];
-            }
-          }
-        }
-        array_push($entities, $json_anno);
-      }
-    }
+  // RDF is embedded in the TEI.
+  $xml = simplexml_load_string($object[$dsid]->content);
+  $xml->registerXPathNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+  $rdf = $xml->xpath('//rdf:RDF');
+  if (!$rdf) {
+    return array();
+  }
+  $xml = simplexml_load_string(reset($rdf)->asXML());
+  // Fetches each annotation.
+  $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
+  foreach ($annotations as $annotation) {
+    $body = $annotation->xpath('oa:hasBody/@rdf:resource');
+    $body = (string) reset($body);
+    $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
+    $type = (string) reset($type);
+    $target = $annotation->xpath('oa:hasTarget/@rdf:resource');
+    $target = (string) reset($target);
+    $selector = $xml->xpath("//rdf:Description[@rdf:about = '$target']/oa:hasSelector/@rdf:resource");
+    $selector = (string) reset($selector);
+    $selection = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/rdf:value");
+    $selection = (string) reset($selection);
+    $cwrc_info = $annotation->xpath('cw:cwrcInfo');
+    $cwrc_info = json_decode((string) reset($cwrc_info));
+    $cwrc_attributes = $annotation->xpath('cw:cwrcAttributes');
+    $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
+    // JS code expects the following variables to be in these places.
+    $cwrc_attributes->cwrcInfo = $cwrc_info;
+    $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
+    $matches = array();
+    preg_match('/@annotationId="(.*)"/', $selection, $matches);
+    $entities[] = array(
+      'id' => $matches[1],
+      'type' => $type,
+      'text' => $cwrc_info->name,
+      'attributes' => array(
+        'annotationId' => $matches[1],
+        'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
+        'cwrcAttributes' => $cwrc_attributes,
+      ),
+    );
   }
   return $entities;
 }
@@ -458,16 +474,16 @@ function versionable_object_viewer_get_transcription_text($object) {
 /**
  * Flatten all annotations for use with the version viewer 'tree'.
  *
- * @param array $rdf_annotations
+ * @param array $annotations
  *   A zero based indexed array of entities/annotations.
  *
  * @return array
  *   An indexed array of annotations for use with the version viewer.
  */
-function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
+function versionable_object_viewer_flatten_rdf_annos($annotations) {
   $tree_data = array();
-  foreach ($rdf_annotations as $rdf_anno) {
-    if ($rdf_anno->cwrcType == "textimagelink") {
+  foreach ($annotations as $annotation) {
+    if ($annotation['attributes']['cwrcType'] == 'textimagelink') {
       if (!isset($tree_data["textimagelink"])) {
         $tree_data["textimagelink"] = array(
           "id" => "tree_textimagelinks",
@@ -480,10 +496,10 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
         );
       }
       $child = array(
-        "id" => $rdf_anno->annotationId,
-        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+        "id" => $annotation['id'],
+        "text" => $annotation['text'],
         "state" => "open",
-        "attributes" => $rdf_anno,
+        "attributes" => $annotation['attributes'],
       );
       array_push(
           $tree_data["textimagelink"]["children"], $child
@@ -502,10 +518,10 @@ function versionable_object_viewer_flatten_rdf_annos($rdf_annotations) {
         );
       }
       $child = array(
-        "id" => $rdf_anno->annotationId,
-        "text" => $rdf_anno->cwrcAttributes->cwrcInfo->name,
+        "id" => $annotation['id'],
+        "text" => $annotation['text'],
         "state" => "open",
-        "attributes" => $rdf_anno,
+        "attributes" => $annotation['attributes'],
       );
       array_push(
           $tree_data['entity']["children"], $child
