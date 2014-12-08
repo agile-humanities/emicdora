@@ -410,27 +410,29 @@
 
     function add_tooltip_imageannotations() {
       var node = $("#easyui_tree").tree('find', 'tree_imageannotations');
-      var children = node['children'];
-      var data = "";
-      for (var i = 0; i < children.length; i++) {
-        data = children[i]['attributes'];
-        var tool_tip_content = data['title'];
-        if (data['cwrcInfo'].hasOwnProperty('description')) {
-          tool_tip_content = data['cwrcInfo']['description'];
-        }
-        $("#" + children[i].domId).tooltip({
-          position: 'right',
-          width: 100,
-          height: 100,
-          hideEvent: 'none',
-          content: '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' + tool_tip_content + '</div>',
-          onShow: function() {
-            var t = $(this);
-            t.tooltip('tip').focus().unbind().bind('blur', function() {
-              t.tooltip('hide');
-            });
+      if (node) {
+        var children = node['children'];
+        var data = "";
+        for (var i = 0; i < children.length; i++) {
+          data = children[i]['attributes'];
+          var tool_tip_content = data['title'];
+          if (data['cwrcInfo'].hasOwnProperty('description')) {
+            tool_tip_content = data['cwrcInfo']['description'];
           }
-        }).show();
+          $("#" + children[i].domId).tooltip({
+            position: 'right',
+            width: 100,
+            height: 100,
+            hideEvent: 'none',
+            content: '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' + tool_tip_content + '</div>',
+            onShow: function () {
+              var t = $(this);
+              t.tooltip('tip').focus().unbind().bind('blur', function () {
+                t.tooltip('hide');
+              });
+            }
+          }).show();
+        }
       }
     }
     add_tooltip_imageannotations();
