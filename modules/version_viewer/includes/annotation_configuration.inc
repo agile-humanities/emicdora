@@ -45,8 +45,8 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $checked = ($chosen && $chosen != 'none') ? TRUE : FALSE;
 
   $query = db_select('versionable_object_custom_config', 'v')
-      ->fields('v')
-      ->extend('PagerDefault')->limit(10);
+          ->fields('v')
+          ->extend('PagerDefault')->limit(10);
   $configs = $query->execute()->fetchAll();
 
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
@@ -227,7 +227,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#required' => FALSE,
     '#description' => t('Select a file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $css_extensions[0])),
     '#default_value' => isset($form_state['values']['custom_css']) ? $form_state['values']['custom_css'] : NULL,
-    '#upload_location' => 'temporary://',
+    '#upload_location' => 'public://',
     '#upload_validators' => array(
       'file_validate_extensions' => $css_extensions,
       // Assume its specified in MB.
@@ -236,11 +236,12 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   );
   $form['custom_forms']['custom_xslt'] = array(
     '#title' => t('XSLT File'),
+    '#name' => 'files[custom_xslt]',
     '#type' => 'managed_file',
     '#required' => FALSE,
     '#description' => t('Select a file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $xsl_extensions[0])),
     '#default_value' => isset($form_state['values']['custom_xslt']) ? $form_state['values']['custom_xslt'] : NULL,
-    '#upload_location' => 'temporary://',
+    '#upload_location' => 'public://',
     '#upload_validators' => array(
       'file_validate_extensions' => $xsl_extensions,
       // Assume its specified in MB.
@@ -294,7 +295,7 @@ function islandora_emicdora_annotation_availability_validate(array $form, array 
  * @param array $form_state
  *   Drupal form state
  */
-function islandora_emicdora_annotation_availability_submit(array $form, array $form_state) {
+function islandora_emicdora_annotation_availability_submit(array &$form, array &$form_state) {
   $action = $form_state['triggering_element']['#attributes']['action'];
   $version_pid = $form_state['values']['version_id'];
   $critical_edition_pid = $form_state['values']['critical_edition_pid'];
@@ -315,22 +316,36 @@ function islandora_emicdora_annotation_availability_submit(array $form, array $f
       $cid = 'none';
       if ($form_state['values']['use_custom']) {
         $cid = $form_state['values']['config_table'];
+        versionable_object_viewer_config_upsert($version_pid, $cid);
       }
-
-      versionable_object_viewer_config_upsert($version_pid, $cid);
+      else {
+        db_delete('versionable_object_config_choice')
+            ->condition('pid', $version_pid)
+            ->execute();
+      }
 
       break;
 
     case 'create':
-      $css = NULL;
+      $css_url = NULL;
       if ($form_state['values']['custom_forms']['custom_css']) {
         $css_file = file_load($form_state['values']['custom_forms']['custom_css']);
         $css = file_get_contents(drupal_realpath($css_file->uri));
+        $public_css_file = drupal_tempnam('public://', 'css');
+        $css_file = file_save_data($css, $public_css_file);
+        $css_file->status = 1;
+        file_save($css_file);
+        $css_url = file_create_url($css_file->uri);
       }
-      $xslt = NULL;
+      $xslt_url = NULL;
       if ($form_state['values']['custom_forms']['custom_xslt']) {
         $xslt_file = file_load($form_state['values']['custom_forms']['custom_xslt']);
         $xslt = file_get_contents(drupal_realpath($xslt_file->uri));
+        $public_xslt_file = drupal_tempnam('public://', 'xslt');
+        $xslt_file = file_save_data($xslt, $public_xslt_file);
+        $xslt_file->status = 1;
+        file_save($xslt_file);
+        $xslt_url = file_create_url($xslt_file->uri);
       }
 
       $label = $form_state['values']['custom_forms']['config_label'];
@@ -340,8 +355,8 @@ function islandora_emicdora_annotation_availability_submit(array $form, array $f
             'pid' => $version_pid,
             'label' => $label,
             'description' => $description,
-            'css' => $css,
-            'xslt' => $xslt,
+            'css' => $css_url,
+            'xslt' => $xslt_url,
               )
           )
           ->execute();
@@ -419,11 +434,11 @@ function versionable_object_viewer_download($cid, $type) {
   header('Content-Disposition: attachment; filename="File.' . $type . '"');
   switch ($type) {
     case 'css':
-      echo $results->css;
+      echo file_get_contents($results->css);
       break;
 
     case 'xslt':
-      echo $results->xslt;
+      echo file_get_contents($results->xslt);
       break;
   }
 }

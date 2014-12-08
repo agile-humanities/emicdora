@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Defines all the theme functions this module implements.
@@ -18,21 +19,27 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $version_object = $variables['islandora_object'];
   $type = emicdora_get_source_type($version_object);
   drupal_add_css("$module_path/css/viewer.css");
-  drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_common_tei.css");
+  $config = version_viewer_get_config($version_object->id);
+  if ($config && $config->css) {
+    $stylesheet = file_create_url($config->css);
+    drupal_add_css($stylesheet);
+  }
+  else {
+    drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
+    drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
+    drupal_add_css("$module_path/css/version_viewer_common_tei.css");
+  }
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
   drupal_add_js("$module_path/js/viewer_behaviours.js");
   // This is the Shared Canvas prefered jQuery.
   drupal_add_js(
-    array(
-      'versionable_object_viewer' => array(
-        'version_pid' => $version->id,
-      ),
-    ),
-    'setting'
+      array(
+        'versionable_object_viewer' => array(
+          'version_pid' => $version->id,
+        ),
+      ), 'setting'
   );
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
