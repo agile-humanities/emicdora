@@ -82,6 +82,7 @@ function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
  */
 function tei_editor(AbstractObject $object) {
   module_load_include('inc', 'tei_editor', 'includes/utilities');
+  module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
   list($documents, $sources) = tei_editor_get_documents_and_sources($object);
   $module_path = drupal_get_path('module', 'tei_editor');
   return array(
@@ -91,6 +92,7 @@ function tei_editor(AbstractObject $object) {
     'cwrc_writer' => array(
       '#theme' => 'islandora_cwrc_writer',
       '#object' => $object,
+      '#schema' => islandora_cwrc_writer_get_document_schema_pid($object),
       '#documents' => $documents,
       '#sources' => $sources,
     ),
