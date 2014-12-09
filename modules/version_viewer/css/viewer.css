@@ -324,10 +324,14 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
   padding: 0;
 }
 
-.entity_dialog li, .entity_dialog ul {
-  padding-left: 2em;
+.entity_dialog li {
+  margin-left: 1em;
 }
 
 .entity_dialog ul div {
   width: 100%;
+}
+
+.entity_dialog label:after {
+  content: ':';
 }
