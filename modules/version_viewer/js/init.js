@@ -408,6 +408,32 @@
       }
     }
 
+    function add_tooltip_imageannotations() {
+      var node = $("#easyui_tree").tree('find', 'tree_imageannotations');
+      if (node) {
+        var children = node['children'];
+        var data = "";
+        for (var i = 0; i < children.length; i++) {
+          data = children[i]['attributes'];
+          var tool_tip_content = data['title'];
+          if (data['cwrcInfo'].hasOwnProperty('description')) {
+            tool_tip_content = data['cwrcInfo']['description'];
+          }
+          $("#" + children[i].domId).tooltip({
+            position: 'right',
+            hideEvent: 'none',
+            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>',
+            onShow: function () {
+              var t = $(this);
+              t.tooltip('tip').focus().unbind().bind('blur', function () {
+                t.tooltip('hide');
+              });
+            }
+          }).show();
+        }
+      }
+    }
+    add_tooltip_imageannotations();
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
 
