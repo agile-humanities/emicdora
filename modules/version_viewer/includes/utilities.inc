@@ -173,11 +173,13 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
  *
  * @param string $id
  *   The ID of the annotation referencing the entity.
- * @param object $object
+ * @param object $info
  *   A stdClass object containing at least:
- *   - cwrcInfo
- *     - repository
- *     - id
+ *   - cwrcInfo: A stdClass object containing at least:
+ *     - repository: A string identifying to which repository the current
+ *       object belongs.
+ *     - id: A string identifying the object in the given repo... A URL for our
+ *       stuff in the "cwrc" repository.
  */
 function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
   if ($info->cwrcInfo->repository !== 'cwrc') {
@@ -226,7 +228,6 @@ function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
 function versionable_object_viewer_generate_readonly_form(&$form, $parent_list = FALSE) {
   $_type_map = array(
     'markup' => 'defaultable_markup',
-    //'fieldset' => 'defaultable_markup',
   );
 
   $child_offsets = element_children($form);
@@ -249,8 +250,8 @@ function versionable_object_viewer_generate_readonly_form(&$form, $parent_list =
     unset($form['#default_value']);
   }
   if ($parent_list && $form['#access'] && (
-     (isset($form['#default_value']) && !empty($form['#default_value'])) ||
-     $visible_child)) {
+    (isset($form['#default_value']) && !empty($form['#default_value'])) ||
+    $visible_child)) {
     $form['#prefix'] = '<li>' . (isset($form['#prefix']) ? $form['#prefix'] : '');
     $form['#suffix'] = (isset($form['#suffix']) ? $form['#suffix'] : '') . '</li>';
   }
