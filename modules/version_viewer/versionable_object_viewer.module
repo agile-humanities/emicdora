@@ -117,8 +117,6 @@ function versionable_object_viewer_library() {
 function versionable_object_viewer_islandora_versionCModel_islandora_view_object(AbstractObject $object) {
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
 
-  drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
   // Theme our verionable object viewer.
   return theme('versionable_object_viewer', array(
     'islandora_object' => $object,
