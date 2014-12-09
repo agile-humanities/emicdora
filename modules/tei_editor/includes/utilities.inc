@@ -1,21 +1,45 @@
 <?php
+
 /**
  * @file
  * Utility functions.
  */
 
 /**
- * Helper function to find related editions of pages.
+ * Gets the child documents and sources of the given version object.
  *
- * @param AbstractObject $fedora_object
- *   The fedora object in question.
- * @param string $ontology
- *   The ontology to use, defaults to isDerivationOf.
+ * @param AbstractObject $object
+ *   The islandora:versionCModel object whose child documents and their sources
+ *   will be returned.
+ * @param int $limit
+ *   Limit the number of results.
+ *
+ * @return array
+ *   An array of documents pids and source their respective source pids, such
+ *   that you can list($documents, $sources) with this function.
  */
-function tei_editor_get_object_of_tei_rdf(AbstractObject $fedora_object, $ontology = EMICDORA_ISDERIVATIONOF) {
-  $relationships = $fedora_object->relationships->get(ISLANDORA_RELS_EXT_URI, $ontology);
-  if (in_array("islandora:versionCModel", $fedora_object->models)) {
-    $relationships = $fedora_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+function tei_editor_get_documents_and_sources(AbstractObject $object, $limit = NULL) {
+  $limit = is_int($limit) ? "LIMIT $limit" : '';
+  $query = <<<EOT
+PREFIX fedora-rels-ext: <info:fedora/fedora-system:def/relations-external#>
+PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+SELECT ?document ?source ?sequenceNumber
+WHERE {
+  ?document <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}> ;
+            <fedora-model:hasModel> <info:fedora/islandora:tei-rdfCModel> ;
+            <islandora-rels-ext:isSequenceNumber> ?sequenceNumber ;
+            <fedora-rels-ext:isDerivationOf> ?source .
+}
+ORDER BY ?sequenceNumber
+$limit
+EOT;
+  $connection = islandora_get_tuque_connection();
+  $results = $connection->repository->ri->sparqlQuery($query);
+  $documents = array();
+  $sources = array();
+  foreach ($results as $result) {
+    $documents[] = $result['document']['value'];
+    $sources[] = $result['source']['value'];
   }
-  return $relationships[0]['object']['value'];
+  return array($documents, $sources);
 }

@@ -106,11 +106,20 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
 
   $rdf_annotations = versionable_object_viewer_read_rdf($derivation_object);
   $tree_data = versionable_object_viewer_flatten_rdf_annos($rdf_annotations);
+  $text_to_image_annotations = array();
+  foreach ($tree_data as $folder) {
+    foreach ($folder['children'] as $child) {
+      $cwrc_attributes = $child['attributes']['cwrcAttributes'];
+      if (isset($cwrc_attributes->attributes->id)) {
+        $text_to_image_annotations[] = $cwrc_attributes->attributes->id;
+      }
+    }
+  }
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   if (isset($anno_pids['pids'])) {
     $size = count($tree_data);
     foreach ($anno_pids['pids'] as $plain_annotation) {
-      if ($plain_annotation['type'] != "TextImageLink") {
+      if (!in_array($plain_annotation['urn'], $text_to_image_annotations)) {
         if (!isset($tree_data[$size])) {
           $tree_data[$size] = array(
             "id" => "tree_imageannotations",
