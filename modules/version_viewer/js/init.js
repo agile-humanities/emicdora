@@ -421,10 +421,8 @@
           }
           $("#" + children[i].domId).tooltip({
             position: 'right',
-            width: 100,
-            height: 100,
             hideEvent: 'none',
-            content: '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' + tool_tip_content + '</div>',
+            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>',
             onShow: function () {
               var t = $(this);
               t.tooltip('tip').focus().unbind().bind('blur', function () {
