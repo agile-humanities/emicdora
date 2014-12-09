@@ -307,3 +307,18 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 #center_data {
  position: relative !important
 }
+
+.entity_dialog label, .entity_dialog div {
+  display: inline-block;
+}
+
+.entity_dialog {
+  margin: 0;
+  padding: .5em;
+  list-style-position: inside;
+}
+
+.entity_dialog *, .entity_dialog .form-item {
+  margin: 0;
+  padding: 0;
+}

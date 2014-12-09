@@ -148,21 +148,118 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
     // JS code expects the following variables to be in these places.
     $cwrc_attributes->cwrcInfo = $cwrc_info;
-    $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
+    $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
+    $id = $matches[1];
     $entities[] = array(
-      'id' => $matches[1],
+      'id' => $id,
       'type' => $type,
       'text' => $cwrc_info->name,
       'attributes' => array(
-        'annotationId' => $matches[1],
+        'annotationId' => $id,
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
         'cwrcAttributes' => $cwrc_attributes,
+        'dialogId' => "ent_dialog_$id",
+        'dialogMarkup' => verionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
       ),
     );
   }
   return $entities;
+}
+
+/**
+ * Generate markup to show in an entity's popup dialog.
+ *
+ * @param string $id
+ *   The ID of the annotation referencing the entity.
+ * @param object $object
+ *   A stdClass object containing at least:
+ *   - cwrcInfo
+ *     - repository
+ *     - id
+ */
+function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
+  if ($info->cwrcInfo->repository !== 'cwrc') {
+    // Current implementation only supports the local repository.
+    return NULL;
+  }
+
+  $get_form_name = function ($models, $dsid) {
+    module_load_include('inc', 'xml_form_builder', 'includes/associations');
+    $associations = xml_form_builder_get_associations(array(), $models, array($dsid));
+    $association = reset($associations);
+    return $association ? $association['form_name'] : FALSE;
+  };
+
+  if ($info->cwrcInfo->repository === 'cwrc') {
+    $pid = substr($info->cwrcInfo->id, strrpos($info->cwrcInfo->id, '/') + 1);
+    $object = islandora_object_load($pid);
+    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+    $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
+    $form_name = $get_form_name($object->models, $dsid);
+    if (!$form_name) {
+      // No form for which to produce a "read-only" variant... Fallback to old
+      // client-side behaviour.
+      return NULL;
+    }
+    $form = array();
+    $fake_form_state = array();
+    $form = @xml_form_builder_get_form($form, $fake_form_state, $form_name, $object[$dsid]->content);
+    versionable_object_viewer_generate_readonly_form($form);
+    $form['#prefix'] = "<div id='ent_dialog_$id' class='entity_dialog'>";
+    $form['#suffix'] = '</div>';
+    //dsm($form);
+    return drupal_render($form);
+  }
+}
+
+function versionable_object_viewer_generate_readonly_form(&$form) {
+  $_fix_map = array(
+    'tabs' => array(
+      'prefix' => '<ul>',
+      'suffix' => '</ul>',
+    ),
+    'tags' => array(
+      'prefix' => '<ul>',
+      'suffix' => '</ul>',
+    ),
+    'tabpanel' => array(
+      'prefix' => '<li>',
+      'suffix' => '</li>',
+    ),
+    'tag' => array(
+      'prefix' => '<li>',
+      'suffix' => '</li>',
+    ),
+  );
+  $_type_map = array(
+    //'tabs' => 'defaultable_markup',
+    //'tabpanel' => 'defaultable_markup',
+    //'tags' => 'defaultable_markup',
+    //'tag' => 'defaultable_markup',
+    'fieldset' => 'defaultable_markup',
+    'markup' => 'defaultable_markup',
+  );
+
+  if (isset($form['#type']) && isset($_fix_map[$form['#type']])) {
+    $fixes = $_fix_map[$form['#type']];
+    $form['#prefix'] = $fixes['prefix'];
+    $form['#suffix'] = $fixes['suffix'];
+  }
+  $child_offsets = element_children($form);
+  $visible_child = FALSE;
+  foreach ($child_offsets as $child_offset) {
+    versionable_object_viewer_generate_readonly_form($form[$child_offset]);
+    $visible_child = $visible_child || $form[$child_offset]['#access'];
+  }
+  if ($form['#type'] == 'tabpanel') {
+    unset($form['add-tabpanel']);
+    unset($form['delete-tabpanel']);
+  }
+  unset($form['#description']);
+  $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
+  $form['#type'] = isset($_type_map[$form['#type']]) ? $_type_map[$form['#type']] : 'defaultable_item';
 }
 
 /**
