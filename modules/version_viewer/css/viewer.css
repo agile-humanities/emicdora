@@ -309,16 +309,25 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 }
 
 .entity_dialog label, .entity_dialog div {
-  display: inline-block;
+  position: relative;
+  display: inline;
 }
 
 .entity_dialog {
   margin: 0;
   padding: .5em;
-  list-style-position: inside;
+  overflow-y: scroll !important;
 }
 
 .entity_dialog *, .entity_dialog .form-item {
   margin: 0;
   padding: 0;
+}
+
+.entity_dialog li, .entity_dialog ul {
+  padding-left: 2em;
+}
+
+.entity_dialog ul div {
+  width: 100%;
 }

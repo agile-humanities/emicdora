@@ -207,50 +207,52 @@ function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
     $fake_form_state = array();
     $form = @xml_form_builder_get_form($form, $fake_form_state, $form_name, $object[$dsid]->content);
     versionable_object_viewer_generate_readonly_form($form);
-    $form['#prefix'] = "<div id='ent_dialog_$id' class='entity_dialog'>";
+    $form['#prefix'] = "<div id='ent_dialog_$id' class='entity_dialog' style='overflow: scroll;'>";
     $form['#suffix'] = '</div>';
-    //dsm($form);
+    dsm($form);
     return drupal_render($form);
   }
 }
 
-function versionable_object_viewer_generate_readonly_form(&$form) {
+function versionable_object_viewer_generate_readonly_form(&$form, $parent_list = FALSE) {
   $_fix_map = array(
     'tabs' => array(
       'prefix' => '<ul>',
       'suffix' => '</ul>',
+      'parent_list' => TRUE,
     ),
     'tags' => array(
       'prefix' => '<ul>',
       'suffix' => '</ul>',
+      'parent_list' => TRUE,
     ),
     'tabpanel' => array(
-      'prefix' => '<li>',
-      'suffix' => '</li>',
+      'prefix' => '<ul>',
+      'suffix' => '</ul>',
+      'parent_list' => TRUE,
     ),
-    'tag' => array(
-      'prefix' => '<li>',
-      'suffix' => '</li>',
+    'fieldset' => array(
+      'prefix' => '<ul>',
+      'suffix' => '</ul>',
+      'parent_list' => TRUE,
     ),
   );
   $_type_map = array(
-    //'tabs' => 'defaultable_markup',
-    //'tabpanel' => 'defaultable_markup',
-    //'tags' => 'defaultable_markup',
-    //'tag' => 'defaultable_markup',
-    'fieldset' => 'defaultable_markup',
+    //'fieldset' => 'defaultable_markup',
     'markup' => 'defaultable_markup',
   );
 
+  $make_list = FALSE;
   if (isset($form['#type']) && isset($_fix_map[$form['#type']])) {
     $fixes = $_fix_map[$form['#type']];
     $form['#prefix'] = $fixes['prefix'];
     $form['#suffix'] = $fixes['suffix'];
+    $make_list = $fixes['parent_list'];
   }
   $child_offsets = element_children($form);
   $visible_child = FALSE;
   foreach ($child_offsets as $child_offset) {
-    versionable_object_viewer_generate_readonly_form($form[$child_offset]);
+    versionable_object_viewer_generate_readonly_form($form[$child_offset], $make_list);
     $visible_child = $visible_child || $form[$child_offset]['#access'];
   }
   if ($form['#type'] == 'tabpanel') {
@@ -259,7 +261,19 @@ function versionable_object_viewer_generate_readonly_form(&$form) {
   }
   unset($form['#description']);
   $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
+  if ($form['#type'] == 'select' && isset($form['#default_value'])) {
+    $form['#default_value'] = $form['#options'][$form['#default_value']];
+  }
+  elseif (!empty($child_offsets)) {
+    unset($form['#default_value']);
+  }
+  if ($parent_list && $form['#access'] && (
+     (isset($form['#default_value']) && !empty($form['#default_value'])) || count($child_offsets) > 1)) {
+    $form['#prefix'] = '<li>' . (isset($form['#prefix']) ? $form['#prefix'] : '');
+    $form['#suffix'] = (isset($form['#suffix']) ? $form['#suffix'] : '') . '</li>';
+  }
   $form['#type'] = isset($_type_map[$form['#type']]) ? $_type_map[$form['#type']] : 'defaultable_item';
+  $form['#required'] = FALSE;
 }
 
 /**
