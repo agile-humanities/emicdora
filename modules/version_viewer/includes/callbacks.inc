@@ -46,7 +46,7 @@ function versionable_object_viewer_prepare_detail_metadata() {
  * Gather transcription data for a given versionable object.
  *
  * @param AbstractObject $object
- * The versionable object to process transcriptions.
+ *   The versionable object to process transcriptions.
  */
 function versionable_object_viewer_build_transcription_data($object) {
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
@@ -54,7 +54,7 @@ function versionable_object_viewer_build_transcription_data($object) {
   $page = urldecode($_GET['page']);
   $members = versionable_object_viewer_get_members($object);
   $pids = array();
-// Ensure page pids have a 'TEI_RDF' datastream.
+  // Ensure page pids have a 'TEI_RDF' datastream.
   foreach ($members as $member) {
     array_push($pids, $member['obj']['value']);
   }
