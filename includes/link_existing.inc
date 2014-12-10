@@ -148,9 +148,9 @@ function emicdora_add_source_to_edition() {
       }
     }
     if (!isset($results['message'])) {
-      $source_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
+      $source_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edion_pid);
     }
   }
   $results['added'] = "$critical_edition_pid/source/$source_pid";
-  echo drupal_json($results);
+  drupal_json_output($results);
 }
