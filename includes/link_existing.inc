@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Functions to display Add Existing Sources page..
@@ -18,7 +19,11 @@
 function emicdora_add_existing($object, $title = NULL) {
   $form = drupal_get_form('emicdora_sources_update_form');
   $output = drupal_render($form);
-  $output .= theme('emicdora_add_source_page', array('object' => $object, 'title' => $title));
+  $output .= theme('emicdora_add_source_page', array(
+    'islandora_object' => $object,
+    'title' => $title,
+      )
+  );
   return $output;
 }
 
@@ -134,22 +139,18 @@ function emicdora_add_source_to_edition() {
   $source_pid = urldecode(filter_xss($_POST['source_pid']));
   $critical_edition_pid = urldecode(filter_xss($_POST['critical_edition_pid']));
   $source_object = islandora_object_load($source_pid);
+  $results = array();
   if ($source_object) {
     $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
     foreach ($rels as $rel) {
       if ($rel['object']['value'] == $critical_edition_pid) {
-        $message = t("@label is already associated with this Critical Edition", array('@label' => $source_object->label));
+        $results['message'] = t("@label is already associated with this Critical Edition", array('@label' => $source_object->label));
       }
     }
-    if (!isset($message)) {
+    if (!isset($results['message'])) {
       $source_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $critical_edition_pid);
-      $message = t("Successfully added @label to Critical Edition", array('@label' => $source_object->label));
     }
-
   }
-  $results = array(
-    'message' => $message,
-    'added' => "$critical_edition_pid/source/$source_pid",
-  );
-  echo json_encode($results);
+  $results['added'] = "$critical_edition_pid/source/$source_pid";
+  echo drupal_json($results);
 }
