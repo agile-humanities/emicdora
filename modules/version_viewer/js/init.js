@@ -231,8 +231,15 @@
           $('#wb_meta').removeClass('img_selected');
 
           $('#wb_meta').addClass('img_selected');
-          $('#easy-ui-south').css('height', '623');
           toggle_layout(is_selected, 'south', 'wb_meta');
+          // Change the window size based on if the easyui is fullscreen or not.
+          if ($('#eui_window').hasClass('eui-window-fullscreen')) {
+            // Use window height and subtract 50px for the menu bar display.
+            var height = $(window).height() - 50;
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
+          } else {
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});
+          }
           break;
         case 'wb_dt':
           $('#wb_reading').removeClass('img_selected');
@@ -450,6 +457,5 @@
       });
     $('#easy-ui-east').css('height', '623px');
     $('#easy-ui-west').css('height', '623px');
-    
   });
 })(jQuery);
