@@ -664,7 +664,7 @@ function emicdora_theme() {
     'emicdora_add_source_page' => array(
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_add_source_page',
-      'variables' => array('islandora_object' => NULL),
+      'variables' => array('islandora_object' => NULL, 'display_count' => 10),
     ),
   );
 }

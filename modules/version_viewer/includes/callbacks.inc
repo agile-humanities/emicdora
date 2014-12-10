@@ -46,48 +46,23 @@ function versionable_object_viewer_prepare_detail_metadata() {
  * Gather transcription data for a given versionable object.
  *
  * @param AbstractObject $object
- *   The versionable object to process transcriptions.
+ * The versionable object to process transcriptions.
  */
 function versionable_object_viewer_build_transcription_data($object) {
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $page = urldecode($_GET['page']);
-  $type = emicdora_get_source_type($object);
-  $transcriptions = versionable_object_viewer_get_transcription_text($object);
-  switch ($type) {
-    case "audio":
-      $return['body'] = $transcriptions[$page - 1]['text'];
-      $return['title'] = $transcriptions[$page - 1]['title'];
-      drupal_json_output($return);
-      break;
-
-    case "text":
-      $members = versionable_object_viewer_get_members($object);
-      $pids = array();
-      // Ensure page pids have a 'TEI_RDF' datastream.
-      foreach ($members as $member) {
-        array_push($pids, $member['obj']['value']);
-      }
-      $derivation_object = islandora_object_load($pids[$page - 1]);
-      $tran_data = versionable_object_viewer_display_page_tei($object, $derivation_object, 'CWRC');
-      $return['body'] = $tran_data;
-      $return['title'] = $derivation_object->label . " (page $page)";
-      $return['transcriptions'] = $transcriptions;
-      drupal_json_output($return);
-      break;
-
-    case "video":
-      $return['body'] = $transcriptions[$page - 1]['text'];
-      $return['title'] = $transcriptions[$page - 1]['title'];
-      drupal_json_output($return);
-      break;
-
-    case "image":
-      $return['body'] = $transcriptions[$page - 1]['text'];
-      $return['title'] = $transcriptions[$page - 1]['title'];
-      drupal_json_output($return);
-      break;
+  $members = versionable_object_viewer_get_members($object);
+  $pids = array();
+// Ensure page pids have a 'TEI_RDF' datastream.
+  foreach ($members as $member) {
+    array_push($pids, $member['obj']['value']);
   }
+  $derivation_object = islandora_object_load($pids[$page - 1]);
+  $tran_data = versionable_object_viewer_display_page_tei($object, $derivation_object, 'CWRC');
+  $return['body'] = $tran_data;
+  $return['title'] = $derivation_object->label . " (page $page)";
+  drupal_json_output($return);
 }
 
 /**

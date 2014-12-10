@@ -232,8 +232,15 @@
           $('#wb_meta').removeClass('img_selected');
 
           $('#wb_meta').addClass('img_selected');
-          $('#easy-ui-south').css('height', '623');
           toggle_layout(is_selected, 'south', 'wb_meta');
+          // Change the window size based on if the easyui is fullscreen or not.
+          if ($('#eui_window').hasClass('eui-window-fullscreen')) {
+            // Use window height and subtract 50px for the menu bar display.
+            var height = $(window).height() - 50;
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
+          } else {
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});
+          }
           break;
         case 'wb_dt':
           $('#wb_reading').removeClass('img_selected');
@@ -409,6 +416,32 @@
       }
     }
 
+    function add_tooltip_imageannotations() {
+      var node = $("#easyui_tree").tree('find', 'tree_imageannotations');
+      if (node) {
+        var children = node['children'];
+        var data = "";
+        for (var i = 0; i < children.length; i++) {
+          data = children[i]['attributes'];
+          var tool_tip_content = data['title'];
+          if (data['cwrcInfo'].hasOwnProperty('description')) {
+            tool_tip_content = data['cwrcInfo']['description'];
+          }
+          $("#" + children[i].domId).tooltip({
+            position: 'right',
+            hideEvent: 'none',
+            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>',
+            onShow: function () {
+              var t = $(this);
+              t.tooltip('tip').focus().unbind().bind('blur', function () {
+                t.tooltip('hide');
+              });
+            }
+          }).show();
+        }
+      }
+    }
+    add_tooltip_imageannotations();
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
 
@@ -451,6 +484,5 @@
       });
     $('#easy-ui-east').css('height', '623px');
     $('#easy-ui-west').css('height', '623px');
-    
   });
 })(jQuery);

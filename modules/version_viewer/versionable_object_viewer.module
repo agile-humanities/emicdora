@@ -115,6 +115,7 @@ function versionable_object_viewer_theme($existing, $type, $theme, $path) {
         'transcription_source' => NULL,
         'meta_source' => NULL,
         'islandora_content' => NULL,
+        'pager_data' => NULL,
       ),
     ),
   );
