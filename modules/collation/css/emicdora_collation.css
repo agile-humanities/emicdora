@@ -107,3 +107,7 @@ white-space: nowrap;
 .merged_selected {
   background-color: lightblue;
 }
+.field_label{
+  width: 20%;
+  padding-left:3%;
+}
