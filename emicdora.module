@@ -653,7 +653,7 @@ function emicdora_theme() {
     'emicdora_add_source_page' => array(
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_add_source_page',
-      'variables' => array('islandora_object' => NULL),
+      'variables' => array('islandora_object' => NULL, 'display_count' => 10),
     ),
   );
 }
@@ -850,33 +850,38 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'critical_edition':
+      module_load_include('inc', 'emicdora', 'includes/utilities');
       $source_object = islandora_object_load($path_parts[2]);
-      $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-      $links = array();
-      $options = array(
-        'attributes' => array('class' => 'source_edition_links'),
-      );
-      foreach ($rels as $rel) {
-        $parent_edition = islandora_object_load($rel['object']['value']);
-        if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
-          $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
-        }
-      }
-      $total = count($links);
-      $current = pager_default_initialize($total, 5, $element = 0);
-      if ($total > 5) {
-        $links = array_slice($links, $current * 5, 5);
-      }
-      $output = "";
-      foreach ($links as $link) {
-        $output .= "$link<br />";
-      }
-      $output .= theme('pager', array('quantity' => $total));
-      if (count($links)) {
-        $block['subject'] = t('Critical Editions');
-        $block['content'] = array(
-          '#markup' => $output,
+      // Only show the critical edition block if the object has a model that is
+      // one of the allowed source content models.
+      if (array_intersect($object->models, array_keys(emicdora_source_content_models()))) {
+        $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+        $links = array();
+        $options = array(
+          'attributes' => array('class' => 'source_edition_links'),
         );
+        foreach ($rels as $rel) {
+          $parent_edition = islandora_object_load($rel['object']['value']);
+          if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
+            $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
+          }
+        }
+        $total = count($links);
+        $current = pager_default_initialize($total, 5, $element = 0);
+        if ($total > 5) {
+          $links = array_slice($links, $current * 5, 5);
+        }
+        $output = "";
+        foreach ($links as $link) {
+          $output .= "$link<br />";
+        }
+        $output .= theme('pager', array('quantity' => $total));
+        if (count($links)) {
+          $block['subject'] = t('Critical Editions');
+          $block['content'] = array(
+            '#markup' => $output,
+          );
+        }
       }
       break;
 

@@ -25,7 +25,7 @@
           },
           async: true,
           success: function(data, status, xhr) {
-            var results = JSON.parse(data);
+            var results = data;
             if (results.hasOwnProperty('message')) {
               alert(results.message)
             }

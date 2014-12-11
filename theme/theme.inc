@@ -137,21 +137,20 @@ function emicdora_preprocess_emicdora_coop_topic(array &$variables) {
 function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
   module_load_include('inc', 'emicdora', 'includes/link_existing');
 
-  $object = $variables['object'];
+  $object = $variables['islandora_object'];
   $return_label = t("Return to @label", array('@label' => $object->label));
   $variables['return_button'] = "<button class = 'emicdora_button return'>$return_label</button>";
   $title = isset($variables['title']) ? $variables['title'] : NULL;
-  $display_count = 5;
-  $element = 0;
+  $display_count = $variables['display_count'];
   $count_data = emicdora_get_all_source_objects($object->id, 0, 0, $title);
   $total = $count_data['count'];
-  $current_page = pager_default_initialize($total, $display_count, $element);
+  $current_page = pager_default_initialize($total, $display_count);
   $start = $current_page * $display_count;
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
   drupal_add_css("$module_path/css/emicdora.coop.css");
   drupal_add_js("$module_path/js/emicdora_add_source_callback.js");
-  $critical_edition = $variables['object'];
+  $critical_edition = $variables['islandora_object'];
   drupal_add_css("$module_path/css/emicdora.coop.css");
   drupal_add_js(
       array(
@@ -166,7 +165,7 @@ function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
     $output .= $item;
   }
   $variables['item_table'] = $output;
-  $variables['pager'] = theme('pager', array('quantity' => $total, 'element' => $element));
+  $variables['pager'] = theme('pager');
 }
 
 /**
