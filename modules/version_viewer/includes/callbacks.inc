@@ -90,29 +90,28 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
     }
   }
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
-  $restrained = FALSE;
   if (isset($anno_pids['pids'])) {
-    $query = db_select('versionable_object_access')
-        ->fields('versionable_object_access', array(
-          'pid',
-          'allowed_users',
-          'allowed_roles',
-            )
-        )
-        ->condition('pid', $version_pid, '=');
-    $row = $query->execute()->fetchObject();
+    $restricted = variable_get('annotation_access_restricted', 0);
+    if ($restricted) {
+      $query = db_select('versionable_object_access')
+          ->fields('versionable_object_access', array(
+            'pid',
+            'allowed_users',
+            'allowed_roles',
+              )
+          )
+          ->condition('pid', $version_pid, '=');
+      $row = $query->execute()->fetchObject();
+    }
+    $restrained = isset($row) && is_object($row);
     $size = count($tree_data);
-
     foreach ($anno_pids['pids'] as $key => $plain_annotation) {
       $annotation = islandora_object_load($plain_annotation['id']);
-      if (is_object($row)) {
-        $restrained = TRUE;
+      if ($restrained && $restricted) {
         $users = unserialize($row->allowed_users);
         $roles = unserialize($row->allowed_roles);
         $owner = user_load_by_name($annotation->owner);
         $owner_roles = isset($owner->roles) ? $owner->roles : array();
-      }
-      if ($restrained) {
         $user_blocked = in_array($owner->name, $users) ? FALSE : TRUE;
         $role_blocked = count(array_intersect($roles, $owner_roles) < 1) ? FALSE : TRUE;
         if ($user_blocked && $role_blocked) {
