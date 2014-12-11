@@ -850,16 +850,11 @@ function emicdora_block_view($delta = '') {
       break;
 
     case 'critical_edition':
+      module_load_include('inc', 'emicdora', 'includes/utilities');
       $source_object = islandora_object_load($path_parts[2]);
       // Only show the critical edition block if the object has a model that is
-      // one of the allowed content models.
-      $allowed_content_models = array(
-        'islandora:sp-audioCModel',
-        'islandora:sp_videoCModel',
-        'islandora:bookCModel',
-        'islandora:sp_large_image_cmodel',
-      );
-      if (array_intersect($object->models, $allowed_content_models)) {
+      // one of the allowed source content models.
+      if (array_intersect($object->models, array_keys(emicdora_source_content_models()))) {
         $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
         $links = array();
         $options = array(
