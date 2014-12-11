@@ -13,7 +13,7 @@ print '<div id="metadata"></div>
     <div id="uiplaceholder"></div>';
 if (user_access(COLLATION_EDIT_COLLATION) && $variables['display_type'] == 'compare') {
   print '
-    <h3 id="merge_label" class="ui-widget-header">Associate text</h3>
+    <h3 id="merge_label" class="ui-widget-header field_label">Associate text</h3>
     <div id="merge_container" class="emicdora_edit_container">
     <h3 id="top-label" class="ui-widget-header">Version 1</h3>
     <div id="diff_l" class="ui-widget-content collation_resize emcidora_input">
@@ -25,7 +25,7 @@ if (user_access(COLLATION_EDIT_COLLATION) && $variables['display_type'] == 'comp
   <button class = "emicdora_button" id="collation_variant" class="form-submit" type="submit" value="Variant">Variant</button><br/>
   </div>
 
-  <h3 id="unmerge_label" class="ui-widget-header">Disassociate text</h3>
+  <h3 id="unmerge_label" class="ui-widget-header field_label">Disassociate text</h3>
   <div id="unmerge_container" class="emicdora_edit_container">
 
     <h3 id="merged" class="ui-widget-header">Merged text</h3>
