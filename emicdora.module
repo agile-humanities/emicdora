@@ -859,8 +859,7 @@ function emicdora_block_view($delta = '') {
         'islandora:bookCModel',
         'islandora:sp_large_image_cmodel',
       );
-      $in_allowed_models = array_intersect($object->models, $allowed_content_models);
-      if (!empty($in_allowed_models)) {
+      if (array_intersect($object->models, $allowed_content_models)) {
         $rels = $source_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
         $links = array();
         $options = array(
