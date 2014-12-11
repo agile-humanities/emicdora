@@ -148,6 +148,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
     // JS code expects the following variables to be in these places.
     $cwrc_attributes->cwrcInfo = $cwrc_info;
+    if (!isset($cwrc_attributes->attributes)) {
+      $cwrc_attributes->attributes = new stdClass();
+    }
     $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
@@ -155,7 +158,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $entities[] = array(
       'id' => $id,
       'type' => $type,
-      'text' => $cwrc_info->name,
+      'text' => isset($cwrc_info->name) ? $cwrc_info->name : $id,
       'attributes' => array(
         'annotationId' => $id,
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
@@ -176,13 +179,11 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
  * @param object $info
  *   A stdClass object containing at least:
  *   - cwrcInfo: A stdClass object containing at least:
- *     - repository: A string identifying to which repository the current
- *       object belongs.
  *     - id: A string identifying the object in the given repo... A URL for our
  *       stuff in the "cwrc" repository.
  */
 function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
-  if ($info->cwrcInfo->repository !== 'cwrc') {
+  if (!isset($info->cwrcInfo->id)) {
     // Current implementation only supports the local repository.
     return NULL;
   }
@@ -194,9 +195,15 @@ function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
     return $association ? $association['form_name'] : FALSE;
   };
 
-  if ($info->cwrcInfo->repository === 'cwrc') {
-    $pid = substr($info->cwrcInfo->id, strrpos($info->cwrcInfo->id, '/') + 1);
+  $parts = explode('/', $info->cwrcInfo->id);
+  if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
+    $pid = end($parts);
     $object = islandora_object_load($pid);
+    if (!$object) {
+      // Object could not be loaded... Lack of permissions or object isn't in
+      // the local Islandora?
+      return NULL;
+    }
     module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
     $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
     $form_name = $get_form_name($object->models, $dsid);
