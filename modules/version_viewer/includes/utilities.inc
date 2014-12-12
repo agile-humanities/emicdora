@@ -237,32 +237,43 @@ function versionable_object_viewer_generate_readonly_form(&$form, $parent_list =
     'markup' => 'defaultable_markup',
   );
 
+  // If we have more than one child, we want to render the children as a list.
   $child_offsets = element_children($form);
   $child_count = count($child_offsets);
   if ($child_count > 1) {
     $form['#prefix'] = '<ul>';
     $form['#suffix'] = '</ul>';
   }
+
+  // Track if we have a visible child element.
   $visible_child = FALSE;
   foreach ($child_offsets as $child_offset) {
     versionable_object_viewer_generate_readonly_form($form[$child_offset], $child_count > 1);
     $visible_child = $visible_child || $form[$child_offset]['#access'];
   }
 
+  // If we have a visible child or a value, we should be rendered.
   $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
+
+  // Map the value of selects to the "human-readable" text.
   if ($form['#type'] == 'select' && isset($form['#default_value'])) {
     $form['#default_value'] = $form['#options'][$form['#default_value']];
   }
   elseif ($visible_child) {
+    // If we have visible children, we don't want our value...
     unset($form['#default_value']);
   }
+
+  // We should render as a list item and are trying to show something...
   if ($parent_list && $form['#access'] && (
     (isset($form['#default_value']) && !empty($form['#default_value'])) ||
     $visible_child)) {
+    // Slap in the list item markup to the prefix and suffix.
     $form['#prefix'] = '<li>' . (isset($form['#prefix']) ? $form['#prefix'] : '');
     $form['#suffix'] = (isset($form['#suffix']) ? $form['#suffix'] : '') . '</li>';
   }
 
+  // Map types as applicable.
   $form['#type'] = isset($form['#type']) ?
     (isset($_type_map[$form['#type']]) ? $_type_map[$form['#type']] : 'defaultable_item') :
     'defaultable_markup';
