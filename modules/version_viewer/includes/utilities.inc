@@ -148,21 +148,138 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
     // JS code expects the following variables to be in these places.
     $cwrc_attributes->cwrcInfo = $cwrc_info;
-    $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
+    if (!isset($cwrc_attributes->attributes)) {
+      $cwrc_attributes->attributes = new stdClass();
+    }
+    $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
+    $id = $matches[1];
     $entities[] = array(
-      'id' => $matches[1],
+      'id' => $id,
       'type' => $type,
-      'text' => $cwrc_info->name,
+      'text' => isset($cwrc_info->name) ? $cwrc_info->name : $id,
       'attributes' => array(
-        'annotationId' => $matches[1],
+        'annotationId' => $id,
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
         'cwrcAttributes' => $cwrc_attributes,
+        'dialogId' => "ent_dialog_$id",
+        'dialogMarkup' => verionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
       ),
     );
   }
   return $entities;
+}
+
+/**
+ * Generate markup to show in an entity's popup dialog.
+ *
+ * @param string $id
+ *   The ID of the annotation referencing the entity.
+ * @param object $info
+ *   A stdClass object containing at least:
+ *   - cwrcInfo: A stdClass object containing at least:
+ *     - id: A string identifying the object in the given repo... A URL for our
+ *       stuff in the "cwrc" repository.
+ */
+function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
+  if (!isset($info->cwrcInfo->id)) {
+    // Current implementation only supports the local repository.
+    return NULL;
+  }
+
+  $get_form_name = function ($models, $dsid) {
+    module_load_include('inc', 'xml_form_builder', 'includes/associations');
+    $associations = xml_form_builder_get_associations(array(), $models, array($dsid));
+    $association = reset($associations);
+    return $association ? $association['form_name'] : FALSE;
+  };
+
+  $parts = explode('/', $info->cwrcInfo->id);
+  if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
+    $pid = end($parts);
+    $object = islandora_object_load($pid);
+    if (!$object) {
+      // Object could not be loaded... Lack of permissions or object isn't in
+      // the local Islandora?
+      return NULL;
+    }
+    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+    $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
+    $form_name = $get_form_name($object->models, $dsid);
+    if (!$form_name) {
+      // No form for which to produce a "read-only" variant... Fallback to old
+      // client-side behaviour.
+      return NULL;
+    }
+    $form = array();
+    $fake_form_state = array();
+    $form = @xml_form_builder_get_form($form, $fake_form_state, $form_name, $object[$dsid]->content);
+    versionable_object_viewer_generate_readonly_form($form);
+    $form['#prefix'] = "<div id='ent_dialog_$id' class='entity_dialog'>";
+    $form['#suffix'] = '</div>';
+    return drupal_render($form);
+  }
+}
+
+/**
+ * Transform the form(/element) into a a read-only variant.
+ *
+ * @param array $form
+ *   A form element to recursively transform into a read-only variant.
+ * @param bool $parent_list
+ *   A boolean indicating if the parent element is being rendered as a list:
+ *   TRUE if we may have siblings rendered; FALSE if we are the only element
+ *   contained by the parent.
+ */
+function versionable_object_viewer_generate_readonly_form(&$form, $parent_list = FALSE) {
+  $_type_map = array(
+    'markup' => 'defaultable_markup',
+  );
+
+  // If we have more than one child, we want to render the children as a list.
+  $child_offsets = element_children($form);
+  $child_count = count($child_offsets);
+  if ($child_count > 1) {
+    $form['#prefix'] = '<ul>';
+    $form['#suffix'] = '</ul>';
+  }
+
+  // Track if we have a visible child element.
+  $visible_child = FALSE;
+  foreach ($child_offsets as $child_offset) {
+    versionable_object_viewer_generate_readonly_form($form[$child_offset], $child_count > 1);
+    $visible_child = $visible_child || $form[$child_offset]['#access'];
+  }
+
+  // If we have a visible child or a value, we should be rendered.
+  $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
+
+  // Map the value of selects to the "human-readable" text.
+  if ($form['#type'] == 'select' && isset($form['#default_value'])) {
+    $form['#default_value'] = $form['#options'][$form['#default_value']];
+  }
+  elseif ($visible_child) {
+    // If we have visible children, we don't want our value...
+    unset($form['#default_value']);
+  }
+
+  // We should render as a list item and are trying to show something...
+  if ($parent_list && $form['#access'] && (
+    (isset($form['#default_value']) && !empty($form['#default_value'])) ||
+    $visible_child)) {
+    // Slap in the list item markup to the prefix and suffix.
+    $form['#prefix'] = '<li>' . (isset($form['#prefix']) ? $form['#prefix'] : '');
+    $form['#suffix'] = (isset($form['#suffix']) ? $form['#suffix'] : '') . '</li>';
+  }
+
+  // Map types as applicable.
+  $form['#type'] = isset($form['#type']) ?
+    (isset($_type_map[$form['#type']]) ? $_type_map[$form['#type']] : 'defaultable_item') :
+    'defaultable_markup';
+
+  unset($form['#description']);
+  $form['#required'] = FALSE;
 }
 
 /**
