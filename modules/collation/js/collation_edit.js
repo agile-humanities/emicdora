@@ -85,6 +85,18 @@
           });
         }
       });
+      $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+          if ($('#full-window-button').val() == Drupal.t('Exit Full Window')) {
+            $('#compareviewer-1009').show();
+            $('#admin-menu-wrapper').show();
+            $('#cwrc_wrapper').css({
+              height: '600',
+            });
+            $('#full-window-button').val(Drupal.t('Full Window'))
+          };
+        }
+      });
 
       waitUntilExists("versionview-1010", function() {
 
@@ -156,7 +168,7 @@
           }
         });
 
-       $(".emicdora_previous_button").click(function() {
+        $(".emicdora_previous_button").click(function() {
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
