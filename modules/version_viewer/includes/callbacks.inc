@@ -179,5 +179,4 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
     }
   }
   drupal_json_output($tree_data);
-  drupal_exit();
 }

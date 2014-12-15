@@ -129,9 +129,10 @@
         if (data['cwrcAttributes']['attributes']['Colour']) {
           colour = data['cwrcAttributes']['attributes']['Colour'];
         }
-        $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
+        var selector = ".tei *[data-annotationid='" + ent_id + "']";
+        $(selector).css('background-color', colour);
 
-        $("span[data-annotationid='" + ent_id + "']").tooltip({
+        $(selector).tooltip({
           position: 'top',
           width: 100,
           height: 100,
@@ -152,9 +153,14 @@
             });
           }
         }).show();
-        $("span[data-annotationid='" + ent_id + "']").click(function() {
+        $(selector).click(function() {
           if ($('#ent_dialog_' + ent_id).length == 0) {
-            $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+            if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
+              $('#content').append(data['dialogMarkup']);
+            }
+            else {
+              $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+            }
           }
           $('#ent_dialog_' + ent_id).dialog({
             title: data['cwrcAttributes']['cwrcInfo']['name'],
@@ -429,14 +435,7 @@
           }
           $("#" + children[i].domId).tooltip({
             position: 'right',
-            hideEvent: 'none',
-            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>',
-            onShow: function () {
-              var t = $(this);
-              t.tooltip('tip').focus().unbind().bind('blur', function () {
-                t.tooltip('hide');
-              });
-            }
+            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>'
           }).show();
         }
       }
