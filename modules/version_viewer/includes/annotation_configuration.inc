@@ -107,15 +107,9 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#multiple' => TRUE,
     '#size' => 10,
     '#prefix' => '<div class="emicdora_access_selector">',
+    '#suffix' => '</div>',
     '#attributes' => array('class' => array('emicdora_selector')),
   );
-  $form['access']['access_wrapper']['cancel'] = array(
-    '#type' => 'submit',
-    '#value' => t('Cancel'),
-    '#suffix' => '</div>',
-    '#attributes' => array('class' => array('emicdora_button'), 'action' => 'cancel'),
-  );
-
   $form['access']['access_wrapper']['roles'] = array(
     '#type' => 'select',
     '#title' => t('Allowed Roles'),
@@ -124,11 +118,20 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#size' => 10,
     '#default_value' => $allowed_roles,
     '#prefix' => '<div class="emicdora_access_selector">',
+    '#suffix' => '</div>',
     '#attributes' => array('class' => array('emicdora_selector')),
   );
-  $form['access']['access_wrapper']['save'] = array(
+  $form['access']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#prefix' => '<div class="emicdora_access_selector">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('emicdora_button'), 'action' => 'cancel'),
+  );
+  $form['access']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save Access Configuration'),
+    '#prefix' => '<div class="emicdora_access_selector">',
     '#suffix' => '</div>',
     '#attributes' => array('class' => array('emicdora_button'), 'action' => 'save'),
   );
@@ -280,7 +283,7 @@ function islandora_emicdora_annotation_availability_validate(array $form, array 
   $action = $form_state['triggering_element']['#attributes']['action'];
   switch ($action) {
     case 'save':
-      if (empty($form_state['values']['users']) && empty($form_state['values']['roles'])) {
+      if ($form_state['values']['annotation_access_restricted'] && empty($form_state['values']['users']) && empty($form_state['values']['roles'])) {
         form_set_error('users', t('Please select at least one entry from either Users or Roles'));
       }
 
@@ -317,10 +320,17 @@ function islandora_emicdora_annotation_availability_submit(array &$form, array &
       break;
 
     case 'save':
-      variable_set('annotation_access_restricted', $form_state['values']['annotation_access_restricted']);
-      $users = serialize($form_state['values']['users']);
-      $roles = serialize($form_state['values']['roles']);
-      versionable_object_viewer_access_upsert($version_pid, $users, $roles);
+      $restricted = variable_set('annotation_access_restricted', $form_state['values']['annotation_access_restricted']);
+      if ($restricted) {
+        $users = serialize($form_state['values']['users']);
+        $roles = serialize($form_state['values']['roles']);
+        versionable_object_viewer_access_upsert($version_pid, $users, $roles);
+      }
+      else {
+        db_delete('versionable_object_access')
+            ->condition('pid', $version_pid)
+            ->execute();
+      }
       $form_state['redirect'] = "islandora/object/$critical_edition_pid/version/$version_pid";
       break;
 

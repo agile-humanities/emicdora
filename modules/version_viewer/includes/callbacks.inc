@@ -91,23 +91,20 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
   }
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   if (isset($anno_pids['pids'])) {
-    $restricted = variable_get('annotation_access_restricted', 0);
-    if ($restricted) {
-      $query = db_select('versionable_object_access')
-          ->fields('versionable_object_access', array(
-            'pid',
-            'allowed_users',
-            'allowed_roles',
-              )
-          )
-          ->condition('pid', $version_pid, '=');
-      $row = $query->execute()->fetchObject();
-    }
+    $query = db_select('versionable_object_access')
+        ->fields('versionable_object_access', array(
+          'pid',
+          'allowed_users',
+          'allowed_roles',
+            )
+        )
+        ->condition('pid', $version_pid, '=');
+    $row = $query->execute()->fetchObject();
     $restrained = isset($row) && is_object($row);
     $size = count($tree_data);
     foreach ($anno_pids['pids'] as $key => $plain_annotation) {
       $annotation = islandora_object_load($plain_annotation['id']);
-      if ($restrained && $restricted) {
+      if ($restrained) {
         $users = unserialize($row->allowed_users);
         $roles = unserialize($row->allowed_roles);
         $owner = user_load_by_name($annotation->owner);
