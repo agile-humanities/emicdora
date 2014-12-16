@@ -32,6 +32,8 @@
             $('#full-window-button').val(Drupal.t('Full Window'))
           }
           if ($('#button-1027-btnIconEl').hasClass('exitFullscreenIcon')) {
+            $('#collatex_iframe').show();
+            $('.region-sidebar-first').show();
             $('#admin-menu-wrapper').show();
             $('#button-1027-btnEl').trigger('click');
           }
@@ -107,9 +109,13 @@
         $('#button-1027-btnEl').click(function() {
           if ($('#button-1027-btnIconEl').hasClass('fullscreenIcon')) {
             $('#admin-menu-wrapper').hide();
+            $('#collatex_iframe').hide();
+            $('.region-sidebar-first').hide();
           }
           else {
             $('#admin-menu-wrapper').show();
+            $('#collatex_iframe').show();
+            $('.region-sidebar-first').show();
           }
         });
 
