@@ -20,9 +20,6 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $version_object = $variables['islandora_object'];
   $type = emicdora_get_source_type($version_object);
   drupal_add_css("$module_path/css/viewer.css");
-  drupal_add_css("$module_path/css/version_viewer_diplomatic_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_reading_tei.css");
-  drupal_add_css("$module_path/css/version_viewer_common_tei.css");
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");

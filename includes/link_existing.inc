@@ -152,5 +152,5 @@ function emicdora_add_source_to_edition() {
     }
   }
   $results['added'] = "$critical_edition_pid/source/$source_pid";
-  echo drupal_json($results);
+  drupal_json_output($results);
 }

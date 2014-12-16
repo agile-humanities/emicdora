@@ -128,9 +128,10 @@
         if (data['cwrcAttributes']['attributes']['Colour']) {
           colour = data['cwrcAttributes']['attributes']['Colour'];
         }
-        $("span[data-annotationid='" + ent_id + "']").css('background-color', colour);
+        var selector = ".tei *[data-annotationid='" + ent_id + "']";
+        $(selector).css('background-color', colour);
 
-        $("span[data-annotationid='" + ent_id + "']").tooltip({
+        $(selector).tooltip({
           position: 'top',
           width: 100,
           height: 100,
@@ -151,9 +152,14 @@
             });
           }
         }).show();
-        $("span[data-annotationid='" + ent_id + "']").click(function() {
+        $(selector).click(function() {
           if ($('#ent_dialog_' + ent_id).length == 0) {
-            $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+            if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
+              $('#content').append(data['dialogMarkup']);
+            }
+            else {
+              $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+            }
           }
           $('#ent_dialog_' + ent_id).dialog({
             title: data['cwrcAttributes']['cwrcInfo']['name'],
@@ -231,8 +237,15 @@
           $('#wb_meta').removeClass('img_selected');
 
           $('#wb_meta').addClass('img_selected');
-          $('#easy-ui-south').css('height', '623');
           toggle_layout(is_selected, 'south', 'wb_meta');
+          // Change the window size based on if the easyui is fullscreen or not.
+          if ($('#eui_window').hasClass('eui-window-fullscreen')) {
+            // Use window height and subtract 50px for the menu bar display.
+            var height = $(window).height() - 50;
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
+          } else {
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});
+          }
           break;
         case 'wb_dt':
           $('#wb_reading').removeClass('img_selected');
@@ -421,14 +434,7 @@
           }
           $("#" + children[i].domId).tooltip({
             position: 'right',
-            hideEvent: 'none',
-            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>',
-            onShow: function () {
-              var t = $(this);
-              t.tooltip('tip').focus().unbind().bind('blur', function () {
-                t.tooltip('hide');
-              });
-            }
+            content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>'
           }).show();
         }
       }
@@ -476,6 +482,5 @@
       });
     $('#easy-ui-east').css('height', '623px');
     $('#easy-ui-west').css('height', '623px');
-    
   });
 })(jQuery);
