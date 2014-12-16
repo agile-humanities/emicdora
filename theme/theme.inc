@@ -214,7 +214,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     'genre' => 'mods_genre_authority_marcgt_ms',
   );
   $solr_term = $solr_term_mappings[$type];
-  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc"));
+  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc", 'query_type' => 'coop'));
   foreach ($results as $data) {
     $label = $data['label'];
     $escaped_label = "\"$label\"";
