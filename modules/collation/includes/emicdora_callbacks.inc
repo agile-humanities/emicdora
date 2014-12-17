@@ -403,7 +403,7 @@ function emicdora_cleanup_merged($inputs) {
         if ($class != 'merged') {
 
           $temp_node = $previous_sibling->cloneNode(FALSE);
-          $temp_children = $temp_node->childNodes();
+          $temp_children = $temp_node->childNodes;
           while ($temp_children->length > 0) {
             $temp_node->removeChild($temp_children->item(0));
           }

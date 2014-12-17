@@ -153,15 +153,13 @@
           }
           $("#diff_l").text(text_deleted);
         });
-        // // Adds html to context_added.
+        // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
-          console.log('text_added ' + text_added);
           if (selection_added.toHtml() !== '') {
             context_added = selection_added.toHtml();
-            console.log('context_added ' + context_added);
           }
           if (context_added.indexOf('<span') === -1) {
             context_added = window.getSelection().anchorNode.parentNode.outerHTML;
@@ -179,8 +177,8 @@
             current_count = variant_counts[current_index];
             next_index = (current_index === -1) ? 0 : ++current_index;
             next_count = variant_counts[next_index];
-            current_selector = '"[data-variant=' + current_count + ']"';
-            next_selector = '"[data-variant=' + next_count + ']"';
+            current_selector = '[data-variant=' + current_count + ']';
+            next_selector = '[data-variant=' + next_count + ']';
             $(current_selector).removeClass('variant_selected');
             $(next_selector).addClass('variant_selected');
             variant_selected = $(next_selector).data('variant');
@@ -196,8 +194,8 @@
             current_count = variant_counts[current_index];
             previous_index = (current_index === -1) ? 0 : --current_index;
             previous_count = variant_counts[previous_index];
-            current_selector = '"[data-variant=' + current_count + ']"';
-            previous_selector = '"[data-variant=' + previous_count + ']"';
+            current_selector = '[data-variant=' + current_count + ']';
+            previous_selector = '[data-variant=' + previous_count + ']';
             $(current_selector).removeClass('variant_selected');
             $(previous_selector).addClass('variant_selected');
             variant_selected = $(previous_selector).data('variant');
