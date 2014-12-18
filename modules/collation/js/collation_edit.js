@@ -18,7 +18,7 @@
           return  $(el).data('variant');
         });
         $.unique(variant_counts);
-        return variant_counts.sort();
+        return variant_counts;
       }
       $(document).keyup(function(e) {
         if (e.keyCode == 27) {
@@ -79,7 +79,6 @@
           merged_content = $(wrapped_content).parent().html();
           $(wrapped_content).unwrap();
         }
-
       });
       $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
@@ -189,6 +188,7 @@
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
+          console.log(variant_counts);
           if (variant_counts.length > 0) {
             current_index = $.inArray(variant_selected, variant_counts);
             current_count = variant_counts[current_index];
@@ -229,6 +229,7 @@
             $(".merged").css('background-color', '');
             all_added = encodeURIComponent($("#versionview-1011-body").html());
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
+            $(".variant").removeClass('variant_selected');
           }
           else {
             $("#save_changes").show();
