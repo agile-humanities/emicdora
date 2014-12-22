@@ -639,11 +639,12 @@ function emicdora_theme() {
     'emicdora_coop' => array(
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_coop',
+      'variables' => array('display_count' => 5),
     ),
     'emicdora_coop_topic' => array(
       'file' => 'theme/theme.inc',
       'template' => 'theme/emicdora_coop_topic',
-      'variables' => array('type' => 'author'),
+      'variables' => array('type' => 'author', 'display_count' => 10),
     ),
     'emicdora_add_source_item' => array(
       'file' => 'theme/theme.inc',
