@@ -130,28 +130,26 @@
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
         $(selector).css('background-color', colour);
-
-        $(selector).tooltip({
-          position: 'top',
-          width: 100,
-          height: 100,
-          hideEvent: 'none',
-          content: function() {
-            var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
-            if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
-              tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
+        if (('descriptiveNote' in data) && data['descriptiveNote']) {
+          $(selector).tooltip({
+            position: 'top',
+            width: 100,
+            height: 100,
+            hideEvent: 'none',
+            content: function () {
+              var tool_tip_content = data['descriptiveNote'];
+              return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+              tool_tip_content +
+              '</div>';
+            },
+            onShow: function () {
+              var t = $(this);
+              t.tooltip('tip').focus().unbind().bind('blur', function () {
+                t.tooltip('hide');
+              });
             }
-            return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
-                tool_tip_content +
-                '</div>';
-          },
-          onShow: function() {
-            var t = $(this);
-            t.tooltip('tip').focus().unbind().bind('blur', function() {
-              t.tooltip('hide');
-            });
-          }
-        }).show();
+          }).show();
+        }
         $(selector).click(function() {
           if ($('#ent_dialog_' + ent_id).length == 0) {
             if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {

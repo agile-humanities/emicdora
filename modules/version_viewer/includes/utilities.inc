@@ -152,6 +152,31 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $cwrc_attributes->attributes = new stdClass();
     }
     $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
+    $descriptive_note = NULL;
+    $parts = explode('/', $cwrc_attributes->cwrcInfo->id);
+    if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
+      $pid = end($parts);
+      $obj = islandora_object_load($pid);
+      if ($obj) {
+        module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+        $cwrc_dsid = islandora_cwrc_writer_entity_content_datastream_id($obj);
+        // look for descriptiveNote tag and only read the first note tage from it.
+        if(!empty($obj[$cwrc_dsid]->content)) {
+          $dom_datastream = new DOMDocument();
+          // Remove xml-model tag so it does not error when reading the xml.
+          $contents = $obj[$cwrc_dsid]->content;
+          $contents = preg_replace('/<\?xml-model .*\?>/', '', $contents);
+          $dom_datastream->loadXML($contents);
+          $xpath = new DOMXPath($dom_datastream);
+          // Find descriptive notes element in the datastream.
+          $descriptive_note_node = $xpath->query('//descriptiveNotes/note');
+          if ($descriptive_note_node->length > 0) {
+            // Only return the first descriptive note to display.
+            $descriptive_note = $descriptive_note_node->item(0)->nodeValue;
+          }
+        }
+      }
+    }
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     $id = $matches[1];
@@ -165,6 +190,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'cwrcAttributes' => $cwrc_attributes,
         'dialogId' => "ent_dialog_$id",
         'dialogMarkup' => verionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
+        'descriptiveNote' => $descriptive_note,
       ),
     );
   }
@@ -256,7 +282,7 @@ function versionable_object_viewer_generate_readonly_form(&$form, $parent_list =
   $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
 
   // Map the value of selects to the "human-readable" text.
-  if ($form['#type'] == 'select' && isset($form['#default_value'])) {
+  if ($form['#type'] == 'select' && isset($form['#default_value']) && array_key_exists($form['#default_value'],$form['#options'])) {
     $form['#default_value'] = $form['#options'][$form['#default_value']];
   }
   elseif ($visible_child) {
