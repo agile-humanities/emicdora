@@ -160,7 +160,7 @@
             }
           }
           $('#ent_dialog_' + ent_id).dialog({
-            title: data['cwrcAttributes']['cwrcInfo']['name'],
+            title: data['annotationId'],
             width: 400,
             height: 200,
             closed: false,
