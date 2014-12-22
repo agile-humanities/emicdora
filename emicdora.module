@@ -48,7 +48,8 @@ function emicdora_init() {
  */
 function emicdora_menu() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $source_content_models = emicdora_get_all_content_models();
+  module_load_include('inc', 'islandora', 'includes/delete_object.form');
+  $source_content_models = emicdora_source_content_models();
   $add_source_contextual_links = array();
   foreach ($source_content_models as $content_model => $label) {
     $url = "emicdora/contextual-links/source/%islandora_object/add/{$content_model}";
@@ -67,7 +68,8 @@ function emicdora_menu() {
       'context' => MENU_CONTEXT_INLINE,
     );
   }
-  foreach ($source_content_models as $content_model => $label) {
+  $all_source_content_models = emicdora_get_all_content_models();
+  foreach ($all_source_content_models as $content_model => $label) {
     $url = "emicdora/source/add/{$content_model}";
     $title = "Add New {$label}";
     $add_source_contextual_links[$url] = array(
@@ -175,6 +177,22 @@ function emicdora_menu() {
       'access arguments' => array(2, 'manage_apparatus'),
     ),
     // Contextual Links for Blocks.
+    'emicdora/contextual-links/critical_edition/%islandora_object' => array(
+      'title' => 'Critical Edition',
+      'page callback' => TRUE,
+      'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/critical_edition/%islandora_object/delete' => array(
+      'title' => 'Delete Critical Edition',
+      'file' => 'includes/delete_object.form.inc',
+      'file path' => drupal_get_path('module', 'islandora'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_delete_object_form', 3),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
     'emicdora/contextual-links/apparatus/%islandora_object' => array(
       'title' => 'Critical Apparatus',
       'page callback' => TRUE,
@@ -363,17 +381,6 @@ function emicdora_menu() {
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
-    'emicdora/contextual-links/version_operations/%islandora_object/edit' => array(
-      'title' => 'Edit Metadata',
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
-      'weight' => -50,
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    ),
     'emicdora/contextual-links/version_operations/%islandora_object/edit_tei_rdf' => array(
       'title' => 'Edit TEI-RDF',
       'file' => 'includes/utilities.inc',
@@ -381,6 +388,17 @@ function emicdora_menu() {
       'page arguments' => array(3, 4),
       'access callback' => 'emicdora_object_management_access',
       'access arguments' => array(3, 'show_editor'),
+      'weight' => -50,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/edit' => array(
+      'title' => 'Edit Metadata',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
       'weight' => -45,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
@@ -764,6 +782,9 @@ function emicdora_block_configure($delta = '') {
 function emicdora_block_view($delta = '') {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $object = menu_get_object('islandora_object', 2);
+  if (!$object) {
+    return;
+  }
   $path_parts = explode('/', $_GET['q']);
   $is_source = (isset($path_parts[3]) && $path_parts[3] == 'source') ? TRUE : FALSE;
   $is_sources_page = (isset($path_parts[3]) && $path_parts[3] == 'sources') ? TRUE : FALSE;
@@ -973,10 +994,11 @@ function emicdora_block_view($delta = '') {
 
     case 'operations':
       module_load_include('inc', 'emicdora', 'includes/operations.blocks');
+      module_load_include('inc', 'islandora', 'includes/delete_object.form');
       // This nested object is either a source, version or transcription.
       $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
-      $menu_path = '';
+      $menu_path = NULL;
       if ($nested_object) {
         if (in_array('islandora:versionCModel', $nested_object->models)) {
           // If it's a version we need to get the source version from it.
@@ -1002,14 +1024,20 @@ function emicdora_block_view($delta = '') {
         $current_view = $is_table ? 'table' : 'compare';
         $menu_path = 'collation_operations';
       }
+      if ($is_critical_edition && count($path_parts) == 3) {
 
-      $block['subject'] = t('Operations');
-      $block['content'] = array(
-        '#theme' => 'links',
-        '#links' => $links,
-      );
-      if ($menu_path) {
+      }
+      $is_critical_edition_page = ($is_critical_edition && count($path_parts) == 3) ? TRUE : FALSE;
+      if ($menu_path || $is_critical_edition_page) {
+        $block['subject'] = t('Operations');
+        $block['content'] = array(
+          '#theme' => 'links',
+          '#links' => $links,
+        );
         $chosen = $nested_object ? $nested_object : $critical_edition;
+        if ($is_critical_edition_page) {
+          $menu_path = 'critical_edition';
+        }
         $block['content']['#contextual_links'] = array(
           'emicdora' => array(
             "emicdora/contextual-links/$menu_path",
@@ -1708,4 +1736,11 @@ function emicdora_block_save($delta, $edit) {
   if ($delta == 'transcriptions') {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
   }
+}
+
+/**
+ * Implements hook_admin_paths_alter().
+ */
+function emicdora_admin_paths_alter(&$paths) {
+  $paths['collation/contextual-links/*'] = FALSE;
 }

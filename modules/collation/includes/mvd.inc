@@ -15,6 +15,8 @@
  */
 function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  emicdora_set_title_and_breadcrumbs_object($object);
   $filter_options = array(
     'Empty' => 'Empty',
     'CCE' => 'CCE',
