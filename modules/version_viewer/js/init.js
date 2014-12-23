@@ -472,7 +472,7 @@
         }
       }
     });
-    
+
     $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
