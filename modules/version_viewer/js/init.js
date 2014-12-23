@@ -141,7 +141,7 @@
             if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
               tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
             }
-            return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+            return '<div class="easyui-panel" style="width:100px;padding:5px;">' +
                 tool_tip_content +
                 '</div>';
           },
