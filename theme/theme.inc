@@ -201,7 +201,7 @@ function emicdora_get_browse_view($type) {
  *   Identifier to distinguish between multiple pagers
  *
  * @return HTML
- *   THemed table
+ *   Themed table
  */
 function emicdora_build_topic_table($type, $display_count, $element) {
   $results = emicdora_get_all($type);
@@ -226,7 +226,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     $urls = array_slice($urls, $current_page * $display_count, $display_count);
   }
   $table = emicdora_build_table($urls);
-  $table .= theme('pager', array('quantity' => $display_count, 'element' => $element));
+  $table .= theme('pager', array('quantity' => 10, 'element' => $element));
   return $table;
 }
 
