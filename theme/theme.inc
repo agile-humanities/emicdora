@@ -226,7 +226,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     $urls = array_slice($urls, $current_page * $display_count, $display_count);
   }
   $table = emicdora_build_table($urls);
-  $table .= theme('pager', array('quantity' => $total, 'element' => $element));
+  $table .= theme('pager', array('quantity' => $display_count, 'element' => $element));
   return $table;
 }
 
