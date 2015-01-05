@@ -22,7 +22,7 @@
  * @return array
  *   A Drupal Form for ingesting a new object of the given type.
  */
-function islandora_emicdora_add_source_form($form, $form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
+function islandora_emicdora_add_source_form($form, &$form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
   $add_to_workbench = $add_to_workbench == "TRUE" ? TRUE : FALSE;
   $mappings = islandora_simplified_ingest_get_mappings($content_model);
   drupal_add_css(
@@ -30,7 +30,6 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
       '/css/emicdora_ingest.css'
   );
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
-
   $form['content_model'] = array(
     '#type' => 'hidden',
     '#value' => $content_model,
@@ -69,7 +68,7 @@ function islandora_emicdora_add_source_form($form, $form_state, $content_model, 
   $form_name = $mappings['form'];
   module_load_include('module', 'xml_form_builder');
   $metadata = xml_form_builder_get_form($form, $form_state, $form_name);
-  $form = array_merge_recursive($form, $metadata);
+  $form = array_merge($form, $metadata);
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest @type object", array('@type' => $mappings['label'])),
