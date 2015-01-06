@@ -48,7 +48,6 @@ function emicdora_init() {
  */
 function emicdora_menu() {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  module_load_include('inc', 'islandora', 'includes/delete_object.form');
   $source_content_models = emicdora_source_content_models();
   $add_source_contextual_links = array();
   foreach ($source_content_models as $content_model => $label) {
@@ -1033,9 +1032,6 @@ function emicdora_block_view($delta = '') {
         $mvd = isset($path_parts[4]) ? $path_parts[4] : '';
         $current_view = $is_table ? 'table' : 'compare';
         $menu_path = 'collation_operations';
-      }
-      if ($is_critical_edition && count($path_parts) == 3) {
-
       }
       $is_critical_edition_page = ($is_critical_edition && count($path_parts) == 3);
       if ($menu_path || $is_critical_edition_page) {
