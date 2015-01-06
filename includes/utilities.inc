@@ -93,7 +93,7 @@ function emicdora_show_apparatus_block() {
     // Confirm the given objects content model.
     $object = islandora_object_load($path_parts[2]);
     $allowed_cmodels = array('islandora:criticalEditionContainerCModel', 'islandora:versionCModel');
-    if (count(array_intersect($allowed_cmodels, $object->models))) {
+    if (array_intersect($allowed_cmodels, $object->models)) {
       // Correct content model, and correct path, i say
       // lets show the Apparatus block.
       $return = TRUE;

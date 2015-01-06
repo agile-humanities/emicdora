@@ -1037,7 +1037,7 @@ function emicdora_block_view($delta = '') {
       if ($is_critical_edition && count($path_parts) == 3) {
 
       }
-      $is_critical_edition_page = ($is_critical_edition && count($path_parts) == 3) ? TRUE : FALSE;
+      $is_critical_edition_page = ($is_critical_edition && count($path_parts) == 3);
       if ($menu_path || $is_critical_edition_page) {
         $block['subject'] = t('Operations');
         $block['content'] = array(
