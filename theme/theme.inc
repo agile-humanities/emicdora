@@ -41,7 +41,7 @@ function emicdora_preprocess_emicdora_transcription_object(array &$variables) {
  */
 function emicdora_preprocess_emicdora_coop(array &$variables) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $display_count = 5;
+  $display_count = $variables['display_count'];
   $module_path = drupal_get_path('module', 'emicdora');
   drupal_add_css("$module_path/css/emicdora.coop.css");
   drupal_add_js("$module_path/js/coop.js");
@@ -84,7 +84,7 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
 function emicdora_build_table($urls) {
   $header = array(
     'title' => array('data' => t('Name'), 'class' => 'emicdora_header'),
-    'counter' => array('data' => t('Counter'), 'class' => 'emicdora_header'),
+    'counter' => array('data' => t('Count'), 'class' => 'emicdora_header'),
   );
 
   $rows = array();
@@ -127,8 +127,7 @@ function emicdora_preprocess_emicdora_coop_topic(array &$variables) {
   $topic = $topic_mappings[$type];
   $variables['page_title'] = t("Browse by @genre", array("@genre" => $topic));
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  $display_count = 20;
-  $variables['topic_table'] = emicdora_build_topic_table($type, $display_count, 0);
+  $variables['topic_table'] = emicdora_build_topic_table($type, $variables['display_count'], 0);
 }
 
 /**
@@ -202,7 +201,7 @@ function emicdora_get_browse_view($type) {
  *   Identifier to distinguish between multiple pagers
  *
  * @return HTML
- *   THemed table
+ *   Themed table
  */
 function emicdora_build_topic_table($type, $display_count, $element) {
   $results = emicdora_get_all($type);
@@ -214,7 +213,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     'genre' => 'mods_genre_authority_marcgt_ms',
   );
   $solr_term = $solr_term_mappings[$type];
-  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc"));
+  $options = array('query' => array('sort' => "mods_titleInfo_title_s asc", 'query_type' => 'coop'));
   foreach ($results as $data) {
     $label = $data['label'];
     $escaped_label = "\"$label\"";
@@ -227,7 +226,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     $urls = array_slice($urls, $current_page * $display_count, $display_count);
   }
   $table = emicdora_build_table($urls);
-  $table .= theme('pager', array('quantity' => $total, 'element' => $element));
+  $table .= theme('pager', array('quantity' => 10, 'element' => $element));
   return $table;
 }
 

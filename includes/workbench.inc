@@ -229,7 +229,7 @@ function emicdora_workbench_form($form, &$form_state) {
  *   An array containing the Drupal form state.
  */
 function emicdora_workbench_add_schema_transform_redirect($form, &$form_state) {
-  $form_state['redirect'] = 'islandora/object/islandora:tei_schema_collection/manage/overview/ingest';
+  $form_state['redirect'] = 'islandora/object/cwrc:schemaCollection/manage/overview/ingest';
 }
 
 /**
@@ -323,7 +323,7 @@ function emicdora_workbench_form_submit($form, &$form_state) {
     }
 
     if ($form_state['triggering_element']['#parents'] == array('add_schema_transform')) {
-      $form_state['redirect'] = 'islandora/object/islandora:tei_schema_collection/manage/overview/ingest';
+      $form_state['redirect'] = 'islandora/object/cwrc:schemaCollection/manage/overview/ingest';
     }
   }
 }
