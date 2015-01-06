@@ -533,6 +533,15 @@ function emicdora_menu() {
       'access callback' => 'user_access',
       'access arguments' => array(EMICDORA_MANAGE_EDITION),
     ),
+    'CO-OP/%islandora_object' => array(
+      'title' => 'Show Selection',
+      'page callback' => 'emicdora_show_object',
+      'file' => 'includes/coop_object_view.inc',
+      'page arguments' => array(1),
+      'type' => MENU_CALLBACK,
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_VIEW_OBJECTS, 1),
+    ),
   );
 }
 
@@ -1708,5 +1717,16 @@ function emicdora_remove_objects($object) {
 function emicdora_block_save($delta, $edit) {
   if ($delta == 'transcriptions') {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
+  }
+}
+
+/**
+ * Implements hook_islandora_solr_results_alter().
+ */
+function emicdora_islandora_solr_results_alter(&$search_results, $query_processor) {
+  if (isset($_GET['query_type']) && $_GET['query_type'] == 'coop') {
+    foreach ($search_results as &$search_result) {
+      $search_result['object_url'] = "CO-OP/{$search_result['PID']}";
+    }
   }
 }
