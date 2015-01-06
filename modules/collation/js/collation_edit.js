@@ -188,7 +188,6 @@
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
-          console.log(variant_counts);
           if (variant_counts.length > 0) {
             current_index = $.inArray(variant_selected, variant_counts);
             current_count = variant_counts[current_index];
