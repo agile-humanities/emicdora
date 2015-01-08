@@ -370,7 +370,9 @@ function islandora_emicdora_annotation_availability_submit(array &$form, array &
       if ($form_state['values']['custom_forms']['custom_css']) {
         $css_file = file_load($form_state['values']['custom_forms']['custom_css']);
         $css = file_get_contents(drupal_realpath($css_file->uri));
-        $public_css_file = drupal_tempnam('public://', 'css');
+        // A bug in the pluploader causes it to ignore #upload_location.
+
+        $public_css_file = drupal_tempnam(file_default_scheme() . '://', 'css');
         $css_file = file_save_data($css, $public_css_file);
         $css_file->status = 1;
         file_save($css_file);
@@ -380,7 +382,7 @@ function islandora_emicdora_annotation_availability_submit(array &$form, array &
       if ($form_state['values']['custom_forms']['custom_xslt']) {
         $xslt_file = file_load($form_state['values']['custom_forms']['custom_xslt']);
         $xslt = file_get_contents(drupal_realpath($xslt_file->uri));
-        $public_xslt_file = drupal_tempnam('public://', 'xslt');
+        $public_xslt_file = drupal_tempnam(file_default_scheme() . '://', 'xslt');
         $xslt_file = file_save_data($xslt, $public_xslt_file);
         $xslt_file->status = 1;
         file_save($xslt_file);
