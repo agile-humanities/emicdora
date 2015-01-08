@@ -43,7 +43,7 @@ function versionable_object_viewer_schema() {
       'pid' => array(
         'type' => 'varchar',
         'length' => 255,
-        'description' => 'The pid of the version configuration is associated with.',
+        'description' => 'The pid of the version this configuration is associated with.',
       ),
       'label' => array(
         'type' => 'varchar',
@@ -56,16 +56,19 @@ function versionable_object_viewer_schema() {
         'description' => 'Configuration description.',
       ),
       'xslt' => array(
-        'type' => 'blob',
-        'description' => 'xslt for transform.',
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'url of file holding xslt for this custom transformation.',
       ),
       'css' => array(
-        'type' => 'blob',
-        'description' => 'CSS to display this config.',
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'url of file holding CSS to display this custom transformation.',
       ),
     ),
     'primary key' => array('cid'),
   );
+
   $schema['versionable_object_config_choice'] = array(
     'description' => 'Table that stores chosen configuration.',
     'fields' => array(
@@ -81,15 +84,18 @@ function versionable_object_viewer_schema() {
       ),
     ),
     'primary key' => array('cid', 'pid'),
+    'foreign keys' => array(
+      'versionable_object_custom_config' => array(
+        'table' => 'versionable_object_custom_config',
+        'columns' => array('cid' => 'cid'),
+      ),
+    ),
   );
   return $schema;
 }
 
 /**
- * Implements hook_update_N().
- *
- * Add the required table for handling authentication tokens.
- * This is the first instance that has this table.
+ * Adds all database functionality.
  */
 function versionable_object_viewer_update_7001(&$sandbox) {
   drupal_install_schema('versionable_object_viewer');

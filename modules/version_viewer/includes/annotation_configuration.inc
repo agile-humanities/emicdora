@@ -14,6 +14,8 @@
  *   The Drupal form state.
  * @param AbstractObject $version
  *   The version requesting annotations.
+ * @param string $critical_edition_pid
+ *   PID of parent critical edition
  *
  * @return array
  *   The Drupal From definition.
@@ -34,6 +36,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       )
       ->condition('pid', $version->id, '=');
   $row = $query->execute()->fetchObject();
+  $is_restricted = $row != FALSE;
   $allowed_roles = isset($row->allowed_roles) ? array_values(unserialize($row->allowed_roles)) : array();
   $allowed_users = isset($row->allowed_users) ? unserialize($row->allowed_users) : array();
 
@@ -41,21 +44,19 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       ->fields('versionable_object_config_choice', array('pid', 'cid'))
       ->condition('pid', $version->id, '=');
   $result = $query->execute()->fetchObject();
-  $chosen = is_object($result) ? $result->cid : FALSE;
-  $checked = ($chosen && $chosen != 'none') ? TRUE : FALSE;
-
+  $chosen = $result ? $result->cid : FALSE;
+  $checked = ($chosen && $chosen != 'none');
   $query = db_select('versionable_object_custom_config', 'v')
           ->fields('v')
           ->extend('PagerDefault')->limit(10);
   $configs = $query->execute()->fetchAll();
-
   $upload_size = min((int) ini_get('post_max_size'), (int) ini_get('upload_max_filesize'));
   $css_extensions = array('css');
   $xsl_extensions = array('xsl xslt');
   $users = array();
   $result = db_query('SELECT u.uid, u.name FROM {users} u');
   foreach ($result as $user) {
-    $user->uid == 0 ? $users['anonymous'] = variable_get('anonymous', t('Anonymous')) : $users[$user->name] = $user->name;
+    $user->uid == 0 ? $users['anonymous'] = variable_get('anonymous', t('Anonymous')) : $users[$user->uid] = $user->name;
     if ($user->uid == 1) {
       $admin_user = $user->name;
       $form_state['islandora_xacml']['admin_user'] = $user->name;
@@ -65,7 +66,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $roles = array();
   $result = db_query('SELECT r.rid, r.name FROM {role} r');
   foreach ($result as $role) {
-    $role->rid == 0 ? $roles['anonymous'] = variable_get('anonymous', t('Anonymous')) : $roles[$role->name] = $role->name;
+    $role->rid == 0 ? $roles['anonymous'] = variable_get('anonymous', t('Anonymous')) : $roles[$role->rid] = $role->name;
   }
 
   $form = array();
@@ -89,7 +90,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $form['access']['annotation_access_restricted'] = array(
     '#type' => 'radios',
     '#options' => array(0 => t('Display all annotations.'), 1 => t('Limit the display of annotations to the Users and Roles selected below')),
-    '#default_value' => variable_get('annotation_access_restricted', 0),
+    '#default_value' => intval($is_restricted),
   );
   $form['access']['access_wrapper'] = array(
     '#type' => 'fieldset',
@@ -126,14 +127,14 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#value' => t('Cancel'),
     '#prefix' => '<div class="emicdora_access_selector">',
     '#suffix' => '</div>',
-    '#attributes' => array('class' => array('emicdora_button'), 'action' => 'cancel'),
+    '#attributes' => array('class' => array('emicdora_button'), 'data-action' => 'cancel'),
   );
   $form['access']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save Access Configuration'),
     '#prefix' => '<div class="emicdora_access_selector">',
     '#suffix' => '</div>',
-    '#attributes' => array('class' => array('emicdora_button'), 'action' => 'save'),
+    '#attributes' => array('class' => array('emicdora_button'), 'data-action' => 'save'),
   );
   if ($total) {
     $form['select_config'] = array(
@@ -171,10 +172,24 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       }
 
       $delete = l(t("Delete"), "islandora/version_viewer/configuration/delete/$config->cid/{$version->id}");
+      $renderable_span_array = array(
+        'css_span' => array(
+          '#type' => 'markup',
+          '#markup' => "<span class = 'config_url'>$css</span>",
+        ),
+        'xslt_span' => array(
+          '#type' => 'markup',
+          '#markup' => "<span class = 'config_url'>$xslt</span>",
+        ),
+        'delete_span' => array(
+          '#type' => 'markup',
+          '#markup' => "<span class = 'config_url'>$delete</span>",
+        ),
+      );
       $rows[$config->cid] = array(
         'label' => $config->label,
         'description' => $config->description,
-        'download' => "<span class = 'config_url'>$css</span> <span class = 'config_url'>$xslt</span><span class = 'config_url'>$delete</span>",
+        'download' => drupal_render($renderable_span_array),
       );
     }
     $header = array(
@@ -197,19 +212,20 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       '#type' => 'markup',
       '#markup' => theme('pager', array('quantity' => 10)),
     );
-
-    $form['select_config']['cancel'] = array(
+    $form['select_config_wrapper'] = array(
+      '#prefix' => '<div class = "control_buttons">',
+      '#suffix' => '</div>',
+    );
+    $form['select_config_wrapper']['select_config']['cancel'] = array(
       '#type' => 'submit',
       '#value' => t('Cancel'),
-      '#attributes' => array('class' => array('emicdora_button'), 'action' => 'cancel'),
-      '#prefix' => '<div class = "control_buttons">',
+      '#attributes' => array('class' => array('emicdora_button'), 'data-action' => 'cancel'),
     );
 
-    $form['select_config']['save_config'] = array(
+    $form['select_config_wrapper']['select_config']['save_config'] = array(
       '#type' => 'submit',
       '#value' => t('Save Configuration'),
-      '#attributes' => array('class' => array('emicdora_button'), 'action' => 'save_config'),
-      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('emicdora_button'), 'data-action' => 'save_config'),
     );
   }
 
@@ -240,9 +256,9 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#title' => t('CSS File'),
     '#type' => 'managed_file',
     '#required' => FALSE,
-    '#description' => t('Select a file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $css_extensions[0])),
+    '#description' => t('Select a file to upload.<br/>Files must be less than <strong>@size MB.</strong><br/>Allowed file types: <strong>@ext.</strong>', array('@size' => $upload_size, '@ext' => $css_extensions[0])),
     '#default_value' => isset($form_state['values']['custom_css']) ? $form_state['values']['custom_css'] : NULL,
-    '#upload_location' => 'public://',
+    '#upload_location' => file_default_scheme() . '://',
     '#upload_validators' => array(
       'file_validate_extensions' => $css_extensions,
       // Assume its specified in MB.
@@ -254,9 +270,9 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
     '#name' => 'files[custom_xslt]',
     '#type' => 'managed_file',
     '#required' => FALSE,
-    '#description' => t('Select a file to upload.<br/>Files must be less than <b>@size MB.</b><br/>Allowed file types: <b>@ext.</b>', array('@size' => $upload_size, '@ext' => $xsl_extensions[0])),
+    '#description' => t('Select a file to upload.<br/>Files must be less than <strong>@size MB.</strong><br/>Allowed file types: <strong>@ext.</strong>', array('@size' => $upload_size, '@ext' => $xsl_extensions[0])),
     '#default_value' => isset($form_state['values']['custom_xslt']) ? $form_state['values']['custom_xslt'] : NULL,
-    '#upload_location' => 'public://',
+    '#upload_location' => file_default_scheme() . '://',
     '#upload_validators' => array(
       'file_validate_extensions' => $xsl_extensions,
       // Assume its specified in MB.
@@ -266,7 +282,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   $form['custom_forms']['create'] = array(
     '#type' => 'submit',
     '#value' => t('Create'),
-    '#attributes' => array('class' => array('emicdora_button'), 'action' => 'create'),
+    '#attributes' => array('class' => array('emicdora_button'), 'data-action' => 'create'),
   );
   return $form;
 }
@@ -280,7 +296,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
  *   Drupal Form State
  */
 function islandora_emicdora_annotation_availability_validate(array $form, array $form_state) {
-  $action = $form_state['triggering_element']['#attributes']['action'];
+  $action = $form_state['triggering_element']['#attributes']['data-action'];
   switch ($action) {
     case 'save':
       if ($form_state['values']['annotation_access_restricted'] && empty($form_state['values']['users']) && empty($form_state['values']['roles'])) {
@@ -311,7 +327,8 @@ function islandora_emicdora_annotation_availability_validate(array $form, array 
  *   Drupal form state
  */
 function islandora_emicdora_annotation_availability_submit(array &$form, array &$form_state) {
-  $action = $form_state['triggering_element']['#attributes']['action'];
+  module_load_include('inc', 'versionable_object_viewer', 'includes/db');
+  $action = $form_state['triggering_element']['#attributes']['data-action'];
   $version_pid = $form_state['values']['version_id'];
   $critical_edition_pid = $form_state['values']['critical_edition_pid'];
   switch ($action) {
@@ -320,7 +337,7 @@ function islandora_emicdora_annotation_availability_submit(array &$form, array &
       break;
 
     case 'save':
-      $restricted = variable_set('annotation_access_restricted', $form_state['values']['annotation_access_restricted']);
+      $restricted = $form_state['values']['annotation_access_restricted'];
       if ($restricted) {
         $users = serialize($form_state['values']['users']);
         $roles = serialize($form_state['values']['roles']);
@@ -390,114 +407,6 @@ function islandora_emicdora_annotation_availability_submit(array &$form, array &
 }
 
 /**
- * Inserts or updates access permissions.
- *
- * @param string $version_pid
- *   PID of version
- * @param string $users
- *   Serialized array of allowed users
- * @param string $roles
- *   Serialized array of allowed roles
- */
-function versionable_object_viewer_access_upsert($version_pid, $users, $roles) {
-  $query = db_select('versionable_object_access')
-      ->fields('versionable_object_access', array('pid'))
-      ->condition('pid', $version_pid, '=');
-  $results = $query->execute()->fetchObject();
-
-  if (!is_object($results)) {
-    db_insert('versionable_object_access')
-        ->fields(array(
-          'allowed_users' => $users,
-          'allowed_roles' => $roles,
-          'pid' => $version_pid,
-            )
-        )
-        ->execute();
-  }
-  else {
-    $pid = $results->pid;
-    db_update('versionable_object_access')
-        ->fields(array('allowed_users' => $users, 'allowed_roles' => $roles))
-        ->condition('pid', $pid)
-        ->execute();
-  }
-}
-
-/**
- * Deletes custom configuration.
- *
- * @param int $cid
- *   Unique identifier of configuration record
- * @param string $pid
- *   PID for redirection
- */
-function versionable_object_viewer_delete_config($cid, $pid) {
-  db_delete('versionable_object_custom_config')
-      ->condition('cid', $cid)
-      ->execute();
-  drupal_goto("islandora/version_viewer/annotation/$pid");
-}
-
-/**
- * Downloads selected file.
- *
- * @param int $cid
- *   Unique identifier for record
- * @param string $type
- *   CSS or XSLT
- */
-function versionable_object_viewer_download($cid, $type) {
-  $query = db_select('versionable_object_custom_config')
-      ->fields('versionable_object_custom_config', array($type))
-      ->condition('cid', $cid, '=');
-  $results = $query->execute()->fetchObject();
-  header('Content-Type: text/xml', TRUE);
-  header('Content-Disposition: attachment; filename="File.' . $type . '"');
-  switch ($type) {
-    case 'css':
-      echo file_get_contents($results->css);
-      break;
-
-    case 'xslt':
-      echo file_get_contents($results->xslt);
-      break;
-  }
-}
-
-/**
- * Inserts or updates config choice.
- *
- * @param string $version_pid
- *   PID of version
- * @param int $cid
- *   Unique identifier for configuration
- */
-function versionable_object_viewer_config_upsert($version_pid, $cid) {
-  $query = db_select('versionable_object_config_choice')
-      ->fields('versionable_object_config_choice', array('pid'))
-      ->condition('pid', $version_pid, '=');
-  $results = $query->execute()->fetchObject();
-
-  if (!is_object($results)) {
-    db_insert('versionable_object_config_choice')
-        ->fields(array(
-          'cid' => $cid,
-          'pid' => $version_pid,
-            )
-        )
-        ->execute();
-  }
-  else {
-    $pid = $results->pid;
-    db_update('versionable_object_config_choice')
-        ->fields(array('pid' => $version_pid, 'cid' => $cid))
-        ->condition('pid', $pid)
-        ->execute();
-  }
-}
-
-/**
  * The delete datastream configuration form.
  *
  * @param array $form
@@ -505,7 +414,9 @@ function versionable_object_viewer_config_upsert($version_pid, $cid) {
  * @param array $form_state
  *   The Drupal form state.
  * @param int $cid
- *   The configuraiton to be deleted.
+ *   The configuration to be deleted.
+ * @param string $pid
+ *   PID associated with config to be deleted.
  *
  * @return array
  *   The drupal form definition.
@@ -524,7 +435,7 @@ function versionable_object_viewer_delete_config_form(array $form, array &$form_
 }
 
 /**
- * Submit function for cid delete.
+ * Submit function for configuration deletion.
  *
  * @param array $form
  *   Drupal form
@@ -532,7 +443,39 @@ function versionable_object_viewer_delete_config_form(array $form, array &$form_
  *   Drupal form state
  */
 function versionable_object_viewer_delete_config_form_submit(array $form, array &$form_state) {
+  module_load_include('inc', 'versionable_object_viewer', 'includes/db');
   $cid = $form_state['values']['cid'];
   $pid = $form_state['values']['pid'];
   versionable_object_viewer_delete_config($cid, $pid);
+}
+
+/**
+ * Downloads selected file.
+ *
+ * @param int $cid
+ *   Unique identifier for record
+ * @param string $type
+ *   CSS or XSLT
+ */
+function versionable_object_viewer_download($cid, $type) {
+  $mime_map = array(
+    'css' => 'text/css',
+    'xslt' => 'text/xml',
+  );
+  $mimetype = $mime_map[$type];
+  $query = db_select('versionable_object_custom_config')
+      ->fields('versionable_object_custom_config', array($type))
+      ->condition('cid', $cid, '=');
+  $results = $query->execute()->fetchObject();
+  header("Content-Type: $mimetype", TRUE);
+  header('Content-Disposition: attachment; filename="File.' . $type . '"');
+  switch ($type) {
+    case 'css':
+      echo file_get_contents($results->css);
+      break;
+
+    case 'xslt':
+      echo file_get_contents($results->xslt);
+      break;
+  }
 }

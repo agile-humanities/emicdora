@@ -100,18 +100,17 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
         )
         ->condition('pid', $version_pid, '=');
     $row = $query->execute()->fetchObject();
-    $restrained = isset($row) && is_object($row);
     $size = count($tree_data);
     foreach ($anno_pids['pids'] as $key => $plain_annotation) {
       $annotation = islandora_object_load($plain_annotation['id']);
-      if ($restrained) {
+      if ($row) {
         $users = unserialize($row->allowed_users);
         $roles = unserialize($row->allowed_roles);
         $owner = user_load_by_name($annotation->owner);
         $owner_roles = isset($owner->roles) ? $owner->roles : array();
-        $user_blocked = in_array($owner->name, $users) ? FALSE : TRUE;
-        $role_blocked = count(array_intersect($roles, $owner_roles) < 1) ? FALSE : TRUE;
-        if ($user_blocked && $role_blocked) {
+        $user_blocked = in_array($owner->uid, $users) ? FALSE : TRUE;
+        $roles_blocked = array_intersect($roles, $owner_roles) ? FALSE : TRUE;
+        if ($user_blocked && $roles_blocked) {
           unset($anno_pids['pids'][$key]);
           $size = count($tree_data);
           continue;

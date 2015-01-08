@@ -3,5 +3,7 @@ description = "A TEI Implementation that makes use of the markup editor and the 
 package = EMiC
 dependencies[] = emicdora
 dependencies[] = islandora_cwrc_writer
+dependencies[] = versionable_object_viewer
+dependencies[] = islandora_image_annotation
 version = 7.x-dev
 core = 7.x
