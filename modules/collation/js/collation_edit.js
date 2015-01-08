@@ -20,6 +20,25 @@
         $.unique(variant_counts);
         return variant_counts.sort();
       }
+      $(document).keyup(function(e) {
+        if (e.keyCode == 27) {
+          if ($('#full-window-button').val() == Drupal.t('Exit Full Window')) {
+            $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
+            $('#compareviewer-1009').show();
+            $('#admin-menu-wrapper').show();
+            $('#cwrc_wrapper').css({
+              height: '600',
+            });
+            $('#full-window-button').val(Drupal.t('Full Window'))
+          }
+          if ($('#button-1027-btnIconEl').hasClass('exitFullscreenIcon')) {
+            $('#collatex_iframe').show();
+            $('.region-sidebar-first').show();
+            $('#admin-menu-wrapper').show();
+            $('#button-1027-btnEl').trigger('click');
+          }
+        }
+      });
       $(document).delegate('span.merged', 'click', function() {
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
@@ -87,6 +106,18 @@
       });
 
       waitUntilExists("versionview-1010", function() {
+        $('#button-1027-btnEl').click(function() {
+          if ($('#button-1027-btnIconEl').hasClass('fullscreenIcon')) {
+            $('#admin-menu-wrapper').hide();
+            $('#collatex_iframe').hide();
+            $('.region-sidebar-first').hide();
+          }
+          else {
+            $('#admin-menu-wrapper').show();
+            $('#collatex_iframe').show();
+            $('.region-sidebar-first').show();
+          }
+        });
 
         $('#merge_container').hide();
         $('#unmerge_container').hide();
@@ -156,7 +187,7 @@
           }
         });
 
-       $(".emicdora_previous_button").click(function() {
+        $(".emicdora_previous_button").click(function() {
           if (typeof(variant_counts) === 'undefined') {
             var variant_counts = emicdora_get_variants();
           }
