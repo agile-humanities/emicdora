@@ -1003,7 +1003,6 @@ function emicdora_block_view($delta = '') {
 
     case 'operations':
       module_load_include('inc', 'emicdora', 'includes/operations.blocks');
-      module_load_include('inc', 'islandora', 'includes/delete_object.form');
       // This nested object is either a source, version or transcription.
       $nested_object = menu_get_object('islandora_object', 4);
       $links = array();
