@@ -576,6 +576,8 @@ function emicdora_admin_paths() {
   // Show contextual link pages as overlays.
   return array(
     'emicdora/contextual-links/*' => TRUE,
+    'emicdora/contextual-links/transcription_operations/*/delete_transcription' => FALSE,
+    'emicdora/contextual-links/version_operations/*/download_tei' => FALSE,
   );
 }
 
