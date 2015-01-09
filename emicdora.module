@@ -1755,4 +1755,3 @@ function emicdora_block_save($delta, $edit) {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
   }
 }
-
