@@ -4,3 +4,101 @@
  * @file
  * Install hooks for this module.
  */
+
+/**
+ * Implements hook_schema().
+ */
+function versionable_object_viewer_schema() {
+  $schema['versionable_object_access'] = array(
+    'description' => 'Table that stores access rights to versions.',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version.',
+      ),
+      'allowed_users' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Serialized array of allowed users.',
+      ),
+      'allowed_roles' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Serialized array of allowed roles.',
+      ),
+    ),
+    'primary key' => array('pid'),
+  );
+
+  $schema['versionable_object_custom_config'] = array(
+    'description' => 'Table that stores custom display configurations.',
+    'fields' => array(
+      'cid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'The UID for each configuration.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version this configuration is associated with.',
+      ),
+      'label' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Configuration label.',
+      ),
+      'description' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Configuration description.',
+      ),
+      'xslt' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'url of file holding xslt for this custom transformation.',
+      ),
+      'css' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'url of file holding CSS to display this custom transformation.',
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+
+  $schema['versionable_object_config_choice'] = array(
+    'description' => 'Table that stores chosen configuration.',
+    'fields' => array(
+      'cid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The chosen configurations unique identifier.',
+      ),
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The pid of the version configuration is associated with.',
+      ),
+    ),
+    'primary key' => array('cid', 'pid'),
+    'foreign keys' => array(
+      'versionable_object_custom_config' => array(
+        'table' => 'versionable_object_custom_config',
+        'columns' => array('cid' => 'cid'),
+      ),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Adds all database functionality.
+ */
+function versionable_object_viewer_update_7001(&$sandbox) {
+  drupal_install_schema('versionable_object_viewer');
+  $t = get_t();
+  return $t("Versionable object viewer database updates complete.");
+}

@@ -55,8 +55,9 @@
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
       var pid = Drupal.settings.versionable_object_viewer.pids[pageNumber - 1];
+      var version_pid = Drupal.settings.versionable_object_viewer.version_pid;
       $.ajax({
-        url: Drupal.settings.basePath + 'islandora/object/' + pid + '/get_tree_data/' + dpid,
+        url: Drupal.settings.basePath + 'islandora/object/' + pid + '/get_tree_data/' + dpid + '/' + version_pid,
         async: false,
         success: function(data, status, xhr) {
           $('#easyui_tree').tree({
