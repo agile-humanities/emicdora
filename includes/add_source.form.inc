@@ -118,6 +118,10 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   }
   // Add thumbnail.
   if (isset($form_state['values']['tn_wrapper']['tn_file'])) {
+    // Call out to save the file explicitly because for some reason
+    // element_validate is getting called on AJAX triggered by XML forms.
+    islandora_plupload_element_validate($form['tn_wrapper']['tn_file'], $form_state);
+
     $tn_file = $form_state['values']['tn_wrapper']['tn_file'];
     $file = file_load($tn_file);
     if ($file) {
@@ -125,6 +129,9 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
     }
   }
   if (!empty($form_state['values']['content_wrapper']['content'])) {
+    // Call out to save the file explicitly because for some reason
+    // element_validate is getting called on AJAX triggered by XML forms.
+    islandora_plupload_element_validate($form['content_wrapper']['content'], $form_state);
     $file = file_load($form_state['values']['content_wrapper']['content']);
 
     switch ($form_state['values']['content_model']) {
@@ -183,7 +190,7 @@ function emicdora_get_thumbnail_wrapper($upload_size) {
 
   $form['tn_wrapper']['tn_file'] = array(
     '#title' => t('Add thumbnail images.'),
-    '#type' => 'managed_file',
+    '#type' => 'plupload',
     '#required' => FALSE,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
@@ -226,7 +233,7 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
 
   $form['content_wrapper']['content'] = array(
     '#title' => $mappings['upload_prompt'],
-    '#type' => 'managed_file',
+    '#type' => 'plupload',
     '#required' => FALSE,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
