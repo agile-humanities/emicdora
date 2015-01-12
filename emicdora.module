@@ -1755,3 +1755,17 @@ function emicdora_block_save($delta, $edit) {
     variable_set('emicdora_transcription_block_count', $edit['emicdora_transcription_block_count']);
   }
 }
+
+/**
+ * Implements hook_file_presave().
+ */
+function emicdora_file_presave($file) {
+  $query = db_select('file_managed')
+      ->fields('file_managed', array('uri', 'fid'))
+      ->condition('uri', $file->uri, '=');
+  $result = $query->execute()->fetchObject();
+  // Prevents multiple submissions caused by javascript form alterations.
+  if ($result && isset($result->fid)) {
+    $file->fid = $result->fid;
+  }
+}
