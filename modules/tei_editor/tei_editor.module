@@ -5,6 +5,8 @@
  * Defines all the hooks this module implements.
  */
 
+define('ISLANDORA_CWRC_WRITER_SCHEMA_COLLECTION', 'islandora:tei_schema_collection');
+
 /**
  * Implements hook_menu().
  */
@@ -47,17 +49,17 @@ function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
   $tei_schema = $connection->repository->constructObject('islandora:emic-tei-schema');
   $tei_schema->owner = 'fedoraAdmin';
   $tei_schema->label = 'EMIC Basic TEI Schema';
-  $tei_schema->models = 'islandora:markupeditorschemaCModel';
-  $tei_schema->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:tei_schema_collection');
+  $tei_schema->models = ISLANDORA_CWRC_WRITER_SCHEMA_CONTENT_MODEL;
+  $tei_schema->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', ISLANDORA_CWRC_WRITER_SCHEMA_COLLECTION);
   // Add the schema datastream.
-  $datastream = $tei_schema->constructDatastream('RDF-SCHEMA', 'M');
-  $datastream->label = 'RDF-SCHEMA';
+  $datastream = $tei_schema->constructDatastream('SCHEMA', 'M');
+  $datastream->label = 'SCHEMA';
   $datastream->mimetype = 'application/xml';
   $datastream->setContentFromFile("{$module_path}/data/objects/emic_tei_schema_rdf_schema.rng", FALSE);
   $tei_schema->ingestDatastream($datastream);
   // Add the CSS datastream.
-  $datastream = $tei_schema->constructDatastream('RDF-CSS', 'M');
-  $datastream->label = 'RDF-CSS';
+  $datastream = $tei_schema->constructDatastream('CSS', 'M');
+  $datastream->label = 'CSS';
   $datastream->mimetype = 'text/css';
   $datastream->setContentFromFile("{$module_path}/data/objects/emic_tei_schema_rdf_css.css", FALSE);
   $tei_schema->ingestDatastream($datastream);

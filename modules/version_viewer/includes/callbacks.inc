@@ -59,7 +59,7 @@ function versionable_object_viewer_build_transcription_data($object) {
     array_push($pids, $member['obj']['value']);
   }
   $derivation_object = islandora_object_load($pids[$page - 1]);
-  $tran_data = versionable_object_viewer_display_page_tei($derivation_object, 'CWRC');
+  $tran_data = versionable_object_viewer_display_page_tei($object, $derivation_object, 'CWRC');
   $return['body'] = $tran_data;
   $return['title'] = $derivation_object->label . " (page $page)";
   drupal_json_output($return);
@@ -73,7 +73,7 @@ function versionable_object_viewer_build_transcription_data($object) {
  * @param AbstractObject $derivation_object
  *   The versionable objects source object to use.
  */
-function versionable_object_viewer_build_tree($object, $derivation_object) {
+function versionable_object_viewer_build_tree($object, $derivation_object, $version_pid = NULL) {
   module_load_include('inc', 'islandora_image_annotation', 'includes/utils');
   module_load_include('inc', 'islandora_image_annotation', 'includes/callbacks');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
@@ -91,9 +91,33 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
   }
   $anno_pids = islandora_image_annotation_shared_get_annotation_pids($object->id, FALSE);
   if (isset($anno_pids['pids'])) {
+    $query = db_select('versionable_object_access')
+        ->fields('versionable_object_access', array(
+          'pid',
+          'allowed_users',
+          'allowed_roles',
+            )
+        )
+        ->condition('pid', $version_pid, '=');
+    $row = $query->execute()->fetchObject();
     $size = count($tree_data);
-    foreach ($anno_pids['pids'] as $plain_annotation) {
-      if (!in_array($plain_annotation['urn'], $text_to_image_annotations)) {
+    foreach ($anno_pids['pids'] as $key => $plain_annotation) {
+      $annotation = islandora_object_load($plain_annotation['id']);
+      if ($row) {
+        $users = unserialize($row->allowed_users);
+        $roles = unserialize($row->allowed_roles);
+        $owner = user_load_by_name($annotation->owner);
+        $owner_roles = isset($owner->roles) ? $owner->roles : array();
+        $user_not_in_list = in_array($owner->uid, $users) ? FALSE : TRUE;
+        $roles_not_in_list = empty(array_intersect($roles, $owner_roles));
+        if ($user_not_in_list && $roles_not_in_list) {
+          unset($anno_pids['pids'][$key]);
+          $size = count($tree_data);
+          continue;
+        }
+      }
+      if ($plain_annotation['type'] != "TextImageLink") {
+
         if (!isset($tree_data[$size])) {
           $tree_data[$size] = array(
             "id" => "tree_imageannotations",
@@ -145,8 +169,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object) {
           ),
         );
         array_push(
-          $tree_data[$size]["children"],
-          $child
+            $tree_data[$size]["children"], $child
         );
       }
     }
