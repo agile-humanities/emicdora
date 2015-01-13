@@ -1,7 +1,10 @@
 name = "TEI Editor"
-description = "A TEI Implementation that makes use of the markup editor and the image annotation module"
+description = "A TEI Implementation that makes use of the Islandora CWRC tei editor and the image annotation module"
 package = EMiC
 dependencies[] = emicdora
 dependencies[] = islandora_cwrc_writer
+dependencies[] = versionable_object_viewer
+dependencies[] = islandora_image_annotation
+dependencies[] = libraries
 version = 7.x-dev
 core = 7.x
