@@ -128,7 +128,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
         if ($count == 1) {
           $new_value = $string_parts[0];
           // Orphan only.
-          $new_id = "oo{$prefix}{$counter}";
+          $new_id = "{$prefix}oo{$counter}";
           $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
           if (emicdora_ends_with($current, $selected)) {
             // Inserted before current.
@@ -144,7 +144,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
           $suffix_text = emicdora_starts_with($current, $selected) ? substr($current, strlen($selected)) : end($string_parts);
 
           // Orphan prefix.
-          $prefix_id = "opref{$prefix}{$counter}";
+          $prefix_id = "{$prefix}opref{$counter}";
           if (in_array($prefix_id, $created_elements)) {
             $prefix_id .= '-b';
           }
@@ -152,7 +152,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
           $first_element = emicdora_create_span($dom, $prefix_text, $data['class'], $prefix_id);
           $node->parentNode->insertBefore($first_element, $node);
           // Orphan suffix.
-          $suffix_id = "osuf{$prefix}{$counter}";
+          $suffix_id = "{$prefix}osuf{$prefix}{$counter}";
           if (in_array($suffix_id, $created_elements)) {
             $suffix_id .= '-b';
           }
