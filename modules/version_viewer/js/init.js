@@ -124,52 +124,55 @@
 
     function show_entity_tooltip(data, ent_id) {
       if (data.hasOwnProperty('cwrcAttributes')) {
-        var colour = "red";
-        if (data['cwrcAttributes']['attributes']['Colour']) {
-          colour = data['cwrcAttributes']['attributes']['Colour'];
-        }
-        var selector = ".tei *[data-annotationid='" + ent_id + "']";
-        $(selector).css('background-color', colour);
-        if (('descriptiveNote' in data) && data['descriptiveNote']) {
-          $(selector).tooltip({
-            position: 'top',
-            width: 100,
-            height: 100,
-            hideEvent: 'none',
-            content: function () {
-              var tool_tip_content = data['descriptiveNote'];
-              return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
-              tool_tip_content +
-              '</div>';
-            },
-            onShow: function () {
-              var t = $(this);
-              t.tooltip('tip').focus().unbind().bind('blur', function () {
-                t.tooltip('hide');
-              });
-            }
-          }).show();
-        }
-        $(selector).click(function() {
-          if ($('#ent_dialog_' + ent_id).length == 0) {
-            if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
-              $('#content').append(data['dialogMarkup']);
-            }
-            else {
-              $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
-            }
+        var uuid = data['cwrcAttributes']['attributes']['uuid'];
+        if (uuid) {
+          var colour = "red";
+          if (data['cwrcAttributes']['attributes']['Colour']) {
+            colour = data['cwrcAttributes']['attributes']['Colour'];
           }
-          $('#ent_dialog_' + ent_id).dialog({
-            title: data['annotationId'],
-            width: 400,
-            height: 200,
-            closed: false,
-            cache: false,
-            resizeable: true,
-            collapsible: true,
-            modal: false
+          var selector = ".tei *[data-annotationid='" + ent_id + "']";
+          $(selector).css('background-color', colour);
+          if (('descriptiveNote' in data) && data['descriptiveNote']) {
+            $(selector).tooltip({
+              position: 'top',
+              width: 100,
+              height: 100,
+              hideEvent: 'none',
+              content: function () {
+                var tool_tip_content = data['descriptiveNote'];
+                return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+                  tool_tip_content +
+                  '</div>';
+              },
+              onShow: function () {
+                var t = $(this);
+                t.tooltip('tip').focus().unbind().bind('blur', function () {
+                  t.tooltip('hide');
+                });
+              }
+            }).show();
+          }
+          $(selector).click(function () {
+            if ($('#ent_dialog_' + ent_id).length == 0) {
+              if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
+                $('#content').append(data['dialogMarkup']);
+              }
+              else {
+                $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+              }
+            }
+            $('#ent_dialog_' + ent_id).dialog({
+              title: data['annotationId'],
+              width: 400,
+              height: 200,
+              closed: false,
+              cache: false,
+              resizeable: true,
+              collapsible: true,
+              modal: false
+            });
           });
-        });
+        }
       }
       else {
         // In this case, we are dealing with a plain image annotation.
