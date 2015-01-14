@@ -67,7 +67,10 @@
         }
       });
 
-      $(document).delegate('span.variant', 'click', function() {
+      $(document).delegate('span.variant', 'click', function(e) {
+        if(!e.originalEvent.isTrusted) {
+          return;
+        }
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
@@ -201,7 +204,7 @@
             previous_variant = variant_map[previous_index];
             current_selector = '[data-variant=' + current_variant + ']';
             previous_selector = '[data-variant=' + previous_variant + ']';
-            $(current_selector).removeClass('variant_selected');
+            $('.variant').removeClass('variant_selected');
             $(previous_selector).addClass('variant_selected');
             variant_selected = $(previous_selector).data('variant');
           }

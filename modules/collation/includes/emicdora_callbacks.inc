@@ -401,24 +401,25 @@ function emicdora_cleanup_merged($inputs) {
       if ($node_type != 'DOMText') {
         $class = $previous_sibling->getAttribute('class');
         if ($class != 'merged') {
-
           $temp_node = $previous_sibling->cloneNode(FALSE);
-          $temp_children = $temp_node->childNodes;
-          while ($temp_children->length > 0) {
-            $temp_node->removeChild($temp_children->item(0));
+          if ($temp_node->hasChildNodes()) {
+            $temp_children = $temp_node->childNodes();
+            while ($temp_children->length > 0) {
+              $temp_node->removeChild($temp_children->item(0));
+            }
+            $previous_sibling_childen = $previous_sibling->childNodes;
+            $current_children = $item->childNodes;
+            foreach ($previous_sibling_childen as $child) {
+              $temp_node->appendChild($child);
+            }
+            foreach ($current_children as $child) {
+              $temp_node->appendChild($child);
+            }
+            $parent = $item->parentNode;
+            $parent->replaceChild($temp_node, $previous_sibling);
+            $item->parentNode->removeChild($item);
+            $incomplete = FALSE;
           }
-          $previous_sibling_childen = $previous_sibling->childNodes;
-          $current_children = $item->childNodes;
-          foreach ($previous_sibling_childen as $child) {
-            $temp_node->appendChild($child);
-          }
-          foreach ($current_children as $child) {
-            $temp_node->appendChild($child);
-          }
-          $parent = $item->parentNode;
-          $parent->replaceChild($temp_node, $previous_sibling);
-          $item->parentNode->removeChild($item);
-          $incomplete = FALSE;
         }
       }
       if ($incomplete) {
@@ -427,21 +428,23 @@ function emicdora_cleanup_merged($inputs) {
           $class = $next_sibling->getAttribute('class');
           if ($class != 'merged') {
             $temp_node = $next_sibling->cloneNode(FALSE);
-            $temp_children = $temp_node->childNodes();
-            while ($temp_children->length > 0) {
-              $temp_node->removeChild($temp_children->item(0));
+            if ($temp_node->hasChildNodes()) {
+              $temp_children = $temp_node->childNodes();
+              while ($temp_children->length > 0) {
+                $temp_node->removeChild($temp_children->item(0));
+              }
+              $next_sibling_childen = $next_sibling->childNodes;
+              $current_children = $item->childNodes;
+              foreach ($current_children as $child) {
+                $temp_node->appendChild($child);
+              }
+              foreach ($next_sibling_childen as $child) {
+                $temp_node->appendChild($child);
+              }
+              $parent->replaceChild($temp_node, $next_sibling);
+              $item->parentNode->removeChild($item);
+              $incomplete = FALSE;
             }
-            $next_sibling_childen = $next_sibling->childNodes;
-            $current_children = $item->childNodes;
-            foreach ($current_children as $child) {
-              $temp_node->appendChild($child);
-            }
-            foreach ($next_sibling_childen as $child) {
-              $temp_node->appendChild($child);
-            }
-            $parent->replaceChild($temp_node, $next_sibling);
-            $item->parentNode->removeChild($item);
-            $incomplete = FALSE;
           }
         }
       }
@@ -514,7 +517,6 @@ function emicdora_ends_with($haystack, $needle) {
  *   New element
  */
 function emicdora_create_span($dom, $contents, $class_name, $prefix) {
-  $contents = nl2br($contents, FALSE);
   // The collation viewer doesn't handle xhtml break tags well.
   // @codingStandardsIgnoreStart
   $contents = str_replace('<br/>', '<br>', $contents);
