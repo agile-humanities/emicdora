@@ -142,7 +142,7 @@
             if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
               tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
             }
-            return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+            return '<div class="easyui-panel" style="width:100px;padding:5px;">' +
                 tool_tip_content +
                 '</div>';
           },
@@ -473,7 +473,7 @@
         }
       }
     });
-    
+
     $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
