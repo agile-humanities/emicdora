@@ -23,7 +23,7 @@ function versionable_object_viewer_prepare_page_tei_consolidated($object) {
     $doc->loadXML($contents);
     if ($page_number != '1') {
       $headers = $doc->getElementsByTagName('teiHeader');
-      foreach($headers as $header) {
+      foreach ($headers as $header) {
         $header->parentNode->removeChild($header);
       }
     }
