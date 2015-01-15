@@ -3,42 +3,39 @@ var scrolledDiff;
 var scrolledSpan;
 function getOffsetTopByElem(elem) {
   var offset = 0;
-  while (elem != null)
-  {
+  while (elem != null) {
     offset += elem.offsetTop;
     elem = elem.offsetParent;
   }
   return offset;
 }
-function getElementHeight(elem)
-{
-  if (elem.height)
+function getElementHeight(elem) {
+  if (elem.height) {
     return elem.height;
-  else
+  }
+  else {
     return elem.offsetHeight;
+  }
 }
 
-function getHeight(elem, inclBorder)
-{
-  var borderHeight = getBorderValue(elem, "border-top-width")
-      + getBorderValue(elem, "border-bottom-width");
-  if (elem.clientHeight)
-    return (inclBorder) ? borderHeight + elem.clientHeight
-        : elem.clientHeight;
-  else
-    return (inclBorder) ? elem.offsetHeight
-        : elem.offsetHeight - borderHeight;
+function getHeight(elem, inclBorder) {
+  var borderHeight = getBorderValue(elem, "border-top-width") + getBorderValue(elem, "border-bottom-width");
+  if (elem.clientHeight) {
+    return (inclBorder) ? borderHeight + elem.clientHeight : elem.clientHeight;
+  }
+
+  else {
+    return (inclBorder) ? elem.offsetHeight : elem.offsetHeight - borderHeight;
+  }
 }
-function getOffsetTop(id)
-{
+function getOffsetTop(id) {
   var elem = document.getElementById(id);
   return getOffsetTopForElem(elem);
 }
-function getOffsetTopForElem(elem)
-{
+
+function getOffsetTopForElem(elem) {
   var offset = 0;
-  while (elem != null)
-  {
+  while (elem != null) {
     offset += elem.offsetTop;
     elem = elem.offsetParent;
   }
@@ -55,16 +52,18 @@ function synchroScroll(scrolledDiv, staticDiv) {
       + scrolledDiv.scrollTop;
   findSpanAtOffset(scrolledDiv, centre, scrolledDivTop);
   // 3. find the corresponding span on the other side
-  if (scrolledSpan != null)
-  {
+  if (scrolledSpan != null) {
     var staticId = scrolledSpan.getAttribute("id");
-    if (staticId.charAt(0) == 'a')
+    if (staticId.charAt(0) == 'a') {
       staticId = "d" + staticId.substring(1);
-    else
+    }
+
+    else {
       staticId = "a" + staticId.substring(1);
+    }
+
     var staticSpan = document.getElementById(staticId);
-    if (staticSpan != null)
-    {
+    if (staticSpan != null) {
       // 4. compute relative topOffset of scrolledSpan
       var scrolledTopOffset = scrolledSpan.offsetTop
           - scrolledDivTop;
@@ -72,27 +71,32 @@ function synchroScroll(scrolledDiv, staticDiv) {
       var staticTopOffset = staticSpan.offsetTop - staticDivTop;
       // 6. scroll the static div level with scrolledSpan
       var top = staticTopOffset - getElementHeight(staticDiv) / 2;
-      if (top < 0)
+      if (top < 0) {
         staticDiv.scrollTop = 0;
-      else
+      }
+
+      else {
         staticDiv.scrollTop = top;
+      }
     }
   }
 }
+
 function findSpanAtOffset(elem, pos, divOffset) {
-  if (elem.nodeName == "SPAN"
-      && elem.getAttribute('id') != null)
-  {
+  if (elem.nodeName == "SPAN" && elem.getAttribute('id') != null) {
     var idAttr = elem.getAttribute('id');
     var spanRelOffset = elem.offsetTop - divOffset;
-    if (Math.abs(spanRelOffset - pos) < scrolledDiff)
-    {
+    if (Math.abs(spanRelOffset - pos) < scrolledDiff) {
       scrolledSpan = elem;
       scrolledDiff = Math.abs(spanRelOffset - pos);
     }
   }
-  else if (elem.firstChild != null)
+  else if (elem.firstChild != null) {
     findSpanAtOffset(elem.firstChild, pos, divOffset);
-  if (elem.nextSibling != null)
+  }
+
+  if (elem.nextSibling != null) {
     findSpanAtOffset(elem.nextSibling, pos, divOffset);
+  }
+
 }
