@@ -110,13 +110,16 @@ function versionable_object_viewer_display_page_tei_reading($version_pid, Abstra
 /**
  * Callback for diplomatic display.
  *
+ * @param string $version_pid
+ *   Pid of version providing context.
+ *
  * @param AbstractDatastream $datastream
  *   The datastrean to use to generate the display.
  *
  * @return string
  *   A string of markup to use, representing the diplomatic display.
  */
-function versionable_object_viewer_display_page_tei_diplomatic(AbstractDatastream $datastream) {
+function versionable_object_viewer_display_page_tei_diplomatic($version_pid, AbstractDatastream $datastream) {
   return versionable_object_viewer_render_transcription($version_pid, $datastream, 'diplomatic');
 }
 
