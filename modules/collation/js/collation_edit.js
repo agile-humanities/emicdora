@@ -14,11 +14,18 @@
       var merged_content = "";
       var variant_selected = false;
       function emicdora_get_variants() {
-        var variant_counts = $.map($('.variant'), function(el) {
-          return  $(el).data('variant');
+        var raw_variant_map = [];
+        var variant_map = [];
+        $(".variant").each(function(index, element) {
+          raw_variant_map.push($(this).data('variant'));
         });
-        $.unique(variant_counts);
-        return variant_counts.sort();
+        // Home rolled unique function - will not reorder.
+        $.each(raw_variant_map, function(index, value) {
+          if ($.inArray(value, variant_map) == -1) {
+            variant_map.push(value);
+          }
+        });
+        return variant_map;
       }
       $(document).keyup(function(e) {
         if (e.keyCode == 27) {
@@ -60,7 +67,11 @@
         }
       });
 
-      $(document).delegate('span.variant', 'click', function() {
+      $(document).delegate('span.variant', 'click', function(e) {
+        // Prevents scripted click events from firing
+        if (!e.originalEvent.isTrusted) {
+          return;
+        }
         var qualifier = $(this).attr('id').slice(1);
         left = $('#d' + qualifier);
         right = $('#a' + qualifier);
@@ -79,7 +90,6 @@
           merged_content = $(wrapped_content).parent().html();
           $(wrapped_content).unwrap();
         }
-
       });
       $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
@@ -153,15 +163,13 @@
           }
           $("#diff_l").text(text_deleted);
         });
-        // // Adds html to context_added.
+        // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           text_added = selection_added.toString();
-          console.log('text_added ' + text_added);
           if (selection_added.toHtml() !== '') {
             context_added = selection_added.toHtml();
-            console.log('context_added ' + context_added);
           }
           if (context_added.indexOf('<span') === -1) {
             context_added = window.getSelection().anchorNode.parentNode.outerHTML;
@@ -171,34 +179,33 @@
 
         // Add functionality to arrow keys.
         $(".emicdora_next_button").click(function() {
-          if (typeof(variant_counts) === 'undefined') {
-            var variant_counts = emicdora_get_variants();
+          if (typeof(variant_map) === 'undefined') {
+            var variant_map = emicdora_get_variants();
           }
-          if (variant_counts.length > 0) {
-            current_index = $.inArray(variant_selected, variant_counts);
-            current_count = variant_counts[current_index];
+          if (variant_map.length > 0) {
+            current_index = $.inArray(variant_selected, variant_map);
+            current_variant = variant_map[current_index];
             next_index = (current_index === -1) ? 0 : ++current_index;
-            next_count = variant_counts[next_index];
-            current_selector = '"[data-variant=' + current_count + ']"';
-            next_selector = '"[data-variant=' + next_count + ']"';
-            $(current_selector).removeClass('variant_selected');
+            next_variant = variant_map[next_index];
+            next_selector = '[data-variant=' + next_variant + ']';
+            $('.variant').removeClass('variant_selected');
             $(next_selector).addClass('variant_selected');
             variant_selected = $(next_selector).data('variant');
           }
         });
 
         $(".emicdora_previous_button").click(function() {
-          if (typeof(variant_counts) === 'undefined') {
-            var variant_counts = emicdora_get_variants();
+          if (typeof(variant_map) === 'undefined') {
+            var variant_map = emicdora_get_variants();
           }
-          if (variant_counts.length > 0) {
-            current_index = $.inArray(variant_selected, variant_counts);
-            current_count = variant_counts[current_index];
-            previous_index = (current_index === -1) ? 0 : --current_index;
-            previous_count = variant_counts[previous_index];
-            current_selector = '"[data-variant=' + current_count + ']"';
-            previous_selector = '"[data-variant=' + previous_count + ']"';
-            $(current_selector).removeClass('variant_selected');
+          if (variant_map.length > 0) {
+            current_index = $.inArray(variant_selected, variant_map);
+            current_variant = variant_map[current_index];
+            previous_index = (current_index === -1) ? variant_map.length - 1 : --current_index;
+            previous_variant = variant_map[previous_index];
+            current_selector = '[data-variant=' + current_variant + ']';
+            previous_selector = '[data-variant=' + previous_variant + ']';
+            $('.variant').removeClass('variant_selected');
             $(previous_selector).addClass('variant_selected');
             variant_selected = $(previous_selector).data('variant');
           }
@@ -224,6 +231,7 @@
             }
           }
           if (args.data.action == 'save') {
+            $('.variant').removeClass('variant_selected');
             if ($("#save_changes").text() == 'Saving..') {
               return;
             }
@@ -231,6 +239,7 @@
             $(".merged").css('background-color', '');
             all_added = encodeURIComponent($("#versionview-1011-body").html());
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
+            $(".variant").removeClass('variant_selected');
           }
           else {
             $("#save_changes").show();
@@ -260,7 +269,7 @@
               if (results.hasOwnProperty('message')) {
                 alert(results.message)
               }
-              variant_counts = emicdora_get_variants();
+              variant_map = emicdora_get_variants();
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());
@@ -275,12 +284,20 @@
                     ($(this).html($(this).text()));
                   }
                 });
+                context_deleted = '';
+                context_added = '';
+                text_deleted = '';
+                text_added = '';
+                merged_content = '';
                 $('#merged_text').text("");
+                $('#diff_l').text("");
+                $('#diff_r').text("");
               }
               if (results.added == 'success') {
                 $("#save_changes").text("Save Changes")
                 $("#save_changes").hide();
                 $(".emicdora_input").text('');
+                $('#merged_text').text("");
                 $('#diff_l').text("");
                 $('#diff_r').text("");
               }
