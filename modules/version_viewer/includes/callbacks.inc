@@ -14,11 +14,23 @@
 function versionable_object_viewer_prepare_page_tei_consolidated($object) {
   module_load_include('inc', 'php_lib', 'DOMHelpers');
   module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
+  $rels = $object->relationships->get(ISLANDORA_RELS_EXT_URI, 'isPageNumber');
+  $page_number = $rels[0]['object']['value'];
   try {
     $contents = $object['CWRC']->content;
     $contents = preg_replace('/<\?xml-model .*\?>/', '', $contents);
     $doc = new DOMDocument();
     $doc->loadXML($contents);
+    if ($page_number != '1') {
+      $headers = $doc->getElementsByTagName('teiHeader');
+      foreach($headers as $header) {
+        $header->parentNode->removeChild($header);
+      }
+    }
+    $rdf_nodes = $doc->getElementsByTagNameNS('http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'RDF');
+    foreach ($rdf_nodes as $node) {
+      $node->parentNode->removeChild($node);
+    }
     $pretty_printed = dom_document_pretty_print($doc, TRUE);
 
     $return['body'] = $pretty_printed;
