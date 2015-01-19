@@ -150,15 +150,21 @@
         ));
         $('.emicdora_input').text('');
         $("#save_changes").hide();
+        $('.x-panel-body').hover(
+            function() {
+              $(this).data('active_pane', 1);
+            },
+            function() {
+              $(this).data('active_pane', 0);
+            }
+        );
+        var sync_on = true;
+        $('.emicdora_sync_button').click(function() {
+          sync_on = !sync_on;
+          opacity = sync_on ? 1 : .5;
+          $('.emicdora_sync_button').css('opacity', opacity);
+        });
         // Adds html to context_deleted.
-        $('#versionview-1010-body').mousedown(function(evt) {
-          active_pane = evt.currentTarget.id
-          console.log(active_pane);
-        })
-        $('#versionview-1011-body').mousedown(function(evt) {
-          active_pane = evt.currentTarget.id
-          console.log(active_pane);
-        })
         $('#versionview-1010-body').mouseup(function(evt) {
           $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
@@ -219,12 +225,7 @@
           }
         });
         $("#versionview-1010-body").scroll(function(e) {
-          e.stopPropagation();
-          console.dir(e);
-//          if (active_pane != 'versionview-1010-body') {
-//            return;
-//          }
-          if (e.stopPropagation()) {
+          if ($("#versionview-1010-body").data('active_pane') != 1 || sync_on == false) {
             return;
           }
           $("#versionview-1010-body").find('.merged').each(function() {
@@ -238,11 +239,9 @@
         });
 
         $("#versionview-1011-body").scroll(function(e) {
-          e.stopPropagation();
-          console.dir(e);
-//          if (active_pane != 'versionview-1011-body') {
-//            return;
-//          }
+          if ($("#versionview-1011-body").data('active_pane') != 1 || sync_on == false) {
+            return;
+          }
           $("#versionview-1011-body").find('.merged').each(function() {
             var $this = $(this);
             if ($this.position().top + $this.height() > 0 && $this.position().top < $("#versionview-1011-body").height()) {
