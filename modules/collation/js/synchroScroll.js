@@ -42,7 +42,7 @@ function getOffsetTopForElem(elem) {
   return offset;
 }
 function synchroScroll(scrolledDiv, staticDiv) {
-
+return;
   // 2. find the most central span in the scrolled div
   scrolledDiff = 4294967296;
   scrolledSpan = null;
@@ -98,5 +98,4 @@ function findSpanAtOffset(elem, pos, divOffset) {
   if (elem.nextSibling != null) {
     findSpanAtOffset(elem.nextSibling, pos, divOffset);
   }
-
 }

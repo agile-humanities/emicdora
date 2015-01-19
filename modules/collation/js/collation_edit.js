@@ -68,8 +68,8 @@
       });
 
       $(document).delegate('span.variant', 'click', function(e) {
-        // Prevents scripted click events from firing
-        if (!e.originalEvent.isTrusted) {
+        // Prevents scripted click events from firing.
+        if (e.screenY == 0 && e.screenX == 0) {
           return;
         }
         var qualifier = $(this).attr('id').slice(1);
@@ -151,6 +151,14 @@
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         // Adds html to context_deleted.
+        $('#versionview-1010-body').mousedown(function(evt) {
+          active_pane = evt.currentTarget.id
+          console.log(active_pane);
+        })
+        $('#versionview-1011-body').mousedown(function(evt) {
+          active_pane = evt.currentTarget.id
+          console.log(active_pane);
+        })
         $('#versionview-1010-body').mouseup(function(evt) {
           $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
@@ -209,6 +217,40 @@
             $(previous_selector).addClass('variant_selected');
             variant_selected = $(previous_selector).data('variant');
           }
+        });
+        $("#versionview-1010-body").scroll(function(e) {
+          e.stopPropagation();
+          console.dir(e);
+//          if (active_pane != 'versionview-1010-body') {
+//            return;
+//          }
+          if (e.stopPropagation()) {
+            return;
+          }
+          $("#versionview-1010-body").find('.merged').each(function() {
+            var $this = $(this);
+            if ($this.position().top + $this.height() > 0 && $this.position().top < $("#versionview-1010-body").height()) {
+              var qualifier = $(this).attr('id').slice(1);
+              right = $('#a' + qualifier);
+              $("#versionview-1011-body").scrollTop($("#versionview-1011-body").scrollTop() + right.position().top);
+            }
+          });
+        });
+
+        $("#versionview-1011-body").scroll(function(e) {
+          e.stopPropagation();
+          console.dir(e);
+//          if (active_pane != 'versionview-1011-body') {
+//            return;
+//          }
+          $("#versionview-1011-body").find('.merged').each(function() {
+            var $this = $(this);
+            if ($this.position().top + $this.height() > 0 && $this.position().top < $("#versionview-1011-body").height()) {
+              var qualifier = $(this).attr('id').slice(1);
+              left = $('#d' + qualifier);
+              $("#versionview-1010-body").scrollTop($("#versionview-1010-body").scrollTop() + left.position().top);
+            }
+          });
         });
 
         $("#collation_link").click({action: 'link'}, execute_callback);
