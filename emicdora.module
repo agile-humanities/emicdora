@@ -589,7 +589,7 @@ function emicdora_menu_alter(array &$items) {
 }
 
 /**
- * Blocks managemant tab from showing on critical editions.
+ * Blocks management tab from showing on critical editions.
  *
  * @param array $perms
  *   Array of user permission to test for.
