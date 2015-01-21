@@ -974,12 +974,7 @@ function emicdora_block_view($delta = '') {
         break;
       }
 
-      if ($is_source) {
-        $versions = emicdora_get_raw_objects($critical_edition, 'source_versions', $path_parts[4]);
-      }
-      else {
-        $versions = emicdora_get_raw_objects($critical_edition, 'version');
-      }
+      $versions = emicdora_get_raw_objects($critical_edition, 'version');
       $facets = emicdora_retrieve_user_created_facets($critical_edition->id, 'version');
       $links = array();
 
