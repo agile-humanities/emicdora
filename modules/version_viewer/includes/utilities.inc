@@ -169,6 +169,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
+    if (empty($matches)) {
+      continue;
+    }
     $id = $matches[1];
     $entities[] = array(
       'id' => $id,
