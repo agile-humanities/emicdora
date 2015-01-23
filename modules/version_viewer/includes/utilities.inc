@@ -166,7 +166,34 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if (!isset($cwrc_attributes->attributes)) {
       $cwrc_attributes->attributes = new stdClass();
     }
-    $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
+    if (isset($cwrc_attributes->cwrcInfo->id)) {
+      $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
+      $descriptive_note = NULL;
+      $parts = explode('/', $cwrc_attributes->cwrcInfo->id);
+      if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
+        $pid = end($parts);
+        $obj = islandora_object_load($pid);
+        if ($obj) {
+          module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+          $cwrc_dsid = islandora_cwrc_writer_entity_content_datastream_id($obj);
+          // Read the first note in the descriptiveNote tag.
+          if (!empty($obj[$cwrc_dsid]->content)) {
+            $dom_datastream = new DOMDocument();
+            // Remove xml-model tag so it does not error when reading the xml.
+            $contents = $obj[$cwrc_dsid]->content;
+            $contents = preg_replace('/<\?xml-model .*\?>/', '', $contents);
+            $dom_datastream->loadXML($contents);
+            $xpath = new DOMXPath($dom_datastream);
+            // Find descriptive notes element in the datastream.
+            $descriptive_note_node = $xpath->query('//descriptiveNotes/note');
+            if ($descriptive_note_node->length > 0) {
+              // Only return the first descriptive note to display.
+              $descriptive_note = $descriptive_note_node->item(0)->nodeValue;
+            }
+          }
+        }
+      }
+    }
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     if (empty($matches)) {
@@ -183,6 +210,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'cwrcAttributes' => $cwrc_attributes,
         'dialogId' => "ent_dialog_$id",
         'dialogMarkup' => verionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
+        'descriptiveNote' => $descriptive_note,
       ),
     );
   }
@@ -205,99 +233,289 @@ function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
     // Current implementation only supports the local repository.
     return NULL;
   }
-
-  $get_form_name = function ($models, $dsid) {
-    module_load_include('inc', 'xml_form_builder', 'includes/associations');
-    $associations = xml_form_builder_get_associations(array(), $models, array($dsid));
-    $association = reset($associations);
-    return $association ? $association['form_name'] : FALSE;
-  };
-
   $parts = explode('/', $info->cwrcInfo->id);
-  if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
-    $pid = end($parts);
-    $object = islandora_object_load($pid);
-    if (!$object) {
-      // Object could not be loaded... Lack of permissions or object isn't in
-      // the local Islandora?
-      return NULL;
-    }
-    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
-    $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
-    $form_name = $get_form_name($object->models, $dsid);
-    if (!$form_name) {
-      // No form for which to produce a "read-only" variant... Fallback to old
-      // client-side behaviour.
-      return NULL;
-    }
-    $form = array();
-    $fake_form_state = array();
-    $form = @xml_form_builder_get_form($form, $fake_form_state, $form_name, $object[$dsid]->content);
-    versionable_object_viewer_generate_readonly_form($form);
-    $form['#prefix'] = "<div id='ent_dialog_$id' class='entity_dialog'>";
-    $form['#suffix'] = '</div>';
-    return drupal_render($form);
+  $type = $parts[3] == 'viaf' ? 'viaf' : 'islandora';
+  switch ($type) {
+    case 'viaf':
+      $viaf_id = $parts[4];
+      $content_markup = versionable_object_viewer_generate_viaf_markup($viaf_id);
+      break;
+
+    case 'islandora' :
+      $pid = end($parts);
+      $object = islandora_object_load($pid);
+      if (!$object) {
+        return NULL;
+      }
+      module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+      $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
+      $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
+      $markup = "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
   }
+  return "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
 }
 
 /**
- * Transform the form(/element) into a a read-only variant.
+ * Builds tooltip markup from datastream content.
  *
- * @param array $form
- *   A form element to recursively transform into a read-only variant.
- * @param bool $parent_list
- *   A boolean indicating if the parent element is being rendered as a list:
- *   TRUE if we may have siblings rendered; FALSE if we are the only element
- *   contained by the parent.
+ * @param datastream $content
+ *   Object datastream which contains the data to be rendered out.
+ * @param string $dsid
+ *   Datastream of the content being rendered to markup.
+ *
+ * @return string
+ *   HTML string of content to be rendered to the tooltip.
  */
-function versionable_object_viewer_generate_readonly_form(&$form, $parent_list = FALSE) {
-  $_type_map = array(
-    'markup' => 'defaultable_markup',
+function versionable_object_viewer_generate_markup($content, $dsid) {
+  // Lookup arrays for variant type and certainty for human readable output.
+  $variant_type_array = array(
+    "birthName" => t("Birth Name"),
+    "indexedName" => t("Indexed Name"),
+    "marriedName" => t("Married Name"),
+    "nickname" => t("Nickname"),
+    "pseudonym" => t("Pseudonym"),
+    "religiousName" => t("Religious"),
+    "royalName" => t("Royal"),
+    "selfConstructedName" => t("Self Constructed"),
+    "styledName" => t("Styled"),
+    "titledName" => t("Titled"),
+    "usedForm" => t("Used Form"),
   );
+  $certainty_array = array(
+    "1" => t("Speculative"),
+    "2" => t("Probable"),
+    "3" => t("Reasonably Certain"),
+    "4" => t("Definite"),
+  );
+  $markup = '';
+  $tag = strtolower($dsid);
+  // Load the context, xml document, for parsing.
+  $content = preg_replace('/<\?xml-model .*\?>/', '', $content);
+  $dom_mods = new DOMDocument();
+  $dom_mods->loadXML($content);
 
-  // If we have more than one child, we want to render the children as a list.
-  $child_offsets = element_children($form);
-  $child_count = count($child_offsets);
-  if ($child_count > 1) {
-    $form['#prefix'] = '<ul>';
-    $form['#suffix'] = '</ul>';
+  // Begin xpath query operations.
+  $xpath = new DOMXPath($dom_mods);
+  $xpath->registerNamespace("mods", "http://www.loc.gov/mods/v3");
+  if ($dsid == "PERSON" || $dsid == "ORGANIZATION" || $dsid == "PLACE") {
+    // Preferred Name information.
+    $preferred_form = $xpath->query("/entity/" . $tag . "/identity/preferredForm");
+    if ($preferred_form->length > 0) {
+      // Names rendered Name: Term of Address, First, Last.
+      $name_array = array();
+      $terms_of_address = $xpath->query("/entity/" . $tag . "/identity/preferredForm/namePart[@partType='termsOfAddress']");
+      version_viewer_conditionally_add($terms_of_address, $name_array);
+      $full_name = $xpath->query("/entity/" . $tag . "/identity/preferredForm/namePart[@partType='fullName']");
+      version_viewer_conditionally_add($full_name, $name_array);
+      $fullname = version_viewer_conditionally_add($terms_of_address, $name_array);
+      if (!$fullname) {
+        $family_name = $xpath->query("/entity/" . $tag . "/identity/preferredForm/namePart[@partType='family']");
+        version_viewer_conditionally_add($family_name, $name_array);
+        $given_name = $xpath->query("/entity/" . $tag . "/identity/preferredForm/namePart[@partType='given']");
+        version_viewer_conditionally_add($given_name, $name_array);
+      }
+      if (empty($name_array)) {
+        $name = $xpath->query("/entity/" . $tag . "/identity/preferredForm/namePart[not(@*)]");
+        version_viewer_conditionally_add($name, $name_array);
+      }
+      if (!empty($name_array)) {
+        $label = t('Name');
+        $markup .= version_viewer_get_rendered_array($label, $name_array);
+      }
+    }
+    // Variant name(s).
+    $variants = $xpath->query("/entity/" . $tag . "/identity/variantForms/variant");
+    if ($variants->length > 0) {
+      foreach ($variants as $variant) {
+        $type = $xpath->query("./variantType", $variant)->item(0)->nodeValue;
+        if (array_key_exists($type, $variant_type_array)) {
+          $type = $variant_type_array[$type];
+        }
+        // Names rendered Name: Term of Address, First, Last.
+        $name_array = array();
+        $terms_of_address = $xpath->query("./namePart[@partType='termsOfAddress']");
+        version_viewer_conditionally_add($terms_of_address, $name_array);
+        $full_name = $xpath->query("./namePart[@partType='fullName']");
+        $full_name = version_viewer_conditionally_add($full_name, $name_array);
+
+        if (!$full_name) {
+          $family_name = $xpath->query("./namePart[@partType='family']");
+          version_viewer_conditionally_add($family_name, $name_array);
+          $given_name = $xpath->query("./namePart[@partType='given']");
+          version_viewer_conditionally_add($given_name, $name_array);
+        }
+        if (!empty($name_array)) {
+          $label = t('Name');
+          $markup .= version_viewer_get_rendered_array($label, $name_array);
+        }
+      }
+    }
+    // Same As.
+    $same_as = $xpath->query("/entity/" . $tag . "/identity/sameAs");
+    if ($same_as->length > 0) {
+      foreach ($same_as as $node) {
+        $certainty = "";
+        $cert = $xpath->query("./@cert", $node)->item(0)->nodeValue;
+        if (array_key_exists($cert, $certainty_array)) {
+          $certainty = " ({$certainty_array[$cert]})";
+        }
+        $label = t("Same As");
+        $value = $node->nodeValue;
+        $markup .= "<span class = 'version_tooltip_label'>$label :</span>$value $certainty<br/>";
+      }
+    }
+    // Date(s) of existance.
+    $dates = $xpath->query("/entity/" . $tag . "/description/existDates/dateSingle");
+    if ($dates->length > 0) {
+      foreach ($dates as $date) {
+        $certainty = "";
+        $output_dates = array();
+        $cert = $xpath->query("./@cert", $date)->item(0)->nodeValue;
+        if (array_key_exists($cert, $certainty_array)) {
+          $certainty = "({$certainty_array[$cert]})";
+        }
+        // Default value incase type is not set.
+        $date_label = t("Date(s) of existance");
+        $date_type = $xpath->query("./dateType", $date);
+        if ($date_type->length > 0) {
+          $date_label = ucfirst($date_type->item(0)->nodeValue);
+        }
+        $standard_dates = $xpath->query("./standardDate", $date);
+        if ($standard_dates->length > 0) {
+          foreach ($standard_dates as $standard_date) {
+            $output_dates[] = $standard_date->nodeValue;
+          }
+        }
+        if (strtotime($date->nodeValue)) {
+          $output_dates[] = $date->nodeValue;
+        }
+        $dates = implode(', ', $output_dates);
+        $markup .= "<span class='version_tooltip_label'>$date_label</span>$dates $certainty<br/>";
+      }
+    }
+    // Gender(s).
+    $genders = $xpath->query("/entity/" . $tag . "/description/genders/gender");
+    if ($genders->length > 0) {
+      foreach ($genders as $gender) {
+        $certainty = "";
+        $cert = $xpath->query("./@cert", $gender)->item(0)->nodeValue;
+        if (array_key_exists($cert, $certainty_array)) {
+          $certainty = "({$certainty_array[$cert]})";
+        }
+        $term = $gender->nodeValue;
+        $label = t("Gender");
+        $markup .= "<span class='version_tooltip_label'>{$label}: </span>$term $certainty<br/>";
+      }
+    }
+    // Occupation(s).
+    $occupations = $xpath->query("/entity/" . $tag . "/description/occupations/occupation");
+    if ($occupations->length > 0) {
+      foreach ($occupations as $occupation) {
+        $certainty = "";
+        $certs = $xpath->query("./term/@cert", $occupation);
+        if ($certs->length > 0) {
+          $cert = $xpath->query("./term/@cert", $occupation)->item(0)->nodeValue;
+          if (array_key_exists($cert, $certainty_array)) {
+            $certainty = "({$certainty_array[$cert]})";
+          }
+          $term = $xpath->query("./term", $occupation)->item(0)->nodeValue;
+          $label = t("Occupation");
+          $markup .= "<span class='version_tooltip_label'>{$label}: </span>$term $certainty<br/>";
+        }
+      }
+    }
+    // Note(s).
+    $notes = $xpath->query("/entity/" . $tag . "/description/descriptiveNotes/note");
+    if ($notes->length > 0) {
+      foreach ($notes as $note) {
+        $label = t("Descriptive Note");
+        $note = $note->nodeValue;
+        $markup .= "<span class='version_tooltip_label'>{$label}: </span> {$note}<br/>";
+      }
+    }
+    // Activities/Activity.
+    $activities = $xpath->query("/entity/" . $tag . "/description/activities/activity");
+    if ($activities->length > 0) {
+      foreach ($activities as $activity) {
+        $certainty = "";
+        $cert = $xpath->query("./term/@cert", $activity)->item(0)->nodeValue;
+        if (array_key_exists($cert, $certainty_array)) {
+          $certainty = "({$certainty_array[$cert]})";
+        }
+        $term = $xpath->query("./term", $activity)->item(0)->nodeValue;
+        $label = t("Activity");
+        $markup .= "<span class='version_tooltip_label'>{$label}: </span>$term $certainty<br/>";
+      }
+    }
+    // Research interest(s)
+    $research_interests = $xpath->query("/entity/" . $tag . "/description/researchInterests/interest");
+    if ($research_interests->length > 0) {
+      foreach ($research_interests as $research_interest) {
+        $certainty = "";
+        $cert = $xpath->query("./term/@cert", $research_interest)->item(0)->nodeValue;
+        if (array_key_exists($cert, $certainty_array)) {
+          $certainty = "({$certainty_array[$cert]})";
+        }
+        $term = $xpath->query("./term", $research_interest)->item(0)->nodeValue;
+        $label = t("Research Interest");
+        $markup .= "<span class='version_tooltip_label'>{$label}: </span>$term $certainty<br/>";
+      }
+    }
+    // Related Resource(s).
+    $related_resources = $xpath->query("/entity/" . $tag . "/description/relatedResources/resource");
+    if ($related_resources->length > 0) {
+      foreach ($related_resources as $resource) {
+        if ($resource->nodeValue) {
+          $label = t("Resource");
+          $resource = $resource->nodeValue;
+          $markup .= "<span class='version_tooltip_label'>$label: </span>$resource<br/>";
+        }
+      }
+    }
+  }
+  elseif ($dsid == "TITLE") {
+    $title = $xpath->query("/mods:mods/mods:titleInfo/mods:title");
+    $label = t('Title');
+    $markup .= version_viewer_get_title_markup($label, $title);
+
+    $author = $xpath->query("/mods:mods/mods:name[@type='personal']/mods:namePart");
+    $label = t("Author");
+    $markup .= version_viewer_get_title_markup($label, $author);
+
+    $type = $xpath->query("/mods:mods/mods:genre[@type='formatType']");
+    $label = t("Type of Resource");
+    $markup .= version_viewer_get_title_markup($label, $type);
+
+    $date = $xpath->query("/mods:mods/mods:originInfo/mods:dateIssued");
+    $label = t("Date");
+    $markup .= version_viewer_get_title_markup($label, $date);
+
+    $record = $xpath->query("/mods:mods/mods:recordInfo/mods:recordContentSource");
+    $label = t("Project");
+    $markup .= version_viewer_get_title_markup($label, $record);
+  }
+  return $markup;
+}
+
+function versionable_object_viewer_generate_viaf_markup($id) {
+  global $base_url;
+  $path = "$base_url/viaf/$id/viaf.xml";
+  $viaf_xml = file_get_contents($path);
+  $dom = new DOMDocument();
+  $dom->loadXML($viaf_xml);
+  $xpath = new DOMXPath($dom);
+  $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
+  $markup = '';
+  $authors = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  if ($authors->length > 0) {
+    $label = t("Author");
+    $author = $authors->item(0)->nodeValue;
+    $markup .= "<span class='version_tooltip_label'>$label: </span>$author<br/>";
   }
 
-  // Track if we have a visible child element.
-  $visible_child = FALSE;
-  foreach ($child_offsets as $child_offset) {
-    versionable_object_viewer_generate_readonly_form($form[$child_offset], $child_count > 1);
-    $visible_child = $visible_child || $form[$child_offset]['#access'];
-  }
-
-  // If we have a visible child or a value, we should be rendered.
-  $form['#access'] = $visible_child || (isset($form['#default_value']) && !empty($form['#default_value']));
-
-  // Map the value of selects to the "human-readable" text.
-  if ($form['#type'] == 'select' && isset($form['#default_value'])) {
-    $form['#default_value'] = $form['#options'][$form['#default_value']];
-  }
-  elseif ($visible_child) {
-    // If we have visible children, we don't want our value...
-    unset($form['#default_value']);
-  }
-
-  // We should render as a list item and are trying to show something...
-  if ($parent_list && $form['#access'] && (
-    (isset($form['#default_value']) && !empty($form['#default_value'])) ||
-    $visible_child)) {
-    // Slap in the list item markup to the prefix and suffix.
-    $form['#prefix'] = '<li>' . (isset($form['#prefix']) ? $form['#prefix'] : '');
-    $form['#suffix'] = (isset($form['#suffix']) ? $form['#suffix'] : '') . '</li>';
-  }
-
-  // Map types as applicable.
-  $form['#type'] = isset($form['#type']) ?
-    (isset($_type_map[$form['#type']]) ? $_type_map[$form['#type']] : 'defaultable_item') :
-    'defaultable_markup';
-
-  unset($form['#description']);
-  $form['#required'] = FALSE;
+  $birth_death = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='d']");
+  $markup .= version_viewer_get_title_markup("both", $birth_death);
+  return $markup;
 }
 
 /**
@@ -690,4 +908,81 @@ function version_viewer_get_config($version_pid) {
   $query->condition('v.pid', $version_pid);
   $config = $query->execute()->fetchObject();
   return is_object($config) ? $config : NULL;
+}
+
+/**
+ * Conditionally adds result to array.
+ *
+ * @param DOMNodeList $result
+ *   Query result to be added
+ * @param array $result_array
+ *   Array of values to be displayed
+ *
+ * @return bool
+ *   Indicates if there was a value to add.
+ */
+function version_viewer_conditionally_add($result, &$result_array) {
+  if ($result->length > 0) {
+    $result_array[] = $result->item(0)->nodeValue;
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Prepare rendered name.
+ *
+ * @param array $input_array
+ *   name data
+ *
+ * @return string
+ *   Rendered name, with label
+ */
+function version_viewer_get_rendered_array($label, $input_array) {
+  $renderable = array(
+    'open_span' => array(
+      '#type' => 'markup',
+      '#markup' => "<span class='version_tooltip_label'>",
+    ),
+    'label' => array(
+      '#type' => 'markup',
+      '#markup' => $label,
+    ),
+    'spacer' => array(
+      '#type' => 'markup',
+      '#markup' => ": ",
+    ),
+    'closing_span' => array(
+      '#type' => 'markup',
+      '#markup' => "</span> ",
+    ),
+    'name' => array(
+      '#type' => 'markup',
+      '#markup' => implode(", ", $input_array),
+    ),
+    'closing_br' => array(
+      '#type' => 'markup',
+      '#markup' => "<br/>",
+    ),
+  );
+  return drupal_render($renderable);
+}
+
+/**
+ * Gets formatted Title info.
+ *
+ * @param string $label
+ *   Displayed label
+ * @param DOMNodeList $content
+ *   Displayed content
+ *
+ * @return string
+ *   Formatted output if populated, empty string if not.
+ */
+function version_viewer_get_title_markup($label, $content) {
+  if ($content->length > 0) {
+    $value = $content->item(0)->nodeValue;
+    return "<span class = 'version_tooltip_label'>$label: </span>$value<br/>";
+  }
+  return '';
 }
