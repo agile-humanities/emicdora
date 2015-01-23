@@ -904,7 +904,7 @@ function emicdora_get_all($type) {
   $qp->solrParams['fl'] = "PID $term";
   $qp->solrParams['facet.limit'] = 100000;
   $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
-  $qp->solrParams['sort'] = "mods_titleInfo_title_s asc";
+  $qp->solrParams['sort'] = "mods_titleInfo_title_ss asc";
   $qp->solrParams['facet.mincount'] = 1;
   $qp->executeQuery(FALSE);
 
