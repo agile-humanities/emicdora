@@ -69,7 +69,7 @@ function versionable_object_viewer_config_upsert($version_pid, $cid) {
       ->condition('pid', $version_pid, '=');
   $results = $query->execute()->fetchObject();
 
-  if ($results) {
+  if (!$results) {
     db_insert('versionable_object_config_choice')
         ->fields(array(
           'cid' => $cid,
@@ -79,10 +79,9 @@ function versionable_object_viewer_config_upsert($version_pid, $cid) {
         ->execute();
   }
   else {
-    $pid = $results->pid;
     db_update('versionable_object_config_choice')
         ->fields(array('pid' => $version_pid, 'cid' => $cid))
-        ->condition('pid', $pid)
+        ->condition('pid', $version_pid)
         ->execute();
   }
 }
