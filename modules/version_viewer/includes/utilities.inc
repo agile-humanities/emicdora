@@ -136,6 +136,7 @@ function versionable_object_viewer_display_page_tei_diplomatic($version_pid, Abs
  */
 function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
   $entities = array();
+  $obj = NULL;
   // RDF is embedded in the TEI.
   $xml = simplexml_load_string($object[$dsid]->content);
   $xml->registerXPathNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
@@ -202,6 +203,10 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $id = $matches[1];
     if (!isset($cwrc_info->name)) {
       $cwrc_info->name = $id;
+    }
+    $cwrc_info->name = $obj ? $obj->label : $cwrc_info->name;
+    if ($descriptive_note) {
+      $cwrc_info->description = $descriptive_note;
     }
     $entities[] = array(
       'id' => $id,

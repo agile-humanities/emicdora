@@ -110,7 +110,10 @@
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          $("span[data-annotationid='" + ent_id + "']").css('background-color', 'initial');
+          var selector = "span[data-annotationid='" + ent_id + "']";
+          $(selector).css('background-color', 'initial');
+          // Clear all click and tooltip events.
+          $(selector).off();
           if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
             var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
             $('.svg_' + anno_id).remove();
@@ -124,6 +127,7 @@
     }
 
     function show_entity_tooltip(data, ent_id) {
+      $descriptive_note = data['descriptiveNote'];
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = "red";
         if (data['cwrcAttributes']['attributes']['Colour']) {
@@ -131,28 +135,29 @@
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
         $(selector).css('background-color', colour);
-
-        $(selector).tooltip({
-          position: 'top',
-          width: 100,
-          height: 100,
-          hideEvent: 'none',
-          content: function() {
-            var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
-            if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
-              tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
+        if ($descriptive_note !== null && $descriptive_note.length > 0) {
+          $(selector).tooltip({
+            position: 'top',
+            width: 100,
+            height: 100,
+            hideEvent: 'none',
+            content: function() {
+              var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
+              if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
+                tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
+              }
+              return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+                  tool_tip_content +
+                  '</div>';
+            },
+            onShow: function() {
+              var t = $(this);
+              t.tooltip('tip').focus().unbind().bind('blur', function() {
+                t.tooltip('hide');
+              });
             }
-            return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
-                tool_tip_content +
-                '</div>';
-          },
-          onShow: function() {
-            var t = $(this);
-            t.tooltip('tip').focus().unbind().bind('blur', function() {
-              t.tooltip('hide');
-            });
-          }
-        }).show();
+          }).show();
+        }
         $(selector).click(function() {
           if ($('#ent_dialog_' + ent_id).length == 0) {
             if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
@@ -179,6 +184,7 @@
         // Wireframes dont well me what to show in this case.
       }
     }
+
 
     function build_dialog_content(data) {
       var content = "";
@@ -473,14 +479,14 @@
         }
       }
     });
-    
+
     $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
     $('#eui_window').layout('resize', {
-        width:'100%',
-        height:'729px',
-      });
+      width: '100%',
+      height: '729px',
+    });
     $('#easy-ui-east').css('height', '623px');
     $('#easy-ui-west').css('height', '623px');
   });
