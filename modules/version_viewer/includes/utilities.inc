@@ -201,10 +201,10 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       continue;
     }
     $id = $matches[1];
-    if (!isset($cwrc_info->name)) {
-      $cwrc_info->name = $id;
+    if (!isset($cwrc_info->repository)) {
+      $cwrc_info->name = $obj ? $obj->label : $id;
     }
-    $cwrc_info->name = $obj ? $obj->label : $cwrc_info->name;
+
     if ($descriptive_note) {
       $cwrc_info->description = $descriptive_note;
     }
@@ -217,7 +217,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
         'cwrcAttributes' => $cwrc_attributes,
         'dialogId' => "ent_dialog_$id",
-        'dialogMarkup' => verionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
+        'dialogMarkup' => versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
         'descriptiveNote' => $descriptive_note,
       ),
     );
@@ -236,26 +236,95 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
  *     - id: A string identifying the object in the given repo... A URL for our
  *       stuff in the "cwrc" repository.
  */
-function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
+function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
   if (!isset($info->cwrcInfo->id)) {
     // Current implementation only supports the local repository.
     return NULL;
   }
   $parts = explode('/', $info->cwrcInfo->id);
-  if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
-    $pid = end($parts);
-    $object = islandora_object_load($pid);
-    if (!$object) {
-      // Object could not be loaded... Lack of permissions or object isn't in
-      // the local Islandora?
-      return NULL;
-    }
-    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
-    $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
-    $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
-    $markup = "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
-    return $markup;
+  $type = $parts[3] == 'viaf' ? 'viaf' : 'islandora';
+  switch ($type) {
+    case 'viaf':
+      $viaf_id = $parts[4];
+      $content_markup = versionable_object_viewer_generate_viaf_markup($viaf_id);
+      break;
+
+    case 'islandora':
+      $pid = end($parts);
+      $object = islandora_object_load($pid);
+      if (!$object) {
+        return NULL;
+      }
+      module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+      $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
+      $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
+      $markup = "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
   }
+  return "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
+}
+
+/**
+ * Gets VIAF data for dialog.
+ *
+ * @global type $base_url
+ *
+ * @param string $id
+ *   VIAF identifier
+ *
+ * @return string
+ *   Formatted output.
+ */
+function versionable_object_viewer_generate_viaf_markup($id) {
+  global $base_url;
+  $path = "$base_url/viaf/$id/viaf.xml";
+  $viaf_xml = file_get_contents($path);
+  $dom = new DOMDocument();
+  $dom->loadXML($viaf_xml);
+  $xpath = new DOMXPath($dom);
+  $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
+  $markup = '';
+  // VIAF Titles.
+  // Authors.
+  $authors = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  $label = t("Author");
+  $markup .= version_viewer_get_markup($label, $authors);
+
+  // Date.
+  $dates = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='d']");
+  $label = t("Date");
+  $markup .= version_viewer_get_markup($label, $dates);
+
+  // VIAF Persons.
+  // Full Name.
+  $fullnames = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  $label = t("Full Name");
+  $markup .= version_viewer_get_markup($label, $fullnames);
+
+  // Birth-death.
+  $birth_death = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='d']");
+  $label = t("Birth-Death");
+  $markup .= version_viewer_get_markup($label, $birth_death);
+  // Gender.
+  $genders = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  $label = t("Gender");
+  $gender_code = array(
+    'a' => t('Male'),
+    'b' => t('Female'),
+  );
+  foreach ($genders as $gender) {
+    $value = t('Unspecified');
+    $gender_val = $gender->nodeValue;
+    if (isset($gender_code[$gender_val])) {
+      $value = $gendercode[$gender_val];
+    }
+    $markup .= "<span class='version_tooltip_label'>$label: </span>$value<br/>";
+  }
+  // URL to VIAF object.
+  $link = l(t('VIAF Record'), "http://viaf.org/viaf/$id");
+  $label = t('URL');
+  $markup .= "<span class='version_tooltip_label'>$label: </span>$link<br/>";
+
+  return $markup;
 }
 
 /**
@@ -270,7 +339,7 @@ function verionable_object_viewer_generate_entity_dialog_markup($id, $info) {
  *   HTML string of content to be rendered to the tooltip.
  */
 function versionable_object_viewer_generate_markup($content, $dsid) {
-  // Lookup arrays for variant type and certainty for human readable output.
+  // Lookup arrays for variant type for human readable output.
   $variant_type_array = array(
     "birthName" => t("Birth Name"),
     "indexedName" => t("Indexed Name"),
@@ -927,7 +996,7 @@ function version_viewer_get_markup($label, $content) {
 }
 
 /**
- * Gets and concatentates typed values.
+ * Gets and concatenates typed values.
  *
  * @param DOMXpath $xpath
  *   xpath object to query DOM
@@ -960,7 +1029,7 @@ function version_viewer_add_markup($xpath, $dom, $query_string, $label) {
 }
 
 /**
- * Gets certaintty attribure for node.
+ * Gets certainty attribute for node.
  *
  * @param DOMXpath $xpath
  *   xpath object to query DOM
