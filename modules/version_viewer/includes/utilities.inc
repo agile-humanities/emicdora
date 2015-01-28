@@ -50,7 +50,8 @@ function versionable_object_viewer_render_transcription($version_pid, AbstractDa
   global $base_url;
   $path = drupal_get_path('module', 'versionable_object_viewer');
   $input = new DOMDocument();
-  $input->loadXML($datastream->content);
+  $content = preg_replace('/<\?xml-model .*\?>/', '', $datastream->content);
+  $input->loadXML($content);
   $wrapper_xslt_doc = new DOMDocument();
   $wrapper_xslt_doc->load("$path/tei_transforms/wrap.xslt");
   $wrapper_xslt = new XSLTProcessor();
@@ -138,7 +139,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
   $entities = array();
   $obj = NULL;
   // RDF is embedded in the TEI.
-  $xml = simplexml_load_string($object[$dsid]->content);
+  $content = preg_replace('/<\?xml-model .*\?>/', '', $object[$dsid]->content);
+  $xml = simplexml_load_string($content);
+
   $xml->registerXPathNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
   $rdf = $xml->xpath('//rdf:RDF');
   if (!$rdf) {
