@@ -970,6 +970,10 @@ function emicdora_contextual_redirect($source_object, $delta) {
       drupal_goto("islandora/version_viewer/annotation/$pid/{$destination_parts[2]}");
       break;
 
+    case "delete_tei":
+      drupal_goto("emicdora/remove/version/{$destination_parts[2]}/{$get_parts[3]}");
+      break;
+
     default:
       return "This function has not yet been implemented";
   }
