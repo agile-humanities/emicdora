@@ -658,7 +658,7 @@ function emicdora_copy_versionable_object_tei_rdf_page_batch_operation($page_pid
     if (isset($page_object[$dsid])) {
       $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
       $unique_id = uniqid();
-      $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
+      $file = file_save_data('', "temporary://${unique_id}_datastream_$dsid");
       $filename = drupal_realpath($file->uri);
       // Since the file must persist across multiple requests, we must not
       // delete it, until it has successfully been ingested.
@@ -701,7 +701,7 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
     if (isset($page[$dsid])) {
       $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
       $unique_id = uniqid();
-      $file = file_save_data('', "temporary://${unique_id}_datastream_$DSID");
+      $file = file_save_data('', "temporary://${unique_id}_datastream_$dsid");
       $filename = drupal_realpath($file->uri);
       // Since the file must persist across multiple requests, we must not
       // delete it, until it has successfully been ingested.
