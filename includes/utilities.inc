@@ -304,6 +304,7 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
   $tei_rdf_document = new DOMDocument();
   $tei_rdf_document->formatOutput = TRUE;
   $tei_rdf_document->preserveWhiteSpace = TRUE;
+  $tei_rdf = preg_replace('/<\?xml-model .*\?>/', '', $tei_rdf);
   $tei_rdf_document->loadXML($tei_rdf);
   $tei_rdf_text_node = $tei_rdf_document->getElementsByTagNameNS(EMICDORA_TEI_NAMESPACE, 'text')->item(0);
   foreach ($tei_rdf_text_node->childNodes as $tei_rdf_content_node) {
