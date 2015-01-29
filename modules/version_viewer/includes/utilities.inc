@@ -258,7 +258,7 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
       module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
       $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
       $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
-      $markup = "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
+      break;
   }
   return "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
 }
