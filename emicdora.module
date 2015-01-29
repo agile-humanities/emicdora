@@ -13,6 +13,7 @@ define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 define('EMICDORA_COOP_PATH', 'CO-OP');
 define('EMICDORA_MANAGE_EDITION', 'manage critical edition');
+define('EMICDORA_TEI_NAMESPACE', 'http://www.tei-c.org/ns/1.0');
 
 /**
  * Implements hook_permission().

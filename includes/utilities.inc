@@ -294,7 +294,6 @@ function emicdora_get_members($object_pid, $content_model = NULL, $relationship 
  *   The given TEI document with the appended TEI-RDF document.
  */
 function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
-  define('TEI_NAMESPACE', 'http://www.tei-c.org/ns/1.0');
   $tei_document = new DOMDocument();
   $tei_document->formatOutput = TRUE;
   $tei_document->preserveWhiteSpace = TRUE;
@@ -306,7 +305,7 @@ function emicdora_append_tei_rdf_text_to_tei($tei, $tei_rdf) {
   $tei_rdf_document->formatOutput = TRUE;
   $tei_rdf_document->preserveWhiteSpace = TRUE;
   $tei_rdf_document->loadXML($tei_rdf);
-  $tei_rdf_text_node = $tei_rdf_document->getElementsByTagNameNS(TEI_NAMESPACE, 'text')->item(0);
+  $tei_rdf_text_node = $tei_rdf_document->getElementsByTagNameNS(EMICDORA_TEI_NAMESPACE, 'text')->item(0);
   foreach ($tei_rdf_text_node->childNodes as $tei_rdf_content_node) {
     if (isset(${$tei_rdf_content_node->nodeName})) {
       $tei_rdf_fragment = $tei_document->createDocumentFragment();
