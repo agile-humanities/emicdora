@@ -20,9 +20,9 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $type = emicdora_get_source_type($version_object);
   drupal_add_css("$module_path/css/viewer.css");
   $config = version_viewer_get_config($version_object->id);
+  $custom_css = FALSE;
   if ($config && $config->css) {
-    $stylesheet = file_create_url($config->css);
-    drupal_add_css($stylesheet);
+    $custom_css = file_create_url($config->css);
   }
 
   // Drop in our initilization script.
@@ -32,9 +32,9 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   // This is the Shared Canvas prefered jQuery.
   drupal_add_js(
       array(
-        'versionable_object_viewer' => array(
-          'version_pid' => $version->id,
-        ),
+    'versionable_object_viewer' => array(
+      'version_pid' => $version->id,
+    ),
       ), 'setting'
   );
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
@@ -49,9 +49,15 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $variables['version_pid'] = $version->id;
   versionable_object_viewer_build_version_media_view($version_object, $variables);
 
-  drupal_add_css("$module_path/tei_transforms/stylesheets/screen.css", array(
-    'media' => 'screen, projection',
-  ));
+  if ($custom_css) {
+    drupal_add_css($custom_css, array('type' => 'external'));
+  }
+  else {
+    drupal_add_css("$module_path/tei_transforms/stylesheets/screen.css", array(
+      'media' => 'screen, projection',
+    ));
+  }
+
   drupal_add_css("$module_path/tei_transforms/stylesheets/print.css", array(
     'media' => 'print',
   ));
