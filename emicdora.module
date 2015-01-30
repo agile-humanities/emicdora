@@ -621,7 +621,6 @@ function emicdora_admin_paths() {
   // Show contextual link pages as overlays.
   return array(
     'emicdora/contextual-links/*' => TRUE,
-    'emicdora/contextual-links/transcription_operations/*/delete_transcription' => FALSE,
     'emicdora/contextual-links/version_operations/*/download_tei' => FALSE,
   );
 }
@@ -1657,7 +1656,11 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
  */
 function emicdora_delete_transcription_submit(array $form, array &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
+  module_load_include('inc', 'islandora', 'includes/utilities');
   $object = $form_state['object'];
+  $parents = islandora_get_parents_from_rels_ext($object);
+  $parent = array_pop($parents);
+  $form_state['redirect'] = isset($parent) ? "islandora/object/{$parent->id}" : 'islandora';
   emicdora_calliope_delete_file($object->id);
   islandora_delete_object($object);
   drupal_set_message(t("Transcription has been deleted."));
