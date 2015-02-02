@@ -31,11 +31,11 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   drupal_add_js("$module_path/js/viewer_behaviours.js");
   // This is the Shared Canvas prefered jQuery.
   drupal_add_js(
-      array(
-    'versionable_object_viewer' => array(
-      'version_pid' => $version->id,
-    ),
-      ), 'setting'
+    array(
+      'versionable_object_viewer' => array(
+        'version_pid' => $version->id,
+      ),
+    ), 'setting'
   );
   drupal_add_library('versionable_object_viewer', 'jquery_easy_ui');
   $image_module_path = drupal_get_path('module', 'islandora_image_annotation');
