@@ -308,7 +308,7 @@ function versionable_object_viewer_generate_viaf_markup($id) {
   $label = t("Birth-Death");
   $markup .= version_viewer_get_markup($label, $birth_death);
   // Gender.
-  $genders = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  $genders = $xpath->query("/ns2:VIAFCluster/ns2:fixed/ns2:gender");
   $label = t("Gender");
   $gender_code = array(
     'a' => t('Male'),
@@ -318,7 +318,7 @@ function versionable_object_viewer_generate_viaf_markup($id) {
     $value = t('Unspecified');
     $gender_val = $gender->nodeValue;
     if (isset($gender_code[$gender_val])) {
-      $value = $gendercode[$gender_val];
+      $value = $gender_code[$gender_val];
     }
     $markup .= "<span class='version_tooltip_label'>$label: </span>$value<br/>";
   }
