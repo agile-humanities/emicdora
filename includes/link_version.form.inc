@@ -27,8 +27,8 @@ function emicdora_link_version_form($form, $form_state, $critical_edition) {
   $source_pid = $path_parts[4];
   $rows = array();
   $header = array(
-    'title' => array('data' => t('Version'), 'class' => array('class' => 'version_title')),
-    'pid' => array('data' => t('PID'), 'class' => array('class' => 'version_pid')),
+    'title' => array('data' => t('Version'), 'class' => array('class' => 'emicdora_version_title')),
+    'pid' => array('data' => t('PID'), 'class' => array('class' => 'emicdora_version_pid')),
   );
   // We check the date here being bound as having a FILTER inside the
   // OPTIONAL as well as that the end was yielding some weird behavior.
@@ -47,8 +47,8 @@ EOQ;
   foreach ($results as $result) {
     $pid = $result['pid']['value'];
     $rows[$pid] = array(
-      'title' => array('data' => $result['label']['value'], 'class' => array('class' => 'version_title')),
-      'pid' => array('data' => $pid, 'class' => array('class' => 'version_pid')),
+      'title' => array('data' => $result['label']['value'], 'class' => array('class' => 'emicdora_version_title')),
+      'pid' => array('data' => $pid, 'class' => array('class' => 'emicdora_version_pid')),
     );
   }
 
@@ -66,7 +66,7 @@ EOQ;
     '#options' => $rows,
     '#empty' => t('No TEI-RDF objects available. Please select "Create New"'),
     '#attributes' => array('class' => array('version_select_table')),
-    '#id' => 'version_select_table',
+    '#id' => 'emicdora_version_select_table',
     '#required' => TRUE,
   );
 
