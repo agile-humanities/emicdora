@@ -63,8 +63,7 @@ function emicdora_preprocess_emicdora_coop(array &$variables) {
   ));
   // Returns all source object(s), this assumes that solr has been configured to
   // only display source objects, version objects, and critical editions.
-  $label = variable_get('islandora_solr_object_label_field', 'fgs_label_ss');
-  $options = array('query' => array('sort' => "$label asc"));
+  $options = array('query' => array('sort' => "fgs_label_ss asc"));
   $variables['browse_all_link'] = l(t('Browse All'), EMICDORA_SEARCH_COOP_PATH, $options);
   $variables['author_table'] = emicdora_build_topic_table('author', $display_count, 0);
   $variables['genre_table'] = emicdora_build_topic_table('genre', $display_count, 1);
@@ -213,7 +212,7 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     'genre' => 'mods_genre_authority_marcgt_ms',
   );
   $solr_term = $solr_term_mappings[$type];
-  $options = array('query' => array('sort' => "mods_titleInfo_title_ss asc", 'query_type' => 'coop'));
+  $options = array('query' => array('sort' => "fgs_label_ss asc", 'query_type' => 'coop'));
   foreach ($results as $data) {
     $label = $data['label'];
     $escaped_label = "\"$label\"";
