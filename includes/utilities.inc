@@ -971,11 +971,11 @@ function emicdora_contextual_redirect($source_object, $delta) {
       break;
 
     case "delete_tei":
+      $versionable_object_pid = $get_parts[3];
       $versionable_object = islandora_object_load($get_parts[3]);
-      $critical_editions = array_merge(
-          $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOfCollection'), $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf'));
+      $critical_editions = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
       $critical_edition_pid = $critical_editions[0]['object']['value'];
-      drupal_goto("emicdora/remove/version/$critical_edition_pid/{$destination_parts[2]}");
+      drupal_goto("emicdora/remove/version/$critical_edition_pid/$versionable_object_pid");
       break;
 
     default:
