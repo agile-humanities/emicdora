@@ -6,14 +6,14 @@
         Purpose of the stylesheet follows.
 */
 
-.version_select_table {
+.emicdora_version_select_table {
   width: 70%;
   margin-bottom: 1%;
 }
 
-.version_pid {
-  width: 20%;
+.emicdora_version_pid {
+  width: 15%;
 }
-.version_title {
+.emicdora_version_title {
   width: 80%;
 }
