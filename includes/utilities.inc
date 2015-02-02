@@ -689,30 +689,27 @@ function emicdora_wrap_plain_text_in_tei($content = 'Blank Page') {
   $schema = file_create_url("$cwrc_library_path/src/schema/CWRC-TEIBasic.rng");
   $prefix = '<?xml version="1.0" encoding="UTF-8"?>
 <?xml-model href="' . $schema . '" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
-<TEI xml:id="struct_35" xmlns="http://www.tei-c.org/ns/1.0">
-  <teiHeader xml:id="struct_530">
-    <fileDesc xml:id="struct_531">
-      <titleStmt xml:id="struct_532">
-        <title xml:id="struct_533">Sample Document Title</title>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>Sample Document Title</title>
       </titleStmt>
-      <publicationStmt xml:id="struct_534">
-        <p xml:id="struct_535"/>
+      <publicationStmt>
+        <p/>
       </publicationStmt>
-      <sourceDesc xml:id="struct_536" sameAs="http://www.cwrc.ca">
-        <p xml:id="struct_537">Created from islandora book ingest unless otherwise noted.</p>
+      <sourceDesc sameAs="http://www.cwrc.ca">
+        <p>Created from Islandora book ingest unless otherwise noted.</p>
       </sourceDesc>
     </fileDesc>
   </teiHeader>
-  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:w="http://cwrctc.artsrn.ualberta.ca/#"></rdf:RDF>
   <text>
-    <body><ab>';
-  $suffix = '</ab></body></text></TEI>';
-
+    <body><p>';
+  $suffix = '</p></body></text></TEI>';
   // Correct common problems with the incoming text, and replace line breaks
   // with there TEI equivalent.
   $content = trim(preg_replace('/&£/', '£', $content));
   $content = htmlspecialchars($content);
-  $content = trim(preg_replace("/\n/", '<lb/>', $content));
 
   return $prefix . $content . $suffix;
 }
