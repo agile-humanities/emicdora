@@ -154,3 +154,13 @@ function versionable_object_viewer_islandora_versionCModel_islandora_view_object
       )
   );
 }
+
+/**
+ * Implements hook_admin_paths().
+ */
+function versionable_object_viewer_admin_paths() {
+  // Show contextual link pages as overlays.
+  return array(
+    'islandora/version_viewer/annotation/*' => TRUE,
+  );
+}
