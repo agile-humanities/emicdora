@@ -1643,7 +1643,11 @@ function emicdora_delete_critical_edition_submit(array $form, array &$form_state
     emicdora_mvd_crud($object->id, $mvd_label, 'bulk_delete');
   }
   islandora_delete_object($object);
-  $form_state['redirect'] = 'co-op';
+
+  // XXX: Note: Because this is likely being called from a contextual link
+  // (which automatically inserts "destination" query parameters to the URL),
+  // this value will likely have no effect... Have fun!
+  $form_state['redirect'] = 'workbench';
 }
 
 /**
@@ -1782,5 +1786,24 @@ function emicdora_file_presave($file) {
   // Prevents multiple submissions caused by javascript form alterations.
   if ($result && isset($result->fid)) {
     $file->fid = $result->fid;
+  }
+}
+
+/**
+ * Implements hook_contextual_links_view_alter().
+ */
+function emicdora_contextual_links_view_alter(&$element, $items) {
+  if (!isset($element['#element']['#block'])) {
+    // Not a block.
+    return;
+  }
+  $block = $element['#element']['#block'];
+  if ($block->module != 'emicdora' || $block->delta != 'operations') {
+    // Not our operations block.
+    return;
+  }
+  $links =& $element['#links'];
+  if (isset($links['emicdora-delete']) && $items['emicdora-delete']['path'] == 'emicdora/contextual-links/critical_edition/%/delete') {
+    $links['emicdora-delete']['query']['destination'] = 'workbench';
   }
 }
