@@ -56,7 +56,7 @@ function emicdora_workbench_form($form, &$form_state) {
   );
   $form['add_schema_transform'] = array(
     '#type' => 'submit',
-    '#value' => t('Add New Schema / Transform'),
+    '#value' => t('Add New Schema'),
     '#access' => user_access(ISLANDORA_INGEST),
     '#attributes' => array(
       'class' => array(
