@@ -1275,7 +1275,7 @@ function emicdora_islandora_xml_form_builder_form_associations() {
       'content_model' => 'islandora:versionCModel',
       'form_name' => 'EMiC Version MODS form',
       'dsid' => 'MODS',
-      'title_field' => array('titleInfo', 'title'),
+      'title_field' => array('altTitleInfo', 'altTitle'),
       'transform' => 'mods_to_dc.xsl',
       'template' => FALSE,
     ),
