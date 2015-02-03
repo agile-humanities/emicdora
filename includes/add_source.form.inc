@@ -247,7 +247,7 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
 }
 
 /**
- * Returns paramaters associated with content model.
+ * Returns parameters associated with content model.
  *
  * @param string $content_model
  *   Configuration type
@@ -261,7 +261,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Text'),
       'type' => 'text',
-      'collection' => 'islandora:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => FALSE,
       'prompt' => t("Add zipped pages?"),
       'required' => FALSE,
@@ -272,7 +272,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Video'),
       'type' => 'video',
-      'collection' => 'islandora:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => TRUE,
       'prompt' => t("Upload video file"),
       'required' => TRUE,
@@ -283,7 +283,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Audio'),
       'type' => 'audio',
-      'collection' => 'islandora:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => TRUE,
       'prompt' => t("Upload audio file"),
       'required' => TRUE,
@@ -294,7 +294,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Image'),
       'type' => 'image',
-      'collection' => 'islandora:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => FALSE,
       'prompt' => t("Upload image file"),
       'required' => TRUE,
@@ -304,7 +304,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:criticalEditionContainerCModel' => array(
       'form' => 'EMiC Critical Edition MODS form',
       'label' => t('Critical Edition'),
-      'collection' => 'islandora:co-op',
+      'collection' => EMICDORA_EDITION_COLLECTION,
       'tn' => FALSE,
       'prompt' => NULL,
       'upload_prompt' => NULL,
