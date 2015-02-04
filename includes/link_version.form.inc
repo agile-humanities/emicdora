@@ -21,7 +21,6 @@
 function emicdora_link_version_form($form, $form_state, $critical_edition) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
-  drupal_add_css("$module_path/css/version_table.css");
   $destination_parts = explode('?', $_GET['destination']);
   $path_parts = explode('/', $destination_parts[0]);
   $source_pid = $path_parts[4];

@@ -116,7 +116,11 @@ EOT;
  */
 function emicdora_get_breadcrumbs_critical_edition(AbstractObject $critical_edition) {
   return array(
-    l(t("Editions"), EMICDORA_SEARCH_EDITIONS_PATH),
+    l(t("Editions"), EMICDORA_SEARCH_EDITIONS_PATH, array(
+      'query' => array(
+        'sort' => 'fgs_label_ss asc',
+      ),
+    )),
     l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}"),
   );
 }

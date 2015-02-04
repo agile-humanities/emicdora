@@ -60,13 +60,13 @@ function islandora_emicdora_upload_tei_form_submit(array $form, array &$form_sta
     $datastream = $object->constructDatastream('TEI', 'M');
     $datastream->setContentFromFile($path);
     $datastream->label = 'Consolidated TEI';
-    $datastream->mimetype = 'application/tei+xml';
+    $datastream->mimetype = 'text/xml';
     $object->ingestDatastream($datastream);
   }
   else {
     $datastream = $object['TEI'];
     $datastream->setContentFromFile($path);
     $datastream->label = 'Consolidated TEI';
-    $datastream->mimetype = 'application/tei+xml';
+    $datastream->mimetype = 'text/xml';
   }
 }

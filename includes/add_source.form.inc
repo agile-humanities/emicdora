@@ -23,6 +23,7 @@
  *   A Drupal Form for ingesting a new object of the given type.
  */
 function islandora_emicdora_add_source_form($form, &$form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
+  form_load_include($form_state, 'inc', 'islandora', 'includes/ingest.form');
   $add_to_workbench = $add_to_workbench == "TRUE" ? TRUE : FALSE;
   $mappings = islandora_simplified_ingest_get_mappings($content_model);
   drupal_add_css(
@@ -72,6 +73,7 @@ function islandora_emicdora_add_source_form($form, &$form_state, $content_model,
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest @type object", array('@type' => $mappings['label'])),
+    '#process' => array('islandora_ingest_form_ingest_button_process'),
   );
   return $form;
 }
@@ -91,7 +93,7 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
   $mapping = islandora_simplified_ingest_get_mappings($form_state['values']['content_model']);
-  $object = $repository->constructObject('islandora');
+  $object = $repository->constructObject('emic');
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $mapping['collection']);
   if ($form_state['values']['critical_edition_pid']) {
     $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $form_state['values']['critical_edition_pid']);
@@ -247,7 +249,7 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
 }
 
 /**
- * Returns paramaters associated with content model.
+ * Returns parameters associated with content model.
  *
  * @param string $content_model
  *   Configuration type
@@ -261,7 +263,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Text'),
       'type' => 'text',
-      'collection' => 'emic:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => FALSE,
       'prompt' => t("Add zipped pages?"),
       'required' => FALSE,
@@ -272,7 +274,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Video'),
       'type' => 'video',
-      'collection' => 'emic:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => TRUE,
       'prompt' => t("Upload video file"),
       'required' => TRUE,
@@ -283,7 +285,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Audio'),
       'type' => 'audio',
-      'collection' => 'emic:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => TRUE,
       'prompt' => t("Upload audio file"),
       'required' => TRUE,
@@ -294,7 +296,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'form' => 'EMiC Source MODS form',
       'label' => t('Image'),
       'type' => 'image',
-      'collection' => 'emic:co-op',
+      'collection' => EMICDORA_SOURCE_COLLECTION,
       'tn' => FALSE,
       'prompt' => t("Upload image file"),
       'required' => TRUE,
@@ -304,7 +306,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
     'islandora:criticalEditionContainerCModel' => array(
       'form' => 'EMiC Critical Edition MODS form',
       'label' => t('Critical Edition'),
-      'collection' => 'emic:co-op',
+      'collection' => EMICDORA_EDITION_COLLECTION,
       'tn' => FALSE,
       'prompt' => NULL,
       'upload_prompt' => NULL,
@@ -390,7 +392,7 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $lang
 
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
-  $object = $repository->constructObject('islandora');
+  $object = $repository->constructObject('emic');
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
   $book_object = islandora_object_load($book);
   $object->label = "{$book_object->label} - page $page_number";
