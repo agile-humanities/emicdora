@@ -2,11 +2,11 @@
 	xmlns:fedora-model="info:fedora/fedora-system:def/model#"
 	xmlns:islandora="http://islandora.ca/ontology/relsext#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-	<rdf:Description rdf:about="info:fedora/islandora:sample-tei-rdf-02">
+	<rdf:Description rdf:about="info:fedora/emic:sample-tei-rdf-02">
 		<fedora-model:hasModel rdf:resource="info:fedora/islandora:tei-rdfCModel"/>
-		<fedora:isMemberOf rdf:resource="info:fedora/islandora:sample-version"/>
-		<fedora:isDerivationOf rdf:resource="info:fedora/islandora:sample-page-02"/>
-		<islandora:isPageOf rdf:resource="info:fedora/islandora:sample-version"/>
+		<fedora:isMemberOf rdf:resource="info:fedora/emic:sample-version"/>
+		<fedora:isDerivationOf rdf:resource="info:fedora/emic:sample-page-02"/>
+		<islandora:isPageOf rdf:resource="info:fedora/emic:sample-version"/>
 		<islandora:isSequenceNumber>2</islandora:isSequenceNumber>
 		<islandora:isPageNumber>2</islandora:isPageNumber>
 		<islandora:isSection>1</islandora:isSection>

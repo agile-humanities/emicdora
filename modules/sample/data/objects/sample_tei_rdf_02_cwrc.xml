@@ -4,7 +4,7 @@
 	<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 		xmlns:w="http://cwrctc.artsrn.ualberta.ca/#">
 		<rdf:Description
-			rdf:about="http://stage.emic.dgicloud.com/editor/documents/islandora:sample-tei-rdf-02">
+			rdf:about="http://stage.emic.dgicloud.com/editor/documents/emic:sample-tei-rdf-02">
 			<w:mode>0</w:mode>
 		</rdf:Description>
 	</rdf:RDF>

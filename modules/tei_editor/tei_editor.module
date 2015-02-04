@@ -44,7 +44,7 @@ function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'tei_editor');
 
   // CWRC Basic TEI Schema.
-  $tei_schema = $connection->repository->constructObject('islandora:emic-tei-schema');
+  $tei_schema = $connection->repository->constructObject('emic:emic-tei-schema');
   $tei_schema->owner = 'fedoraAdmin';
   $tei_schema->label = 'EMIC Basic TEI Schema';
   $tei_schema->models = ISLANDORA_CWRC_WRITER_SCHEMA_CONTENT_MODEL;

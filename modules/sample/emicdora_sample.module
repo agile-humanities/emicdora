@@ -25,7 +25,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   }
   // Critical Edition Object.
   $critical_edition_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-critical_edition',
+    'pid' => 'emic:sample-critical_edition',
     'label' => 'Legends of Vancouver (Sample)',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -44,10 +44,10 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ) + $apparatus_datastreams,
   ));
   // Add the Sample Critical Edition to the Featured Collection by default.
-  $critical_edition_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:featured_collections');
+  $critical_edition_object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', EMICDORA_FEATURED_EDITIONS_COLLECTION);
   // Version Object.
   $version_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-version',
+    'pid' => 'emic:sample-version',
     'label' => 'Sample Version',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -67,7 +67,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   ));
   // TEI-RDF Object.
   $tei_rdf_01_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-tei-rdf-01',
+    'pid' => 'emic:sample-tei-rdf-01',
     'label' => 'Sample TEI-RDF',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -79,7 +79,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   $tei_rdf_02_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-tei-rdf-02',
+    'pid' => 'emic:sample-tei-rdf-02',
     'label' => 'Sample TEI-RDF',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -92,7 +92,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   ));
   // Transcription Object.
   $transcription_01_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-transcription-01',
+    'pid' => 'emic:sample-transcription-01',
     'label' => 'The Legend of the Two Sisters 1908',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -105,7 +105,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   $transcription_02_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-transcription-02',
+    'pid' => 'emic:sample-transcription-02',
     'label' => "The True Legend of Vancouver's Lions 1910",
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -118,7 +118,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
     ),
   ));
   $transcription_03_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-transcription-03',
+    'pid' => 'emic:sample-transcription-03',
     'label' => 'The Two Sisters 1913',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -132,7 +132,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   ));
   // Book Object.
   $source_book_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-book',
+    'pid' => 'emic:sample-book',
     'label' => 'Sample Book',
     'datastreams' => array(
       'RELS-EXT' => array(
@@ -149,7 +149,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   ));
   // Page Object.
   $source_page_01_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-page-01',
+    'pid' => 'emic:sample-page-01',
     'label' => 'Sample Page',
     'datastreams' => array(
       'TN' => array(
@@ -193,7 +193,7 @@ function emicdora_sample_islandora_required_objects(IslandoraTuque $connection) 
   ));
   // Page Object.
   $source_page_02_object = emicdora_create_required_object($connection, array(
-    'pid' => 'islandora:sample-page-02',
+    'pid' => 'emic:sample-page-02',
     'label' => 'Sample Page',
     'datastreams' => array(
       'TN' => array(
