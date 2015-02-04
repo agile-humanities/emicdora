@@ -23,6 +23,7 @@
  *   A Drupal Form for ingesting a new object of the given type.
  */
 function islandora_emicdora_add_source_form($form, &$form_state, $content_model, $critical_edition = NULL, $add_to_workbench = FALSE) {
+  form_load_include($form_state, 'inc', 'islandora', 'includes/ingest.form');
   $add_to_workbench = $add_to_workbench == "TRUE" ? TRUE : FALSE;
   $mappings = islandora_simplified_ingest_get_mappings($content_model);
   drupal_add_css(
@@ -72,6 +73,7 @@ function islandora_emicdora_add_source_form($form, &$form_state, $content_model,
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t("Ingest @type object", array('@type' => $mappings['label'])),
+    '#process' => array('islandora_ingest_form_ingest_button_process'),
   );
   return $form;
 }
