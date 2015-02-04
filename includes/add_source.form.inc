@@ -74,9 +74,6 @@ function islandora_emicdora_add_source_form($form, &$form_state, $content_model,
     '#type' => 'submit',
     '#value' => t("Ingest @type object", array('@type' => $mappings['label'])),
     '#process' => array('islandora_ingest_form_ingest_button_process'),
-    '#attributes' => array(
-      'class' => array('islandora-spinner-submit'),
-    ),
   );
   return $form;
 }
