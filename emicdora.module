@@ -231,28 +231,6 @@ function emicdora_menu() {
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
-    'emicdora/contextual-links/version/%islandora_object/%islandora_object/add' => array(
-      'title' => 'Add New',
-      'file' => 'includes/add_version.form.inc',
-      'page callback' => 'emicdora_add_version_form',
-      // @todo How are we gonna get around passing several arguments
-      // via contextual links?
-      'page arguments' => array(3),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
-    'emicdora/contextual-links/version/%islandora_object/%islandora_object/link' => array(
-      'title' => 'Add Existing',
-      'file' => 'includes/link_version.form.inc',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('emicdora_link_version_form', 3),
-      'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
     'emicdora/contextual-links/transcription/%islandora_object' => array(
       'title' => 'Transcriptions',
       'page callback' => TRUE,
@@ -283,26 +261,6 @@ function emicdora_menu() {
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
-    'emicdora/contextual-links/version/%islandora_object/create' => array(
-      'title' => 'Add new version',
-      'page callback' => 'emicdora_ingest_versionable_object_page',
-      'page arguments' => array(3),
-      'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(ISLANDORA_INGEST, 3),
-      'file' => 'includes/ingest_versionable_object.form.inc',
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
-    'emicdora/contextual-links/version/%islandora_object/link' => array(
-      'title' => 'Link existing version',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('emicdora_link_version_form', 3),
-      'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
-      'file' => 'includes/link_version.form.inc',
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_INLINE,
-    ),
     'emicdora/contextual-links/version/%islandora_object/configure' => array(
       'title' => 'Configure Links',
       'page callback' => 'drupal_get_form',
@@ -328,6 +286,26 @@ function emicdora_menu() {
       'title' => 'Operations',
       'page callback' => TRUE,
       'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/create' => array(
+      'title' => 'Add new version',
+      'page callback' => 'emicdora_ingest_versionable_object_page',
+      'page arguments' => array(3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(ISLANDORA_INGEST, 3),
+      'file' => 'includes/ingest_versionable_object.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/source_operations/%islandora_object/link' => array(
+      'title' => 'Link existing version',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_link_version_form', 3),
+      'access callback' => 'emicdora_show_version_context_menu',
+      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
+      'file' => 'includes/link_version.form.inc',
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/source_operations/%islandora_object/edit' => array(
       'title' => 'Edit Metadata',
@@ -1512,7 +1490,7 @@ function emicdora_show_version_context_menu($permission, $object) {
     if (isset($url_parts[3]) && $url_parts[3] == 'source') {
       $access = TRUE;
     }
-    if (isset($url_parts[4]) && $url_parts[4] == 'create' && $url_parts[1] == 'contextual-links' && $url_parts[2] == 'version') {
+    if (isset($url_parts[4]) && $url_parts[4] == 'create' && $url_parts[1] == 'contextual-links' && $url_parts[2] == 'source-operations') {
       $access = TRUE;
     }
     if (in_array('islandora:criticalEditionContainerCModel', $object->models)) {
@@ -1805,5 +1783,13 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
   $links =& $element['#links'];
   if (isset($links['emicdora-delete']) && $items['emicdora-delete']['path'] == 'emicdora/contextual-links/critical_edition/%/delete') {
     $links['emicdora-delete']['query']['destination'] = 'workbench';
+  }
+  // Re-write version addition hrefs to match expected form.
+  if (isset($links['emicdora-create']) && $items['emicdora-link']) {
+    $destination = explode('/', $links['emicdora-create']['query']['destination']);
+    $critical_edition = $destination[2];
+    $source = $destination[4];
+    $links['emicdora-create']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
+    $links['emicdora-link']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/link";
   }
 }
