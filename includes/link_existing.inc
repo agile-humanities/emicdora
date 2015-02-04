@@ -17,7 +17,7 @@
  *   Themed page
  */
 function emicdora_add_existing($object, $title = NULL) {
-  $form = drupal_get_form('emicdora_sources_update_form');
+  $form = drupal_get_form('emicdora_sources_update_form', $object->id);
   $output = drupal_render($form);
   $output .= theme('emicdora_add_source_page', array(
     'islandora_object' => $object,
@@ -102,14 +102,20 @@ function emicdora_get_all_source_objects($critical_edition_pid, $start = 0, $row
  *   Drupal Form definition
  * @param array $form_state
  *   Drupal Form_state definition
+ * @param string $pid
+ *   PID of the current source.
  *
  * @return array
  *   Drupal Form
  */
-function emicdora_sources_update_form(array $form, array $form_state) {
+function emicdora_sources_update_form(array $form, array $form_state, $pid) {
   $form['filter'] = array(
     '#type' => 'textfield',
     '#title' => t('Filter'),
+  );
+  $form['pid'] = array(
+    '#type' => 'value',
+    '#value' => $pid,
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -129,7 +135,7 @@ function emicdora_sources_update_form(array $form, array $form_state) {
 function emicdora_sources_update_form_submit(array $form, array $form_state) {
   unset($_GET['destination']);
   $filter = $form_state['values']['filter'];
-  drupal_goto("emicdora/contextual-links/source/islandora%3Asample-critical_edition/link/$filter");
+  drupal_goto("emicdora/contextual-links/source/{$form_state['values']['pid']}/link/$filter");
 }
 
 /**
