@@ -170,8 +170,12 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if (!isset($cwrc_attributes->attributes)) {
       $cwrc_attributes->attributes = new stdClass();
     }
+    // Image Annotation code in init.js expects the UUID to be set for Text
+    // to Image Links and nothing else uses it so we'll just always set it.
+    if (isset($cwrc_attributes->attributes->id)) {
+      $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
+    }
     if (isset($cwrc_attributes->cwrcInfo->id)) {
-      $cwrc_attributes->attributes->uuid = $cwrc_attributes->cwrcInfo->id;
       $descriptive_note = NULL;
       $parts = explode('/', $cwrc_attributes->cwrcInfo->id);
       if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
@@ -211,7 +215,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if ($descriptive_note) {
       $cwrc_info->description = $descriptive_note;
     }
-    $entities[] = array(
+    $entity = array(
       'id' => $id,
       'type' => $type,
       'text' => isset($cwrc_info->name) ? $cwrc_info->name : $id,
@@ -219,11 +223,18 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'annotationId' => $id,
         'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
         'cwrcAttributes' => $cwrc_attributes,
-        'dialogId' => "ent_dialog_$id",
-        'dialogMarkup' => versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
-        'descriptiveNote' => $descriptive_note,
       ),
     );
+    $no_dialog_types = array(
+      'http://xmlns.com/foaf/0.1/Image'
+    );
+    if (!in_array($type, $no_dialog_types)) {
+      $entity['attributes']['dialogId'] = "ent_dialog_$id";
+      $entity['attributes']['dialogMarkup'] =
+        versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes);
+      $entity['attributes']['descriptiveNote'] = $descriptive_note;
+    }
+    $entities[] = $entity;
   }
   return $entities;
 }
@@ -245,7 +256,8 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
     return NULL;
   }
   $parts = explode('/', $info->cwrcInfo->id);
-  $type = $parts[3] == 'viaf' ? 'viaf' : 'islandora';
+
+  $type = (isset($parts[3]) && $parts[3] == 'viaf') ? 'viaf' : 'islandora';
   switch ($type) {
     case 'viaf':
       $viaf_id = $parts[4];
