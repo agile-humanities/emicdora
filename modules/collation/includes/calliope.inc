@@ -155,6 +155,7 @@ function emicdora_calliope_delete_mvd($id) {
  */
 function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL, $filter = "Empty") {
   global $base_url;
+  // We need a one character token that won't appear in normal text.
   $br_token = '☂';
   $mvd_url = "$base_url/calliope";
   $calliope_import_url = "$mvd_url/import/";
