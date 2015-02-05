@@ -5,6 +5,7 @@
  * Defines all the hooks this module implements.
  */
 
+define('EMICDORA_ROOT', 'emic:root');
 define('EMICDORA_EDITION_COLLECTION', 'emic:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'emic:featured_collections');
 define('EMICDORA_SOURCE_COLLECTION', 'emic:co-op');
@@ -1159,6 +1160,22 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // Editions - Critical Edition Collection.
+  $root = emicdora_create_required_object($connection, array(
+    'pid' => EMICDORA_ROOT,
+    'label' => 'Modernist Commons',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        'file' => "$module_path/data/objects/editions_collection_policy.xml",
+      ),
+    ),
+  ));
+  $root->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  // Editions - Critical Edition Collection.
   $editions = emicdora_create_required_object($connection, array(
     'pid' => EMICDORA_EDITION_COLLECTION,
     'label' => 'Editions',
@@ -1215,6 +1232,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $version_content_model,
         $tei_rdf_content_model,
         $transcription_content_model,
+        $root,
         $editions,
         $coop,
         $featured_editions,
