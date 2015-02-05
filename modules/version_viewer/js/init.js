@@ -105,7 +105,7 @@
                 remaining: offset,
                 node: null
               };
-              var elements =  $.unique($(element).find('*').andSelf().contents().get());
+              var elements =  $.unique($(element).find('.overlap-spanning-annotation').andSelf().contents().get());
               $(elements)
                 .filter(function (element) {
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
