@@ -93,7 +93,7 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
   $mapping = islandora_simplified_ingest_get_mappings($form_state['values']['content_model']);
-  $object = $repository->constructObject('islandora');
+  $object = $repository->constructObject('emic');
   $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', $mapping['collection']);
   if ($form_state['values']['critical_edition_pid']) {
     $object->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $form_state['values']['critical_edition_pid']);
@@ -392,7 +392,7 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $lang
 
   $tuque = new IslandoraTuque();
   $repository = $tuque->repository;
-  $object = $repository->constructObject('islandora');
+  $object = $repository->constructObject('emic');
   $object->relationships->add(FEDORA_MODEL_URI, 'hasModel', 'islandora:pageCModel');
   $book_object = islandora_object_load($book);
   $object->label = "{$book_object->label} - page $page_number";

@@ -5,9 +5,10 @@
  * Defines all the hooks this module implements.
  */
 
-define('EMICDORA_EDITION_COLLECTION', 'islandora:editions');
-define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'islandora:featured_collections');
-define('EMICDORA_SOURCE_COLLECTION', 'islandora:co-op');
+define('EMICDORA_ROOT', 'emic:root');
+define('EMICDORA_EDITION_COLLECTION', 'emic:editions');
+define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'emic:featured_collections');
+define('EMICDORA_SOURCE_COLLECTION', 'emic:co-op');
 define('EMICDORA_ISDERIVATIONOF', 'isDerivationOf');
 define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_mt%3A%28criticalEditionContainerCModel%29');
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
@@ -36,7 +37,7 @@ function emicdora_init() {
   $path_parts = explode('/', $path);
   if (isset($path_parts[3]) && islandora_is_valid_pid(urldecode($path_parts[3]))) {
     $object = islandora_object_load($path_parts[3]);
-    if ($object && in_array('islandora:criticalEditionContainerCModel', $object->models)) {
+    if ($object && in_array('emic:criticalEditionContainerCModel', $object->models)) {
       // This allows the RI to catch up when an object's associations change.
       sleep(1);
       $GLOBALS['conf']['cache'] = FALSE;
@@ -1181,6 +1182,22 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   // Editions - Critical Edition Collection.
+  $root = emicdora_create_required_object($connection, array(
+    'pid' => EMICDORA_ROOT,
+    'label' => 'Modernist Commons',
+    'model' => 'islandora:collectionCModel',
+    'datastreams' => array(
+      'TN' => array(
+        'file' => "$module_path/images/folder.png",
+        'mimetype' => 'image/png',
+      ),
+      'COLLECTION_POLICY' => array(
+        'file' => "$module_path/data/objects/editions_collection_policy.xml",
+      ),
+    ),
+  ));
+  $root->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  // Editions - Critical Edition Collection.
   $editions = emicdora_create_required_object($connection, array(
     'pid' => EMICDORA_EDITION_COLLECTION,
     'label' => 'Editions',
@@ -1195,7 +1212,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
       ),
     ),
   ));
-  $editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  $editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'emic:root');
   // CO-OP - Source Object Collection.
   $coop = emicdora_create_required_object($connection, array(
     'pid' => EMICDORA_SOURCE_COLLECTION,
@@ -1211,7 +1228,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
       ),
     ),
   ));
-  $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'emic:root');
   // Featured Editions - Featured Critical Edition Collection.
   $featured_editions = emicdora_create_required_object($connection, array(
     'pid' => EMICDORA_FEATURED_EDITIONS_COLLECTION,
@@ -1223,12 +1240,12 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         'mimetype' => 'image/png',
       ),
       'COLLECTION_POLICY' => array(
-        // Uses the same collection policy as the islandora:editions.
+        // Uses the same collection policy as the emicdora:editions.
         'file' => "$module_path/data/objects/editions_collection_policy.xml",
       ),
     ),
   ));
-  $featured_editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'islandora:root');
+  $featured_editions->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'emic:root');
   return array(
     'emicdora' => array(
       'title' => 'EMiC (Editing Modernism in Canada)',
@@ -1237,6 +1254,7 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
         $version_content_model,
         $tei_rdf_content_model,
         $transcription_content_model,
+        $root,
         $editions,
         $coop,
         $featured_editions,
