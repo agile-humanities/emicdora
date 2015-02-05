@@ -27,7 +27,7 @@ function tei_editor_menu() {
     'islandora/object/%islandora_object/version/%islandora_object/edit' => array(
       'title callback' => 'emicdora_set_title_and_breadcrumbs_callback',
       'title arguments' => array(
-        'emicdora_set_title_and_breadcrumbs_object', 2,
+        'emicdora_set_title_and_breadcrumbs_editor', 2,
       ),
       'page callback' => 'tei_editor',
       'page arguments' => array(4),

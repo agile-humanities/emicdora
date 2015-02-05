@@ -260,3 +260,29 @@ function emicdora_set_title_and_breadcrumbs_collation(AbstractObject $critical_e
   drupal_set_breadcrumb($breadcrumbs);
   emicdora_set_page_title_and_subtitle($critical_edition->label, $label);
 }
+
+/**
+ * Creates breadcrumbs for TEI Editior.
+ *
+ * @param AbstractObject $version
+ *   The object in which we generate the breadcrumbs for.
+ */
+function emicdora_set_title_and_breadcrumbs_editor(AbstractObject $version) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $membership = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+  $critical_edition = islandora_object_load($membership[0]['object']['value']);
+  $critical_edition_link = l(filter_xss($critical_edition->label), "islandora/object/{$critical_edition->id}");
+  $derivations = $version->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+  $source = islandora_object_load($derivations[0]['object']['value']);
+  $source_link = l(filter_xss($source->label), "islandora/object/{$critical_edition->id}/source/{$source->id}");
+  $version_link = l(filter_xss($version->label), "islandora/object/{$critical_edition->id}/version/{$version->id}");
+  $version = filter_xss($version->label);
+  $edit = t('Edit View');
+  $breadcrumbs = array(
+    $critical_edition_link,
+    $source_link,
+    $version_link,
+    $edit,
+  );
+  drupal_set_breadcrumb($breadcrumbs);
+}
