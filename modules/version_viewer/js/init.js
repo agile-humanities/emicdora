@@ -77,6 +77,7 @@
     });
 
     function show_annotations(nodes) {
+      console.log(nodes);
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -86,15 +87,99 @@
       else {
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
-          show_entity_tooltip(nodes[i]['attributes'], ent_id);
-          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
-          }
-          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-            var anno_id = nodes[i]['attributes']['uuid'];
-            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          if (ent_id == 'overlap') {
+            var start = nodes[i]['attributes']['offsets']['start'];
+            var end = nodes[i]['attributes']['offsets']['end'];
+            var get_offset_element = function (offset) {
+              var selector = '.tei .line-magic .text .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
+              return document.querySelector(selector);
+            };
+
+            // Get start offset_id
+            var start_element = get_offset_element(start);
+            var end_element = get_offset_element(end);
+            console.log(start_element);
+            console.log(end_element);
+
+            var find_text_node_at_offset = function (element, offset) {
+              var info = {
+                remaining: offset,
+                node: null
+              };
+              $(element).contents().each(function(index, element) {
+                if (this.nodeType == Node.TEXT_NODE && this.data != ' ') {
+                  if (info.remaining < this.data.length) {
+                    info.node = this;
+                    return false;
+                  }
+                  else {
+                    info.remaining -= this.data.length;
+                  }
+                }
+              });
+              return info;
+            };
+
+            // Custom handle overlap tooltips and "painting".
+            // Find text nodes and offset inside of them.
+            var start_info = find_text_node_at_offset(start_element, start['offset']);
+            var end_info = find_text_node_at_offset(end_element, end['offset']);
+            console.log(start_info);
+            console.log(end_info);
+
+            // Split text nodes.
+            var start_suffix = start_info.node.splitText(start_info.remaining);
+            var end_suffix = end_info.node.splitText(end_info.remaining);
+            console.log(start_info);
+            console.log(end_info);
+            console.log(start_suffix);
+            console.log(end_suffix);
+
+            // Tag relevant text nodes between the start and end elements
+            // (exclusive).
+            var found_start = false;
+            var found_end = false;
+
+            // No nice way to recursively consider text nodes...
+            var unique = $.unique($('.tei .line-magic .text *')
+              .contents()
+              .get());
+            $(unique)
+              .each(function(){console.log(this)})
+              .filter(function (index, element) {
+                if (this.nodeType != Node.TEXT_NODE) {
+                  return false;
+                }
+                if (this == start_suffix) {
+                  found_start = true;
+                  return true;
+                }
+                else if (start_suffix && this == end_info.node) {
+                  found_end = true;
+                  return true;
+                }
+                else {
+                  return found_start && !found_end;
+                }
+              })
+              .each(function(){console.log(this)})
+              .wrap('<span class="overlap-spanning-annotation"></span>');
+
+            $('span.overlap-spanning-annotation')
+              .css('background-color', 'red');
+
+
+          } else {
+            $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+            show_entity_tooltip(nodes[i]['attributes'], ent_id);
+            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace
+              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+            }
+            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+              var anno_id = nodes[i]['attributes']['uuid'];
+              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+            }
           }
         }
       }
