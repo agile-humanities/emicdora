@@ -328,3 +328,7 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 .entity_dialog label:after {
   content: ':';
 }
+
+.line-magic, .super-magic, .sub-magic {
+    min-width: 596px;
+}
