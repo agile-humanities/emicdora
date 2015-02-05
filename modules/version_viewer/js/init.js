@@ -135,7 +135,7 @@
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
         $(selector).css('background-color', colour);
-        if ($descriptive_note !== undefined && $descriptive_note.length > 0) {
+        if ($descriptive_note !== undefined && $descriptive_note !== null && $descriptive_note.length > 0) {
           $(selector).tooltip({
             position: 'top',
             width: 100,
