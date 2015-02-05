@@ -202,6 +202,13 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         }
       }
     }
+    $types = array(
+      'http://xmlns.com/foaf/0.1/Organization' => 'organization',
+      'http://xmlns.com/foaf/0.1/Image' => 'textimagelink',
+      'http://xmlns.com/foaf/0.1/Person' => 'person',
+      'http://xmlns.com/foaf/0.1/Place' => 'place',
+    );
+    $type = isset($types[$type]) ? $types[$type] : '';
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     if (empty($matches)) {
@@ -221,17 +228,16 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'text' => isset($cwrc_info->name) ? $cwrc_info->name : $id,
       'attributes' => array(
         'annotationId' => $id,
-        'cwrcType' => $type == 'http://xmlns.com/foaf/0.1/Image' ? 'textimagelink' : '',
+        'cwrcType' => $type,
         'cwrcAttributes' => $cwrc_attributes,
       ),
     );
     $no_dialog_types = array(
-      'http://xmlns.com/foaf/0.1/Image'
+      'image',
     );
     if (!in_array($type, $no_dialog_types)) {
       $entity['attributes']['dialogId'] = "ent_dialog_$id";
-      $entity['attributes']['dialogMarkup'] =
-        versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes);
+      $entity['attributes']['dialogMarkup'] = versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes, $type);
       $entity['attributes']['descriptiveNote'] = $descriptive_note;
     }
     $entities[] = $entity;
@@ -249,19 +255,25 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
  *   - cwrcInfo: A stdClass object containing at least:
  *     - id: A string identifying the object in the given repo... A URL for our
  *       stuff in the "cwrc" repository.
+ * @param string $record_type
+ *   person, place, image or organization
  */
-function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
+function versionable_object_viewer_generate_entity_dialog_markup($id, $info, $record_type) {
   if (!isset($info->cwrcInfo->id)) {
     // Current implementation only supports the local repository.
     return NULL;
   }
   $parts = explode('/', $info->cwrcInfo->id);
-
   $type = (isset($parts[3]) && $parts[3] == 'viaf') ? 'viaf' : 'islandora';
   switch ($type) {
     case 'viaf':
       $viaf_id = $parts[4];
-      $content_markup = versionable_object_viewer_generate_viaf_markup($viaf_id);
+      if ($record_type == 'organization') {
+        $content_markup = versionable_object_viewer_generate_viaf_organization_markup($viaf_id);
+      }
+      else {
+        $content_markup = versionable_object_viewer_generate_viaf_markup($viaf_id);
+      }
       break;
 
     case 'islandora':
@@ -279,6 +291,29 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
 }
 
 /**
+ * Gets VIAF organizationdata for dialog.
+ *
+ * @global type $base_url
+ *
+ * @param string $id
+ *   VIAF identifier
+ *
+ * @return string
+ *   Formatted output.
+ */
+function versionable_object_viewer_generate_viaf_organization_markup($id) {
+  $xpath = version_viewer_get_xpath($id);
+  $markup = '';
+  $orgnames = $xpath->query("/ns2:VIAFCluster/ns2:mainHeadings/ns2:mainHeadingEl/ns2:datafield/ns2:subfield[@code='a']");
+  $label = t("Name");
+  $markup .= version_viewer_get_markup($label, $orgnames);
+  $link = l(t('VIAF Record'), "http://viaf.org/viaf/$id");
+  $label = t('URL');
+  $markup .= "<span class='version_tooltip_label'>$label: </span>$link<br/>";
+  return $markup;
+}
+
+/**
  * Gets VIAF data for dialog.
  *
  * @global type $base_url
@@ -290,13 +325,7 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info) {
  *   Formatted output.
  */
 function versionable_object_viewer_generate_viaf_markup($id) {
-  global $base_url;
-  $path = "$base_url/viaf/$id/viaf.xml";
-  $viaf_xml = file_get_contents($path);
-  $dom = new DOMDocument();
-  $dom->loadXML($viaf_xml);
-  $xpath = new DOMXPath($dom);
-  $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
+  $xpath = version_viewer_get_xpath($id);
   $markup = '';
   // VIAF Titles.
   // Authors.
@@ -1070,4 +1099,24 @@ function version_viewer_get_certainty($xpath, $node) {
     }
   }
   return $certainty;
+}
+
+/**
+ * Gets DOMXPath object to query VIAF record.
+ *
+ * @param string $id
+ *   VIAF id
+ *
+ * @return DOMXPath
+ *   XPath objhect for queries
+ */
+function version_viewer_get_xpath($id) {
+  global $base_url;
+  $path = "$base_url/viaf/$id/viaf.xml";
+  $viaf_xml = file_get_contents($path);
+  $dom = new DOMDocument();
+  $dom->loadXML($viaf_xml);
+  $xpath = new DOMXPath($dom);
+  $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
+  return $xpath;
 }
