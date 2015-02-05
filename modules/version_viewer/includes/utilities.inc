@@ -154,6 +154,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $id = NULL;
     $parsed_start = NULL;
     $parsed_end = NULL;
+    $anchor_type = 'element';
     $body = $annotation->xpath('oa:hasBody/@rdf:resource');
     $body = (string) reset($body);
     $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
@@ -168,7 +169,6 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if (!$selection) {
       $parse_xpointer = function ($xpointer) {
         preg_match('!xpointer\(string-range\(//(.*)\[\@(.*)="([^"]+)"\],"",(\d+)\)\)!', $xpointer, $matches);
-        list($all, $element, $id_attribute, $id, $offset) = $matches;
         return array_combine(array(
           'element',
           'id_attribute',
@@ -181,7 +181,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $end_xpointer = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/oa:end");
       $end_xpointer = (string) reset($end_xpointer);
       if ($start_xpointer && $end_xpointer) {
-        $id = "overlap";
+        $anchor_type = 'offset';
+        $id = drupal_html_id('offset');
         $parsed_start = $parse_xpointer($start_xpointer);
         $parsed_end = $parse_xpointer($end_xpointer);
       }
@@ -252,6 +253,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'dialogId' => "ent_dialog_$id",
         'dialogMarkup' => versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes),
         'descriptiveNote' => $descriptive_note,
+        'anchorType' => $anchor_type,
         'offsets' => array(
           'start' => $parsed_start,
           'end' => $parsed_end,

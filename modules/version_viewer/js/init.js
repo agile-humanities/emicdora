@@ -77,7 +77,6 @@
     });
 
     function show_annotations(nodes) {
-      console.log(nodes);
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -87,7 +86,7 @@
       else {
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          if (ent_id == 'overlap') {
+          if (nodes[i]['attributes']['anchorType'] == 'offset') {
             var start = nodes[i]['attributes']['offsets']['start'];
             var end = nodes[i]['attributes']['offsets']['end'];
             var get_offset_element = function (offset) {
@@ -106,17 +105,20 @@
                 remaining: offset,
                 node: null
               };
-              $(element).contents().each(function(index, element) {
-                if (this.nodeType == Node.TEXT_NODE && this.data != ' ') {
-                  if (info.remaining < this.data.length) {
+              var elements =  $.unique($(element).find('*').andSelf().contents().get());
+              $(elements)
+                .filter(function (element) {
+                  return this.nodeType == Node.TEXT_NODE && this.data != ' ';
+                })
+                .each(function(index, element) {
+                  if (info.remaining >= this.data.length) {
+                    info.remaining -= this.data.length;
+                  }
+                  else {
                     info.node = this;
                     return false;
                   }
-                  else {
-                    info.remaining -= this.data.length;
-                  }
-                }
-              });
+                });
               return info;
             };
 
@@ -128,8 +130,12 @@
             console.log(end_info);
 
             // Split text nodes.
-            var start_suffix = start_info.node.splitText(start_info.remaining);
-            var end_suffix = end_info.node.splitText(end_info.remaining);
+            var start_suffix = start_info.remaining == start_info.node.length ?
+              start_info.node :
+              start_info.node.splitText(start_info.remaining);
+            var end_suffix = end_info.remaining == end_info.node.length ?
+              null :
+              end_info.node.splitText(end_info.remaining);
             console.log(start_info);
             console.log(end_info);
             console.log(start_suffix);
@@ -145,7 +151,6 @@
               .contents()
               .get());
             $(unique)
-              .each(function(){console.log(this)})
               .filter(function (index, element) {
                 if (this.nodeType != Node.TEXT_NODE) {
                   return false;
@@ -163,10 +168,10 @@
                 }
               })
               .each(function(){console.log(this)})
-              .wrap('<span class="overlap-spanning-annotation"></span>');
+              .wrap('<span class="overlap-spanning-annotation ' + ent_id + '"></span>');
 
-            $('span.overlap-spanning-annotation')
-              .css('background-color', 'red');
+            $('span.overlap-spanning-annotation.' + ent_id)
+              .css('text-decoration', 'underline');
 
 
           } else {
@@ -195,17 +200,25 @@
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          var selector = "span[data-annotationid='" + ent_id + "']";
-          $(selector).css('background-color', 'initial');
-          // Clear all click and tooltip events.
-          $(selector).off();
-          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-            $('.svg_' + anno_id).remove();
+          if (nodes[i]['attributes']['anchorType'] == 'offset') {
+            $('span.overlap-spanning-annotation.' + ent_id)
+              .css('text-decoration', 'inherit')
+              .contents()
+              .unwrap();
           }
-          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-            var anno_id = nodes[i]['attributes']['uuid'];
-            $('.svg_' + anno_id).remove();
+          else {
+            var selector = "span[data-annotationid='" + ent_id + "']";
+            $(selector).css('background-color', 'initial');
+            // Clear all click and tooltip events.
+            $(selector).off();
+            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+              $('.svg_' + anno_id).remove();
+            }
+            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+              var anno_id = nodes[i]['attributes']['uuid'];
+              $('.svg_' + anno_id).remove();
+            }
           }
         }
       }
@@ -220,7 +233,7 @@
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
         $(selector).css('background-color', colour);
-        if ($descriptive_note !== undefined && $descriptive_note.length > 0) {
+        if ($descriptive_note !== null && $descriptive_note.length > 0) {
           $(selector).tooltip({
             position: 'top',
             width: 100,
