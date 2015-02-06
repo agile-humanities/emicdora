@@ -808,7 +808,7 @@ function emicdora_remove_source(AbstractObject $source_object = NULL) {
 }
 
 /**
- * Removes Transcription from Critical Edition.
+ * Removes Version from Critical Edition.
  *
  * @param string $critical_edition_pid
  *   PID of Critical Edition
