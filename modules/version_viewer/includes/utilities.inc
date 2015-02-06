@@ -203,6 +203,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       }
     }
     $types = array(
+      'http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing' => 'place',
       'http://xmlns.com/foaf/0.1/Organization' => 'organization',
       'http://xmlns.com/foaf/0.1/Image' => 'textimagelink',
       'http://xmlns.com/foaf/0.1/Person' => 'person',
@@ -280,14 +281,51 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info, $re
       $pid = end($parts);
       $object = islandora_object_load($pid);
       if (!$object) {
-        return NULL;
+        // Some places don't have objects.
+        if ($record_type == 'place') {
+          $content_markup = versionable_object_viewer_generate_geoname_markup(
+            $info->cwrcInfo->id,
+            $info->cwrcInfo->name
+          );
+        }
+        else {
+          return NULL;
+        }
       }
-      module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
-      $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
-      $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
+      if (!isset($content_markup)) {
+        module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+        $dsid = islandora_cwrc_writer_entity_content_datastream_id($object);
+        $content_markup = versionable_object_viewer_generate_markup($object[$dsid]->content, $dsid);
+      }
       break;
   }
   return "<div id='ent_dialog_$id' class='entity_dialog'>$content_markup</div>";
+}
+
+/**
+ * Get markup for for geoname entity dialog.
+ *
+ * @param string $id
+ *   The url for the entity.
+ * @param string $name
+ *   Human readable name for the entity.
+ *
+ * @return string
+ *   Dialog markup.
+ */
+function versionable_object_viewer_generate_geoname_markup($id, $name) {
+  $name_label = t("Name");
+  $link = l($id, $id);
+  $url_label = t('URL');
+  $dialog = array(
+    'name' => array(
+      '#markup' => "<span class='version_tooltip_label'>$name_label: </span>$name<br/>",
+    ),
+    'url' => array(
+      '#markup' => "<span class='version_tooltip_label'>$url_label: </span>$link<br/>",
+    ),
+  );
+  return drupal_render($dialog);
 }
 
 /**
