@@ -291,9 +291,7 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info, $re
 }
 
 /**
- * Gets VIAF organizationdata for dialog.
- *
- * @global type $base_url
+ * Gets VIAF organization data for dialog.
  *
  * @param string $id
  *   VIAF identifier
@@ -315,8 +313,6 @@ function versionable_object_viewer_generate_viaf_organization_markup($id) {
 
 /**
  * Gets VIAF data for dialog.
- *
- * @global type $base_url
  *
  * @param string $id
  *   VIAF identifier
@@ -1111,9 +1107,8 @@ function version_viewer_get_certainty($xpath, $node) {
  *   XPath objhect for queries
  */
 function version_viewer_get_xpath($id) {
-  global $base_url;
-  $path = "$base_url/viaf/$id/viaf.xml";
-  $viaf_xml = file_get_contents($path);
+  $url = url("/viaf/$id/viaf.xml", array('absolute' => TRUE));
+  $viaf_xml = file_get_contents($url);
   $dom = new DOMDocument();
   $dom->loadXML($viaf_xml);
   $xpath = new DOMXPath($dom);
