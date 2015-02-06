@@ -1104,7 +1104,7 @@ function version_viewer_get_certainty($xpath, $node) {
  *   VIAF id
  *
  * @return DOMXPath
- *   XPath objhect for queries
+ *   XPath object for queries
  */
 function version_viewer_get_xpath($id) {
   $url = url("/viaf/$id/viaf.xml", array('absolute' => TRUE));
