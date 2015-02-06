@@ -148,6 +148,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     return array();
   }
   $xml = simplexml_load_string(reset($rdf)->asXML());
+  $ignore_entity_types = array(
+    'http://purl.org/ontology/bibo/Note', // We don't display notes in a special way.
+  );
   // Fetches each annotation.
   $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
   foreach ($annotations as $annotation) {
@@ -155,6 +158,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $body = (string) reset($body);
     $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
     $type = (string) reset($type);
+    if (in_array($type, $ignore_entity_types)) {
+      continue;
+    }
     $target = $annotation->xpath('oa:hasTarget/@rdf:resource');
     $target = (string) reset($target);
     $selector = $xml->xpath("//rdf:Description[@rdf:about = '$target']/oa:hasSelector/@rdf:resource");
@@ -265,6 +271,7 @@ function versionable_object_viewer_generate_entity_dialog_markup($id, $info, $re
     return NULL;
   }
   $parts = explode('/', $info->cwrcInfo->id);
+
   $type = (isset($parts[3]) && $parts[3] == 'viaf') ? 'viaf' : 'islandora';
   switch ($type) {
     case 'viaf':
