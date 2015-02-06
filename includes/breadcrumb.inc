@@ -276,6 +276,6 @@ function emicdora_set_title_and_breadcrumbs_editor(AbstractObject $version) {
   $source = islandora_object_load($derivations[0]['object']['value']);
   $breadcrumbs[] = l(filter_xss($source->label), "islandora/object/{$critical_edition->id}/source/{$source->id}");
   $breadcrumbs[] = l(filter_xss($version->label), "islandora/object/{$critical_edition->id}/version/{$version->id}");
-  $breadcrumbs[]= t('Edit View');
+  $breadcrumbs[] = t('Edit View');
   drupal_set_breadcrumb($breadcrumbs);
 }
