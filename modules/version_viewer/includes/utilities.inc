@@ -156,6 +156,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     'http://xmlns.com/foaf/0.1/Image',
     'http://xmlns.com/foaf/0.1/Person',
     'http://xmlns.com/foaf/0.1/Place',
+    'http://purl.org/dc/terms/BibliographicResource',
   );
   // Fetches each annotation.
   $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
@@ -220,6 +221,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'http://xmlns.com/foaf/0.1/Image' => 'textimagelink',
       'http://xmlns.com/foaf/0.1/Person' => 'person',
       'http://xmlns.com/foaf/0.1/Place' => 'place',
+      'http://purl.org/dc/terms/BibliographicResource' => 'title',
     );
     $type = isset($types[$type]) ? $types[$type] : '';
     $matches = array();
