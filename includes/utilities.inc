@@ -686,9 +686,7 @@ function emicdora_generate_tei_from_ocr(AbstractObject $object) {
 function emicdora_wrap_plain_text_in_tei($content = 'Blank Page') {
   // @ignore style_lowercase_html:function
   $cwrc_library_path = libraries_get_path('CWRC-Writer');
-  $schema = file_create_url("$cwrc_library_path/src/schema/CWRC-TEIBasic.rng");
   $prefix = '<?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="' . $schema . '" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
   <teiHeader>
     <fileDesc>
