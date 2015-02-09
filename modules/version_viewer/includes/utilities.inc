@@ -148,6 +148,16 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     return array();
   }
   $xml = simplexml_load_string(reset($rdf)->asXML());
+  // We don't display entities or annotations aside from those listed,
+  // notes, dates or citations.
+  $valid_entity_types = array(
+    'http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing',
+    'http://xmlns.com/foaf/0.1/Organization',
+    'http://xmlns.com/foaf/0.1/Image',
+    'http://xmlns.com/foaf/0.1/Person',
+    'http://xmlns.com/foaf/0.1/Place',
+    'http://purl.org/dc/terms/BibliographicResource',
+  );
   // Fetches each annotation.
   $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
   foreach ($annotations as $annotation) {
@@ -155,6 +165,9 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $body = (string) reset($body);
     $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
     $type = (string) reset($type);
+    if (!in_array($type, $valid_entity_types)) {
+      continue;
+    }
     $target = $annotation->xpath('oa:hasTarget/@rdf:resource');
     $target = (string) reset($target);
     $selector = $xml->xpath("//rdf:Description[@rdf:about = '$target']/oa:hasSelector/@rdf:resource");
@@ -208,6 +221,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'http://xmlns.com/foaf/0.1/Image' => 'textimagelink',
       'http://xmlns.com/foaf/0.1/Person' => 'person',
       'http://xmlns.com/foaf/0.1/Place' => 'place',
+      'http://purl.org/dc/terms/BibliographicResource' => 'title',
     );
     $type = isset($types[$type]) ? $types[$type] : '';
     $matches = array();
@@ -234,7 +248,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       ),
     );
     $no_dialog_types = array(
-      'image',
+      'textimagelink',
     );
     if (!in_array($type, $no_dialog_types)) {
       $entity['attributes']['dialogId'] = "ent_dialog_$id";
