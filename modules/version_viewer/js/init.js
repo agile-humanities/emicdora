@@ -162,21 +162,18 @@
           if ($('#ent_dialog_' + ent_id).length == 0) {
             if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
               $('#content').append(data['dialogMarkup']);
-            }
-            else {
-              $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
+              $('#ent_dialog_' + ent_id).dialog({
+                title: data['cwrcAttributes']['cwrcInfo']['name'],
+                width: 400,
+                height: 200,
+                closed: false,
+                cache: false,
+                resizeable: true,
+                collapsible: true,
+                modal: false
+              });
             }
           }
-          $('#ent_dialog_' + ent_id).dialog({
-            title: data['cwrcAttributes']['cwrcInfo']['name'],
-            width: 400,
-            height: 200,
-            closed: false,
-            cache: false,
-            resizeable: true,
-            collapsible: true,
-            modal: false
-          });
         });
       }
       else {
