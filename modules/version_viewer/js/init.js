@@ -159,20 +159,21 @@
           }).show();
         }
         $(selector).click(function() {
-          if ($('#ent_dialog_' + ent_id).length == 0) {
-            if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
-              $('#content').append(data['dialogMarkup']);
-              $('#ent_dialog_' + ent_id).dialog({
-                title: data['cwrcAttributes']['cwrcInfo']['name'],
-                width: 400,
-                height: 200,
-                closed: false,
-                cache: false,
-                resizeable: true,
-                collapsible: true,
-                modal: false
-              });
-            }
+          var hasMarkup = (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null);
+          if ($('#ent_dialog_' + ent_id).length == 0 && hasMarkup) {
+            $('#content').append(data['dialogMarkup']);
+          }
+          if (hasMarkup) {
+            $('#ent_dialog_' + ent_id).dialog({
+              title: data['cwrcAttributes']['cwrcInfo']['name'],
+              width: 400,
+              height: 200,
+              closed: false,
+              cache: false,
+              resizeable: true,
+              collapsible: true,
+              modal: false
+            });
           }
         });
       }
