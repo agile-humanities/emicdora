@@ -14,6 +14,7 @@ define('EMICDORA_SEARCH_EDITIONS_PATH', 'islandora/search/RELS_EXT_hasModel_uri_
 define('EMICDORA_SEARCH_COOP_PATH', 'islandora/search/NOT RELS_EXT_hasModel_uri_mt:(criticalEditionContainerCModel OR versionCModel)');
 define('EMICDORA_COOP_PATH', 'CO-OP');
 define('EMICDORA_MANAGE_EDITION', 'manage critical edition');
+define('EMICDORA_ADMINISTER_EDITION', 'administer critical edition');
 define('EMICDORA_TEI_NAMESPACE', 'http://www.tei-c.org/ns/1.0');
 
 /**
@@ -22,8 +23,12 @@ define('EMICDORA_TEI_NAMESPACE', 'http://www.tei-c.org/ns/1.0');
 function emicdora_permission() {
   return array(
     EMICDORA_MANAGE_EDITION => array(
-      'title' => t('Edit Critical Edition'),
-      'description' => t('Allows management and editing of Critical Edition.'),
+      'title' => t('Edit Critical Editions'),
+      'description' => t('Allows management and editing of Critical Editions.'),
+    ),
+    EMICDORA_ADMINISTER_EDITION => array(
+      'title' => t('Administer Critical Editions'),
+      'description' => t('Allow administration of Critical Editions.'),
     ),
   );
 }
@@ -267,7 +272,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
+      'access arguments' => array(EMICDORA_ADMINISTER_EDITION, 3),
       'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -277,7 +282,7 @@ function emicdora_menu() {
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_configure_version_links', 3),
       'access callback' => 'emicdora_show_version_context_menu',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
+      'access arguments' => array(EMICDORA_ADMINISTER_EDITION, 3),
       'file' => 'includes/configure_links.inc',
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
@@ -388,7 +393,7 @@ function emicdora_menu() {
       'page callback' => 'emicdora_contextual_redirect',
       'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
-      'access arguments' => array(EMICDORA_MANAGE_EDITION, 3),
+      'access arguments' => array(EMICDORA_ADMINISTER_EDITION, 3),
       'weight' => -43,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
