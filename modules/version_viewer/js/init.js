@@ -263,7 +263,7 @@
     }
 
     function show_entity_tooltip(data, ent_id) {
-      $descriptive_note = data['descriptiveNote'];
+      var descriptive_note = data['descriptiveNote'];
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = "red";
         var position = "top";
@@ -277,7 +277,7 @@
           position = "bottom";
         }
         $(selector).css('background-color', colour);
-        if ($descriptive_note !== null && $descriptive_note.length > 0) {
+        if (descriptive_note !== null && descriptive_note.length > 0) {
           $(selector).tooltip({
             position: position,
             width: 100,
