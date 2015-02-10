@@ -97,15 +97,21 @@
             // Get start offset_id
             var start_element = get_offset_element(start);
             var end_element = get_offset_element(end);
-            console.log(start_element);
-            console.log(end_element);
 
             var find_text_node_at_offset = function (element, offset) {
               var info = {
                 remaining: offset,
                 node: null
               };
-              var elements =  $.unique($(element).find('.overlap-spanning-annotation').andSelf().contents().get());
+              var elements =  $.unique(
+                $(element)
+                  .children('.overlap-spanning-annotation')
+                  .find('.overlap-spanning-annotation')
+                  .addBack()
+                  .add(element)
+                  .contents()
+                  .get()
+              );
               $(elements)
                 .filter(function (element) {
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
@@ -123,23 +129,17 @@
             };
 
             // Custom handle overlap tooltips and "painting".
-            // Find text nodes and offset inside of them.
+            // Find and split "start" node.
             var start_info = find_text_node_at_offset(start_element, start['offset']);
-            var end_info = find_text_node_at_offset(end_element, end['offset']);
-            console.log(start_info);
-            console.log(end_info);
-
-            // Split text nodes.
             var start_suffix = start_info.remaining == start_info.node.length ?
               start_info.node :
               start_info.node.splitText(start_info.remaining);
+            // Find and split "end" node.
+            var end_info = find_text_node_at_offset(end_element, end['offset']);
+            // Split text nodes.
             var end_suffix = end_info.remaining == end_info.node.length ?
               null :
               end_info.node.splitText(end_info.remaining);
-            console.log(start_info);
-            console.log(end_info);
-            console.log(start_suffix);
-            console.log(end_suffix);
 
             // Tag relevant text nodes between the start and end elements
             // (exclusive).
@@ -167,13 +167,29 @@
                   return found_start && !found_end;
                 }
               })
-              .each(function(){console.log(this)})
               .wrap('<span class="overlap-spanning-annotation ' + ent_id + '"></span>');
 
             $('span.overlap-spanning-annotation.' + ent_id)
               .css('text-decoration', 'underline');
 
+            show_entity_tooltip(nodes[i]['attributes'], ent_id);
 
+            var checked = $("#easyui_tree").tree('getChecked');
+            for (var j = 0; j < checked.length; j++) {
+              if (checked[j]['attributes']['annotationId'] == start['id'] || checked[j]['attributes']['annotationId'] == end['id']) {
+                var tooltips_elements = [];
+                if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
+                  tooltips_elements = checked[j]['attributes']['nestedTooltips'];
+                }
+                tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                var temp_attributes = checked[j]['attributes'];
+                temp_attributes['nestedTooltips'] = tooltips_elements;
+                $("#easyui_tree").tree('update', {
+                  target: checked[j].target,
+                  attributes: temp_attributes
+                });
+              }
+            }
           } else {
             $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
@@ -205,6 +221,28 @@
               .css('text-decoration', 'inherit')
               .contents()
               .unwrap();
+
+            var checked = $("#easyui_tree").tree('getChecked');
+            for (var j = 0; j < checked.length; j++) {
+              if (checked[j]['attributes']['annotationId'] == nodes[i]['attributes']['offsets']['start']['id'] || checked[j]['attributes']['annotationId'] == nodes[i]['attributes']['offsets']['start']['id']) {
+                if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
+                  var tooltips_elements = checked[j]['attributes']['nestedTooltips'];
+                  var value = 'span.overlap-spanning-annotation.' + ent_id;
+                  for (var index in tooltips_elements) {
+                    if (tooltips_elements[index] == value) {
+                      tooltips_elements.splice(index, 1);
+                      break;
+                    }
+                  }
+                  var temp_attributes = checked[j]['attributes'];
+                  temp_attributes['nestedTooltips'] = tooltips_elements;
+                  $("#easyui_tree").tree('update', {
+                    target: checked[j].target,
+                    attributes: temp_attributes
+                  });
+                }
+              }
+            }
           }
           else {
             var selector = "span[data-annotationid='" + ent_id + "']";
@@ -228,14 +266,20 @@
       $descriptive_note = data['descriptiveNote'];
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = "red";
+        var position = "top";
         if (data['cwrcAttributes']['attributes']['Colour']) {
           colour = data['cwrcAttributes']['attributes']['Colour'];
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
+        if (data['anchorType'] == 'offset') {
+          selector = 'span.overlap-spanning-annotation.' + ent_id;
+          colour = 'inherit';
+          position = "bottom";
+        }
         $(selector).css('background-color', colour);
         if ($descriptive_note !== null && $descriptive_note.length > 0) {
           $(selector).tooltip({
-            position: 'top',
+            position: position,
             width: 100,
             height: 100,
             hideEvent: 'none',
@@ -250,7 +294,7 @@
             },
             onShow: function() {
               var t = $(this);
-              t.tooltip('tip').focus().unbind().bind('blur', function() {
+              t.tooltip('tip').focus().unbind().bind('blur', function () {
                 t.tooltip('hide');
               });
             }
