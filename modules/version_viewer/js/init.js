@@ -379,6 +379,14 @@
         // Reset to remove ":first" to keep the on click working correctly.
         if (data['anchorType'] == 'offset') {
           selector = 'span.overlap-spanning-annotation.' + ent_id;
+          // To enable overlay hover all spans not just first.
+          $(selector).hover(
+            function() {
+              $( selector + ':first' ).tooltip('show');
+            }, function() {
+              $( selector + ':first' ).tooltip('hide');
+            }
+          );
         }
         $(selector).click(function() {
           // Hide any active tooltips (sometimes they do not clear).
