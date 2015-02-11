@@ -52,7 +52,7 @@
     // Highlight all the members of a substJoin if one is clicked.
     Drupal.behaviors.highlightSubstJoin = {
       attach: function () {
-        $('.substJoin').once('highlightSubstJoin', function () {
+        $('.tei.diplomatic .substJoin').once('highlightSubstJoin', function () {
           var substJoin = $(this),
             group = getSubstitutionGroup(substJoin),
             timeout;
@@ -82,7 +82,7 @@
     // Highlight a subst if it is clicked.
     Drupal.behaviors.highlightSubst = {
       attach: function () {
-        $('.subst').once('highlightSubst', function () {
+        $('.tei.diplomatic .subst').once('highlightSubst', function () {
           var subst = $(this);
           var timeout;
           // Clicking on the subst will highlight it.
