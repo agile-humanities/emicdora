@@ -66,6 +66,10 @@
           $('#easyui_tree').tree({
             data: data
           });
+          // Resize content.
+          $('#eui_window').layout('resize', {
+            width: '100%'
+          });
         },
         error: function(data, status, xhd) {
         }
@@ -626,6 +630,10 @@
           if (add_class != "") {
             $('#' + type).addClass(add_class);
           }
+          // Resize with new content.
+          $('#eui_window').layout('resize', {
+            width: '100%'
+          });
         },
         error: function(xhRequest, ErrorText, thrownError) {
           console.log(ErrorText + ":" + thrownError);
@@ -715,9 +723,7 @@
     // use these method to trigger the resize event.
     $('#eui_window').layout('resize', {
       width: '100%',
-      height: '729px',
+      height: '729px'
     });
-    $('#easy-ui-east').css('height', '623px');
-    $('#easy-ui-west').css('height', '623px');
   });
 })(jQuery);
