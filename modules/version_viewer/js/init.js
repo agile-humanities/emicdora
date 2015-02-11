@@ -1,6 +1,9 @@
 (function($) {
   $(document).ready(function() {
-
+    $('body').click(function(){
+      // Hide any active tooltips (sometimes they do not clear).
+      $('.tooltip-f').tooltip('hide');
+    });
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
@@ -77,6 +80,9 @@
     });
 
     function show_annotations(nodes) {
+      // Hide any active tooltips (sometimes they do not clear).
+      $('.tooltip-f').tooltip('hide');
+
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -86,20 +92,155 @@
       else {
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
-          show_entity_tooltip(nodes[i]['attributes'], ent_id);
-          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
-          }
-          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-            var anno_id = nodes[i]['attributes']['uuid'];
-            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          if (nodes[i]['attributes']['anchorType'] == 'offset') {
+            var start = nodes[i]['attributes']['offsets']['start'];
+            var end = nodes[i]['attributes']['offsets']['end'];
+            var get_offset_element = function (offset) {
+              var selector = '.tei .line-magic .text .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
+              return document.querySelector(selector);
+            };
+
+            // Get start offset_id
+            var start_element = get_offset_element(start);
+            var end_element = get_offset_element(end);
+
+            var find_text_node_at_offset = function (element, offset) {
+              var info = {
+                remaining: offset,
+                node: null
+              };
+              var elements =  $.unique(
+                $(element)
+                  .children('.overlap-spanning-annotation')
+                  .find('.overlap-spanning-annotation')
+                  .addBack()
+                  .add(element)
+                  .contents()
+                  .get()
+              );
+              $(elements)
+                .filter(function (element) {
+                  return this.nodeType == Node.TEXT_NODE && this.data != ' ';
+                })
+                .each(function(index, element) {
+                  if (info.remaining >= this.data.length) {
+                    info.remaining -= this.data.length;
+                  }
+                  else {
+                    info.node = this;
+                    return false;
+                  }
+                });
+              return info;
+            };
+
+            // Custom handle overlap tooltips and "painting".
+            // Find and split "start" node.
+            var start_info = find_text_node_at_offset(start_element, start['offset']);
+            var start_suffix = start_info.remaining == start_info.node.length ?
+              start_info.node :
+              start_info.node.splitText(start_info.remaining);
+            // Find and split "end" node.
+            var end_info = find_text_node_at_offset(end_element, end['offset']);
+            // Split text nodes.
+            var end_suffix = end_info.remaining == end_info.node.length ?
+              null :
+              end_info.node.splitText(end_info.remaining);
+
+            // Tag relevant text nodes between the start and end elements
+            // (exclusive).
+            var found_start = false;
+            var found_end = false;
+            var temp_linked_overlaps = [];
+            var linked_overlaps = [];
+            // No nice way to recursively consider text nodes...
+            var unique = $.unique($('.tei .line-magic .text *')
+              .contents()
+              .get());
+            $(unique)
+              .filter(function (index, element) {
+                if (this.nodeType != Node.TEXT_NODE) {
+                  return false;
+                }
+                if (this == start_suffix) {
+                  found_start = true;
+                  return true;
+                }
+                else if (start_suffix && this == end_info.node) {
+                  found_end = true;
+                  return true;
+                }
+                else {
+                  return found_start && !found_end;
+                }
+              })
+              .each(function(){
+                var parents = $.unique($(this).parent('span.overlap-spanning-annotation:not(.tooltip-f)').get());
+                $(parents).each(function(){ temp_linked_overlaps.push($(this).prop("className").replace(" ", ".")); });;
+              })
+              .wrap('<span class="overlap-spanning-annotation ' + ent_id + '"></span>');
+            temp_linked_overlaps = $.unique(temp_linked_overlaps);
+            // Associate the linked_overlaps with current overlap.
+            for (var index in temp_linked_overlaps) {
+              if (temp_linked_overlaps[index]) {
+                var tooltip_selector = temp_linked_overlaps[index].replace(" ", ".");
+                linked_overlaps.push(tooltip_selector);
+                // Get current data and append to it.
+                var data_overlap_attr = $('overlap-spanning-annotation.' + ent_id).attr('data-linked-overlaps');
+                var current_overlaps = [];
+                if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
+                  var current_overlaps = data_overlap_attr.split(",");
+                }
+                current_overlaps.push('overlap-spanning-annotation.' + ent_id);
+                $("span." + tooltip_selector).attr('data-linked-overlaps', current_overlaps.join());
+              }
+            }
+
+            $('span.overlap-spanning-annotation.' + ent_id)
+              .css('text-decoration', 'underline')
+              .attr('data-linked-overlaps', linked_overlaps.join());
+
+            show_entity_tooltip(nodes[i]['attributes'], ent_id);
+
+            var checked = $("#easyui_tree").tree('getChecked');
+            for (var j = 0; j < checked.length; j++) {
+              if (checked[j]['attributes']['annotationId'] == start['id'] || checked[j]['attributes']['annotationId'] == end['id']) {
+                var tooltips_elements = [];
+                if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
+                  tooltips_elements = checked[j]['attributes']['nestedTooltips'];
+                }
+                tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                var temp_attributes = checked[j]['attributes'];
+                temp_attributes['nestedTooltips'] = tooltips_elements;
+                $("#easyui_tree").tree('update', {
+                  target: checked[j].target,
+                  attributes: temp_attributes
+                });
+                // Reset the parent entity to have it update the tooltip code.
+                var selector = ".tei *[data-annotationid='" + checked[j]['attributes']['annotationId'] + "']";
+                $(selector).off();
+                show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
+              }
+            }
+          } else {
+            $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+            show_entity_tooltip(nodes[i]['attributes'], ent_id);
+            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace
+              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+            }
+            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+              var anno_id = nodes[i]['attributes']['uuid'];
+              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+            }
           }
         }
       }
     }
     function hide_annotations(nodes) {
+      // Hide any active tooltips (sometimes they do not clear).
+      $('.tooltip-f').tooltip('hide');
+
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -110,37 +251,70 @@
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
-          var selector = "span[data-annotationid='" + ent_id + "']";
-          $(selector).css('background-color', 'initial');
-          // Clear all click and tooltip events.
-          $(selector).off();
-          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-            $('.svg_' + anno_id).remove();
+          if (nodes[i]['attributes']['anchorType'] == 'offset') {
+            $('span.overlap-spanning-annotation.' + ent_id)
+              .css('text-decoration', 'inherit')
+              .contents()
+              .unwrap();
+
+            var checked = $("#easyui_tree").tree('getChecked');
+            for (var j = 0; j < checked.length; j++) {
+              if (checked[j]['attributes']['annotationId'] == nodes[i]['attributes']['offsets']['start']['id'] || checked[j]['attributes']['annotationId'] == nodes[i]['attributes']['offsets']['start']['id']) {
+                if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
+                  var tooltips_elements = checked[j]['attributes']['nestedTooltips'];
+                  var value = 'span.overlap-spanning-annotation.' + ent_id;
+                  for (var index in tooltips_elements) {
+                    if (tooltips_elements[index] == value) {
+                      tooltips_elements.splice(index, 1);
+                      break;
+                    }
+                  }
+                  var temp_attributes = checked[j]['attributes'];
+                  temp_attributes['nestedTooltips'] = tooltips_elements;
+                  $("#easyui_tree").tree('update', {
+                    target: checked[j].target,
+                    attributes: temp_attributes
+                  });
+                }
+              }
+            }
           }
-          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-            var anno_id = nodes[i]['attributes']['uuid'];
-            $('.svg_' + anno_id).remove();
+          else {
+            var selector = "span[data-annotationid='" + ent_id + "']";
+            $(selector).css('background-color', 'initial');
+            // Clear all click and tooltip events.
+            $(selector).off();
+            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+              $('.svg_' + anno_id).remove();
+            }
+            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+              var anno_id = nodes[i]['attributes']['uuid'];
+              $('.svg_' + anno_id).remove();
+            }
           }
         }
       }
     }
 
     function show_entity_tooltip(data, ent_id) {
-      $descriptive_note = data['descriptiveNote'];
+      var descriptive_note = data['descriptiveNote'];
+      var positions = ['left', 'right', 'bottom'];
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = "red";
         if (data['cwrcAttributes']['attributes']['Colour']) {
           colour = data['cwrcAttributes']['attributes']['Colour'];
         }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
+        if (data['anchorType'] == 'offset') {
+          selector = 'span.overlap-spanning-annotation.' + ent_id +  ':first';
+          colour = 'inherit';
+        }
         $(selector).css('background-color', colour);
-        if ($descriptive_note !== undefined && $descriptive_note !== null && $descriptive_note.length > 0) {
+        if (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0) {
           $(selector).tooltip({
             position: 'top',
-            width: 100,
-            height: 100,
-            hideEvent: 'none',
+            hideEvent: 'mouseleave',
             content: function() {
               var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
               if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
@@ -151,14 +325,72 @@
                   '</div>';
             },
             onShow: function() {
-              var t = $(this);
-              t.tooltip('tip').focus().unbind().bind('blur', function() {
-                t.tooltip('hide');
-              });
+              var display_count = 0;
+              if (data.hasOwnProperty('nestedTooltips')) {
+                var tooltips_elements = data['nestedTooltips'];
+                for (var index in tooltips_elements) {
+                  if (tooltips_elements[index]) {
+                    if (display_count == 2) display_count = 0;
+                    $(tooltips_elements[index] + ":first").tooltip({
+                      position: positions[display_count],
+                      hideEvent: 'mouseleave'
+                    });
+                    $(tooltips_elements[index] + ":first").tooltip('show');
+                    display_count++;
+                  }
+                }
+              } else {
+                // Overlaps need to display other overlaps that collide with it.
+                positions = ['bottom', 'right', 'left'];
+                var data_overlap_attr = $(selector).attr('data-linked-overlaps');
+                if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
+                  var linked_tooltips = data_overlap_attr.split(",");
+                  for (var index in linked_tooltips) {
+                    if (linked_tooltips[index]) {
+                      if (display_count == 2) display_count = 0;
+                      $("." + linked_tooltips[index] + ":first").tooltip({
+                        position: positions[display_count],
+                        hideEvent: 'mouseleave',
+                        onShow: function() {
+                          // Reset onShow to not have a custom function to
+                          // prevent recursive calls to onShow.
+                        },
+                        onHide: function() {
+                          var checked = $("#easyui_tree").tree('getChecked');
+                          for (var j = 0; j < checked.length; j++) {
+                            if (linked_tooltips[index].search(checked[j]['attributes']['annotationId']) != -1) {
+                              // Rebuild tooltip to restore removed the onShow
+                              // function and remove this onHide function.
+                              show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
+                              break;
+                            }
+                          }
+                        }
+                      });
+                      $("." + linked_tooltips[index] + ":first").tooltip('show');
+                      display_count++;
+                    }
+                  }
+                }
+              }
             }
           }).show();
         }
+        // Reset to remove ":first" to keep the on click working correctly.
+        if (data['anchorType'] == 'offset') {
+          selector = 'span.overlap-spanning-annotation.' + ent_id;
+          // To enable overlay hover all spans not just first.
+          $(selector).hover(
+            function() {
+              $( selector + ':first' ).tooltip('show');
+            }, function() {
+              $( selector + ':first' ).tooltip('hide');
+            }
+          );
+        }
         $(selector).click(function() {
+          // Hide any active tooltips (sometimes they do not clear).
+          $('.tooltip-f').tooltip('hide');
           var hasMarkup = (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null);
           if ($('#ent_dialog_' + ent_id).length == 0 && hasMarkup) {
             $('#content').append(data['dialogMarkup']);
@@ -217,7 +449,7 @@
           continueSetup();
         },
         error: function(data, status, xhd) {
-          alert("Please Login to site");
+          alert(Drupal.t("Please Login to site"));
         },
         dataType: 'json'
       });

@@ -161,6 +161,10 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
   // Fetches each annotation.
   $annotations = $xml->xpath("//rdf:Description[rdf:type/@rdf:resource = 'http://www.w3.org/ns/oa#Annotation']");
   foreach ($annotations as $annotation) {
+    $id = NULL;
+    $parsed_start = NULL;
+    $parsed_end = NULL;
+    $anchor_type = 'element';
     $body = $annotation->xpath('oa:hasBody/@rdf:resource');
     $body = (string) reset($body);
     $type = $xml->xpath("//rdf:Description[@rdf:about = '$body']/rdf:type[@rdf:resource != 'http://www.w3.org/ns/oa#SemanticTag']/@rdf:resource");
@@ -174,6 +178,28 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $selector = (string) reset($selector);
     $selection = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/rdf:value");
     $selection = (string) reset($selection);
+    // If there is no selection check if it is an overlapping annotation.
+    if (!$selection) {
+      $parse_xpointer = function ($xpointer) {
+        preg_match('!xpointer\(string-range\(//(.*)\[\@(.*)="([^"]+)"\],"",(\d+)\)\)!', $xpointer, $matches);
+        return array_combine(array(
+          'element',
+          'id_attribute',
+          'id',
+          'offset',
+        ), array_slice($matches, 1));
+      };
+      $start_xpointer = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/oa:start");
+      $start_xpointer = (string) reset($start_xpointer);
+      $end_xpointer = $xml->xpath("//rdf:Description[@rdf:about = '$selector']/oa:end");
+      $end_xpointer = (string) reset($end_xpointer);
+      if ($start_xpointer && $end_xpointer) {
+        $anchor_type = 'offset';
+        $id = drupal_html_id('offset');
+        $parsed_start = $parse_xpointer($start_xpointer);
+        $parsed_end = $parse_xpointer($end_xpointer);
+      }
+    }
     $cwrc_info = $annotation->xpath('cw:cwrcInfo');
     $cwrc_info = json_decode((string) reset($cwrc_info));
     $cwrc_attributes = $annotation->xpath('cw:cwrcAttributes');
@@ -227,9 +253,13 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     if (empty($matches)) {
-      continue;
+      if (!$id) {
+        continue;
+      }
     }
-    $id = $matches[1];
+    else {
+      $id = $matches[1];
+    }
     if (!isset($cwrc_info->repository)) {
       $cwrc_info->name = $obj ? $obj->label : $id;
     }
@@ -245,6 +275,11 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         'annotationId' => $id,
         'cwrcType' => $type,
         'cwrcAttributes' => $cwrc_attributes,
+        'anchorType' => $anchor_type,
+        'offsets' => array(
+          'start' => $parsed_start,
+          'end' => $parsed_end,
+        ),
       ),
     );
     $no_dialog_types = array(
