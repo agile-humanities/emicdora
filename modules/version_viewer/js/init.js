@@ -640,6 +640,11 @@
           $('#eui_window').layout('resize', {
             width: '100%'
           });
+          try {
+            Drupal.attachBehaviors();
+          } catch(e) {
+            console.log(e);
+          }
         },
         error: function(xhRequest, ErrorText, thrownError) {
           console.log(ErrorText + ":" + thrownError);

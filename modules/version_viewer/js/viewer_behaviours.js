@@ -1,7 +1,8 @@
 (function ($) {
   Drupal.behaviors.ViewerFullWindow = {
     attach: function (context, settings){
-      $('#wb_max_min').click(function() {
+      $('#wb_max_min').once('viewer-full-window', function () {
+        $(this).click(function() {
         $('#eui_window').toggleClass('eui-window-fullscreen');
         if ($(this).hasClass('win-switch-full')) {
             $('#admin-menu-wrapper').hide();
@@ -37,6 +38,7 @@
             });
           $(window).trigger('resize');
         }
+      });
       });
     }
   };

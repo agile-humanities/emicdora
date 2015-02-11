@@ -29,6 +29,7 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
   drupal_add_js("$module_path/js/init.js");
   drupal_add_js("$module_path/js/viewer_behaviours.js");
+  drupal_add_js("$module_path/js/diplomatic_transcription.js");
   // This is the Shared Canvas prefered jQuery.
   drupal_add_js(
     array(
