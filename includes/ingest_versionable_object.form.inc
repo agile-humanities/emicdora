@@ -292,7 +292,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
   $source = islandora_object_load($values['source']);
   // It must be a Fedora Object.
   if (!$source) {
-    form_error($form['source_ajax_wrapper']['source'], t('Source Object: "@source" is not valid object.', array(
+    form_error($form['source'], t('Source Object: "@source" is not valid object.', array(
       '@source' => $values['source'])));
   }
   else {
@@ -300,7 +300,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
     $sources_valid_models = array_intersect(array_keys($valid_source_types), $source->models);
     // It must be of a valid source type.
     if (empty($sources_valid_models)) {
-      form_error($form['source_ajax_wrapper']['source'], t('Source Object: "@source" must be one of the following types: @types.', array(
+      form_error($form['source'], t('Source Object: "@source" must be one of the following types: @types.', array(
         '@source' => $values['source'],
         '@types' => implode(', ', $valid_source_types))));
     }
