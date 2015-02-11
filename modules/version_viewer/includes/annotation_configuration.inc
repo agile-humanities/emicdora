@@ -89,7 +89,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
   );
   $form['access']['annotation_access_restricted'] = array(
     '#type' => 'radios',
-    '#options' => array(0 => t('Display all annotations.'), 1 => t('Limit the display of annotations to the Users and Roles selected below')),
+    '#options' => array(0 => t('Display all annotations.'), 1 => t('Only display annotations created by the Users and Roles selected below')),
     '#default_value' => intval($is_restricted),
   );
   $form['access']['access_wrapper'] = array(
