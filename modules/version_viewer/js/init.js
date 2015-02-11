@@ -341,7 +341,7 @@
                 }
               } else {
                 // Overlaps need to display other overlaps that collide with it.
-                positions = ['right', 'bottom', 'left'];
+                positions = ['bottom', 'right', 'left'];
                 var data_overlap_attr = $(selector).attr('data-linked-overlaps');
                 if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
                   var linked_tooltips = data_overlap_attr.split(",");
