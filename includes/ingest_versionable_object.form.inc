@@ -400,6 +400,9 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
   $critical_edition = $parents[0]['object']['value'];
 
+  // Inherit source XACML.
+  $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'inheritXacmlFrom', $source->id, RELS_TYPE_URI);
+
   // Link to an existing TEI-RDF Object.
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
