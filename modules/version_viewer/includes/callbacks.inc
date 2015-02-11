@@ -121,8 +121,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
         $owner = user_load_by_name($annotation->owner);
         $owner_roles = isset($owner->roles) ? $owner->roles : array();
         $user_not_in_list = in_array($owner->uid, $users) ? FALSE : TRUE;
-        $allowed_roles = array_intersect($roles, $owner_roles);
-        $roles_not_in_list = empty($allowed_roles);
+        $roles_not_in_list = array_intersect($roles, array_keys($owner_roles)) ? FALSE : TRUE;
         if ($user_not_in_list && $roles_not_in_list) {
           unset($anno_pids['pids'][$key]);
           $size = count($tree_data);

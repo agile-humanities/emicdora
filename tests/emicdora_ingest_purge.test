@@ -49,7 +49,7 @@ class EmicdoraIngestPurgeTestCase extends IslandoraCollectionWebTestCase {
 
     $label = $this->randomName(16);
     $suffix = $this->randomName(16);
-    $collection_pid = 'islandora:' . $suffix;
+    $collection_pid = 'emic:' . $suffix;
     $this->createTestCollection($label, 'islandora:criticalEditionContainerCModel', $collection_pid);
 
     // @todo Set configuration, when one is defined.

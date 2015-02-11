@@ -391,24 +391,22 @@
         $(selector).click(function() {
           // Hide any active tooltips (sometimes they do not clear).
           $('.tooltip-f').tooltip('hide');
-          if ($('#ent_dialog_' + ent_id).length == 0) {
-            if (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null) {
-              $('#content').append(data['dialogMarkup']);
-            }
-            else {
-              $('#content').append('<div id="' + 'ent_dialog_' + ent_id + '">' + build_dialog_content(data) + '</div>');
-            }
+          var hasMarkup = (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null);
+          if ($('#ent_dialog_' + ent_id).length == 0 && hasMarkup) {
+            $('#content').append(data['dialogMarkup']);
           }
-          $('#ent_dialog_' + ent_id).dialog({
-            title: data['cwrcAttributes']['cwrcInfo']['name'],
-            width: 400,
-            height: 200,
-            closed: false,
-            cache: false,
-            resizeable: true,
-            collapsible: true,
-            modal: false
-          });
+          if (hasMarkup) {
+            $('#ent_dialog_' + ent_id).dialog({
+              title: data['cwrcAttributes']['cwrcInfo']['name'],
+              width: 400,
+              height: 200,
+              closed: false,
+              cache: false,
+              resizeable: true,
+              collapsible: true,
+              modal: false
+            });
+          }
         });
       }
       else {

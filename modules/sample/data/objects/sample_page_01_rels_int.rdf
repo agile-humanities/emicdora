@@ -1,14 +1,14 @@
 <rdf:RDF xmlns:islandora="http://islandora.ca/ontology/relsint#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-	<rdf:Description rdf:about="info:fedora/islandora:sample-page-01/JP2">
+	<rdf:Description rdf:about="info:fedora/emic:sample-page-01/JP2">
 		<width xmlns="http://islandora.ca/ontology/relsext#">1112</width>
 		<height xmlns="http://islandora.ca/ontology/relsext#">1640</height>
 	</rdf:Description>
-	<rdf:Description rdf:about="info:fedora/islandora:sample-page-01/JPG">
+	<rdf:Description rdf:about="info:fedora/emic:sample-page-01/JPG">
 		<width xmlns="http://islandora.ca/ontology/relsint#">542</width>
 		<height xmlns="http://islandora.ca/ontology/relsint#">800</height>
 	</rdf:Description>
-	<rdf:Description rdf:about="info:fedora/islandora:sample-page-01/OBJ">
+	<rdf:Description rdf:about="info:fedora/emic:sample-page-01/OBJ">
 		<width xmlns="http://islandora.ca/ontology/relsint#">1112</width>
 		<height xmlns="http://islandora.ca/ontology/relsint#">1640</height>
 	</rdf:Description>

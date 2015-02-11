@@ -2,8 +2,8 @@
 	xmlns:fedora-model="info:fedora/fedora-system:def/model#"
 	xmlns:islandora="http://islandora.ca/ontology/relsext#"
 	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-	<rdf:Description rdf:about="info:fedora/islandora:sample-critical_edition">
+	<rdf:Description rdf:about="info:fedora/emic:sample-critical_edition">
 		<fedora-model:hasModel rdf:resource="info:fedora/islandora:criticalEditionContainerCModel"/>
-		<fedora:isMemberOfCollection rdf:resource="info:fedora/islandora:editions"/>
+		<fedora:isMemberOfCollection rdf:resource="info:fedora/emic:editions"/>
 	</rdf:Description>
 </rdf:RDF>
