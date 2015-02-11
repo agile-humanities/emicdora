@@ -231,8 +231,11 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     if (empty($matches)) {
-      if (!$id) continue;
-    } else {
+      if (!$id) {
+        continue;
+      }
+    }
+    else {
       $id = $matches[1];
     }
     if (!isset($cwrc_info->repository)) {
@@ -261,12 +264,12 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       ),
     );
     $no_dialog_types = array(
-      'http://xmlns.com/foaf/0.1/Image'
+      'http://xmlns.com/foaf/0.1/Image',
     );
     if (!in_array($type, $no_dialog_types)) {
       $entity['attributes']['dialogId'] = "ent_dialog_$id";
-      $entity['attributes']['dialogMarkup'] =
-        versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes);
+      $entity['attributes']['dialogMarkup']
+        = versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes);
       $entity['attributes']['descriptiveNote'] = $descriptive_note;
     }
     $entities[] = $entity;
