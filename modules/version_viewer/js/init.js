@@ -438,8 +438,14 @@
     }
 
     function show_transcription(page) {
-      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=rd';
-      add_tab("wb_reading_tab", url, 'reading_tei');
+      var type = $('#wb_dt').hasClass('img_selected') ? 'dt' : 'rd';
+      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=' + type;
+      if (type = 'dt') {
+        add_tab("wb_dt_tab", url, 'diplomatic_tei');
+      }
+      else {
+        add_tab("wb_reading_tab", url, 'reading_tei');
+      }
       advance_shared_canvas_page(page);
     }
 
