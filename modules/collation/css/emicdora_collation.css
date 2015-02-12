@@ -99,10 +99,13 @@ vertical-align: baseline;
 white-space: nowrap;
 }
 .variant {
-  color: darkolivegreen;
+  color: #4E9258;
+}
+.merged {
+  color: #C11B17;
 }
 .variant_selected {
-  background-color: pink;
+  background-color: lightgray;
 }
 .merged_selected {
   background-color: lightblue;
