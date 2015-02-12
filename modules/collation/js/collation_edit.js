@@ -185,27 +185,27 @@
         $('#versionview-1010-body').mouseup(function(evt) {
           $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
-          text_deleted = selection_deleted.toString();
+          text_deleted = selection_deleted.toHtml();
           if (selection_deleted.toHtml() !== '') {
             context_deleted = selection_deleted.toHtml();
           }
           if (context_deleted.indexOf('<span') === -1) {
             context_deleted = window.getSelection().anchorNode.parentNode.outerHTML;
           }
-          $("#diff_l").text(text_deleted);
+          $("#diff_l").html(text_deleted);
         });
         // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
-          text_added = selection_added.toString();
+          text_added = selection_added.toHtml();
           if (selection_added.toHtml() !== '') {
             context_added = selection_added.toHtml();
           }
           if (context_added.indexOf('<span') === -1) {
             context_added = window.getSelection().anchorNode.parentNode.outerHTML;
           }
-          $("#diff_r").text(text_added);
+          $("#diff_r").html(text_added);
         });
 
         // Add functionality to arrow keys.
