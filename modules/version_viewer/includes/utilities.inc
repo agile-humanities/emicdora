@@ -90,15 +90,32 @@ function versionable_object_viewer_render_transcription($version_pid, AbstractDa
   // be beyond what any user will be capable of.
   $config = version_viewer_get_config($version_pid);
   if ($config && $config->xslt) {
-    $config_xslt_doc = new DOMDocument();
-    $config_xslt_doc->load(file_create_url($config->xslt));
-    $config_xslt = new XSLTProcessor();
-    $config_xslt->importStylesheet($config_xslt_doc);
-    $input->loadXML($result->data);
-    $transform = $config_xslt->transformToDoc($input);
-    if ($transform) {
-      return $transform->saveXML();
+    $file = file_save_data($result->data, file_default_scheme() . '://');
+    $file->status &= ~FILE_STATUS_PERMANENT;
+    $file = file_save($file);
+    $custom_url = url("$tomcat_url/saxon/SaxonServlet", array(
+      'absolute' => TRUE,
+      'external' => TRUE,
+      'query' => array(
+        'style' => $config->xslt,
+        'source' => file_create_url($file->uri),
+        'clear-stylesheet-cache' => 'yes',
+      ),
+    ));
+
+    $custom_result = drupal_http_request($custom_url);
+    if ($custom_result->code == 200) {
+      $result = $custom_result;
     }
+    else {
+      watchdog('versionable_object_viewer', 'Custom XSLT fails. Config info: "@config", PID: "@pid", data: @data', array(
+        '@config' => print_r($config, TRUE),
+        '@pid' => $version_pid,
+        '@data' => $custom_result->data,
+      ), WATCHDOG_WARNING, l(t('view'), "islandora/object/$version_pid"));
+    }
+
+    file_delete($file);
   }
   return $result->data;
 }
