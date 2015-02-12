@@ -66,6 +66,10 @@
           $('#easyui_tree').tree({
             data: data
           });
+          // Resize content.
+          $('#eui_window').layout('resize', {
+            width: '100%'
+          });
         },
         error: function(data, status, xhd) {
         }
@@ -434,8 +438,14 @@
     }
 
     function show_transcription(page) {
-      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=rd';
-      add_tab("wb_reading_tab", url, 'reading_tei');
+      var type = $('#wb_dt').hasClass('img_selected') ? 'dt' : 'rd';
+      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=' + type;
+      if (type = 'dt') {
+        add_tab("wb_dt_tab", url, 'diplomatic_tei');
+      }
+      else {
+        add_tab("wb_reading_tab", url, 'reading_tei');
+      }
       advance_shared_canvas_page(page);
     }
 
@@ -626,6 +636,15 @@
           if (add_class != "") {
             $('#' + type).addClass(add_class);
           }
+          // Resize with new content.
+          $('#eui_window').layout('resize', {
+            width: '100%'
+          });
+          try {
+            Drupal.attachBehaviors();
+          } catch(e) {
+            console.log(e);
+          }
         },
         error: function(xhRequest, ErrorText, thrownError) {
           console.log(ErrorText + ":" + thrownError);
@@ -715,9 +734,7 @@
     // use these method to trigger the resize event.
     $('#eui_window').layout('resize', {
       width: '100%',
-      height: '729px',
+      height: '729px'
     });
-    $('#easy-ui-east').css('height', '623px');
-    $('#easy-ui-west').css('height', '623px');
   });
 })(jQuery);

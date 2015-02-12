@@ -169,11 +169,20 @@
     </dd>
   </xsl:template>
 
-  <xsl:template match="tei:p | tei:note[not(@place='footnote')] | tei:epigraph | tei:label" mode="#all">
+  <xsl:template match="tei:p" mode="#all">
+    <!-- HTML does not allow for nested <p> tags. So only the element <p> should
+         Be a <p> tag. -->
     <p>
       <xsl:call-template name="element_attributes"/>
       <xsl:apply-imports/>
     </p>
+  </xsl:template>
+
+  <xsl:template match="tei:note[not(@place='footnote')] | tei:epigraph | tei:label" mode="#all">
+    <div>
+      <xsl:call-template name="element_attributes"/>
+      <xsl:apply-imports/>
+    </div>
   </xsl:template>
 
   <xsl:template match="tei:zone" mode="#all">
@@ -183,7 +192,7 @@
     </div>
   </xsl:template>
 
-  <xsl:template match="tei:q" mode="#all">
+  <xsl:template match="tei:q | tei:quote" mode="#all">
     <q>
       <xsl:call-template name="element_attributes"/>
       <xsl:apply-templates mode="#current"/>

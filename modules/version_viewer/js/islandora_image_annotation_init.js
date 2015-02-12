@@ -1,12 +1,5 @@
 // Toggle full window shared canvas.
 (function ($) {
-  Drupal.behaviors.islandorAnnoFullWindow = {
-    attach: function (context, settings) {
-      $('#full-window-button').click(function() {
-        window_change_view_size();
-      });
-    }
-  };
   $(document).keyup(function(e) {
     if (e.keyCode == 27) {
       // Only preform the 'ESC' functionality if in full screen.
