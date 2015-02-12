@@ -172,6 +172,10 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
 
   switch ($operation) {
     case 'refresh':
+      // Redirect won't work if destination is set.
+      if (isset($_GET['destination'])) {
+        unset($_GET['destination']);
+      }
       foreach ($mvd['metadata']['resources'] as $transcription) {
         $resource_ids[] = $transcription['id'];
       }
