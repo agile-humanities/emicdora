@@ -117,6 +117,25 @@ function emicdora_calliope_delete_file($pid) {
 }
 
 /**
+ * Deletes Mongo collation records.
+ *
+ * @param string $name
+ *   Name of collation to kill.
+ */
+function emicdora_calliope_delete_collation($name) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  try {
+    $db = emicdora_calliope_create_mongo_db();
+    $collection = $db->selectCollection('collations');
+    $collection->remove(array('emic_data.collation' => $name));
+  }
+  catch (Exception $e) {
+    drupal_add_http_header('Status', '500 Internal server error');
+    echo $e->getMessage();
+    exit;
+  }
+}
+/**
  * Deletes Mongo MVD record.
  *
  * @param string $id
@@ -243,6 +262,7 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
             emicdora_calliope_delete_mvd($mvd['_id']);
           }
           $verb = t('updated');
+          emicdora_calliope_delete_collation($mvd_title);
         }
         // Post new MVD details to db.
         $newmvd = array(
