@@ -7,12 +7,17 @@
   Drupal.behaviors.emicdoraEdit = {
     attach: function(context, settings) {
       var emicdora_counter = 'undeclared';
+      var range_deleted = null;
+      var range_added = null;
+      var selection_deleted = null;
+      var selection_added = null;
       var context_deleted = "";
       var context_added = "";
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
       var variant_selected = false;
+
       function emicdora_get_variants() {
         var raw_variant_map = [];
         var variant_map = [];
@@ -184,7 +189,7 @@
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
           $("#top-label").text($('#combobox-1026-inputEl').val());
-          var selection_deleted = rangy.getSelection();
+          selection_deleted = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_deleted.rangeCount !== 1;
           // If either the start or the end of the selection is outside of this
@@ -192,21 +197,17 @@
           var invalid_anchor = $(selection_deleted.anchorNode).parents('#versionview-1010-body').length !== 1;
           var invalid_focus = $(selection_deleted.focusNode).parents('#versionview-1010-body').length !== 1;
           if (invalid_range || invalid_anchor || invalid_focus) {
+            selection_deleted = null;
             return;
           }
+          range_deleted = selection_deleted._ranges[0]
           text_deleted = selection_deleted.toHtml();
-          if (selection_deleted.toHtml() !== '') {
-            context_deleted = selection_deleted.toHtml();
-          }
-          if (context_deleted.indexOf('<span') === -1) {
-            context_deleted = window.getSelection().anchorNode.parentNode.outerHTML;
-          }
           $("#diff_l").html(text_deleted);
         });
         // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
-          var selection_added = rangy.getSelection();
+          selection_added = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_added.rangeCount !== 1;
           // If either the start or the end of the selection is outside of this
@@ -214,15 +215,11 @@
           var invalid_anchor = $(selection_added.anchorNode).parents('#versionview-1011-body').length !== 1;
           var invalid_focus = $(selection_added.focusNode).parents('#versionview-1011-body').length !== 1;
           if (invalid_range || invalid_anchor || invalid_focus) {
+            selection_added = null;
             return;
           }
+          range_added = selection_added._ranges[0]
           text_added = selection_added.toHtml();
-          if (selection_added.toHtml() !== '') {
-            context_added = selection_added.toHtml();
-          }
-          if (context_added.indexOf('<span') === -1) {
-            context_added = window.getSelection().anchorNode.parentNode.outerHTML;
-          }
           $("#diff_r").html(text_added);
         });
 
@@ -285,6 +282,11 @@
         function execute_callback(args) {
           var all_added;
           var all_deleted;
+
+          if (selection_deleted === null || selection_added === null) {
+            alert(Drupal.t('You must select text from both the left and right panes.'));
+            return;
+          }
           if (args.data.action == 'link' || args.data.action == 'variant') {
             if (text_added.length < 1 || text_deleted.length < 1) {
               alert('Text to link must be selected from both panes.')
@@ -315,24 +317,55 @@
           }
 
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
+          var build_selection = function (range) {
+            var total_offset = function (node, node_offset) {
+              // We need the text offset inside of a given node, so let's
+              // sum up our previous siblings.
+              var total = node_offset;
+              var current = node;
+              while (current.previousSibling != null) {
+                current = current.previousSibling;
+                if (current.nodeType === Node.TEXT_NODE) {
+                  total += current.length;
+                }
+              }
+              return total;
+            };
+            var to_return = {
+              start: {
+                // The ID of the element in which the selection started.
+                id: range.startContainer.parentNode.id,
+                // The number of characters from the beginning of the parent
+                // node, until we hit the start of the selection.
+                offset: total_offset(range.startContainer, range.startOffset)
+              },
+              end: {
+                // The ID of the element in which the selection ended.
+                id: range.endContainer.parentNode.id,
+                // The number of characters from the beginning of the parent
+                // node, until we hit the end of the selection.
+                offset: total_offset(range.endContainer, range.endOffset)
+              }
+            };
+            return to_return;
+          };
           $.ajax({
             url: callback_url,
             type: "POST",
             data: {
               action: args.data.action,
               collation_id: Drupal.settings.collation.collation_name,
-              context_deleted: encodeURIComponent(context_deleted),
               text_deleted: text_deleted,
-              context_added: encodeURIComponent(context_added),
               text_added: text_added,
               merged_content: encodeURIComponent(merged_content),
               all_deleted: all_deleted,
               all_added: all_added,
-              emicdora_counter: emicdora_counter
+              emicdora_counter: emicdora_counter,
+              deleted: build_selection(range_deleted),
+              added: build_selection(range_added)
             },
             async: false,
-            success: function(data, status, xhr) {
-              var results = JSON.parse(data);
+            success: function(results, status, xhr) {
               if (results.hasOwnProperty('message')) {
                 alert(results.message)
               }
@@ -351,11 +384,11 @@
                     ($(this).html($(this).text()));
                   }
                 });
-                context_deleted = '';
-                context_added = '';
                 text_deleted = '';
                 text_added = '';
                 merged_content = '';
+                selection_deleted = null;
+                selection_added = null;
                 $('#merged_text').text("");
                 $('#diff_l').text("");
                 $('#diff_r').text("");

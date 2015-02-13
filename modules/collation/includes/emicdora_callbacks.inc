@@ -11,8 +11,8 @@
 function emicdora_collation_edit() {
   module_load_include('inc', 'collation', 'includes/calliope');
   $config = emicdora_get_config();
-  $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
-  $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
+  $fixed_deleted = "<div id='emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
+  $fixed_added = "<div id='emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $counter = emicdora_cleaned_post('emicdora_counter');
   if ($counter == 'undeclared' || $counter == '') {
@@ -24,8 +24,8 @@ function emicdora_collation_edit() {
     case 'variant':
       $linkage_type = 'variant';
     case 'link':
-      $marshalled_deleted = emicdora_marshall_spans('deleted');
-      $marshalled_added = emicdora_marshall_spans('added');
+      dsm($_POST, 'post');
+      $marshalled_deleted = $marshalled_added = array();
       $merged_deleted = emicdora_check_merged($marshalled_deleted);
       $merged_added = emicdora_check_merged($marshalled_added);
       if ($merged_added || $merged_deleted) {
@@ -35,8 +35,8 @@ function emicdora_collation_edit() {
         );
       }
       else {
-        $new_deleted = emicdora_merge($fixed_deleted, $marshalled_deleted, 'deleted', $linkage_type);
-        $new_added = emicdora_merge($fixed_added, $marshalled_added, 'added', $linkage_type);
+        $new_deleted = emicdora_merge($fixed_deleted, 'deleted', $linkage_type, $counter);
+        $new_added = emicdora_merge($fixed_added, 'added', $linkage_type, $counter);
         $outputs = array(
           'added' => $new_added,
           'deleted' => $new_deleted,
@@ -48,7 +48,7 @@ function emicdora_collation_edit() {
         $results = array(
           'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
           'new_added' => $cleaned_doms['added']->saveXML($added_node),
-          'emicdora_counter' => $_POST['emicdora_counter'] + 1,
+          'emicdora_counter' => $counter + 1,
           'refresh' => 'refresh',
         );
       }
@@ -75,7 +75,7 @@ function emicdora_collation_edit() {
       );
   }
   if (!empty($results)) {
-    echo json_encode($results);
+    drupal_json_output($results);
   }
 }
 
@@ -84,99 +84,160 @@ function emicdora_collation_edit() {
  *
  * @param XML $fixed_content
  *   Current pane contents
- * @param array $marshalled_content
- *   Array of span ids matched to span contents
  * @param string $type
  *   add or delete
  * @param string $linkage_type
  *   'merge' or 'variant'
+ * @param int $counter
+ *   The "ID number" of this merge operation.
  *
  * @return XML
  *   Revised content
  */
-function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_type) {
-  $identified_text = emicdora_cleaned_post("text_$type");
-  $created_elements = array();
-  $counter = emicdora_cleaned_post('emicdora_counter');
-  if ($counter == 'undeclared') {
-    $counter = emicdora_get_counter();
-  }
+function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $prefix = $type[0];
   $config = emicdora_get_config();
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
-  $nodes_to_delete = array();
 
-  foreach ($marshalled_content as $data) {
-    $id = $data['id'];
-    $node = $dom->getElementById($id);
-    if ($node) {
-      $current = emicdora_get_innerHTML($node);
-      $selected = $data['text'];
-      if (strlen($identified_text) < strlen($selected)) {
-        $selected = $identified_text;
-      }
+  $range_info = $_POST[$type];
 
-      if ($current == $selected) {
-        $nodes_to_delete[$id] = $node;
-        continue;
-      }
-      if ($current != $selected) {
-        $nodes_to_delete[$id] = $node;
-        $string_parts = explode($selected, $current);
-        $count = count($string_parts);
-        if ($count == 1) {
-          $new_value = $string_parts[0];
-          // Orphan only.
-          $new_id = "{$prefix}oo{$counter}";
-          $element = emicdora_create_span($dom, $new_value, $data['class'], $new_id);
-          if (emicdora_ends_with($current, $selected)) {
-            // Inserted before current.
-            $refnode = $node;
-          }
-          else {
-            $refnode = $node->nextSibling;
-          }
-          $refnode->parentNode->insertBefore($element, $refnode);
+  $find_text_node = function ($node_info) use ($dom) {
+    //dsm($node_info, 'node info');
+    $remaining = $node_info['offset'];
+    $element = $dom->getElementById($node_info['id']);
+    //dsm($element, 'el');
+    foreach ($element->childNodes as $child) {
+      //dsm($child, 'c');
+      if ($child->nodeType === XML_TEXT_NODE) {
+        $length = drupal_strlen($child->nodeValue);
+        //dsm($length, 'l');
+        if ($remaining >= $length) {
+          $remaining -= $length;
+          //dsm($remaining, 'rem');
         }
         else {
-          $prefix_text = emicdora_ends_with($current, $selected) ? substr($current, 0, -strlen($selected)) : reset($string_parts);
-          $suffix_text = emicdora_starts_with($current, $selected) ? substr($current, strlen($selected)) : end($string_parts);
-
-          // Orphan prefix.
-          $prefix_id = "{$prefix}opref{$counter}";
-          if (in_array($prefix_id, $created_elements)) {
-            $prefix_id .= '-b';
-          }
-          $created_elements[] = $prefix_id;
-          $first_element = emicdora_create_span($dom, $prefix_text, $data['class'], $prefix_id);
-          $node->parentNode->insertBefore($first_element, $node);
-          // Orphan suffix.
-          $suffix_id = "{$prefix}osuf{$prefix}{$counter}";
-          if (in_array($suffix_id, $created_elements)) {
-            $suffix_id .= '-b';
-          }
-          $created_elements[] = $suffix_id;
-          $second_element = emicdora_create_span($dom, $suffix_text, $data['class'], $suffix_id);
-          $node->parentNode->insertBefore($second_element, $node->nextSibling);
+          return array(
+            'remaining' => $remaining,
+            'node' => $child,
+          );
         }
       }
     }
+    if ($remaining === 0) {
+      $get_next_text_node = function (DOMNode $node) {
+        foreach ($node->nextSibling->childNodes as $child) {
+          if ($child->nodeType === XML_TEXT_NODE) {
+            return $child;
+          }
+        }
+        throw new Exception('Next node fallback failed.');
+      };
+      return array(
+        'remaining' => $remaining,
+        'node' => $get_next_text_node($element),
+      );
+    }
+    throw new Exception('Failed to find text node.');
+  };
+
+
+  $start_location_info = $range_info['start'];
+  $start_info = $find_text_node($start_location_info);
+  //dsm($start_info, 'start');
+  $start_suffix = drupal_strlen($start_info['node']->nodeValue) === $start_info['remaining'] ?
+    $start_info['node'] :
+    $start_info['node']->splitText($start_info['remaining']);
+  $end_location_info = $range_info['end'];
+  $end_info = $find_text_node($end_location_info);
+  //dsm($end_info, 'end');
+  $end_suffix = drupal_strlen($end_info['node']->nodeValue) === $end_info['remaining'] ?
+    NULL :
+    $end_info['node']->splitText($end_info['remaining']);
+
+  $content_id = "{$prefix}e{$counter}";
+  $replacements = array();
+  $replacements['prefix'] = $dom->createElement('span');
+  $replacements['prefix']->setAttribute('id', "{$prefix}opref{$counter}e{$content_id}");
+  $replacements['content'] = $dom->createElement('span');
+  $replacements['content']->setAttribute('id', $content_id);
+  $replacements['content']->setAttribute('class', $linkage_type);
+  $replacements['content']->setAttribute("data-$linkage_type", $counter);
+  $replacements['suffix'] = $dom->createElement('span');
+  $replacements['suffix']->setAttribute('id', "{$prefix}osuf{$counter}e{$content_id}");
+
+  $found_start = FALSE;
+  $found_end = FALSE;
+  $to_nuke = array();
+  $start_node = $start_suffix;
+  $end_node = $end_info['node'];
+  $replacement_nodes = array(
+    'prefix' => array(),
+    'content' => array(),
+    'suffix' => array(),
+  );
+  $traverse_container = function (DOMNodeList $nodes) use (&$replacement_nodes, &$found_start, &$found_end, $start_node, $end_node) {
+    foreach ($nodes as $node) {
+      $found_start = $found_start || $start_node->isSameNode($node);
+
+      if (!$found_start) {
+        $replacement_nodes['prefix'][] = $node;
+      }
+      elseif ($found_start && !$found_end) {
+        $replacement_nodes['content'][] = $node;
+      }
+      elseif ($found_start && $found_end) {
+        $replacement_nodes['suffix'][] = $node;
+      }
+
+      $found_end = $found_end || ($found_start && $end_node->isSameNode($node));
+    }
+  };
+  $traverse = function (DOMElement $element) use (&$found_end, $traverse_container, &$to_nuke) {
+    $current = $element;
+    while (!$found_end && $current->nextSibling !== NULL) {
+      $traverse_container($current->childNodes);
+      $to_nuke[] = $current;
+      if ($current->nextSibling === NULL) {
+        if (!$found_end) {
+          // Ran out of elements!?
+          throw new Exception('Kaboom!');
+        }
+        break;
+      }
+      do {
+        $current = $current->nextSibling;
+      } while ($current->childNodes === NULL);
+    }
+  };
+  $traverse($start_suffix->parentNode);
+
+  foreach ($replacement_nodes as $type_thing => $nodes) {
+    foreach($nodes as $node) {
+    dsm($dom->saveHTML($node), 'asf');
+    }
+    array_map(array($replacements[$type_thing], 'appendChild'), $nodes);
   }
-  $new_element = $dom->createElement('span', $identified_text);
-  $fresh_id = "{$prefix}e{$counter}";
-  $new_element->setAttribute('id', $fresh_id);
-  $new_element->setAttribute('class', $linkage_type);
-  $new_element->setAttribute("data-$linkage_type", $counter);
-  if (!isset($refnode)) {
-    $refnode = reset($nodes_to_delete);
-  }
+
+  $first_nuked = reset($to_nuke);
   $wrapper_node = $dom->getElementById($config[$type]);
-  $refnode->parentNode->insertBefore($new_element, $refnode);
-  foreach ($nodes_to_delete as $victim) {
-    $victim->parentNode->removeChild($victim);
+  dsm($dom->saveHTML($wrapper_node), 'all');
+  dsm($dom->saveHTML($first_nuked), 'replacement');
+  foreach ($replacements as $type_thing => &$node) {
+    dsm($dom->saveHTML($node), $type_thing);
   }
-  return $dom->saveXML($wrapper_node);
+  foreach ($replacements as $type_thing => &$node) {
+    if ($node->hasChildNodes()) {
+    dsm($dom->saveHTML($node), $type_thing);
+      $node = $first_nuked->parentNode->insertBefore($node, $first_nuked);
+    }
+  }
+  foreach ($to_nuke as $nuke) {
+    $nuke->parentNode->removeChild($nuke);
+  }
+
+  $wrapper_node = $dom->getElementById($config[$type]);
+  return $dom->saveHTML($wrapper_node);
 }
 
 /**
