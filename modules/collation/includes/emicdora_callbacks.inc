@@ -163,7 +163,7 @@ function emicdora_merge($fixed_content, $marshalled_content, $type, $linkage_typ
       }
     }
   }
-  $new_element = $dom->createElement('span', $identified_text);
+  $new_element = $dom->createElement('span', strip_tags($identified_text, '<br>'));
   $fresh_id = "{$prefix}e{$counter}";
   $new_element->setAttribute('id', $fresh_id);
   $new_element->setAttribute('class', $linkage_type);
