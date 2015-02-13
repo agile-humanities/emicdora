@@ -49,8 +49,8 @@ function collation_menu() {
       'title' => 'Collation',
       'page callback' => 'emicdora_mvd_crud',
       'type' => MENU_CALLBACK,
-      'access callback' => 'user_access',
-      'access arguments' => array(COLLATION_EDIT_COLLATION),
+      'access callback' => 'emicdora_mvd_crud_access_callback',
+      'access arguments' => array(3, 5),
       'file' => 'includes/mvd.inc',
     ),
     'islandora/object/%islandora_object/compare' => array(
@@ -103,6 +103,22 @@ function collation_menu() {
       'access arguments' => array(ISLANDORA_PURGE, 1),
     ),
   );
+}
+
+/**
+ * Checks if the user can perform the given action.
+ */
+function emicdora_mvd_crud_access_callback($pid, $operation) {
+  $perms = array(
+    'refresh' => COLLATION_EDIT_COLLATION,
+    'bulk_delete' => COLLATION_EDIT_COLLATION,
+    'delete' => COLLATION_EDIT_COLLATION,
+    'compare' => ISLANDORA_VIEW_OBJECTS,
+    'apparatus' => ISLANDORA_VIEW_OBJECTS,
+    'list' => ISLANDORA_VIEW_OBJECTS,
+  );
+  $object = islandora_object_load($pid);
+  return isset($perms[$operation]) && islandora_object_access_callback($perms[$operation], $object);
 }
 
 /**
