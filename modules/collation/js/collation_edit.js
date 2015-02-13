@@ -184,7 +184,16 @@
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
           $("#top-label").text($('#combobox-1026-inputEl').val());
-          selection_deleted = rangy.getSelection();
+          var selection_deleted = rangy.getSelection();
+          // If multiple ranges ignore the selection.
+          var invalid_range = selection_deleted.rangeCount !== 1;
+          // If either the start or the end of the selection is outside of this
+          // panel ignore it.
+          var invalid_anchor = $(selection_deleted.anchorNode).parents('#versionview-1010-body').length !== 1;
+          var invalid_focus = $(selection_deleted.focusNode).parents('#versionview-1010-body').length !== 1;
+          if (invalid_range || invalid_anchor || invalid_focus) {
+            return;
+          }
           text_deleted = selection_deleted.toHtml();
           if (selection_deleted.toHtml() !== '') {
             context_deleted = selection_deleted.toHtml();
@@ -197,7 +206,16 @@
         // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
           $("#bottom-label").text($('#combobox-1027-inputEl').val());
-          selection_added = rangy.getSelection();
+          var selection_added = rangy.getSelection();
+          // If multiple ranges ignore the selection.
+          var invalid_range = selection_added.rangeCount !== 1;
+          // If either the start or the end of the selection is outside of this
+          // panel ignore it.
+          var invalid_anchor = $(selection_added.anchorNode).parents('#versionview-1011-body').length !== 1;
+          var invalid_focus = $(selection_added.focusNode).parents('#versionview-1011-body').length !== 1;
+          if (invalid_range || invalid_anchor || invalid_focus) {
+            return;
+          }
           text_added = selection_added.toHtml();
           if (selection_added.toHtml() !== '') {
             context_added = selection_added.toHtml();
