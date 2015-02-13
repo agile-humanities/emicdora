@@ -128,7 +128,6 @@ function collation_menu_breadcrumb_alter(array &$active_trail, array $item) {
 function collation_admin_paths() {
   // Show contextual link pages as overlays.
   return array(
-    'collation/*/refresh/*/*' => TRUE,
     'collation/*/delete/*/*' => TRUE,
   );
 }
