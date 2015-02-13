@@ -159,6 +159,7 @@ function islandora_emicdora_add_transcription_form_validate($form, $form_state) 
       $transcription_data = array_merge($transcription_data, $version_data);
     }
   }
+  $current_transcriptions = array();
   foreach ($transcription_data as $pid => $values) {
     foreach ($values as $value) {
       $current_transcriptions[] = $value['label'];

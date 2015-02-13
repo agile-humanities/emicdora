@@ -1069,10 +1069,13 @@ function emicdora_block_view($delta = '') {
       }
       // Only show the transcriptions content if viewing the version viewer or
       // the markup editor.
-      if ($is_tei_editor || isset($versionable_object->id)) {
-
+      if ($is_tei_editor || $is_transcript || isset($versionable_object->id)) {
         module_load_include('inc', 'emicdora', 'includes/utilities');
-        $versions = emicdora_get_raw_objects($critical_edition, 'version');
+        // If viewing a transcript, the versionable object is not in the url, so
+        // we need to fetch it.
+        if ($is_transcript) {
+          $versionable_object = emicdora_get_transcription_version($nested_object);
+        }
         // Only show transcriptions relevant to the version we are on.
         $transcription_data = emicdora_get_raw_objects($versionable_object, 'transcriptions');
         $links = array();
@@ -1092,22 +1095,12 @@ function emicdora_block_view($delta = '') {
           '#theme' => 'links',
           '#links' => $links,
         );
-        if ($is_versionable_object) {
-          $block['content']['#contextual_links'] = array(
-            'emicdora' => array(
-              'emicdora/contextual-links/transcription',
-              array($versionable_object->id),
-            ),
-          );
-        }
-        if ($is_transcript) {
-          $block['content']['#contextual_links'] = array(
-            'emicdora' => array(
-              "emicdora/contextual-links/transcription/$transcript_pid/edit",
-              array($transcript_pid),
-            ),
-          );
-        }
+        $block['content']['#contextual_links'] = array(
+          'emicdora' => array(
+            'emicdora/contextual-links/transcription',
+            array($versionable_object->id),
+          ),
+        );
       }
       break;
   }
