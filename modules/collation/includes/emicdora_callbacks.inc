@@ -26,8 +26,8 @@ function emicdora_collation_edit() {
     case 'link':
       $marshalled_deleted = emicdora_marshall_spans('deleted');
       $marshalled_added = emicdora_marshall_spans('added');
-      $merged_deleted = emicdora_check_merged($marshalled_deleted);
-      $merged_added = emicdora_check_merged($marshalled_added);
+      $merged_deleted = emicdora_check_input_classes($marshalled_deleted);
+      $merged_added = emicdora_check_input_classes($marshalled_added);
       if ($merged_added || $merged_deleted) {
         $results = array(
           'message' => t("You have associated text in your selection.  Please unlink before resubmitting."),
@@ -534,18 +534,19 @@ function emicdora_create_span($dom, $contents, $class_name, $prefix) {
 }
 
 /**
- * Tests input array for merged class.
+ * Test input array for undesired class.
  *
  * @param array $input_array
  *   Array to be tested
  *
  * @return bool
- *   TRUE is merged class is found
+ *   TRUE if merged and/or variant classes are found.
  */
-function emicdora_check_merged($input_array) {
+function emicdora_check_input_classes($input_array) {
   $merged = FALSE;
   foreach ($input_array as $candidate) {
-    if ($candidate['class'] == 'merged' || $candidate['class'] == 'variant') {
+    $classes = explode(' ', $candidate['class']);
+    if (array_intersect($classes, array('merged', 'variant'))) {
       $merged = TRUE;
       break;
     }
