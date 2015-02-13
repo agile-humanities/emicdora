@@ -289,7 +289,7 @@ function emicdora_unlink($fixed_content, $type) {
  *   Decoded input
  */
 function emicdora_cleaned_post($term) {
-  return (isset($_POST[$term])) ? urldecode(filter_xss($_POST[$term])) : '';
+  return urldecode(filter_input(INPUT_POST, $term));
 }
 
 /**
@@ -565,7 +565,7 @@ function emicdora_check_merged($input_array) {
 function emicdora_get_innerHTML($element) {
   $html = '';
   foreach ($element->childNodes as $child) {
-    $html .= $child->ownerDocument->saveXML($child);
+    $html .= $child->ownerDocument->saveHTML($child);
   }
   return $html;
 }
