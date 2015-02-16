@@ -160,10 +160,9 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   // present should not affect the size of the set. We exploit this to perform
   // a set intersection here.
   // @see http://stackoverflow.com/q/7178471
-  $query = "$start_xpath/following::node()[count(. | $end_xpath/preceding::node()) = count($end_xpath/preceding::node()) and (contains(@class, 'merged') or contains(@class, 'variant'))]";
+  $query = "($start_xpath/following::node()[count(. | $end_xpath/preceding::node()) = count($end_xpath/preceding::node())] | $start_xpath/.. | $end_xpath/..)[(contains(@class, 'merged') or contains(@class, 'variant'))]";
   $overlapping_nodes = $xpath->query($query);
   if ($overlapping_nodes->length > 0) {
-    $dump('overlap', $overlapping_nodes);
     throw new CollationSelectionOverlapException(t('The "@type" selection overlaps with an existing merged or variant tag. Unlink the existing tag as necessary.', array(
       '@type' => $type,
     )));
