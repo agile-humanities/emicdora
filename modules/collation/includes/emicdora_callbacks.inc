@@ -24,17 +24,7 @@ function emicdora_collation_edit() {
     case 'variant':
       $linkage_type = 'variant';
     case 'link':
-      dsm($_POST, 'post');
-      $marshalled_deleted = $marshalled_added = array();
-      $merged_deleted = emicdora_check_merged($marshalled_deleted);
-      $merged_added = emicdora_check_merged($marshalled_added);
-      if ($merged_added || $merged_deleted) {
-        $results = array(
-          'message' => t("You have associated text in your selection.  Please unlink before resubmitting."),
-          'emicdora_counter' => $_POST['emicdora_counter'],
-        );
-      }
-      else {
+      try {
         $new_deleted = emicdora_merge($fixed_deleted, 'deleted', $linkage_type, $counter);
         $new_added = emicdora_merge($fixed_added, 'added', $linkage_type, $counter);
         $outputs = array(
@@ -50,6 +40,12 @@ function emicdora_collation_edit() {
           'new_added' => $cleaned_doms['added']->saveXML($added_node),
           'emicdora_counter' => $counter + 1,
           'refresh' => 'refresh',
+        );
+      }
+      catch (CollationException $e) {
+        $results = array(
+          'message' => $e->getMessage(),
+          'emicdora_counter' => $counter,
         );
       }
       break;
@@ -103,18 +99,13 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $range_info = $_POST[$type];
 
   $find_text_node = function ($node_info) use ($dom) {
-    //dsm($node_info, 'node info');
     $remaining = $node_info['offset'];
     $element = $dom->getElementById($node_info['id']);
-    //dsm($element, 'el');
     foreach ($element->childNodes as $child) {
-      //dsm($child, 'c');
       if ($child->nodeType === XML_TEXT_NODE) {
         $length = drupal_strlen($child->nodeValue);
-        //dsm($length, 'l');
         if ($remaining >= $length) {
           $remaining -= $length;
-          //dsm($remaining, 'rem');
         }
         else {
           return array(
@@ -125,32 +116,36 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
       }
     }
     if ($remaining === 0) {
+      // XXX: The selection provided from the client side "rangy" code can
+      // point to the very end of an element, which means that you could end up
+      // selecting an empty text node which is actually outside the selection,
+      // so let's instead try to point at the next text node. NOTE: This needs
+      // to be tested for how it works at the /end/ of the selection... likely
+      // end up in the next span...
       $get_next_text_node = function (DOMNode $node) {
         foreach ($node->nextSibling->childNodes as $child) {
           if ($child->nodeType === XML_TEXT_NODE) {
             return $child;
           }
         }
-        throw new Exception('Next node fallback failed.');
+        throw new CollationException('Next node fallback failed.');
       };
       return array(
         'remaining' => $remaining,
         'node' => $get_next_text_node($element),
       );
     }
-    throw new Exception('Failed to find text node.');
+    throw new CollationException('Failed to find text node.');
   };
 
 
   $start_location_info = $range_info['start'];
   $start_info = $find_text_node($start_location_info);
-  //dsm($start_info, 'start');
   $start_suffix = drupal_strlen($start_info['node']->nodeValue) === $start_info['remaining'] ?
     $start_info['node'] :
     $start_info['node']->splitText($start_info['remaining']);
   $end_location_info = $range_info['end'];
   $end_info = $find_text_node($end_location_info);
-  //dsm($end_info, 'end');
   $end_suffix = drupal_strlen($end_info['node']->nodeValue) === $end_info['remaining'] ?
     NULL :
     $end_info['node']->splitText($end_info['remaining']);
@@ -166,6 +161,25 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $replacements['suffix'] = $dom->createElement('span');
   $replacements['suffix']->setAttribute('id', "{$prefix}osuf{$counter}e{$content_id}");
 
+  $xpath = new DOMXPath($dom);
+  $start_xpath = $start_suffix->getNodePath();
+  $end_xpath = $end_info['node']->getNodePath();
+  $query = "//div[@id='emidora_$type']//span[following::*[$start_xpath] and preceding::*[$end_xpath] and (contains(@class, 'merged') or contains(@class, 'variant'))]";
+  $overlapping_nodes = $xpath->query($query);
+  dsm($query);
+  $dump = function($name, $nodelist) {
+    dsm($name);
+    foreach ($nodelist as $node) {
+      dsm($node->ownerDocument->saveHTML($node), $name);
+    }
+  };
+  if ($overlapping_nodes->length > 0) {
+    $dump('overlap', $overlapping_nodes);
+    throw new CollationSelectionOverlapException(t('The "@type" selection overlaps with an existing merged or variant tag. Unlink the existing tag as necessary.', array(
+      '@type' => $type,
+    )));
+  }
+
   $found_start = FALSE;
   $found_end = FALSE;
   $to_nuke = array();
@@ -176,6 +190,13 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     'content' => array(),
     'suffix' => array(),
   );
+  $prefix_nodes = $xpath->query("preceding-sibling::* | preceding-sibling::text()", $start_node);
+  $content_nodes = $xpath->query("$start_xpath/following::node()[count(. | $end_xpath/preceding::node()) = count($end_xpath/preceding::node())] | $start_xpath | $end_xpath");
+  $suffix_nodes = $xpath->query("following-sibling::* | following-sibling::text()", $end_node);
+  $dump('prefix', $prefix_nodes);
+  $dump('content', $content_nodes);
+  $dump('suffix', $suffix_nodes);
+
   $traverse_container = function (DOMNodeList $nodes) use (&$replacement_nodes, &$found_start, &$found_end, $start_node, $end_node) {
     foreach ($nodes as $node) {
       $found_start = $found_start || $start_node->isSameNode($node);
@@ -214,7 +235,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
 
   foreach ($replacement_nodes as $type_thing => $nodes) {
     foreach($nodes as $node) {
-    dsm($dom->saveHTML($node), 'asf');
+    dsm($dom->saveHTML($node), $type_thing);
     }
     array_map(array($replacements[$type_thing], 'appendChild'), $nodes);
   }
@@ -262,46 +283,6 @@ function emicdora_fix_calliope($spans, $type) {
     }
   }
   return implode('', $repaired);
-}
-
-/**
- * Pairs content with identified span tags.
- *
- * @param string $type
- *   'added' or 'deleted'
- *
- * @return array
- *   Associative array id => content
- */
-function emicdora_marshall_spans($type) {
-  $input = emicdora_cleaned_post("context_$type");
-  $tagname = "span";
-  $pattern = "/<$tagname ?.*>(.*)<\/$tagname>/";
-  preg_match($pattern, $input, $matches);
-  if (isset($matches[0])) {
-    $input = $matches[0];
-  }
-  $spans = array_filter(explode('</span>', $input));
-  $marshalled_spans = array();
-  foreach ($spans as $candidate) {
-    // @codingStandardsIgnoreStart
-    $fixed_span = str_replace('<br>', '<br />', $candidate) . '</span>';
-    // @codingStandardsIgnoreEnd
-    $dom = new DOMDocument();
-    $dom->loadXML($fixed_span);
-    $items = $dom->getElementsByTagName('span');
-    $id = $items->item(0)->getAttribute('id');
-    $class = $items->item(0)->getAttribute('class');
-    $text_value = emicdora_get_innerHTML($items->item(0));
-    if ($text_value) {
-      $marshalled_spans[] = array(
-        'id' => $id,
-        'text' => $text_value,
-        'class' => $class,
-      );
-    }
-  }
-  return $marshalled_spans;
 }
 
 /**
@@ -532,101 +513,5 @@ function emicdora_get_config() {
   );
 }
 
-/**
- * Determine if one string matches the start of another.
- *
- * @param string $haystack
- *   String being searched
- * @param string $needle
- *   Substring being compared
- *
- * @return bool
- *   TRUE for match, FALSE for not
- */
-function emicdora_starts_with($haystack, $needle) {
-  return $needle === "" || strpos($haystack, $needle) === 0;
-}
-
-/**
- * Determine if one string matches the end of another.
- *
- * @param string $haystack
- *   String being searched
- * @param string $needle
- *   Substring being compared
- *
- * @return bool
- *   TRUE for match, FALSE for not
- */
-function emicdora_ends_with($haystack, $needle) {
-  return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
-}
-
-/**
- * Creates new DomElement.
- *
- * @param DOMDocument $dom
- *   Representation of current panel
- * @param string $contents
- *   Contents of new element
- * @param string $class_name
- *   class attribute for new element
- * @param string $prefix
- *   'a' or 'd'
- *
- * @return DOMElement
- *   New element
- */
-function emicdora_create_span($dom, $contents, $class_name, $prefix) {
-  // The collation viewer doesn't handle xhtml break tags well.
-  // @codingStandardsIgnoreStart
-  $contents = str_replace('<br/>', '<br>', $contents);
-  // @codingStandardsIgnoreEnd
-  $new_element = $dom->createElement('span', $contents);
-  $counter = emicdora_cleaned_post('emicdora_counter');
-  if ($counter == 'undeclared') {
-    $counter = emicdora_get_counter();
-  }
-  $_POST['emicdora_counter'] = $counter;
-  $fresh_id = "{$prefix}e{$counter}";
-  $new_element->setAttribute('id', $fresh_id);
-  $new_element->setAttribute('class', $class_name);
-  return $new_element;
-}
-
-/**
- * Tests input array for merged class.
- *
- * @param array $input_array
- *   Array to be tested
- *
- * @return bool
- *   TRUE is merged class is found
- */
-function emicdora_check_merged($input_array) {
-  $merged = FALSE;
-  foreach ($input_array as $candidate) {
-    if ($candidate['class'] == 'merged' || $candidate['class'] == 'variant') {
-      $merged = TRUE;
-      break;
-    }
-  }
-  return $merged;
-}
-
-/**
- * Gets innerHTML of DOMElement.
- *
- * @param DOMElement $element
- *   Element being examined
- *
- * @return string
- *   InnerHTML
- */
-function emicdora_get_innerHTML($element) {
-  $html = '';
-  foreach ($element->childNodes as $child) {
-    $html .= $child->ownerDocument->saveHTML($child);
-  }
-  return $html;
-}
+class CollationException extends Exception {}
+class CollationSelectionOverlapException extends CollationException {}
