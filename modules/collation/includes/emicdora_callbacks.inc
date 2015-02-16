@@ -99,6 +99,10 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $range_info = $_POST[$type];
 
   $find_text_node = function ($node_info) use ($dom) {
+    // Iterate over text nodes in the given element until we find the one in
+    // which our offset occurs.
+    // XXX: Very much based on the overlapping entities work, for the
+    // "versionable object viewer".
     $remaining = $node_info['offset'];
     $element = $dom->getElementById($node_info['id']);
     foreach ($element->childNodes as $child) {
@@ -115,26 +119,6 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
         }
       }
     }
-    if ($remaining === 0) {
-      // XXX: The selection provided from the client side "rangy" code can
-      // point to the very end of an element, which means that you could end up
-      // selecting an empty text node which is actually outside the selection,
-      // so let's instead try to point at the next text node. NOTE: This needs
-      // to be tested for how it works at the /end/ of the selection... likely
-      // end up in the next span...
-      $get_next_text_node = function (DOMNode $node) {
-        foreach ($node->nextSibling->childNodes as $child) {
-          if ($child->nodeType === XML_TEXT_NODE) {
-            return $child;
-          }
-        }
-        throw new CollationException('Next node fallback failed.');
-      };
-      return array(
-        'remaining' => $remaining,
-        'node' => $get_next_text_node($element),
-      );
-    }
     throw new CollationException('Failed to find text node.');
   };
 
@@ -149,7 +133,14 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $end_suffix = drupal_strlen($end_info['node']->nodeValue) === $end_info['remaining'] ?
     NULL :
     $end_info['node']->splitText($end_info['remaining']);
+  $start_node = $start_suffix;
+  $end_node = $end_info['node'];
 
+  // Build up spans which will replace those whose text we are "merging".
+  // "prefix", meaning those in the starting span but outside the selection,
+  // "content", meaning the selection and,
+  // "suffix", meaning those nodes in the ending span, but outside the
+  // selection.
   $content_id = "{$prefix}e{$counter}";
   $replacements = array();
   $replacements['prefix'] = $dom->createElement('span');
@@ -162,17 +153,15 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $replacements['suffix']->setAttribute('id', "{$prefix}osuf{$counter}e{$content_id}");
 
   $xpath = new DOMXPath($dom);
-  $start_xpath = $start_suffix->getNodePath();
-  $end_xpath = $end_info['node']->getNodePath();
-  $query = "//div[@id='emidora_$type']//span[following::*[$start_xpath] and preceding::*[$end_xpath] and (contains(@class, 'merged') or contains(@class, 'variant'))]";
+  $start_xpath = $start_node->getNodePath();
+  $end_xpath = $end_node->getNodePath();
+
+  // XXX: Some XPath magic... Unioning a node into a set in which it is already
+  // present should not affect the size of the set. We exploit this to perform
+  // a set intersection here.
+  // @see http://stackoverflow.com/q/7178471
+  $query = "$start_xpath/following::node()[count(. | $end_xpath/preceding::node()) = count($end_xpath/preceding::node()) and (contains(@class, 'merged') or contains(@class, 'variant'))]";
   $overlapping_nodes = $xpath->query($query);
-  dsm($query);
-  $dump = function($name, $nodelist) {
-    dsm($name);
-    foreach ($nodelist as $node) {
-      dsm($node->ownerDocument->saveHTML($node), $name);
-    }
-  };
   if ($overlapping_nodes->length > 0) {
     $dump('overlap', $overlapping_nodes);
     throw new CollationSelectionOverlapException(t('The "@type" selection overlaps with an existing merged or variant tag. Unlink the existing tag as necessary.', array(
@@ -182,32 +171,33 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
 
   $found_start = FALSE;
   $found_end = FALSE;
+  // Track those spans whose content is being slotted into one of our three.
   $to_nuke = array();
-  $start_node = $start_suffix;
-  $end_node = $end_info['node'];
   $replacement_nodes = array(
     'prefix' => array(),
     'content' => array(),
     'suffix' => array(),
   );
-  $prefix_nodes = $xpath->query("preceding-sibling::* | preceding-sibling::text()", $start_node);
-  $content_nodes = $xpath->query("$start_xpath/following::node()[count(. | $end_xpath/preceding::node()) = count($end_xpath/preceding::node())] | $start_xpath | $end_xpath");
-  $suffix_nodes = $xpath->query("following-sibling::* | following-sibling::text()", $end_node);
-  $dump('prefix', $prefix_nodes);
-  $dump('content', $content_nodes);
-  $dump('suffix', $suffix_nodes);
 
   $traverse_container = function (DOMNodeList $nodes) use (&$replacement_nodes, &$found_start, &$found_end, $start_node, $end_node) {
+    // Traverse /inside/ the containing elements, slotting the content into one
+    // of our three spans accordingly.
+
+    // XXX: Yes, this could be done with XPath, though due to "missing" set
+    // operations in XPath 1.0, it gets very messy.
     foreach ($nodes as $node) {
       $found_start = $found_start || $start_node->isSameNode($node);
 
       if (!$found_start) {
+        // Initially, thing go into "prefix".
         $replacement_nodes['prefix'][] = $node;
       }
       elseif ($found_start && !$found_end) {
+        // When we've found our starting node, we've found our content.
         $replacement_nodes['content'][] = $node;
       }
       elseif ($found_start && $found_end) {
+        // And when we've hit our end node, our content has been exhausted.
         $replacement_nodes['suffix'][] = $node;
       }
 
@@ -215,14 +205,15 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     }
   };
   $traverse = function (DOMElement $element) use (&$found_end, $traverse_container, &$to_nuke) {
+    // Traverse across the "containing" elements... Should be the spans
+    // themselves.
     $current = $element;
     while (!$found_end && $current->nextSibling !== NULL) {
       $traverse_container($current->childNodes);
       $to_nuke[] = $current;
       if ($current->nextSibling === NULL) {
         if (!$found_end) {
-          // Ran out of elements!?
-          throw new Exception('Kaboom!');
+          throw new Exception(t('Ran out of elements before finding ending text node.'));
         }
         break;
       }
@@ -234,26 +225,19 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $traverse($start_suffix->parentNode);
 
   foreach ($replacement_nodes as $type_thing => $nodes) {
-    foreach($nodes as $node) {
-    dsm($dom->saveHTML($node), $type_thing);
-    }
     array_map(array($replacements[$type_thing], 'appendChild'), $nodes);
   }
 
+  // We use the first affected span to know where to locate where in the
+  // document our replacement spans should go.
   $first_nuked = reset($to_nuke);
-  $wrapper_node = $dom->getElementById($config[$type]);
-  dsm($dom->saveHTML($wrapper_node), 'all');
-  dsm($dom->saveHTML($first_nuked), 'replacement');
-  foreach ($replacements as $type_thing => &$node) {
-    dsm($dom->saveHTML($node), $type_thing);
-  }
   foreach ($replacements as $type_thing => &$node) {
     if ($node->hasChildNodes()) {
-    dsm($dom->saveHTML($node), $type_thing);
       $node = $first_nuked->parentNode->insertBefore($node, $first_nuked);
     }
   }
   foreach ($to_nuke as $nuke) {
+    // Nuke all the "replaced" spans.
     $nuke->parentNode->removeChild($nuke);
   }
 

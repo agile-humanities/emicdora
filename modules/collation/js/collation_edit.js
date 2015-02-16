@@ -347,6 +347,19 @@
                 offset: total_offset(range.endContainer, range.endOffset)
               }
             };
+
+            // XXX: Try to account for some oddities in rangy... Placing the
+            // selection endpoints inside of element which do not contain any
+            // of the selected text (just outside it, really).
+            if (range.startOffset === range.startContainer.length) {
+              to_return.start.id = range.startContainer.parentNode.nextSibling.id;
+              to_return.start.offset = 0;
+            }
+            if (to_return.end.offset === 0) {
+              var alternate = range.endContainer.parentNode.previousSibling;
+              to_return.end.id = alternate.id;
+              to_return.end.offset = total_offset(alternate.lastChild, alternate.lastChild.length);
+            }
             return to_return;
           };
           $.ajax({
@@ -389,6 +402,8 @@
                 merged_content = '';
                 selection_deleted = null;
                 selection_added = null;
+                range_deleted = null;
+                range_added = null;
                 $('#merged_text').text("");
                 $('#diff_l').text("");
                 $('#diff_r').text("");
