@@ -119,6 +119,12 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
         }
       }
     }
+    if ($remaining === 0) {
+      return array(
+        'remaining' => drupal_strlen($element->lastChild->nodeValue),
+        'node' => $element->lastChild,
+      );
+    }
     throw new CollationException('Failed to find text node.');
   };
 
