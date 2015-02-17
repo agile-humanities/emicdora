@@ -101,13 +101,43 @@ function emicdora_calliope_write_file($pid, $critical_edition = '') {
 function emicdora_calliope_delete_file($pid) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   try {
-    $grid = emicdora_calliope_create_mongo_grid();
-    $query = array('_resourceid' => $pid);
-    $record = $grid->findOne($query);
-    $id = isset($record->file['_id']) ? $record->file['_id'] : FALSE;
-    if ($id) {
-      $grid->remove($query);
-    }
+    emicdora_calliope_delete_file_no_exit($pid);
+  }
+  catch (Exception $e) {
+    drupal_add_http_header('Status', '500 Internal server error');
+    echo $e->getMessage();
+    exit;
+  }
+}
+
+/**
+ * Deletes Mongo record associated with pid.
+ *
+ * @throws Exception
+ *
+ * @param string $pid
+ *   PID of associated object
+ */
+function emicdora_calliope_delete_file_no_exit($pid) {
+  $grid = emicdora_calliope_create_mongo_grid();
+  $query = array('_resourceid' => $pid);
+  $record = $grid->findOne($query);
+  $id = isset($record->file['_id']) ? $record->file['_id'] : FALSE;
+  if ($id) {
+    $grid->remove($query);
+  }
+}
+
+/**
+ * Deletes Mongo collation records.
+ *
+ * @param string $name
+ *   Name of collation to kill.
+ */
+function emicdora_calliope_delete_collation($name) {
+  module_load_include('inc', 'islandora', 'includes/utilities');
+  try {
+    emicdora_calliope_delete_collation_no_exit($name);
   }
   catch (Exception $e) {
     drupal_add_http_header('Status', '500 Internal server error');
@@ -122,19 +152,12 @@ function emicdora_calliope_delete_file($pid) {
  * @param string $name
  *   Name of collation to kill.
  */
-function emicdora_calliope_delete_collation($name) {
-  module_load_include('inc', 'islandora', 'includes/utilities');
-  try {
-    $db = emicdora_calliope_create_mongo_db();
-    $collection = $db->selectCollection('collations');
-    $collection->remove(array('emic_data.collation' => $name));
-  }
-  catch (Exception $e) {
-    drupal_add_http_header('Status', '500 Internal server error');
-    echo $e->getMessage();
-    exit;
-  }
+function emicdora_calliope_delete_collation_no_exit($name) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('collations');
+  $collection->remove(array('emic_data.collation' => $name));
 }
+
 /**
  * Deletes Mongo MVD record.
  *
@@ -144,15 +167,27 @@ function emicdora_calliope_delete_collation($name) {
 function emicdora_calliope_delete_mvd($id) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   try {
-    $db = emicdora_calliope_create_mongo_db();
-    $collection = $db->selectCollection('mvds');
-    $collection->remove(array('_id' => $id));
+    emicdora_calliope_delete_mvd_no_exit($id);
   }
   catch (Exception $e) {
     drupal_add_http_header('Status', '500 Internal server error');
     echo $e->getMessage();
     exit;
   }
+}
+
+/**
+ * Deletes Mongo MVD record.
+ *
+ * @throws Exception
+ *
+ * @param string $id
+ *   Mongo ID of MVD
+ */
+function emicdora_calliope_delete_mvd_no_exit($id) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('mvds');
+  $collection->remove(array('_id' => $id));
 }
 
 /**
@@ -326,38 +361,57 @@ function emicdora_calliope_get_file($pid) {
  *   Associative array of MVD data
  */
 function emicdora_calliope_find_mvds($critical_edition_object, $sort = "asc", $limit = NULL, $offset = 0) {
-  $id = $critical_edition_object->id;
-  $query = array('metadata.critical_edition' => $critical_edition_object->id);
-  $sort = strtolower($sort);
-  $sort_val = ($sort == 'asc') ? 1 : -1;
   try {
-    $db = emicdora_calliope_create_mongo_db();
-    $collection = $db->selectCollection('mvds');
-    $mvd_cursor = $collection->find($query);
-    $count = $mvd_cursor->count();
-    $mvd_cursor->sort(array('metadata.name' => $sort_val));
-    $mvd_data = array();
-    foreach ($mvd_cursor as $mvd) {
-      if (is_array($mvd['metadata']['resources'])) {
-        $transcriptions = array();
-        foreach ($mvd['metadata']['resources'] as $transcription) {
-          $transcriptions[$transcription['id']] = $transcription['name'];
-        }
-        $mvd_data[$mvd['metadata']['name']]['name'] = $mvd['metadata']['name'];
-        $mvd_data[$mvd['metadata']['name']]['filter'] = $mvd['metadata']['filter'];
-        $mvd_data[$mvd['metadata']['name']]['transcriptions'] = $transcriptions;
-        if (isset($mvd['metadata']['description'])) {
-          $mvd_data[$mvd['metadata']['name']]['description'] = $mvd['metadata']['description'];
-        }
-        else {
-          $mvd_data[$mvd['metadata']['name']]['description'] = t("No description");
-        }
-      }
-    }
+    return emicdora_calliope_find_mvds_no_exit($critical_edition_object, $sort, $limit, $offset);
   }
   catch (Exception $e) {
     drupal_set_message($e->getMessage());
     exit;
+  }
+}
+
+/**
+ * Pulls all MVD metadata from Mongo.
+ *
+ * @throws Exception
+ *
+ * @param AbstractObject $critical_edition_object
+ *   Object representing Critical Edition
+ * @param string $sort
+ *   Sort type
+ * @param int $limit
+ *   Size of result set.
+ * @param int $offset
+ *   Offset for db call
+ *
+ * @return array
+ *   Associative array of MVD data
+ */
+function emicdora_calliope_find_mvds_no_exit($critical_edition_object, $sort = "asc", $limit = NULL, $offset = 0) {
+  $query = array('metadata.critical_edition' => $critical_edition_object->id);
+  $sort = strtolower($sort);
+  $sort_val = ($sort == 'asc') ? 1 : -1;
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('mvds');
+  $mvd_cursor = $collection->find($query);
+  $mvd_cursor->sort(array('metadata.name' => $sort_val));
+  $mvd_data = array();
+  foreach ($mvd_cursor as $mvd) {
+    if (is_array($mvd['metadata']['resources'])) {
+      $transcriptions = array();
+      foreach ($mvd['metadata']['resources'] as $transcription) {
+        $transcriptions[$transcription['id']] = $transcription['name'];
+      }
+      $mvd_data[$mvd['metadata']['name']]['name'] = $mvd['metadata']['name'];
+      $mvd_data[$mvd['metadata']['name']]['filter'] = $mvd['metadata']['filter'];
+      $mvd_data[$mvd['metadata']['name']]['transcriptions'] = $transcriptions;
+      if (isset($mvd['metadata']['description'])) {
+        $mvd_data[$mvd['metadata']['name']]['description'] = $mvd['metadata']['description'];
+      }
+      else {
+        $mvd_data[$mvd['metadata']['name']]['description'] = t("No description");
+      }
+    }
   }
   return $mvd_data;
 }
@@ -373,17 +427,30 @@ function emicdora_calliope_find_mvds($critical_edition_object, $sort = "asc", $l
  */
 function emicdora_calliope_find_mvd($query) {
   try {
-    $db = emicdora_calliope_create_mongo_db();
-    $collection = $db->selectCollection('mvds');
-    $mvd_cursor = $collection->find($query);
-    $mvd_data = array();
-    foreach ($mvd_cursor as $mvd) {
-      $mvd_data[] = $mvd;
-    }
+    return emicdora_calliope_find_mvd_no_exit($query);
   }
   catch (Exception $e) {
     drupal_set_message($e->getMessage());
     exit;
+  }
+}
+
+/**
+ * Pulls all MVD metadata from Mongo.
+ *
+ * @param array $query
+ *   Mongo query
+ *
+ * @return array
+ *   All values associated with all MVD's attached to this Critical Edition
+ */
+function emicdora_calliope_find_mvd_no_exit($query) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('mvds');
+  $mvd_cursor = $collection->find($query);
+  $mvd_data = array();
+  foreach ($mvd_cursor as $mvd) {
+    $mvd_data[] = $mvd;
   }
   return $mvd_data;
 }
