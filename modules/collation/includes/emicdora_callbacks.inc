@@ -128,7 +128,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     throw new CollationException('Failed to find text node.');
   };
 
-
+  // Identify and split out our selection in the start and ending elements.
   $start_location_info = $range_info['start'];
   $start_info = $find_text_node($start_location_info);
   $start_suffix = drupal_strlen($start_info['node']->nodeValue) === $start_info['remaining'] ?
@@ -174,6 +174,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     )));
   }
 
+  // Couple flags to help track our traversal.
   $found_start = FALSE;
   $found_end = FALSE;
   // Track those spans whose content is being slotted into one of our three.
@@ -227,8 +228,12 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
       } while ($current->childNodes === NULL);
     }
   };
+
+  // Kick off the traversal.
   $traverse($start_suffix->parentNode);
 
+  // Add each node to its replacements. Note: This also removes the node from
+  // its original location in the document.
   foreach ($replacement_nodes as $type_thing => $nodes) {
     array_map(array($replacements[$type_thing], 'appendChild'), $nodes);
   }
