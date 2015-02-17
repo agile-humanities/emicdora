@@ -96,7 +96,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
 
-  $range_info = $_POST[$type];
+  $range_info = filter_input(INPUT_POST, $type, FILTER_DEFAULT , FILTER_REQUIRE_ARRAY);
 
   $find_text_node = function ($node_info) use ($dom) {
     // Iterate over text nodes in the given element until we find the one in
