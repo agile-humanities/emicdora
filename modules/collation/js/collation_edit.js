@@ -375,7 +375,9 @@
               all_added: all_added,
               emicdora_counter: emicdora_counter,
               deleted: build_selection(range_deleted),
-              added: build_selection(range_added)
+              added: build_selection(range_added),
+              name_deleted: Ext.ComponentQuery.query('#versionSelector1')[0].getValue(),
+              name_added: Ext.ComponentQuery.query('#versionSelector2')[0].getValue()
             },
             async: false,
             success: function(results, status, xhr) {
