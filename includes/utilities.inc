@@ -822,57 +822,6 @@ function emicdora_remove_version($critical_edition_pid, $version_object_pid) {
 }
 
 /**
- * Safely deletes transcription.
- *
- * @param array $form
- *   Drupal Form
- * @param array $form_state
- *   Drupal Form State
- * @param string $critical_edition_pid
- *   Pid of containing Critical Edition
- * @param string $transcription_pid
- *   Pid of transcription
- *
- * @return form
- *   Drupal confirmation form
- */
-function emicdora_delete_transcription_form(array $form, array &$form_state, $critical_edition_pid, $transcription_pid) {
-  unset($_GET['destination']);
-  $object = islandora_object_load($transcription_pid);
-  $version_objects = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-  $version_identifier = '';
-  if (!empty($version_objects)) {
-    $version_pid = $version_objects[0]['object']['value'];
-    $version_identifier = "version/$version_pid";
-  }
-  $form_state['object'] = $object;
-  $form_state['redirect_url'] = "islandora/object/$critical_edition_pid/$version_identifier";
-
-  return confirm_form($form,
-      t('Are you sure you want to delete %title?',
-      array('%title' => $object->label)),
-      "islandora/object/$critical_edition_pid/transcription/$transcription_pid",
-      t('This action cannot be undone.'),
-      t('Delete transcription'),
-      t('Cancel')
-  );
-}
-
-/**
- * Submit handler.
- *
- * @param array $form
- *   Drupal From
- * @param array $form_state
- *   Drupal Form State
- */
-function emicdora_delete_transcription_form_submit(array $form, array &$form_state) {
-  $object = $form_state['object'];
-  $form_state['redirect'] = $form_state['redirect_url'];
-  islandora_delete_object($object);
-}
-
-/**
  * Fetches the source object the given version object was derived from.
  *
  * This function makes no checks to see if the object given is in fact a
@@ -997,9 +946,8 @@ function emicdora_contextual_redirect($source_object, $delta) {
       break;
 
     case "delete_transcription":
-      $transcription = $destination_parts[4];
-      $critical_edition = $destination_parts[2];
-      return drupal_get_form('emicdora_delete_transcription_form', $critical_edition, $transcription);
+      drupal_goto("islandora/object/$pid/delete", $options);
+      break;
 
     case "edit_tei_rdf":
       drupal_goto("islandora/object/$pid/version/{$get_parts[3]}/edit");
@@ -1023,6 +971,10 @@ function emicdora_contextual_redirect($source_object, $delta) {
       $critical_editions = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
       $critical_edition_pid = $critical_editions[0]['object']['value'];
       drupal_goto("emicdora/remove/version/$critical_edition_pid/$versionable_object_pid");
+      break;
+
+    case "purge_version":
+      drupal_goto("islandora/object/$pid/delete", $options);
       break;
 
     default:
