@@ -334,9 +334,8 @@
                 var tooltips_elements = data['nestedTooltips'];
                 for (var index in tooltips_elements) {
                   if (tooltips_elements[index]) {
-                    if (display_count == 2) display_count = 0;
                     $(tooltips_elements[index] + ":first").tooltip({
-                      position: positions[display_count],
+                      position: positions[display_count % positions.length],
                       hideEvent: 'mouseleave'
                     });
                     $(tooltips_elements[index] + ":first").tooltip('show');
@@ -351,9 +350,8 @@
                   var linked_tooltips = data_overlap_attr.split(",");
                   for (var index in linked_tooltips) {
                     if (linked_tooltips[index]) {
-                      if (display_count == 2) display_count = 0;
                       $("." + linked_tooltips[index] + ":first").tooltip({
-                        position: positions[display_count],
+                        position: positions[display_count % positions.length],
                         hideEvent: 'mouseleave',
                         onShow: function() {
                           // Reset onShow to not have a custom function to
