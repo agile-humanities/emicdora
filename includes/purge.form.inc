@@ -251,7 +251,7 @@ EOQ;
   };
   $transcriptions = array_filter($results, $is_transcription);
   $transcriptions = array_values(array_map($get_pid, $transcriptions));
-  emicdora_delete_callopie_files_batch_set($transcriptions);
+  emicdora_delete_calliope_files_batch_set($transcriptions);
 }
 
 /**
@@ -307,15 +307,15 @@ function emicdora_delete_objects_batch_operation(array $objects, array &$context
 }
 
 /**
- * Creates and starts a batch for deleting the given objects from callopie.
+ * Creates and starts a batch for deleting the given objects from calliope.
  *
  * @param array $objects
  *   All the objects to delete.
  */
-function emicdora_delete_callopie_files_batch_set(array $objects) {
+function emicdora_delete_calliope_files_batch_set(array $objects) {
   $batch = array(
     'operations' => array(
-      array('emicdora_delete_callopie_file_batch_operation', array($objects)),
+      array('emicdora_delete_calliope_file_batch_operation', array($objects)),
     ),
     'title' => t('Deleting files(s) ...'),
     'init_message' => t('Preparing to delete files(s)'),
@@ -328,14 +328,14 @@ function emicdora_delete_callopie_files_batch_set(array $objects) {
 
 
 /**
- * Batch operation for deleting a objects from Mongo / Callopie.
+ * Batch operation for deleting a objects from Mongo.
  *
  * @param array $objects
  *   All the objects to delete from Mongo.
  * @param array $context
  *   The context of this batch operation.
  */
-function emicdora_delete_callopie_file_batch_operation(array $objects, array &$context) {
+function emicdora_delete_calliope_file_batch_operation(array $objects, array &$context) {
   module_load_include('inc', 'collation', 'includes/calliope');
   if (empty($context['sandbox'])) {
     $context['sandbox']['current'] = 0;
