@@ -9,7 +9,6 @@
  * Ajax callback for collation editing.
  */
 function emicdora_collation_edit() {
-  //dd($_POST, 'postttttttttt');
   module_load_include('inc', 'collation', 'includes/calliope');
   $config = emicdora_get_config();
   $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
