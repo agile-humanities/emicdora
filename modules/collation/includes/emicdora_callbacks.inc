@@ -311,7 +311,7 @@ function emicdora_update_collation($type, $name_added, $name_deleted) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
   $query = emicdora_get_file_query($type, $name_added, $name_deleted);
   $file = emicdora_calliope_get_collation_file($query);
-  $counter = 0;
+  $counter = 1;
   if (isset($_POST['emicdora_counter']) && filter_input(INPUT_POST, 'emicdora_counter') != 'undeclared') {
     $counter = emicdora_cleaned_post('emicdora_counter');
   }
@@ -320,7 +320,7 @@ function emicdora_update_collation($type, $name_added, $name_deleted) {
     'version1' => $file['emic_data']['version1'],
     'version2' => $file['emic_data']['version2'],
     'diff_kind' => $type,
-    'emicdora_count' => isset($_POST['emicdora_counter']) ? filter_input(INPUT_POST, 'emicdora_counter') : 1,
+    'emicdora_count' => $counter,
   );
   $contents = emicdora_cleaned_post("all_$type");
   emicdora_calliope_write_collation($file_params, $contents);
