@@ -34,7 +34,7 @@ function emicdora_collation_edit() {
       if ($merged_added || $merged_deleted) {
         $results = array(
           'message' => t("You have associated text in your selection.  Please unlink before resubmitting."),
-          'emicdora_counter' => filter_input(INPUT_POST, 'emicdora_counter'),
+          'emicdora_counter' => $counter,
         );
       }
       else {
@@ -51,7 +51,7 @@ function emicdora_collation_edit() {
         $results = array(
           'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
           'new_added' => $cleaned_doms['added']->saveXML($added_node),
-          'emicdora_counter' => filter_input(INPUT_POST, 'emicdora_counter') + 1,
+          'emicdora_counter' => $counter + 1,
           'refresh' => 'refresh',
         );
       }
@@ -76,7 +76,7 @@ function emicdora_collation_edit() {
       $results = array(
         'added' => 'success',
         'refresh' => 'false',
-        'emicdora_counter' => filter_input(INPUT_POST, 'emicdora_counter'),
+        'emicdora_counter' => $counter,
       );
   }
   if (!empty($results)) {
