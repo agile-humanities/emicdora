@@ -9,12 +9,16 @@
  * Ajax callback for collation editing.
  */
 function emicdora_collation_edit() {
+  //dd($_POST, 'postttttttttt');
   module_load_include('inc', 'collation', 'includes/calliope');
   $config = emicdora_get_config();
   $fixed_deleted = "<div id = 'emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
   $fixed_added = "<div id = 'emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
   $action = emicdora_cleaned_post('action');
   $counter = emicdora_cleaned_post('emicdora_counter');
+  // Let's grab the two versions so there's context for Mongo to query on.
+  $name_added = $_POST['name_added'];
+  $name_deleted = $_POST['name_deleted'];
   if ($counter == 'undeclared' || $counter == '') {
     $counter = emicdora_get_counter();
   }
@@ -66,8 +70,10 @@ function emicdora_collation_edit() {
       break;
 
     case 'save':
-      emicdora_update_collation('deleted');
-      emicdora_update_collation('added');
+      // XXX: Due to how Calliope handles requests the parameters need to be
+      // flipped.
+      emicdora_update_collation('deleted', $name_added, $name_deleted);
+      emicdora_update_collation('added', $name_deleted, $name_added);
       $results = array(
         'added' => 'success',
         'refresh' => 'false',
@@ -297,10 +303,14 @@ function emicdora_cleaned_post($term) {
  *
  * @param string $type
  *   added or deleted
+ * @param string $name_added
+ *   The name of the collation added.
+ * @param string $name_deleted
+ *   The name of the collation deleted.
  */
-function emicdora_update_collation($type) {
+function emicdora_update_collation($type, $name_added, $name_deleted) {
   module_load_include('inc', 'austese_collation', 'includes/emicdora');
-  $query = emicdora_get_file_query($type);
+  $query = emicdora_get_file_query($type, $name_added, $name_deleted);
   $file = emicdora_calliope_get_collation_file($query);
   $counter = 0;
   if (isset($_POST['emicdora_counter']) && $_POST['emicdora_counter'] != 'undeclared') {
@@ -321,15 +331,21 @@ function emicdora_update_collation($type) {
  * Gets mongo file query.
  *
  * @param string $type
- *   added or deleted
+ *   Added or deleted
+ * @param string $name_added
+ *   The name of the collation added.
+ * @param string $name_deleted
+ *   The name of the collation deleted.
  *
  * @return array
- *   returned query
+ *   An array representing a constructed query to pass of to Mongo.
  */
-function emicdora_get_file_query($type) {
+function emicdora_get_file_query($type, $name_added, $name_deleted) {
   return array(
     'emic_data.collation' => $_POST['collation_id'],
     'emic_data.diff_kind' => $type,
+    'emic_data.version1' => $name_deleted,
+    'emic_data.version2' => $name_added,
   );
 }
 
@@ -341,7 +357,7 @@ function emicdora_get_file_query($type) {
  */
 function emicdora_get_counter() {
   module_load_include('inc', 'collation', 'includes/calliope');
-  $query = emicdora_get_file_query('deleted');
+  $query = emicdora_get_file_query('deleted', $_POST['name_added'], $_POST['name_deleted']);
   $file = emicdora_calliope_get_collation_file($query);
   return $file['emic_data']['emicdora_count'];
 }

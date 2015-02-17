@@ -328,7 +328,9 @@
               merged_content: encodeURIComponent(merged_content),
               all_deleted: all_deleted,
               all_added: all_added,
-              emicdora_counter: emicdora_counter
+              emicdora_counter: emicdora_counter,
+              name_deleted: Ext.ComponentQuery.query('#versionSelector1')[0].getValue(),
+              name_added: Ext.ComponentQuery.query('#versionSelector2')[0].getValue()
             },
             async: false,
             success: function(data, status, xhr) {

@@ -440,6 +440,8 @@ function emicdora_calliope_write_collation($query, $contents) {
   $search_query = array(
     'emic_data.collation' => $query['collation'],
     'emic_data.diff_kind' => $query['diff_kind'],
+    'emic_data.version1' => $query['version1'],
+    'emic_data.version2' => $query['version2'],
   );
   $current_record = emicdora_calliope_get_collation_file($search_query);
   if ($current_record) {
