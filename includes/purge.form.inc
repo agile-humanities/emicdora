@@ -18,10 +18,6 @@ function emicdora_islandora_delete_object_form_submit_delete_edition(array $form
   emicdora_remove_members_batch_set($object);
   emicdora_delete_mvds_batch_set($object);
   emicdora_delete_objects_batch_set(array($object->id));
-  // XXX: Note: Because this is likely being called from a contextual link
-  // (which automatically inserts "destination" query parameters to the URL),
-  // this value will likely have no effect... Have fun!
-  $form_state['redirect'] = 'workbench';
 }
 
 /**
@@ -112,7 +108,7 @@ function emicdora_delete_mvds_batch_set(AbstractObject $edition) {
 }
 
 /**
- * Batch operation for deleting a MVD.
+ * Batch operation for deleting a MVD's and their collations.
  *
  * @param string $edition
  *   The PID of the edition in which we are removing the MVD's from.
