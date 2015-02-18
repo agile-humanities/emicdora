@@ -283,7 +283,7 @@
           var all_added;
           var all_deleted;
 
-          if (selection_deleted === null || selection_added === null) {
+          if ((selection_deleted === null || selection_added === null) && args.data.action != "save") {
             alert(Drupal.t('You must select text from both the left and right panes.'));
             return;
           }
@@ -374,8 +374,8 @@
               all_deleted: all_deleted,
               all_added: all_added,
               emicdora_counter: emicdora_counter,
-              deleted: build_selection(range_deleted),
-              added: build_selection(range_added),
+              deleted: args.data.action != "save" ? build_selection(range_deleted) : null,
+              added: args.data.action != "save" ? build_selection(range_added) : null,
               name_deleted: Ext.ComponentQuery.query('#versionSelector1')[0].getValue(),
               name_added: Ext.ComponentQuery.query('#versionSelector2')[0].getValue()
             },
