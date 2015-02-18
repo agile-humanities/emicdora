@@ -172,9 +172,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
       }
 
       $delete = l(t("Delete"), "islandora/version_viewer/configuration/delete/$config->cid/{$version->id}", array(
-        'query' => array(
-          'destination' => request_uri(),
-        ),
+        'query' => drupal_get_destination(),
       ));
       $renderable_span_array = array(
         'css_span' => array(
