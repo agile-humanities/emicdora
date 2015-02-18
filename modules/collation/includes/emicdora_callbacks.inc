@@ -261,30 +261,6 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
 }
 
 /**
- * Repairs possibly damaged Calliope.
- *
- * @param array $spans
- *   array of spans from file
- * @param string $type
- *   'delete' or 'added'
- *
- * @return xml
- *   Repaired xml
- */
-function emicdora_fix_calliope($spans, $type) {
-  $repaired = array();
-  foreach ($spans as $index => $span) {
-    if (strpos(trim($span), '<span') !== 0) {
-      $repaired[$index] = "<span class='$type'>$span</span> ";
-    }
-    else {
-      $repaired[$index] = "$span</span>";
-    }
-  }
-  return implode('', $repaired);
-}
-
-/**
  * Updates div contents with incoming unlink request.
  *
  * @param xml $fixed_content
