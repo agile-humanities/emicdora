@@ -282,8 +282,8 @@
         function execute_callback(args) {
           var all_added;
           var all_deleted;
-
-          if ((selection_deleted === null || selection_added === null) && args.data.action != "save") {
+          var requires_dual_selection = args.data.action != "save" && args.data.action != "unlink";
+          if ((selection_deleted === null || selection_added === null) && requires_dual_selection) {
             alert(Drupal.t('You must select text from both the left and right panes.'));
             return;
           }
@@ -374,8 +374,8 @@
               all_deleted: all_deleted,
               all_added: all_added,
               emicdora_counter: emicdora_counter,
-              deleted: args.data.action != "save" ? build_selection(range_deleted) : null,
-              added: args.data.action != "save" ? build_selection(range_added) : null,
+              deleted: requires_dual_selection ? build_selection(range_deleted) : null,
+              added: requires_dual_selection ? build_selection(range_added) : null,
               name_deleted: Ext.ComponentQuery.query('#versionSelector1')[0].getValue(),
               name_added: Ext.ComponentQuery.query('#versionSelector2')[0].getValue()
             },
