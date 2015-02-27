@@ -3,9 +3,8 @@
     attach: function (context, settings){
       $('#wb_max_min').once('viewer-full-window', function () {
         $(this).click(function() {
-        $('#eui_window').toggleClass('eui-window-fullscreen');
-        if ($(this).hasClass('win-switch-full')) {
-            $('#admin-menu-wrapper').hide();
+          $('#eui_window').toggleClass('eui-window-fullscreen');
+          if ($(this).hasClass('win-switch-full')) {
             $("#wb_max_min").removeClass("win-switch-full").addClass("win-switch-norm");
             $("#wb_max_min").attr('title', "Minimize Viewer");
             $('#eui_window').css('max-height', 'none');
@@ -17,28 +16,42 @@
               var height = $(window).height() - 50;
               $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
             }
-            $('#eui_window').layout('resize', {
-              width:'100%',
-              height:'100%',
-            });
-        }
-        else {
-          $('#admin-menu-wrapper').show();
-          $("#wb_max_min").removeClass("win-switch-norm").addClass("win-switch-full");
-          $("#wb_max_min").attr('title', "Maximize Viewer");
-          var element = $('#eui_window').detach();
-          $('#content').append(element);
-          $('#eui_window').css('max-height', '729px');
-          if ($('#eui_window').layout('panel', 'south').is(":visible")) {
-            $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});    // resize the panel
+            resizepage();
           }
-          $('#eui_window').layout('resize', {
+          else {
+            $("#wb_max_min").removeClass("win-switch-norm").addClass("win-switch-full");
+            $("#wb_max_min").attr('title', "Maximize Viewer");
+            var element = $('#eui_window').detach();
+            $('#content').append(element);
+            $('#eui_window').css('max-height', '729px');
+            if ($('#eui_window').layout('panel', 'south').is(":visible")) {
+              $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});    // resize the panel
+            }
+            $('#eui_window').layout('resize', {
               width:'100%',
               height:'550px',
             });
-          $(window).trigger('resize');
+            $(window).trigger('resize');
+          }
+          $(window).resize(function () {
+            resizepage();
+          });
+
+        function resizepage() {
+          if ($('#wb_max_min').hasClass('win-switch-norm')) {
+            var bar_top = 0;
+            if ($('#admin-menu').length > 0) {
+              var bar_top = $('#admin-menu-wrapper').height();
+            }
+            $('.eui-window-fullscreen').css("top", bar_top + "px");
+            $('#eui_window').layout('resize', {
+              width:'100%',
+              height: "100%",
+            });
+          }
         }
-      });
+
+        });
       });
     }
   };
@@ -47,7 +60,7 @@
     if (e.keyCode == 27) {
       if ($("#wb_max_min").hasClass('win-switch-norm')) {
         $('#eui_window').toggleClass('eui-window-fullscreen');
-        $('#admin-menu-wrapper').show();
+        //$('#admin-menu-wrapper').show();
         $("#wb_max_min").removeClass("win-switch-norm").addClass("win-switch-full");
         $("#wb_max_min").attr('title', "Maximize Viewer");
         var element = $('#eui_window').detach();
