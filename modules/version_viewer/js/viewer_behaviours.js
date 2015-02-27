@@ -60,7 +60,6 @@
     if (e.keyCode == 27) {
       if ($("#wb_max_min").hasClass('win-switch-norm')) {
         $('#eui_window').toggleClass('eui-window-fullscreen');
-        //$('#admin-menu-wrapper').show();
         $("#wb_max_min").removeClass("win-switch-norm").addClass("win-switch-full");
         $("#wb_max_min").attr('title', "Maximize Viewer");
         var element = $('#eui_window').detach();
