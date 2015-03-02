@@ -209,6 +209,7 @@ function emicdora_calliope_delete_mvd_no_exit($id) {
  */
 function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL, $filter = "Empty") {
   global $base_url;
+  $mvd_success = FALSE;
   // We need a one character token that won't appear in normal text.
   $br_token = json_decode('"\uFFFC"');
   $mvd_url = "$base_url/calliope";
@@ -322,21 +323,20 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
  * @param string $pid
  *   PID of Fedora object with associated Mongo file
  *
- * @return MongoGridFSFile
- *   Associated file
+ * @return mixed
+ *   Associated MongoGridFSFile file if found, otherwise bool FALSE
  */
 function emicdora_calliope_get_file($pid) {
   module_load_include('inc', 'islandora', 'includes/utilities');
   $id = islandora_escape_pid_for_function($pid);
   $grid = emicdora_calliope_create_mongo_grid();
   if (!$grid) {
-    return;
+    return FALSE;
   }
   $query = array('_resourceid' => $pid);
   $file = $grid->findOne($query);
   if ($file == NULL) {
-    drupal_set_message(t('The requested resource does not exist'));
-    return;
+    return FALSE;
   }
   if (array_key_exists('_deleted', $file->file)) {
     drupal_set_message(t('The requested resource has been deleted'));
