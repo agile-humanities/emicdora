@@ -50,6 +50,17 @@
   color: white;
 }
 
+.layout-split-proxy-h{
+  width: 5px !important;
+  cursor: ew-resize !important;
+}
+
+/* .layout-split-proxy-v { */
+/*   height: 5px !important; */
+/*   cursor: ew-resize !important; */
+/* } */
+
+}
 .pagination-info{
   height: 0px;
 }

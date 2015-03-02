@@ -4,6 +4,7 @@
       // Hide any active tooltips (sometimes they do not clear).
       $('.tooltip-f').tooltip('hide');
     });
+    console.log(Drupal.settings.versionable_object_viewer);
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
@@ -734,5 +735,8 @@
       width: '100%',
       height: '729px'
     });
+
+   
+
   });
 })(jQuery);

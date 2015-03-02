@@ -42,7 +42,7 @@
 }
 .layout-split-proxy-h {
   width: 5px;
-  cursor: e-resize;
+  cursor: none !important;
 }
 .layout-split-proxy-v {
   height: 5px;
