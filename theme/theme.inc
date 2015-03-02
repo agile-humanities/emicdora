@@ -245,7 +245,6 @@ function emicdora_item_table($item_details) {
     'path' => "islandora/object/{$item_details['pid']}/datastream/TN/view",
     'alt' => '',
     'height' => '90px',
-    'width' => '90px',
     'attributes' => array('class' => 'emicdora_thumbnail'),
   ));
 
