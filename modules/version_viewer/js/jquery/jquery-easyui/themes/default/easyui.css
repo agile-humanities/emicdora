@@ -408,7 +408,7 @@
 }
 .layout-split-proxy-h {
   width: 5px;
-  cursor: ew-resize;
+  cursor: e-resize;
 }
 .layout-split-proxy-v {
   height: 5px;
