@@ -10,7 +10,8 @@
 
 /* BEGIN VIEWER 'Internet Archive Bookreader' STYLE */
 .panel.layout-panel.layout-panel-west.layout-split-west{
-  border-right: 5px solid #191972 !important;
+  border-right: none !important;
+  
 }
 /* .layout-expand-west{ */
 /*   border-right: 5px solid #191972 !important; */
@@ -20,20 +21,15 @@
   background-color: #191972 !important;
 }
 
-.layout-split-east{
-  border-right: 5px solid #191972 !important;
-}
 
 .layout-split-east{
-  border-left: 5px solid #191972 !important;
+  border-left: 1px solid #191972 !important;
+  border-right: 1px solid #191972 !important;
+  border-bottom: 1px solid #191972 !important;
 }
 
 .layout-split-west{
-  border-right: 5px solid #191972 !important;
-}
-
-.layout-split-west{
-  border-left: 5px solid #191972 !important;
+  border-left: 1px solid #191972 !important;
 }
 
 .panel-body.panel-body-noheader.layout-body{
