@@ -209,6 +209,7 @@ function emicdora_calliope_delete_mvd_no_exit($id) {
  */
 function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL, $filter = "Empty") {
   global $base_url;
+  $mvd_success = FALSE;
   // We need a one character token that won't appear in normal text.
   $br_token = json_decode('"\uFFFC"');
   $mvd_url = "$base_url/calliope";
@@ -335,8 +336,7 @@ function emicdora_calliope_get_file($pid) {
   $query = array('_resourceid' => $pid);
   $file = $grid->findOne($query);
   if ($file == NULL) {
-    drupal_set_message(t('The requested resource does not exist'));
-    return;
+    return FALSE;
   }
   if (array_key_exists('_deleted', $file->file)) {
     drupal_set_message(t('The requested resource has been deleted'));
