@@ -31,21 +31,7 @@ function emicdora_valid_source_types() {
  */
 function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
   global $user;
-  if (isset($_GET['destination'])) {
-    $url_parts = explode('/', $_GET['destination']);
-    $form_state['values']['limit_page_range'] = TRUE;
-    if (!isset($url_parts[4])) {
-      $version_object = islandora_object_load($url_parts[2]);
-      $sources = $version_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
-      $source_pid = $sources[0]['object']['value'];
-    }
-    else {
-      $source_pid = $url_parts[4];
-    }
-    $_POST['source'] = $source_pid;
-    $form_state['values']['source'] = $source_pid;
-    unset($_GET['destination']);
-  }
+
   module_load_include('inc', 'islandora', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/ingest.form');
   $version = $edition->repository->constructObject(islandora_get_namespace($edition->id));
@@ -54,9 +40,15 @@ function emicdora_ingest_versionable_object_page(AbstractObject $edition) {
   $version->models = 'islandora:versionCModel';
   $version->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOf', $edition);
   drupal_set_title(t('Add Versionable Object to @edition', array('@edition' => $edition->label)));
-  return drupal_get_form('islandora_ingest_form', array(
+  $form = drupal_get_form('islandora_ingest_form', array(
     'models' => array('islandora:versionCModel'),
-    'objects' => array($version)));
+    'objects' => array($version),
+  ));
+
+  // XXX: Allow later redirects to work properly.
+  unset($_GET['destination']);
+
+  return $form;
 }
 
 /**
@@ -102,20 +94,19 @@ EOT;
  *   The Drupal form definition.
  * @param array $form_state
  *   The Drupal form state.
+ * @param string $source_id
+ *   A string containing the PID of the source object for which a versionable
+ *   object is being created.
  *
  * @return array
  *   The Drupal form definition.
  */
-function emicdora_versionable_object_form(array $form, array &$form_state) {
-  module_load_include('inc', 'emicdora', 'includes/utilities');
-  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+function emicdora_versionable_object_form(array $form, array &$form_state, $source_id) {
+  form_load_include($form_state, 'inc', 'emicdora', 'includes/utilities');
+  form_load_include($form_state, 'inc', 'islandora_paged_content', 'includes/utilities');
   $values = &$form_state['values'];
-  if (isset($_POST['source'])) {
-    $raw_source = filter_xss($_POST['source']);
-    $source = preg_replace('/\?.*/', '', $raw_source);
-    $values['source'] = $source;
-  }
-  $source = isset($values['source']) ? islandora_object_load($values['source']) : NULL;
+  $source = islandora_object_load($source_id);
+
   // Build the list rows for the TEI-RDF tableselect, and count the number.
   $page_count = 0;
   $tei_rdf_objects = array();
@@ -291,7 +282,7 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
   // Validate Source Object.
   $source = islandora_object_load($values['source']);
   // It must be a Fedora Object.
-  if (!$source) {
+  if (!($source instanceof FedoraObject)) {
     form_error($form['source'], t('Source Object: "@source" is not valid object.', array(
       '@source' => $values['source'])));
   }
@@ -530,7 +521,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $transcription->ingestDatastream($datastream);
       break;
   }
-  $shared_storage['destination_url'] = "islandora/object/$critical_edition/version/{$versionable_object->id}";
+  $shared_storage['emicdora']['destination_url'] = "islandora/object/$critical_edition/version/{$versionable_object->id}";
 }
 
 /**
@@ -851,4 +842,36 @@ function emicdora_ingest_versionable_object_transcription_batch_finished($succes
     $form = array();
     islandora_ingest_form_previous_submit($form, $batch['form_state']);
   }
+}
+
+/**
+ * Attempt to grok out the relevant source object.
+ *
+ * @param array $form_state
+ *   A $form_state array, as passed along during hook_islandora_ingest_steps().
+ *
+ * @return string|bool
+ *   A string containing the PID of the object if found; otherwise, boolean
+ *   FALSE.
+ */
+function emicdora_determine_source_for_versionable_object_ingest($form_state) {
+  if (isset($_GET['destination'])) {
+    $destination = drupal_get_destination();
+    $destination_url = $destination['destination'];
+    $fourth_arg = arg(4, $destination_url);
+    $custom_params['limit_page_range'] = TRUE;
+    if ($fourth_arg === NULL) {
+      $version_pid = arg(2, $destination_url);
+      $version_object = islandora_object_load($version_pid);
+      $sources = $version_object->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+      $source = reset($sources);
+      if ($source) {
+        return $source['object']['value'];
+      }
+    }
+    else {
+      return $fourth_arg;
+    }
+  }
+  return FALSE;
 }
