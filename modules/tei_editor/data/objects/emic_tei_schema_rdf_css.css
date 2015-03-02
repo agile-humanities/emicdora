@@ -1,19 +1,19 @@
 /*
  *  CANADIAN WRITING RESEARCH COLLABORATORY - CSS2 specification for TEI
     adapted by M. P. Olea from stylesheet by
-        Author: Adrian Edwards (adrian_edwards@yahoo.com) 
+        Author: Adrian Edwards (adrian_edwards@yahoo.com)
         Date:   2000-04-19
         Edited by
             Sebastian Rahtz (sebastian.rahtz@oucs.ox.ac.uk) 2001-05-06
             and for Oxygen:
             2003-08-29 start of new parent div resets child auto-count. kl
             2003-11-06 list attr list-style-type was none, now disc. kl
-            2007-06  reworking for TEI P5 and oxygen    
-    
+            2007-06  reworking for TEI P5 and oxygen
+
     **********
     For comments, questions, and suggestions please contact Susan Brown, CWRC project leader
     (sbrown@uoguelph.ca) or Mariana Paredes-Olea, CWRC Metadata Coordinator (paredeso@ualberta.ca)
-    **********    
+    **********
  *
  */
 /* Use Georgia for default font */
@@ -605,14 +605,6 @@ kw {
 l {
     display : block;
     white-space : nowrap;
-}
-l:after {
-    content:counter(line);
-    counter-increment: line;
-    text-align:right;
-    float: right;
-    color:silver;
-    margin-right:50px;
 }
 label {
     display : inline;
