@@ -79,8 +79,6 @@
 *[_tag="group"] { display: block; margin-bottom: 1em; }
 *[_tag="body"] > *[_tag="div"][type="poem"] > *[_tag="head"] *[_tag="author"] { font-weight: normal; }
 *[_tag="div"] *[_tag="opener"] *[_tag="dateline"] { display: block; text-align: right; width: 95%; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] { color: black; background-color: inherit; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="div"] { color: black; background-color: inherit; }
 *[_tag="hi"] { display: inline; background-color: yellow; color: black; }
 *[_tag="hi"][rend] { background-color: inherit; color: inherit; }
 *[_tag="hi"][rend="bold"] { display: inline; font-weight: bold; }
