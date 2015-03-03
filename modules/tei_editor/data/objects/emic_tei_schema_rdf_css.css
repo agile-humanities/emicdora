@@ -17,7 +17,7 @@
 *[_tag="biblScope"] { display: inline; }
 *[_tag="imprint"] > *[_tag="biblScope"] { display: block; }
 *[_tag="body"] { margin-top: 5px; padding: 0px 2em 0px 0px; display: block; counter-reset: div1; }
-*[_tag="byline"] { display: block; font-style: italic; margin-bottom: 0.5em; }
+*[_tag="byline"] { }
 *[_tag="category"] { display: block; margin-bottom: 1em; }
 *[_tag="catRef"] { display: none; }
 *[_tag="cell"] { display: table-cell; border: 1px solid rgb(238, 239, 238); padding: 3px; color: inherit; background-color: inherit; }
@@ -50,7 +50,7 @@
 *[_tag="div7"] { display: block; margin-bottom: 1em; counter-increment: div7; }
 *[_tag="divGen"] { display: none; }
 *[_tag="docAuthor"] { display: block; margin-bottom: 0.5em; }
-*[_tag="byline"] *[_tag="docAuthor"] { display: inline; }
+*[_tag="docAuthor"] { display: inline; }
 *[_tag="titlePage"] *[_tag="docAuthor"] { }
 *[_tag="titlePage"] *[_tag="docTitle"] { }
 *[_tag="edition"] { display: block; margin-bottom: 0.5em; }
@@ -77,17 +77,8 @@
 *[_tag="tag"]:after, *[_tag="gi"]:after { content: ">"; }
 *[_tag="gloss"] { display: inline; }
 *[_tag="group"] { display: block; margin-bottom: 1em; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="head"] { display: block; padding-top: 7px; padding-bottom: 10px; color: inherit; font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; font-size: 18px; }
 *[_tag="body"] > *[_tag="div"][type="poem"] > *[_tag="head"] *[_tag="author"] { font-weight: normal; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="head"] { display: block; padding-top: 14px; padding-bottom: 10px; padding-left: 10px; color: inherit; background-color: rgb(187, 187, 187); font-weight: bold; margin-bottom: 0.5em; margin-top: 11px; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="div"] > *[_tag="head"] { display: block; padding-top: 14px; padding-bottom: 10px; padding-left: 10px; color: inherit; background-color: rgb(187, 187, 187); font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; }
 *[_tag="div"] *[_tag="opener"] *[_tag="dateline"] { display: block; text-align: right; width: 95%; }
-*[_tag="div1"] > *[_tag="head"]:before { color: black; background-color: inherit; }
-*[_tag="div2"] > *[_tag="head"]:before { color: black; background-color: inherit; }
-*[_tag="div3"] > *[_tag="head"]:before { color: black; background-color: inherit; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="head"]:before { color: black; background-color: inherit; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="head"]:before { color: black; background-color: inherit; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="div"] > *[_tag="head"]:before { color: black; background-color: inherit; }
 *[_tag="hi"] { display: inline; background-color: yellow; color: black; }
 *[_tag="hi"][rend] { background-color: inherit; color: inherit; }
 *[_tag="hi"][rend="bold"] { display: inline; font-weight: bold; }
