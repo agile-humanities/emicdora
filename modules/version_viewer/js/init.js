@@ -305,6 +305,7 @@
     function show_entity_tooltip(data, ent_id) {
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
+      var showTooltip = (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0);
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = highlight_color;
         if (data['cwrcAttributes']['attributes']['Colour']) {
@@ -316,7 +317,7 @@
           colour = 'inherit';
         }
         $(selector).css('background-color', colour);
-        if (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0) {
+        if (showTooltip) {
           $(selector).tooltip({
             position: 'top',
             hideEvent: 'mouseleave',
@@ -392,7 +393,7 @@
           }).show();
         }
         // Reset to remove ":first" to keep the on click working correctly.
-        if (data['anchorType'] == 'offset') {
+        if (showTooltip && data['anchorType'] == 'offset') {
           selector = 'span.overlap-spanning-annotation.' + ent_id;
           // To enable overlay hover all spans not just first.
           $(selector).hover(
