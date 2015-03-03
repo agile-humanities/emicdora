@@ -229,9 +229,13 @@
             }
           } else {
             $("span[data-annotationid='" + ent_id + "']").css('background-color', highlight_color);
+            // Ensure the 'descriptiveNote' property is set, before trying to
+            // show a tooltip.
+            nodes[i]['attributes']['descriptiveNote'] = nodes[i]['attributes']['cwrcAttributes']['cwrcInfo']['description'] ? 
+              nodes[i]['attributes']['cwrcAttributes']['cwrcInfo']['description'] : " ";
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
               paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
             }
             if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
@@ -325,11 +329,23 @@
               if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
                 tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
               }
-              return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+              return '<div class="easyui-panel" style="overflow:scroll; width:100px;height:100px;padding:10px;">' +
                   tool_tip_content +
                   '</div>';
             },
             onShow: function() {
+              // Allow a mouse to enter and leave the tooltip,
+              // for the purposes of scrolling and selecting
+              // a tooltips contents.
+              var this_tip = $(this);
+              this_tip.tooltip('tip').unbind().bind('mouseenter',
+                function(){
+                  this_tip.tooltip('show');
+                }).bind('mouseleave',
+                function(){
+                  this_tip.tooltip('hide');
+                });
+
               var display_count = 0;
               if (data.hasOwnProperty('nestedTooltips')) {
                 var tooltips_elements = data['nestedTooltips'];
