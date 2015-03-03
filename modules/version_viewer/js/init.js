@@ -214,7 +214,9 @@
                 if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
                   tooltips_elements = checked[j]['attributes']['nestedTooltips'];
                 }
-                tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                if (!$.inArray('span.overlap-spanning-annotation.' + ent_id, tooltips_elements)) {
+                  tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                }
                 var temp_attributes = checked[j]['attributes'];
                 temp_attributes['nestedTooltips'] = tooltips_elements;
                 $("#easyui_tree").tree('update', {
@@ -309,6 +311,7 @@
     function show_entity_tooltip(data, ent_id) {
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
+      var showTooltip = (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0);
       if (data.hasOwnProperty('cwrcAttributes')) {
         var colour = highlight_color;
         if (data['cwrcAttributes']['attributes']['Colour']) {
@@ -320,7 +323,7 @@
           colour = 'inherit';
         }
         $(selector).css('background-color', colour);
-        if (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0) {
+        if (showTooltip) {
           $(selector).tooltip({
             position: 'top',
             hideEvent: 'mouseleave',
@@ -349,13 +352,18 @@
               var display_count = 0;
               if (data.hasOwnProperty('nestedTooltips')) {
                 var tooltips_elements = data['nestedTooltips'];
+                var tooltip_element;
                 for (var index in tooltips_elements) {
-                  if (tooltips_elements[index]) {
-                    $(tooltips_elements[index] + ":first").tooltip({
+                  if (!tooltips_elements[index]) {
+                    continue;
+                  }
+                  tooltip_element = $(tooltips_elements[index] + ":first");
+                  if (tooltip_element.hasClass('tooltip-f')) {
+                    tooltip_element.tooltip({
                       position: positions[display_count % positions.length],
                       hideEvent: 'mouseleave'
                     });
-                    $(tooltips_elements[index] + ":first").tooltip('show');
+                    tooltip_element.tooltip('show');
                     display_count++;
                   }
                 }
@@ -365,16 +373,21 @@
                 var data_overlap_attr = $(selector).attr('data-linked-overlaps');
                 if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
                   var linked_tooltips = data_overlap_attr.split(",");
+                  var linked_tooltip;
                   for (var index in linked_tooltips) {
                     if (linked_tooltips[index]) {
-                      $("." + linked_tooltips[index] + ":first").tooltip({
+                      linked_tooltip = $("." + linked_tooltips[index] + ":first");
+                      if (!linked_tooltip.hasClass('tooltip-f')) {
+                        continue;
+                      }
+                      linked_tooltip.tooltip({
                         position: positions[display_count % positions.length],
                         hideEvent: 'mouseleave',
-                        onShow: function() {
+                        onShow: function () {
                           // Reset onShow to not have a custom function to
                           // prevent recursive calls to onShow.
                         },
-                        onHide: function() {
+                        onHide: function () {
                           var checked = $("#easyui_tree").tree('getChecked');
                           for (var j = 0; j < checked.length; j++) {
                             if (linked_tooltips[index].search(checked[j]['attributes']['annotationId']) != -1) {
@@ -396,7 +409,7 @@
           }).show();
         }
         // Reset to remove ":first" to keep the on click working correctly.
-        if (data['anchorType'] == 'offset') {
+        if (showTooltip && data['anchorType'] == 'offset') {
           selector = 'span.overlap-spanning-annotation.' + ent_id;
           // To enable overlay hover all spans not just first.
           $(selector).hover(
