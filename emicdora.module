@@ -1487,6 +1487,18 @@ function emicdora_islandora_versionCModel_islandora_ingest_steps(array $form_sta
       'module' => 'emicdora',
       'file' => 'includes/ingest_versionable_object.form.inc',
     );
+    $steps['emicdora_batch_ingest_objects'] = array(
+      'weight' => PHP_INT_MAX,
+      'type' => 'callback',
+      'do_function' => array(
+        'function' => 'emicdora_defer_ingest_to_batch',
+        'args' => array(
+          TRUE,
+        ),
+        'file' => 'includes/ingest_versionable_object.form.inc',
+      ),
+      'module' => 'emicdora',
+    );
   }
 
   return $steps;
@@ -1574,14 +1586,15 @@ function emicdora_islandora_ingest_steps_alter(array &$steps, array &$form_state
     $form_state['redirect'] = $shared_storage['emicdora']['destination_url'];
   }
 
-  if (!empty($steps['xml_form_builder_metadata_step']) && isset($shared_storage['emicdora']['source'])) {
-    $source = islandora_object_load($shared_storage['emicdora']['source']);
+  if (!empty($steps['xml_form_builder_metadata_step']) && isset($steps['emicdora_versionable_object']) && $steps['emicdora_versionable_object']['args'][0]) {
+    $source = islandora_object_load($steps['emicdora_versionable_object']['args'][0]);
     if (isset($source['MODS'])) {
       // Set the template to be the source objects MODS datastream if present.
       // This pre-populates the Metadata form.
       $steps['xml_form_builder_metadata_step']['args'][0]['template'] = $source['MODS']->content;
     }
   }
+  dsm($steps);
 }
 
 /**

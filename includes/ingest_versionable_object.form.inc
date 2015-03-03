@@ -104,7 +104,10 @@ EOT;
 function emicdora_versionable_object_form(array $form, array &$form_state, $source_id) {
   form_load_include($form_state, 'inc', 'emicdora', 'includes/utilities');
   form_load_include($form_state, 'inc', 'islandora_paged_content', 'includes/utilities');
-  $values = &$form_state['values'];
+
+  $values =& $form_state['values'];
+  $step_storage =& islandora_ingest_form_get_step_storage($form_state);
+  $step_storage['source'] = $source_id;
   $source = islandora_object_load($source_id);
 
   // Build the list rows for the TEI-RDF tableselect, and count the number.
@@ -374,11 +377,9 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $values = $form_state['values'];
-  $shared_storage = &islandora_ingest_form_get_shared_storage($form_state);
-  // Store the Source PID in shared storage so it can be used in other forms
-  // steps and alters.
-  $shared_storage['source'] = $form_state['values']['source'];
-  $source = islandora_object_load($shared_storage['source']);
+  $shared_storage =& islandora_ingest_form_get_shared_storage($form_state);
+  $step_storage =& islandora_ingest_form_get_step_storage($form_state);
+  $source = islandora_object_load($step_storage['source']);
   $tn = $source['TN'] ? $source['TN']->content : NULL;
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
@@ -802,6 +803,7 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
   }
   $page = islandora_object_load($page);
   $filename = $context['results']['filename'];
+  $text = '';
   if (isset($page['CWRC'])) {
     $text = emicdora_convert_tei_to_plain_text($page['CWRC']->content);
   }
@@ -855,6 +857,7 @@ function emicdora_ingest_versionable_object_transcription_batch_finished($succes
  *   FALSE.
  */
 function emicdora_determine_source_for_versionable_object_ingest($form_state) {
+  $step_storage = islandora_ingest_form_get_step_storage($form_state, 'emicdora_versionable_object');
   if (isset($_GET['destination'])) {
     $destination = drupal_get_destination();
     $destination_url = $destination['destination'];
@@ -873,5 +876,76 @@ function emicdora_determine_source_for_versionable_object_ingest($form_state) {
       return $fourth_arg;
     }
   }
+  elseif (isset($step_storage['source'])) {
+    return $step_storage['source'];
+  }
   return FALSE;
+}
+
+function emicdora_defer_ingest_to_batch(&$form_state, $skip_first) {
+  dsm('attempted');
+  $all_objects =& islandora_ingest_form_get_objects($form_state);
+  $batch = array(
+    'title' => t('Ingesting objects'),
+    'file' => drupal_get_path('module', 'emicdora') . '/includes/ingest_versionable_object.form.inc',
+    'operations' => array(
+      array(
+        'emicdora_deferred_batch_ingest_operation',
+        array(
+          ($skip_first ?
+            array_slice($all_objects, 1) :
+            $all_objects),
+        ),
+      ),
+    ),
+    'finished' => 'emicdora_deferred_batch_finished',
+  );
+  if ($skip_first) {
+    $all_objects = array_slice($all_objects, 0, 1);
+  }
+  batch_set($batch);
+}
+
+function emicdora_deferred_batch_ingest_operation($objects, &$context) {
+  $sandbox =& $context['sandbox'];
+
+  if (!isset($sandbox['objects'])) {
+    $sandbox['objects'] = $objects;
+    $sandbox['total'] = count($objects);
+    $sandbox['progress'] = 0.0;
+    if ($sandbox['total'] === 0) {
+      return;
+    }
+  }
+
+  $sandbox['progress']++;
+  $object = array_shift($sandbox['objects']);
+  islandora_add_object($object);
+
+  $context['message'] = t('Ingested @pid.', array(
+    '@pid' => $object->id,
+  ));
+  $context['finished'] = $sandbox['progress'] / $sandbox['total'];
+}
+
+function emicdora_deferred_batch_finished($success, array $results, array $operations) {
+  module_load_include('inc', 'islandora', 'includes/ingest.form');
+  $batch = &batch_get();
+  // We have to unset the cached files here due to a bug in core. Basically when
+  // we come back from the batch function drupal_build_form() gets the
+  // $form_state back from the session rather than the database, thus skipping
+  // $form_get_cache which loads all of the required files. We forget the
+  // required files now, so that we can dynamically load the required files
+  // during drupal_rebuild_form().
+  $batch['form_state']['build_info']['files'] = array();
+  if ($success) {
+    // No-op.
+  }
+  else {
+    drupal_set_message(t('Failed to ingest some objects.'), 'error');
+    // Mock the form as it's not used, then return to the form step,
+    // that launched this batch process.
+    $form = array();
+    islandora_ingest_form_previous_submit($form, $batch['form_state']);
+  }
 }
