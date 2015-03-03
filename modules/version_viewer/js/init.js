@@ -747,10 +747,5 @@
       width: '100%',
       height: '729px'
     });
-    
-//    $("span[data-annotationid]").bind('mouseenter mouseleave', function(e){
-//    	console.log(e);
-//      console.log("hit it")
-//    });
   });
 })(jQuery);
