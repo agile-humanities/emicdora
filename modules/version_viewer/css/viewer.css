@@ -10,7 +10,8 @@
 
 /* BEGIN VIEWER 'Internet Archive Bookreader' STYLE */
 .panel.layout-panel.layout-panel-west.layout-split-west{
-  border-right: 5px solid #191972 !important;
+  border-right: none !important;
+  
 }
 /* .layout-expand-west{ */
 /*   border-right: 5px solid #191972 !important; */
@@ -20,20 +21,15 @@
   background-color: #191972 !important;
 }
 
-.layout-split-east{
-  border-right: 5px solid #191972 !important;
-}
 
 .layout-split-east{
-  border-left: 5px solid #191972 !important;
+  border-left: 1px solid #191972 !important;
+  border-right: 1px solid #191972 !important;
+  border-bottom: 1px solid #191972 !important;
 }
 
 .layout-split-west{
-  border-right: 5px solid #191972 !important;
-}
-
-.layout-split-west{
-  border-left: 5px solid #191972 !important;
+  border-left: 1px solid #191972 !important;
 }
 
 .panel-body.panel-body-noheader.layout-body{
@@ -103,7 +99,10 @@
   height: 27px;
   text-indent: -9999px;
   width: 27px;
-  background-position:  -406px -6px !important;
+  background-position:  27px 0px !important;
+}
+.win-switch-norm.img_selected:hover{
+  background-position: 0px 0px center !important;
 }
 
 .win-switch-full.img_selected {
@@ -204,7 +203,6 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 .BRicon.full.img_selected{
  padding:0px 0px;
  border:solid 2px #ffffff !important;
- background-color: transparent !important;
  -webkit-border-radius:4px;
  -moz-border-radius:4px; 
  border-radius: 4px; 

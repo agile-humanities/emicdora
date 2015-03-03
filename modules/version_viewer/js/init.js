@@ -27,6 +27,7 @@
     }
 
     var is_toggled = false;
+    var highlight_color = '#FFFF00';
 
     // Setup the initial menu 'look'.
     $('#wb_show_til').addClass('annos');
@@ -227,7 +228,7 @@
               }
             }
           } else {
-            $("span[data-annotationid='" + ent_id + "']").css('background-color', 'red');
+            $("span[data-annotationid='" + ent_id + "']").css('background-color', highlight_color);
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
               var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace
@@ -305,7 +306,7 @@
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
       if (data.hasOwnProperty('cwrcAttributes')) {
-        var colour = "red";
+        var colour = highlight_color;
         if (data['cwrcAttributes']['attributes']['Colour']) {
           colour = data['cwrcAttributes']['attributes']['Colour'];
         }
