@@ -302,7 +302,6 @@
     }
 
     function show_entity_tooltip(data, ent_id) {
-      console.log(data);
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
       if (data.hasOwnProperty('cwrcAttributes')) {
