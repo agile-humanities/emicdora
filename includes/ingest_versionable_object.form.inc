@@ -164,7 +164,7 @@ function emicdora_versionable_object_form(array $form, array &$form_state) {
         '#access' => $can_limit_page_range,
         '#type' => 'fieldset',
         '#title' => t('Select page range'),
-        '#description' => t('You may optionally limit the pages used in the TEI-RDF and transcription. Only valid for new TEI-RDF.'),
+        '#description' => t('You may optionally limit the pages used in the TEI-RDF and transcription.'),
         '#prefix' => '<div id="page-ajax-container-wrapper">',
         '#suffix' => '</div>',
         'limit_page_range' => array(
@@ -307,10 +307,6 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
   }
   // Validate TEI-RDF object, if "use existing" was selected.
   if ($values['tei_rdf_source'] == 'existing') {
-    // We can't limit pages on existing TEI-RDF.
-    if ($values['limit_page_range']) {
-      form_set_error('limit_page_range', t('You can not limit the page range on existing TEI-RDF objects, you must create a new one.'));
-    }
     if (empty($values['tei_rdf'])) {
       // We don't put the form error on the tableselect as that is not supported
       // by the Drupal Form API.
