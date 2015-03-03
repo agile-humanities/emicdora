@@ -403,7 +403,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
     $tei_pages = array_keys(emicdora_get_members($tei_rdf->id, 'islandora:tei-rdfCModel', 'isDerivationOf'));
-    $tei_pages = $values['limit_page_range'] ? array_splice($tei_pages, $values['first'] - 1, $values['last']) : $tei_pages;
+    $tei_pages = $values['limit_page_range'] ? array_slice($tei_pages, $values['first'] - 1, $values['last'] - $values['first'] + 1) : $tei_pages;
     // Clone existing tei-rdf if selected.
     if (!empty($tei_pages)) {
       $batch = array(
@@ -423,15 +423,14 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   }
   // Create a new TEI-RDF object.
   else {
-    $pages = islandora_paged_content_get_pages($source);
-
+    $pages = array_values(islandora_paged_content_get_pages($source));
     // @todo We need to migrate the existing data at some point in the future
     // The following property should not be a literal value, but we must make
     // it so for backwards compatibility.
     // TEI-RDF objects associated with books require a batch process to be
     // created, all the files created in the batch will be added to the
     // $form_state, to be ingested when islandora_ingest_form is submited.
-    $pages = $values['limit_page_range'] ? array_splice($pages, $values['first'] - 1, $values['last']) : $pages;
+    $pages = $values['limit_page_range'] ? array_slice($pages, $values['first'] - 1, $values['last'] - $values['first'] + 1) : $pages;
     if (!empty($pages)) {
       $batch = array(
         'title' => t('Creating TEI-RDF Object from @source', array('@source' => $source->label)),
@@ -486,7 +485,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       $tei_rdf = $form_state['values']['tei_rdf'];
       $tei_object = islandora_object_load($tei_rdf);
       $pages = ($values['tei_rdf_source'] == 'existing') ? islandora_paged_content_get_pages($tei_object) : islandora_paged_content_get_pages($source);
-      $pages = $values['limit_page_range'] ? array_splice($pages, $values['first'] - 1, $values['last']) : $pages;
+      $pages = array_values($pages);
+      $pages = $values['limit_page_range'] ? array_slice($pages, $values['first'] - 1, $values['last'] - $values['first'] + 1) : $pages;
       if (!empty($pages)) {
         // If there is already a batch in place we need to append to it,
         // otherwise run from the existing object.
