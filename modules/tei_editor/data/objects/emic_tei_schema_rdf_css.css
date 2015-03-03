@@ -77,10 +77,7 @@
 *[_tag="tag"]:after, *[_tag="gi"]:after { content: ">"; }
 *[_tag="gloss"] { display: inline; }
 *[_tag="group"] { display: block; margin-bottom: 1em; }
-*[_tag="body"] > *[_tag="div"] { display: block; padding-top: 7px; padding-bottom: 10px; color: inherit; font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; font-size: 18px; }
-*[_tag="body"] > *[_tag="div"][type="poem"] > *[_tag="author"] { font-weight: normal; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] { display: block; padding-top: 14px; padding-bottom: 10px; padding-left: 10px; color: inherit; background-color: rgb(187, 187, 187); font-weight: bold; margin-bottom: 0.5em; margin-top: 11px; }
-*[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="div"] { display: block; padding-top: 14px; padding-bottom: 10px; padding-left: 10px; color: inherit; background-color: rgb(187, 187, 187); font-weight: bold; margin-bottom: 0.5em; margin-top: 1em; }
+*[_tag="body"] > *[_tag="div"][type="poem"] > *[_tag="head"] *[_tag="author"] { font-weight: normal; }
 *[_tag="div"] *[_tag="opener"] *[_tag="dateline"] { display: block; text-align: right; width: 95%; }
 *[_tag="body"] > *[_tag="div"] > *[_tag="div"] { color: black; background-color: inherit; }
 *[_tag="body"] > *[_tag="div"] > *[_tag="div"] > *[_tag="div"] { color: black; background-color: inherit; }
