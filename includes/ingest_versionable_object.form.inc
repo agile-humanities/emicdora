@@ -403,6 +403,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   if ($values['tei_rdf_source'] == 'existing') {
     $tei_rdf = islandora_object_load($values['tei_rdf']);
     $tei_pages = array_keys(emicdora_get_members($tei_rdf->id, 'islandora:tei-rdfCModel', 'isDerivationOf'));
+    $tei_pages = $values['limit_page_range'] ? array_splice($tei_pages, $values['first'] - 1, $values['last']) : $tei_pages;
     // Clone existing tei-rdf if selected.
     if (!empty($tei_pages)) {
       $batch = array(
