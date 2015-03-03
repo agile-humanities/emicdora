@@ -214,7 +214,9 @@
                 if (checked[j]['attributes'].hasOwnProperty('nestedTooltips')) {
                   tooltips_elements = checked[j]['attributes']['nestedTooltips'];
                 }
-                tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                if (!$.inArray('span.overlap-spanning-annotation.' + ent_id, tooltips_elements)) {
+                  tooltips_elements.push('span.overlap-spanning-annotation.' + ent_id);
+                }
                 var temp_attributes = checked[j]['attributes'];
                 temp_attributes['nestedTooltips'] = tooltips_elements;
                 $("#easyui_tree").tree('update', {
