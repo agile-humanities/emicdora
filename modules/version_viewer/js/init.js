@@ -348,13 +348,18 @@
               var display_count = 0;
               if (data.hasOwnProperty('nestedTooltips')) {
                 var tooltips_elements = data['nestedTooltips'];
+                var tooltip_element;
                 for (var index in tooltips_elements) {
-                  if (tooltips_elements[index]) {
-                    $(tooltips_elements[index] + ":first").tooltip({
+                  if (!tooltips_elements[index]) {
+                    continue;
+                  }
+                  tooltip_element = $(tooltips_elements[index] + ":first");
+                  if (tooltip_element.hasClass('tooltip-f')) {
+                    tooltip_element.tooltip({
                       position: positions[display_count % positions.length],
                       hideEvent: 'mouseleave'
                     });
-                    $(tooltips_elements[index] + ":first").tooltip('show');
+                    tooltip_element.tooltip('show');
                     display_count++;
                   }
                 }
@@ -364,16 +369,21 @@
                 var data_overlap_attr = $(selector).attr('data-linked-overlaps');
                 if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
                   var linked_tooltips = data_overlap_attr.split(",");
+                  var linked_tooltip;
                   for (var index in linked_tooltips) {
                     if (linked_tooltips[index]) {
-                      $("." + linked_tooltips[index] + ":first").tooltip({
+                      linked_tooltip = $("." + linked_tooltips[index] + ":first");
+                      if (!linked_tooltip.hasClass('tooltip-f')) {
+                        continue;
+                      }
+                      linked_tooltip.tooltip({
                         position: positions[display_count % positions.length],
                         hideEvent: 'mouseleave',
-                        onShow: function() {
+                        onShow: function () {
                           // Reset onShow to not have a custom function to
                           // prevent recursive calls to onShow.
                         },
-                        onHide: function() {
+                        onHide: function () {
                           var checked = $("#easyui_tree").tree('getChecked');
                           for (var j = 0; j < checked.length; j++) {
                             if (linked_tooltips[index].search(checked[j]['attributes']['annotationId']) != -1) {
