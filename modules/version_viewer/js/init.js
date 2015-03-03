@@ -325,11 +325,23 @@
               if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
                 tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
               }
-              return '<div class="easyui-panel" style="width:100px;height:100px;padding:10px;">' +
+              return '<div class="easyui-panel" style="overflow:scroll; width:100px;height:100px;padding:10px;">' +
                   tool_tip_content +
                   '</div>';
             },
             onShow: function() {
+              // Allow a mouse to enter and leave the tooltip,
+              // for the purposes of scrolling and selecting
+              // a tooltips contents.
+              var this_tip = $(this);
+              this_tip.tooltip('tip').unbind().bind('mouseenter',
+                function(){
+                  this_tip.tooltip('show');
+                }).bind('mouseleave',
+                function(){
+                  this_tip.tooltip('hide');
+                });
+
               var display_count = 0;
               if (data.hasOwnProperty('nestedTooltips')) {
                 var tooltips_elements = data['nestedTooltips'];
