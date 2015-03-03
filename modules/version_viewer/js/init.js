@@ -231,7 +231,7 @@
             $("span[data-annotationid='" + ent_id + "']").css('background-color', highlight_color);
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace
+              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
               paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
             }
             if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
