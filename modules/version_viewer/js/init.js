@@ -232,7 +232,6 @@
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
               var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-              console.log(anno_id);
               paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
             }
             if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
