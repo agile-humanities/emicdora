@@ -1594,7 +1594,6 @@ function emicdora_islandora_ingest_steps_alter(array &$steps, array &$form_state
       $steps['xml_form_builder_metadata_step']['args'][0]['template'] = $source['MODS']->content;
     }
   }
-  dsm($steps);
 }
 
 /**
@@ -1703,7 +1702,12 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
     $destination = explode('/', $links['emicdora-create']['query']['destination']);
     $critical_edition = $destination[2];
     $source = $destination[4];
-    $links['emicdora-create']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
+    $create =& $links['emicdora-create'];
+    $create['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
+    // XXX: "destination" is making a mess with redirects... Since we're going
+    // to be redirecting elsewhere anyway, let's just "move" it.
+    $create['query']['d'] = $create['query']['destination'];
+    unset($create['query']['destination']);
     $links['emicdora-link']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/link";
   }
   // For the following operations redirect the user to the Critical Edition in
