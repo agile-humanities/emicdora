@@ -306,8 +306,13 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         ),
       ),
     );
-    $entity['attributes']['dialogId'] = "ent_dialog_$id";
-    $entity['attributes']['dialogMarkup'] = versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes, $type);
+    $no_dialog_types = array(
+      'textimagelink',
+    );
+    if (!in_array($type, $no_dialog_types)) {
+      $entity['attributes']['dialogId'] = "ent_dialog_$id";
+      $entity['attributes']['dialogMarkup'] = versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes, $type);
+    }
     $entity['attributes']['descriptiveNote'] = isset($cwrc_info->description) ? $cwrc_info->description : NULL;
     $entities[] = $entity;
   }
