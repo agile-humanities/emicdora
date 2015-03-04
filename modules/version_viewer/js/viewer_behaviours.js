@@ -34,8 +34,6 @@
             $(window).trigger('resize');
             $('#eui_window').css("top", "0px");
           }
-          
-          
           $(window).resize(function () {
             resizepage();
           });
