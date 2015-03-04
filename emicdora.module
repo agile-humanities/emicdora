@@ -1472,15 +1472,36 @@ function emicdora_object_management_access($object, $context) {
  * Implements hook_islandora_ingest_steps().
  */
 function emicdora_islandora_versionCModel_islandora_ingest_steps(array $form_state) {
-  return array(
-    'emicdora_versionable_object' => array(
+  $steps = array();
+
+  module_load_include('inc', 'emicdora', 'includes/ingest_versionable_object.form');
+  $source = emicdora_determine_source_for_versionable_object_ingest($form_state);
+  if ($source) {
+    $steps['emicdora_versionable_object'] = array(
       'weight' => -10,
       'type' => 'form',
       'form_id' => 'emicdora_versionable_object_form',
+      'args' => array(
+        $source,
+      ),
       'module' => 'emicdora',
       'file' => 'includes/ingest_versionable_object.form.inc',
-    ),
-  );
+    );
+    $steps['emicdora_batch_ingest_objects'] = array(
+      'weight' => PHP_INT_MAX,
+      'type' => 'callback',
+      'do_function' => array(
+        'function' => 'emicdora_defer_ingest_to_batch',
+        'args' => array(
+          TRUE,
+        ),
+        'file' => 'includes/ingest_versionable_object.form.inc',
+      ),
+      'module' => 'emicdora',
+    );
+  }
+
+  return $steps;
 }
 
 /**
@@ -1561,15 +1582,12 @@ function emicdora_transcriptioncmodel_TRANSCRIPTION_islandora_object_ingested(Ab
  */
 function emicdora_islandora_ingest_steps_alter(array &$steps, array &$form_state) {
   $shared_storage = &islandora_ingest_form_get_shared_storage($form_state);
-  if (isset($_POST['source'])) {
-    $shared_storage['source'] = filter_xss($_POST['source']);
-  }
-  if (isset($shared_storage['destination_url'])) {
-    $form_state['redirect'] = $shared_storage['destination_url'];
+  if (isset($shared_storage['emicdora']['destination_url'])) {
+    $form_state['redirect'] = $shared_storage['emicdora']['destination_url'];
   }
 
-  if (!empty($steps['xml_form_builder_metadata_step']) && isset($shared_storage['source'])) {
-    $source = islandora_object_load($shared_storage['source']);
+  if (!empty($steps['xml_form_builder_metadata_step']) && isset($steps['emicdora_versionable_object']) && $steps['emicdora_versionable_object']['args'][0]) {
+    $source = islandora_object_load($steps['emicdora_versionable_object']['args'][0]);
     if (isset($source['MODS'])) {
       // Set the template to be the source objects MODS datastream if present.
       // This pre-populates the Metadata form.
@@ -1684,7 +1702,12 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
     $destination = explode('/', $links['emicdora-create']['query']['destination']);
     $critical_edition = $destination[2];
     $source = $destination[4];
-    $links['emicdora-create']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
+    $create =& $links['emicdora-create'];
+    $create['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
+    // XXX: "destination" is making a mess with redirects... Since we're going
+    // to be redirecting elsewhere anyway, let's just "move" it.
+    $create['query']['d'] = $create['query']['destination'];
+    unset($create['query']['destination']);
     $links['emicdora-link']['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/link";
   }
   // For the following operations redirect the user to the Critical Edition in
