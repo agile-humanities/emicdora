@@ -231,6 +231,10 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_info = json_decode((string) reset($cwrc_info));
     $cwrc_attributes = $annotation->xpath('cw:cwrcAttributes');
     $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
+    // Sometimes CWRC-Writer has garbage in it.
+    if (!is_object($cwrc_attributes)) {
+      continue;
+    }
     // JS code expects the following variables to be in these places.
     $cwrc_attributes->cwrcInfo = $cwrc_info;
     if (!isset($cwrc_attributes->attributes)) {
@@ -241,8 +245,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if (isset($cwrc_attributes->attributes->id)) {
       $cwrc_attributes->attributes->uuid = $cwrc_attributes->attributes->id;
     }
+    // CWRC Entities store their description on another object.
     if (isset($cwrc_attributes->cwrcInfo->id)) {
-      $descriptive_note = NULL;
       $parts = explode('/', $cwrc_attributes->cwrcInfo->id);
       if (array_slice($parts, -3, 2) === array('islandora', 'object')) {
         $pid = end($parts);
@@ -262,7 +266,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
             $descriptive_note_node = $xpath->query('//descriptiveNotes/note');
             if ($descriptive_note_node->length > 0) {
               // Only return the first descriptive note to display.
-              $descriptive_note = $descriptive_note_node->item(0)->nodeValue;
+              $cwrc_info->description = $descriptive_note_node->item(0)->nodeValue;
             }
           }
         }
@@ -291,9 +295,6 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $cwrc_info->name = $obj ? $obj->label : $id;
     }
 
-    if ($descriptive_note) {
-      $cwrc_info->description = $descriptive_note;
-    }
     $entity = array(
       'id' => $id,
       'type' => $type,
@@ -315,8 +316,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     if (!in_array($type, $no_dialog_types)) {
       $entity['attributes']['dialogId'] = "ent_dialog_$id";
       $entity['attributes']['dialogMarkup'] = versionable_object_viewer_generate_entity_dialog_markup($id, $cwrc_attributes, $type);
-      $entity['attributes']['descriptiveNote'] = $descriptive_note;
     }
+    $entity['attributes']['descriptiveNote'] = isset($cwrc_info->description) ? $cwrc_info->description : NULL;
     $entities[] = $entity;
   }
   return $entities;
