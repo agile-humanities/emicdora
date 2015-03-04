@@ -332,9 +332,6 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
   content: ':';
 }
 
-.line-magic, .super-magic, .sub-magic {
-    min-width: 596px;
-}
 #easy-ui-east{
   background-image: none;
 }
