@@ -31,7 +31,6 @@
 *[_tag="code"] { display: inline; font-family: monospace; }
 *[_tag="corr"] { display: inline; color: green; background-color: inherit; }
 *[_tag="creation"] { display: block; }
-*[_tag="line"] { display: block; }
 *[_tag="date"] { display: inline; }
 *[_tag="change"] > *[_tag="date"], *[_tag="publicationStmt"] > *[_tag="date"] { display: block; font-weight: bold; }
 *[_tag="dateline"] { display: inline; }
