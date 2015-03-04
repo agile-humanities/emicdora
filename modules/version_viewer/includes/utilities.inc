@@ -231,6 +231,10 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
     $cwrc_info = json_decode((string) reset($cwrc_info));
     $cwrc_attributes = $annotation->xpath('cw:cwrcAttributes');
     $cwrc_attributes = json_decode((string) reset($cwrc_attributes));
+    // Sometimes CWRC-Writer has garbage in it.
+    if (!is_object($cwrc_attributes)) {
+      continue;
+    }
     // JS code expects the following variables to be in these places.
     $cwrc_attributes->cwrcInfo = $cwrc_info;
     if (!isset($cwrc_attributes->attributes)) {
