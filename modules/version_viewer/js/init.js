@@ -231,16 +231,6 @@
             }
           } else {
             $("span[data-annotationid='" + ent_id + "']").css('background-color', highlight_color);
-            // Ensure the 'descriptiveNote' property is set, before trying to
-            // show a tooltip.
-            nodes[i]['attributes']['descriptiveNote'] = " ";
-            if (nodes[i]['attributes']['cwrcAttributes'] !== undefined &&
-                nodes[i]['attributes']['cwrcAttributes']['cwrcInfo'] !== undefined &&
-                nodes[i]['attributes']['cwrcAttributes']['cwrcInfo']['description'] !== undefined &&
-                nodes[i]['attributes']['cwrcAttributes']['cwrcInfo']['description'] !== null
-              ) {
-              nodes[i]['attributes']['descriptiveNote'] = nodes[i]['attributes']['cwrcAttributes']['cwrcInfo']['description'];
-            }
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
               var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
