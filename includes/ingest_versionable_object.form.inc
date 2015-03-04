@@ -325,9 +325,13 @@ function emicdora_versionable_object_form_validate(array $form, array &$form_sta
   // Validate Page Range.
   if ($values['limit_page_range']) {
     module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
-    // Not efficent we should create a seperate function in
-    // islandora_paged_content to compute the number of pages.
-    $page_count = count(islandora_paged_content_get_pages($source));
+    if ($values['tei_rdf_source'] == 'new') {
+      $page_count = count(islandora_paged_content_get_pages($source));
+    }
+    else {
+      $tei_rdf = islandora_object_load($values['tei_rdf']);
+      $page_count = count(islandora_paged_content_get_pages($tei_rdf));
+    }
     foreach (array('first', 'last') as $element) {
       $numeric = is_numeric($values[$element]);
       $out_of_range = $numeric ? $values[$element] < 1 || $values[$element] > $page_count : FALSE;
