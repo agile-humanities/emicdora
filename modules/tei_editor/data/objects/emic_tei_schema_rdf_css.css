@@ -32,6 +32,7 @@
 *[_tag="corr"] { display: inline; color: green; background-color: inherit; }
 *[_tag="creation"] { display: block; }
 *[_tag="date"] { display: inline; }
+*[_tag="line"] { display: block; }
 *[_tag="change"] > *[_tag="date"], *[_tag="publicationStmt"] > *[_tag="date"] { display: block; font-weight: bold; }
 *[_tag="dateline"] { display: inline; }
 *[_tag="del"] { display: inline; color: red; background-color: inherit; text-decoration: line-through; }
