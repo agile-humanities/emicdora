@@ -136,6 +136,14 @@
                     return false;
                   }
                 });
+              // In some cases of overlay text highlighing it's not setting the
+              // end node properly, to handle these cases by setting the data
+              // at the loop to the last element.
+              if (info.node == null) {
+                // Catch issues where it's not setting the end node.
+                info.node = $(elements).last().get(0);
+                info.remaining = $(elements).last().get(0).length;
+              }
               return info;
             };
 
