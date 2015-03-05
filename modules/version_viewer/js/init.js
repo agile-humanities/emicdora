@@ -101,7 +101,7 @@
             var start = nodes[i]['attributes']['offsets']['start'];
             var end = nodes[i]['attributes']['offsets']['end'];
             var get_offset_element = function (offset) {
-              var selector = '.tei .line-magic .text .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
+              var selector = '.tei .line-magic .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
               return document.querySelector(selector);
             };
 
