@@ -7,7 +7,7 @@
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
       case "text":
-        update_tree_data();
+       // update_tree_data();
         break;
       case "audio":
         $('#wb_tei_markup').hide();
@@ -27,7 +27,7 @@
     }
 
     var is_toggled = false;
-    var highlight_color = '#FFFF00';
+    var text_image_annotation_ids = new Array();
 
     // Setup the initial menu 'look'.
     $('#wb_show_til').addClass('annos');
@@ -54,7 +54,6 @@
         }
       }
     });
-
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
@@ -70,6 +69,9 @@
           // Resize content.
           $('#eui_window').layout('resize', {
             width: '100%'
+          });
+          data[0]['children'].forEach(function(info){
+            $("span[data-annotationid='" + info.id + "']").addClass(info['attributes']['cwrcType']);
           });
         },
         error: function(data, status, xhd) {
@@ -229,8 +231,8 @@
                 show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
               }
             }
-          } else {
-            $("span[data-annotationid='" + ent_id + "']").css('background-color', highlight_color);
+          } else {//v-viewer-textimagelink
+            $("span[data-annotationid='" + ent_id + "']").addClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
               var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
@@ -288,7 +290,7 @@
           }
           else {
             var selector = "span[data-annotationid='" + ent_id + "']";
-            $(selector).css('background-color', 'initial');
+            $(selector).removeClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
             // Clear all click and tooltip events.
             $(selector).off();
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
@@ -305,20 +307,15 @@
     }
 
     function show_entity_tooltip(data, ent_id) {
+      console.log(data);
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
       var showTooltip = (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0);
       if (data.hasOwnProperty('cwrcAttributes')) {
-        var colour = highlight_color;
-        if (data['cwrcAttributes']['attributes']['Colour']) {
-          colour = data['cwrcAttributes']['attributes']['Colour'];
-        }
         var selector = ".tei *[data-annotationid='" + ent_id + "']";
         if (data['anchorType'] == 'offset') {
           selector = 'span.overlap-spanning-annotation.' + ent_id +  ':first';
-          colour = 'inherit';
         }
-        $(selector).css('background-color', colour);
         if (showTooltip) {
           $(selector).tooltip({
             position: 'top',
@@ -650,6 +647,7 @@
     function add_tab(type, endpoint, add_class, data_type) {
       add_class = typeof add_class !== 'undefined' ? add_class : "";
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
+      console.log(type);
       $.ajax({
         type: 'GET',
         async: false,
@@ -664,6 +662,7 @@
           $('#eui_window').layout('resize', {
             width: '100%'
           });
+          update_tree_data();
           try {
             Drupal.attachBehaviors();
           } catch(e) {
