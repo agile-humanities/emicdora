@@ -101,7 +101,7 @@
             var start = nodes[i]['attributes']['offsets']['start'];
             var end = nodes[i]['attributes']['offsets']['end'];
             var get_offset_element = function (offset) {
-              var selector = '.tei .line-magic .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
+              var selector = '.tei .line-magic .text .' + offset['element'] + "[data-" + offset['id_attribute'].toLowerCase() + "='" + offset['id'] + "']";
               return document.querySelector(selector);
             };
 
@@ -137,9 +137,10 @@
                   }
                 });
               // In some cases of overlay text highlighing it's not setting the
-              // end node properly, to handle these cases by setting the data
-              // at the loop to the last element.
-              if (info.node == null) {
+              // end node properly when the selected text stops at the end of a
+              // node, To handle these cases by setting the data at the loop to
+              // the last element.
+              if (info.node == null && info.remaining === 0) {
                 // Catch issues where it's not setting the end node.
                 info.node = $(elements).last().get(0);
                 info.remaining = $(elements).last().get(0).length;
