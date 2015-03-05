@@ -6,9 +6,6 @@
     });
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
-      case "text":
-       // update_tree_data();
-        break;
       case "audio":
         $('#wb_tei_markup').hide();
         $('#wb_show_annos').hide();
@@ -27,7 +24,6 @@
     }
 
     var is_toggled = false;
-    var text_image_annotation_ids = new Array();
 
     // Setup the initial menu 'look'.
     $('#wb_show_til').addClass('annos');
@@ -231,7 +227,7 @@
                 show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
               }
             }
-          } else {//v-viewer-textimagelink
+          } else {
             $("span[data-annotationid='" + ent_id + "']").addClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
@@ -307,7 +303,6 @@
     }
 
     function show_entity_tooltip(data, ent_id) {
-      console.log(data);
       var descriptive_note = data['descriptiveNote'];
       var positions = ['left', 'right', 'bottom'];
       var showTooltip = (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0);
@@ -647,7 +642,6 @@
     function add_tab(type, endpoint, add_class, data_type) {
       add_class = typeof add_class !== 'undefined' ? add_class : "";
       data_type = typeof data_type !== 'undefined' ? data_type : "json";
-      console.log(type);
       $.ajax({
         type: 'GET',
         async: false,
