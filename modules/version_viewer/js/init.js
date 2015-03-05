@@ -138,7 +138,7 @@
                 });
               // In some cases of overlay text highlighing it's not setting the
               // end node properly when the selected text stops at the end of a
-              // node, To handle these cases by setting the data at the loop to
+              // node. To handle these cases by setting the data at the loop to
               // the last element.
               if (info.node == null && info.remaining === 0) {
                 // Catch issues where it's not setting the end node.
