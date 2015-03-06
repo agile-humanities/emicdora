@@ -128,7 +128,7 @@
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
                 })
                 .each(function(index, element) {
-                  if (info.remaining >= this.data.length) {
+                  if (info.remaining > this.data.length) {
                     info.remaining -= this.data.length;
                   }
                   else {
@@ -143,7 +143,7 @@
               if (info.node == null && info.remaining === 0) {
                 // Catch issues where it's not setting the end node.
                 info.node = $(elements).last().get(0);
-                info.remaining = $(elements).last().get(0).length;
+                info.remaining = info.node.length;
               }
               return info;
             };
