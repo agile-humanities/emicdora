@@ -114,16 +114,22 @@
                 remaining: offset,
                 node: null
               };
-              var elements =  $.unique(
-                $(element)
-                  .children('.overlap-spanning-annotation')
-                  .find('.overlap-spanning-annotation')
-                  .addBack()
-                  .add(element)
-                  .contents()
-                  .get()
-              );
-              $(elements)
+              function getTextNodesIn(node) {
+                var textNodes = [];
+                function getTextNodes(node) {
+                  if (node.nodeType == 3) {
+                    textNodes.push(node);
+                  } else {
+                    for (var i = 0, len = node.childNodes.length; i < len; ++i) {
+                      getTextNodes(node.childNodes[i]);
+                    }
+                  }
+                }
+                getTextNodes(node);
+                return textNodes;
+              }
+              var text_nodes = getTextNodesIn(element);
+              $(text_nodes)
                 .filter(function (element) {
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
                 })
@@ -142,7 +148,7 @@
               // the last element.
               if (info.node == null && info.remaining === 0) {
                 // Catch issues where it's not setting the end node.
-                info.node = $(elements).last().get(0);
+                info.node = $(text_nodes).last().get(0);
                 info.remaining = info.node.length;
               }
               return info;
