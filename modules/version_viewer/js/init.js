@@ -334,6 +334,7 @@
                   this_tip.tooltip('show');
                 }).bind('mouseleave',
                 function(){
+                  $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
                   this_tip.tooltip('hide');
                 });
 
@@ -404,6 +405,7 @@
             function() {
               $( selector + ':first' ).tooltip('show');
             }, function() {
+              $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
               $( selector + ':first' ).tooltip('hide');
             }
           );
