@@ -50,6 +50,7 @@
         }
       }
     });
+
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
@@ -126,7 +127,7 @@
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
                 })
                 .each(function(index, element) {
-                  if (info.remaining >= this.data.length) {
+                  if (info.remaining > this.data.length) {
                     info.remaining -= this.data.length;
                   }
                   else {
@@ -134,6 +135,15 @@
                     return false;
                   }
                 });
+              // In some cases of overlay text highlighing it's not setting the
+              // end node properly when the selected text stops at the end of a
+              // node. To handle these cases by setting the data at the loop to
+              // the last element.
+              if (info.node == null && info.remaining === 0) {
+                // Catch issues where it's not setting the end node.
+                info.node = $(elements).last().get(0);
+                info.remaining = info.node.length;
+              }
               return info;
             };
 
