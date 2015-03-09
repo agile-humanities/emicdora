@@ -117,7 +117,7 @@
               function getTextNodesIn(node) {
                 var textNodes = [];
                 function getTextNodes(node) {
-                  if (node.nodeType == 3) {
+                  if (node.nodeType == Node.TEXT_NODE) {
                     textNodes.push(node);
                   } else {
                     for (var i = 0, len = node.childNodes.length; i < len; ++i) {
