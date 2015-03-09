@@ -295,6 +295,46 @@ $line_height_double: 3em;
     .line {
       display: block;
     }
+    .textimagelink {
+      border-color: #7F00FF;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .persName {
+      border-color: #FF0000;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .placeName {
+      border-color: #009999;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .title {
+      border-color: #debb00;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .orgName {
+      border-color: #3914AF;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .v-viewer-textimagelink {
+      border-width: 2px;
+    }
+    .v-viewer-person {
+      border-width: 2px;
+    }
+    .v-viewer-place {
+      border-width: 2px;
+    }
+    .v-viewer-organization {
+      border-width: 2px;
+    }
+    .v-viewer-title {
+      border-width: 2px;
+    }
   }
 
   &:not(.reading) {
@@ -323,6 +363,46 @@ $line_height_double: 3em;
       display: inline;
       color: red;
       text-decoration: line-through;
+    }
+    .textimagelink {
+      border-color: #7F00FF;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .persName {
+      border-color: #FF0000;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .placeName {
+      border-color: #009999;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .title {
+      border-color: #debb00;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .orgName {
+      border-color: #3914AF;
+      border-width: 1px;
+      border-bottom-style: dotted;
+    }
+    .v-viewer-textimagelink {
+      border-width: 2px;
+    }
+    .v-viewer-person {
+      border-width: 2px;
+    }
+    .v-viewer-place {
+      border-width: 2px;
+    }
+    .v-viewer-organization {
+      border-width: 2px;
+    }
+    .v-viewer-title {
+      border-width: 2px;
     }
   }
 }
