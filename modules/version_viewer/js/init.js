@@ -340,6 +340,7 @@
                   '</div>';
             },
             onShow: function() {
+              $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
               // Allow a mouse to enter and leave the tooltip,
               // for the purposes of scrolling and selecting
               // a tooltips contents.
@@ -349,7 +350,6 @@
                   this_tip.tooltip('show');
                 }).bind('mouseleave',
                 function(){
-                  $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
                   this_tip.tooltip('hide');
                 });
 
@@ -390,6 +390,7 @@
                         onShow: function () {
                           // Reset onShow to not have a custom function to
                           // prevent recursive calls to onShow.
+                          $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
                         },
                         onHide: function () {
                           var checked = $("#easyui_tree").tree('getChecked');
@@ -420,7 +421,6 @@
             function() {
               $( selector + ':first' ).tooltip('show');
             }, function() {
-              $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
               $( selector + ':first' ).tooltip('hide');
             }
           );
