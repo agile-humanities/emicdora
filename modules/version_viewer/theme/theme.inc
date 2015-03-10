@@ -27,6 +27,9 @@ function versionable_object_viewer_preprocess_versionable_object_viewer(&$variab
 
   // Drop in our initilization script.
   $module_path = drupal_get_path('module', 'versionable_object_viewer');
+  drupal_add_js("$module_path/js/entity.js");
+  drupal_add_js("$module_path/js/entity_tooltips.js");
+  drupal_add_js("$module_path/js/entity_dialogs.js");
   drupal_add_js("$module_path/js/init.js");
   drupal_add_js("$module_path/js/viewer_behaviours.js");
   drupal_add_js("$module_path/js/diplomatic_transcription.js");
