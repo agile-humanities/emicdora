@@ -215,7 +215,8 @@
             }
 
             $('span.overlap-spanning-annotation.' + ent_id)
-              .css('text-decoration', 'underline')
+              .addClass('v-viewer-' + nodes[i]['attributes']['cwrcType'])
+              .addClass(get_entity_class(nodes[i]['attributes']['cwrcType']))
               .attr('data-linked-overlaps', linked_overlaps.join());
 
             show_entity_tooltip(nodes[i]['attributes'], ent_id);
@@ -256,6 +257,36 @@
           }
         }
       }
+    }
+    /**
+     * Retrieve the CWRC_Writer tei class
+     * representaiton of this entity type.
+     */
+    function get_entity_class(cwrc_type) {
+      // The cwrc_writer uses specific CSS class names
+      // to style entities in TEI that dont match the defined
+      // entity type in the JSON. So, we must find 
+      // there match.
+      var entity_class = "";
+      switch(cwrc_type) {
+        case "person":
+          entity_class = "persName"
+          break;
+        case "place":
+          entity_class = "placeName"
+          break;
+        case "organization":
+          entity_class = "orgName"
+          break;
+        case "title":
+          entity_class = "title"
+          break;
+        case "textimagelink":
+          // DGI made this one, so it does match.
+          entity_class = cwrc_type;
+          break;
+      }
+      return entity_class;
     }
     function hide_annotations(nodes) {
       // Hide any active tooltips (sometimes they do not clear).
