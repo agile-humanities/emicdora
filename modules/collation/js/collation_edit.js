@@ -159,10 +159,6 @@
         $('#unmerge_label').click(function() {
           $('#unmerge_container').toggle();
         });
-        var contents = $("#emicdora_collatex_iframe").contents();
-        contents.find("#examples").closest('.form-element').hide();
-        contents.find("#graphml").closest('.yui3-g').hide();
-        var $head = contents.find("head");
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         $('.x-panel-body').hover(
