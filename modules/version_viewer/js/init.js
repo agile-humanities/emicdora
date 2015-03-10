@@ -340,6 +340,7 @@
                   '</div>';
             },
             onShow: function() {
+              $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
               // Allow a mouse to enter and leave the tooltip,
               // for the purposes of scrolling and selecting
               // a tooltips contents.
@@ -389,6 +390,7 @@
                         onShow: function () {
                           // Reset onShow to not have a custom function to
                           // prevent recursive calls to onShow.
+                          $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
                         },
                         onHide: function () {
                           var checked = $("#easyui_tree").tree('getChecked');
