@@ -159,17 +159,6 @@
         $('#unmerge_label').click(function() {
           $('#unmerge_container').toggle();
         });
-        var contents = $("#emicdora_collatex_iframe").contents();
-        contents.find("#logo").hide();
-        contents.find("#examples").closest('.form-element').hide();
-        contents.find("#graphml").closest('.yui3-g').hide();
-        var $head = contents.find("head");
-        $head.append($("<link/>", {
-          rel: "stylesheet",
-          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
-          type: "text/css"
-        }
-        ));
         $('.emicdora_input').text('');
         $("#save_changes").hide();
         $('.x-panel-body').hover(
@@ -317,8 +306,8 @@
           }
 
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
-          var build_selection = function (range) {
-            var total_offset = function (node, node_offset) {
+          var build_selection = function(range) {
+            var total_offset = function(node, node_offset) {
               // We need the text offset inside of a given node, so let's
               // sum up our previous siblings.
               var total = node_offset;
@@ -427,9 +416,10 @@
       });
       $('#emicdora_collatex_iframe').load(function() {
         var contents = $("#emicdora_collatex_iframe").contents();
-        contents.find("#logo").hide();
+        contents.find("#logo").attr('title', 'Copyright © 2010-2013 The Interedition Development Group. All rights reserved.');
         contents.find("#examples").closest('.form-element').hide();
         contents.find("#graphml").closest('.yui3-g').hide();
+        contents.find("#footer").hide();
         var $head = contents.find("head");
         $head.append($("<link/>", {
           rel: "stylesheet",
