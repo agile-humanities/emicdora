@@ -211,7 +211,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
     $page_results = islandora_paged_content_get_pages($versionable_object);
     $start_page = 1;
     $end_page = count($page_results);
-    if ($form_state['values']['restricted']) {
+    if (isset($form_state['values']['restricted']) && $form_state['values']['restricted']) {
       $start_page = $form_state['values']['first_page'];
       $end_page = $form_state['values']['last_page'];
     }
