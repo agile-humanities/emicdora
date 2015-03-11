@@ -19,7 +19,12 @@ Drupal.versionViewer.dialogs = Drupal.versionViewer.dialogs || {};
    */
   Drupal.versionViewer.dialogs.canDisplayEntity = function (entity) {
     var hasMarkup = entity.dialogMarkup !== undefined && entity.dialogMarkup !== null;
-    var hasName = entity.cwrcAttributes.cwrcInfo.name;
+    var hasName = entity.cwrcAttributes !== undefined &&
+      entity.cwrcAttributes !== null &&
+      entity.cwrcAttributes.cwrcInfo !== undefined &&
+      entity.cwrcAttributes.cwrcInfo !== null &&
+      entity.cwrcAttributes.cwrcInfo.name !== undefined &&
+      entity.cwrcAttributes.cwrcInfo.name !== null;
     return hasMarkup && hasName;
   };
 
