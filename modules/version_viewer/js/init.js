@@ -132,7 +132,7 @@
                   return this.nodeType == Node.TEXT_NODE && this.data != ' ';
                 })
                 .each(function(index, element) {
-                  if (info.remaining > this.data.length) {
+                  if (info.remaining >= this.data.length) {
                     info.remaining -= this.data.length;
                   }
                   else {
@@ -140,7 +140,7 @@
                     return false;
                   }
                 });
-              // In some cases of overlay text highlighing it's not setting the
+              // In some cases of overlay text highlighting it's not setting the
               // end node properly when the selected text stops at the end of a
               // node. To handle these cases by setting the data at the loop to
               // the last element.
