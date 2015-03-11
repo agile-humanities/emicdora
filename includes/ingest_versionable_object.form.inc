@@ -500,7 +500,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
         );
         // If we are using a existing TEI-RDF use it's objects CWRC datastreams.
         // Otherwise generate the CWRC datastream.
-        foreach (array_keys($pages) as $page) {
+        foreach ($pages as $page) {
           $batch['operations'][] = array(
             'emicdora_ingest_versionable_object_transcription_batch_operation',
             array($page),
@@ -807,7 +807,7 @@ function emicdora_ingest_versionable_object_transcription_batch_operation($page,
     $file = file_save_data('', "temporary://{$file_id}transcription.txt");
     $context['results']['filename'] = drupal_realpath($file->uri);
   }
-  $page = islandora_object_load($page);
+  $page = islandora_object_load($page['pid']);
   $filename = $context['results']['filename'];
   $text = '';
   if (isset($page['CWRC'])) {
