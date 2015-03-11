@@ -138,9 +138,10 @@ function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
   $object = $variables['islandora_object'];
   $return_label = t("Return to @label", array('@label' => $object->label));
   $variables['return_button'] = "<button class = 'emicdora_button return'>$return_label</button>";
-  $title = isset($variables['title']) ? $variables['title'] : NULL;
+  $title = isset($variables['filter_term']) ? $variables['filter_term'] : NULL;
+  $field = isset($variables['field']) ? $variables['field'] : NULL;
   $display_count = $variables['display_count'];
-  $count_data = emicdora_get_all_source_objects($object->id, 0, 0, $title);
+  $count_data = emicdora_get_all_source_objects($object->id, 0, 0, $title, $field);
   $total = $count_data['count'];
   $current_page = pager_default_initialize($total, $display_count);
   $start = $current_page * $display_count;
@@ -155,7 +156,7 @@ function emicdora_preprocess_emicdora_add_source_page(array &$variables) {
         'critical_edition' => $critical_edition->id,
       ), 'setting'
   );
-  $source_data = emicdora_get_all_source_objects($object->id, $start, $display_count, $title);
+  $source_data = emicdora_get_all_source_objects($object->id, $start, $display_count, $title, $field);
   $source_objects = $source_data['results'];
   $output = "";
   foreach ($source_objects as $item_details) {
@@ -244,7 +245,7 @@ function emicdora_item_table($item_details) {
   $image = theme_image(array(
     'path' => "islandora/object/{$item_details['pid']}/datastream/TN/view",
     'alt' => '',
-    'height' => '90px',
+    'height' => '150px',
     'attributes' => array('class' => 'emicdora_thumbnail'),
   ));
 
@@ -255,7 +256,7 @@ function emicdora_item_table($item_details) {
     'image' => array(
       'data' => $image,
       'class' => 'emicdora_cell_image',
-      'rowspan' => 2,
+      'rowspan' => 3,
     ),
     'title' => array(
       'data' => t('Title'),
@@ -273,6 +274,16 @@ function emicdora_item_table($item_details) {
     ),
     'label' => array(
       'data' => $item_details['type'],
+      'class' => 'emicdora_cell_label',
+    ),
+  );
+  $rows[] = array(
+    'title' => array(
+      'data' => t('Description'),
+      'class' => 'emicdora_cell_title',
+    ),
+    'label' => array(
+      'data' => $item_details['description'],
       'class' => 'emicdora_cell_label',
     ),
   );
