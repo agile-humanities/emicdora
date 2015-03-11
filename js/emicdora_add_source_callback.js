@@ -29,11 +29,6 @@
             if (results.hasOwnProperty('message')) {
               alert(results.message)
             }
-            if (results.hasOwnProperty('added')) {
-              var location = window.location.origin + Drupal.settings.basePath + 'islandora/object/' + results.added;
-              window.location.replace(location);
-            }
-
           },
           error: function(data, status, xhd) {
             console.log("The function execute_callback has failed");
