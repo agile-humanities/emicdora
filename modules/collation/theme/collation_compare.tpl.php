@@ -32,9 +32,9 @@
   <div id="collatex_iframe">
     <input id="full-window-button" class="emicdora_button" type="button" value="<?php print t("Full Window"); ?>" />
     <div id ="emicdora_collatex_info_window" title = 'Copyright © 2010-2013 The Interedition Development Group. All rights reserved.'>
-      <p>To use <a href="http://collatex.net/">CollateX</a> simply copy and paste desired text from windows above into each of the Witness boxes below.<br />
-        Press 'Collate' to generate results.<br />
-        Press 'Add' to open a fresh witness box to collate additional material.
+      <p>To use <a href="http://collatex.net/" target="_blank">CollateX</a>, copy text from viewer panes above and paste into the witness boxes below.<br />
+        Click 'Add' to open a new witness box to collate additional material. <br />
+        Click 'Collate' to generate results.
       </p>
     </div>
     <iframe id ="emicdora_collatex_iframe" src ="/collatex/" ></iframe>
