@@ -17,13 +17,6 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_title_and_breadcrumbs_object($object);
-  $filter_options = array(
-    'Empty' => 'Empty',
-    'CCE' => 'CCE',
-    'Novel' => 'Novel',
-    'Play' => 'Play',
-    'Poem' => 'Poem',
-  );
 
   $form = array();
 
@@ -68,12 +61,6 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
   $form['pid'] = array(
     '#type' => 'hidden',
     '#value' => $object->id,
-  );
-
-  $form['filter'] = array(
-    '#type' => 'select',
-    '#title' => t('Filter'),
-    '#options' => $filter_options,
   );
 
   $form['intro'] = array(
@@ -137,8 +124,7 @@ function emicdora_mvd_form_submit(&$form, &$form_state) {
   $critical_edition_pid = $form_state['values']['pid'];
   $mvd_title = $form_state['values']['mvd'];
   $mvd_description = $form_state['values']['mvd_description'];
-  $filter = $form_state['values']['filter'];
-  $success = emicdora_calliope_create_mvd($critical_edition_pid, $mvd_title, $mvd_description, $transcriptions, $filter);
+  $success = emicdora_calliope_create_mvd($critical_edition_pid, $mvd_title, $mvd_description, $transcriptions);
   drupal_set_message(check_plain($success));
   $mvd_title = str_replace(' ', '_', $mvd_title);
   $form_state['redirect'] = array("islandora/object/$critical_edition_pid/compare/$mvd_title", array('fragment' => "$mvd_title/$critical_edition_pid"));
@@ -179,8 +165,7 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
       foreach ($mvd['metadata']['resources'] as $transcription) {
         $resource_ids[] = $transcription['id'];
       }
-      $filter = $mvd['metadata']['filter'];
-      emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
+      emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids);
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
       }
