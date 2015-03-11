@@ -165,7 +165,8 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
       foreach ($mvd['metadata']['resources'] as $transcription) {
         $resource_ids[] = $transcription['id'];
       }
-      emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids);
+      $filter = $mvd['metadata']['filter'];
+      emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
       }
