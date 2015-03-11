@@ -201,13 +201,11 @@ function emicdora_calliope_delete_mvd_no_exit($id) {
  *   Title for MVD
  * @param array $resource_ids
  *   Array of transcriptions to build MVD
- * @param string $filter
- *   Optional Filter
  *
  * @return string
  *   Status message
  */
-function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL, $filter = "Empty") {
+function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_description, $resource_ids = NULL) {
   global $base_url;
   $mvd_success = FALSE;
   // We need a one character token that won't appear in normal text.
