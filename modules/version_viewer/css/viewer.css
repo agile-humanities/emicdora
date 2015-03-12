@@ -332,6 +332,13 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
   content: ':';
 }
 
+.entity_tooltip {
+  width:100px;
+  height:100px;
+  padding:10px;
+  overflow: scroll;
+}
+
 #easy-ui-east{
   background-image: none;
 }

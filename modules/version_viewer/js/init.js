@@ -1,8 +1,10 @@
+/*jshint browser: true*/
+/*global jQuery, Drupal */
 (function($) {
   $(document).ready(function() {
     $('body').click(function(){
       // Hide any active tooltips (sometimes they do not clear).
-      $('.tooltip-f').tooltip('hide');
+      Drupal.versionViewer.tooltips.hideTooltips();
     });
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
@@ -84,7 +86,7 @@
 
     function show_annotations(nodes) {
       // Hide any active tooltips (sometimes they do not clear).
-      $('.tooltip-f').tooltip('hide');
+      Drupal.versionViewer.tooltips.hideTooltips();
 
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
@@ -290,7 +292,7 @@
     }
     function hide_annotations(nodes) {
       // Hide any active tooltips (sometimes they do not clear).
-      $('.tooltip-f').tooltip('hide');
+      Drupal.versionViewer.tooltips.hideTooltips();
 
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
@@ -302,6 +304,10 @@
         // Hide Entities.
         for (var i = 0; i < nodes.length; i++) {
           var ent_id = nodes[i]['attributes']['annotationId'];
+          // Because the HTML gets manipulated / removed we have to destroy our
+          // tooltip as it's data will be gone.
+          Drupal.versionViewer.tooltips.destroyEntityTooltip(ent_id);
+          Drupal.versionViewer.dialogs.destroyEntityDialog(ent_id, nodes[i]['attributes']);
           if (nodes[i]['attributes']['anchorType'] == 'offset') {
             $('span.overlap-spanning-annotation.' + ent_id)
               .css('text-decoration', 'inherit')
@@ -348,141 +354,30 @@
       }
     }
 
-    function show_entity_tooltip(data, ent_id) {
-      var descriptive_note = data['descriptiveNote'];
-      var positions = ['left', 'right', 'bottom'];
-      var showTooltip = (descriptive_note !== undefined && descriptive_note !== null && descriptive_note.length > 0);
-      if (data.hasOwnProperty('cwrcAttributes')) {
-        var selector = ".tei *[data-annotationid='" + ent_id + "']";
-        if (data['anchorType'] == 'offset') {
-          selector = 'span.overlap-spanning-annotation.' + ent_id +  ':first';
+    /**
+     * Creates a tooltip/dialog for the given entity.
+     *
+     * @param {Object} entity An object containing the entity data.
+     * @param {String} entID The identifier of the given entity.
+     */
+    function show_entity_tooltip(entity, entID) {
+      var tooltips = Drupal.versionViewer.tooltips;
+      var dialogs = Drupal.versionViewer.dialogs;
+      if (tooltips.canDisplayEntity(entity)) {
+        if (tooltips.entityHasTooltip(entID)) {
+          // Because creating new entities destroys spans we have to recreate
+          // tooltips even when others are being shown.
+          tooltips.destroyEntityTooltip(entID);
         }
-        if (showTooltip) {
-          $(selector).tooltip({
-            position: 'top',
-            hideEvent: 'mouseleave',
-            content: function() {
-              var tool_tip_content = data['cwrcAttributes']['cwrcInfo']['name'];
-              if (data['cwrcAttributes']['cwrcInfo'].hasOwnProperty('description')) {
-                tool_tip_content = data['cwrcAttributes']['cwrcInfo']['description'];
-              }
-              return '<div class="easyui-panel" style="overflow:scroll; width:100px;height:100px;padding:10px;">' +
-                  tool_tip_content +
-                  '</div>';
-            },
-            onShow: function() {
-              $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
-              // Allow a mouse to enter and leave the tooltip,
-              // for the purposes of scrolling and selecting
-              // a tooltips contents.
-              var this_tip = $(this);
-              this_tip.tooltip('tip').unbind().bind('mouseenter',
-                function(){
-                  this_tip.tooltip('show');
-                }).bind('mouseleave',
-                function(){
-                  this_tip.tooltip('hide');
-                });
-
-              var display_count = 0;
-              if (data.hasOwnProperty('nestedTooltips')) {
-                var tooltips_elements = data['nestedTooltips'];
-                var tooltip_element;
-                for (var index in tooltips_elements) {
-                  if (!tooltips_elements[index]) {
-                    continue;
-                  }
-                  tooltip_element = $(tooltips_elements[index] + ":first");
-                  if (tooltip_element.hasClass('tooltip-f')) {
-                    tooltip_element.tooltip({
-                      position: positions[display_count % positions.length],
-                      hideEvent: 'mouseleave'
-                    });
-                    tooltip_element.tooltip('show');
-                    display_count++;
-                  }
-                }
-              } else {
-                // Overlaps need to display other overlaps that collide with it.
-                positions = ['bottom', 'right', 'left'];
-                var data_overlap_attr = $(selector).attr('data-linked-overlaps');
-                if (typeof data_overlap_attr !== typeof undefined && data_overlap_attr !== false) {
-                  var linked_tooltips = data_overlap_attr.split(",");
-                  var linked_tooltip;
-                  for (var index in linked_tooltips) {
-                    if (linked_tooltips[index]) {
-                      linked_tooltip = $("." + linked_tooltips[index] + ":first");
-                      if (!linked_tooltip.hasClass('tooltip-f')) {
-                        continue;
-                      }
-                      linked_tooltip.tooltip({
-                        position: positions[display_count % positions.length],
-                        hideEvent: 'mouseleave',
-                        onShow: function () {
-                          // Reset onShow to not have a custom function to
-                          // prevent recursive calls to onShow.
-                          $('.tooltip .tooltip-content .easyui-panel').scrollTop(0);
-                        },
-                        onHide: function () {
-                          var checked = $("#easyui_tree").tree('getChecked');
-                          for (var j = 0; j < checked.length; j++) {
-                            if (linked_tooltips[index].search(checked[j]['attributes']['annotationId']) != -1) {
-                              // Rebuild tooltip to restore removed the onShow
-                              // function and remove this onHide function.
-                              show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
-                              break;
-                            }
-                          }
-                        }
-                      });
-                      $("." + linked_tooltips[index] + ":first").tooltip('show');
-                      display_count++;
-                    }
-                  }
-                }
-              }
-            }
-          }).show();
-        }
-        // Reset to remove ":first" to keep the on click working correctly.
-        if (showTooltip && data['anchorType'] == 'offset') {
-          selector = 'span.overlap-spanning-annotation.' + ent_id;
-          // To enable overlay hover all spans not just first.
-          $(selector).hover(
-            function() {
-              $( selector + ':first' ).tooltip('show');
-            }, function() {
-              $( selector + ':first' ).tooltip('hide');
-            }
-          );
-        }
-        $(selector).click(function() {
-          // Hide any active tooltips (sometimes they do not clear).
-          $('.tooltip-f').tooltip('hide');
-          var hasMarkup = (typeof data['dialogMarkup'] != 'undefined' && data['dialogMarkup'] !== null);
-          if ($('#ent_dialog_' + ent_id).length == 0 && hasMarkup) {
-            $('#content').append(data['dialogMarkup']);
-          }
-          if (hasMarkup) {
-            $('#ent_dialog_' + ent_id).dialog({
-              title: data['cwrcAttributes']['cwrcInfo']['name'],
-              width: 400,
-              height: 200,
-              closed: false,
-              cache: false,
-              resizeable: true,
-              collapsible: true,
-              modal: false
-            });
-          }
-        });
+        tooltips.createEntityTooltip(entID, entity);
       }
-      else {
-        // In this case, we are dealing with a plain image annotation.
-        // Wireframes dont well me what to show in this case.
+      if (dialogs.canDisplayEntity(entity)) {
+        if (dialogs.entityHasDialog(entID)) {
+          dialogs.destroyEntityDialog(entID, entity);
+        }
+        dialogs.createEntityDialog(entID, entity);
       }
     }
-
 
     function build_dialog_content(data) {
       var content = "";
