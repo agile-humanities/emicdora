@@ -35,8 +35,8 @@ function emicdora_collation_edit() {
           'deleted' => $new_deleted,
         );
         $cleaned_doms = emicdora_cleanup_merged($outputs);
-        $added_node = $cleaned_doms['added']->getElementById($config['added']);
-        $deleted_node = $cleaned_doms['deleted']->getElementById($config['deleted']);
+        $added_node = emicdora_get_element_by_id($cleaned_doms['added'], $config['added']);
+        $deleted_node = emicdora_get_element_by_id($cleaned_doms['deleted'], $config['deleted']);
 
         $results = array(
           'new_deleted' => $cleaned_doms['deleted']->saveXML($deleted_node),
@@ -109,26 +109,28 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     // XXX: Very much based on the overlapping entities work, for the
     // "versionable object viewer".
     $remaining = $node_info['offset'];
-    $element = $dom->getElementById($node_info['id']);
-    foreach ($element->childNodes as $child) {
-      if ($child->nodeType === XML_TEXT_NODE) {
-        $length = drupal_strlen($child->nodeValue);
-        if ($remaining >= $length) {
-          $remaining -= $length;
-        }
-        else {
-          return array(
-            'remaining' => $remaining,
-            'node' => $child,
-          );
+    $element = emicdora_get_element_by_id($dom, $node_info['id']);
+    if ($element) {
+      foreach ($element->childNodes as $child) {
+        if ($child->nodeType === XML_TEXT_NODE) {
+          $length = drupal_strlen($child->nodeValue);
+          if ($remaining >= $length) {
+            $remaining -= $length;
+          }
+          else {
+            return array(
+              'remaining' => $remaining,
+              'node' => $child,
+            );
+          }
         }
       }
-    }
-    if ($remaining === 0) {
-      return array(
-        'remaining' => drupal_strlen($element->lastChild->nodeValue),
-        'node' => $element->lastChild,
-      );
+      if ($remaining === 0) {
+        return array(
+          'remaining' => drupal_strlen($element->lastChild->nodeValue),
+          'node' => $element->lastChild,
+        );
+      }
     }
     throw new CollationException('Failed to find text node.');
   };
@@ -255,9 +257,8 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     // Nuke all the "replaced" spans.
     $nuke->parentNode->removeChild($nuke);
   }
-
-  $wrapper_node = $dom->getElementById($config[$type]);
-  return $dom->saveHTML($wrapper_node);
+  $wrapper_node = emicdora_get_element_by_id($dom, $config[$type]);
+  return $dom->saveXML($wrapper_node);
 }
 
 /**
@@ -289,10 +290,10 @@ function emicdora_unlink($fixed_content, $type) {
   );
   $dom = new DOMDocument();
   $dom->loadHTML($fixed_content);
-  $element = $dom->getElementById($id);
+  $element = emicdora_get_element_by_id($dom, $id);
   $element->setAttribute('class', $type);
   $element->removeAttribute('style');
-  $node = $dom->getElementById($config[$type]);
+  $node = emicdora_get_element_by_id($dom, $config[$type]);
   return $dom->saveXML($node);
 }
 
@@ -418,7 +419,7 @@ function emicdora_cleanup_merged($inputs) {
         continue;
       }
       $opposite_id = emicdora_flip_id($item->getAttribute('id'));
-      $test_node = $doms[$opposite_type]->getElementById($opposite_id);
+      $test_node = emicdora_get_element_by_id($doms[$opposite_type], $opposite_id);
       if ($test_node) {
         continue;
       }
@@ -496,6 +497,23 @@ function emicdora_get_config() {
     'added' => 'versionview-1011-body',
     'deleted' => 'versionview-1010-body',
   );
+}
+
+/**
+ * This is a replace for $dom->getElementById().
+ *
+ * As it does not work in earlier versions (<=5.3.3) of PHP with HTML.
+ *
+ * @param DOMDocument $dom
+ * @param string $id
+ *
+ * @return DOMElement|NULL
+ *   The element if found, NULL otherwise.
+ */
+function emicdora_get_element_by_id($dom, $id) {
+  $xpath = new DOMXPath($dom);
+  $results = $xpath->query("//*[@id='{$id}']");
+  return $results->item(0);
 }
 
 class CollationException extends Exception {}
