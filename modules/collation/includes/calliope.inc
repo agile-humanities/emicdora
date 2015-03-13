@@ -271,20 +271,22 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
   $response = curl_exec($ch);
   $err = curl_errno($ch);
   $error = curl_error($ch);
+  $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
   curl_close($ch);
-
   if ($err) {
-    return t("Error @err @error @response", array(
+    drupal_set_message(t("Error @err @error @response", array(
       '@err' => $err,
       '@error' => $error,
       '@response' => $response,
-    ));
+    )));
+    return FALSE;
   }
   else {
     // Unfortunately HRIT Server does not use HTTP status to indicate errors.
     // Look for 'rror' in response instead.
     $hriterror = preg_match('/rror/', $response);
-    if ($hriterror == 0) {
+    $rejected = preg_match('/[rR]eject/', $response);
+    if ($hriterror == 0 && $rejected == 0) {
       // Try to fetch json for created mvd.
       $hriterror = preg_match('/HritServer Error/', $response);
       if ($hriterror == 0) {
@@ -311,10 +313,24 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
         $mvd_success = emicdora_calliope_write_mvd($newmvd);
       }
     }
+    else if ($contentType == 'text/html;charset=UTF-8') {
+      $doc = new DOMDocument(1.0, 'UTF-8');
+      $doc->loadHTML($response);
+      $xpath = new DOMXPath($doc);
+      $results = $xpath->query('//text()[contains(., "Reject") or contains(., "reject")]');
+      if ($results->length > 0) {
+        $message = '';
+        foreach ($results as $node) {
+          $message .= $doc->saveXML($node);
+        }
+        drupal_set_message($message);
+      }
+    }
     if ($mvd_success) {
       drupal_set_message(t("Collation successfully @verb.", array('@verb' => $verb)));
     }
   }
+  return $mvd_success;
 }
 
 /**

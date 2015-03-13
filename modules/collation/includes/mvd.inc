@@ -106,6 +106,47 @@ function emicdora_mvd_form_validate($form, $form_state) {
   if (count(array_filter($form_state['values']['transcriptions'])) < 2) {
     form_set_error('transcriptions', t('A minimum of two transcriptions are required to create a collation.'));
   }
+  $pids = array_filter($form_state['values']['transcriptions']);
+  $get_transcriptions = function($pid) {
+    $object = islandora_object_load($pid);
+    return $object['TRANSCRIPTION'];
+  };
+  $transcriptions = array_map($get_transcriptions, $pids);
+  foreach ($transcriptions as $transcription) {
+    // Calliope has limits on the length of a transcription.
+    $size = $transcription->size;
+    if ($size <= 0) {
+      form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
+        '%label' => $transcription->parent->label,
+        '%pid' => $transcription->parent->id,
+      )));
+      break;
+    }
+    if ($size >= 102400) {
+      form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
+        '%label' => $transcription->parent->label,
+        '%pid' => $transcription->parent->id,
+        '%length' => $size,
+      )));
+      break;
+    }
+    // Compare each possible combination to check that they can be compared.
+    foreach ($transcriptions as $second) {
+      $second_size = $second->size;
+      $difference_in_length = min($size, $second_size) / max($size, $second_size);
+      if ($difference_in_length < 0.1) {
+        form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
+          '%label_one' => $transcription->parent->label,
+          '%pid_one' => $transcription->parent->id,
+          '%length_one' => $size,
+          '%label_two' => $second->parent->label,
+          '%pid_two' => $second->parent->id,
+          '%length_two' => $second_size,
+        )));
+        break 2;
+      }
+    }
+  }
 }
 
 /**
@@ -125,9 +166,13 @@ function emicdora_mvd_form_submit(&$form, &$form_state) {
   $mvd_title = $form_state['values']['mvd'];
   $mvd_description = $form_state['values']['mvd_description'];
   $success = emicdora_calliope_create_mvd($critical_edition_pid, $mvd_title, $mvd_description, $transcriptions);
-  drupal_set_message(check_plain($success));
-  $mvd_title = str_replace(' ', '_', $mvd_title);
-  $form_state['redirect'] = array("islandora/object/$critical_edition_pid/compare/$mvd_title", array('fragment' => "$mvd_title/$critical_edition_pid"));
+  if ($success) {
+    $mvd_title = str_replace(' ', '_', $mvd_title);
+    $form_state['redirect'] = array(
+      "islandora/object/$critical_edition_pid/compare/$mvd_title",
+      array('fragment' => "$mvd_title/$critical_edition_pid")
+    );
+  }
 }
 
 /**
