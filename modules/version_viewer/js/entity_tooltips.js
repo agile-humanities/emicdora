@@ -443,10 +443,16 @@ Drupal.versionViewer.tooltips = Drupal.versionViewer.tooltips || {};
    * @param {String} entID The identifier of the given entity.
    */
   Drupal.versionViewer.tooltips.hideEntityTooltip = function (entID) {
-    var tooltip, visible;
+    var tooltip, tip, initialized, visible;
     if (Drupal.versionViewer.tooltips.entityHasTooltip(entID)) {
       tooltip = tooltips[entID];
-      visible = tooltip.tooltip('tip').is(':visible');
+      try {
+        tip = tooltip.tooltip('tip');
+      } catch(e) {
+        (console.error || console.log).call(console, e.stack || e);
+      }
+      initialized = tip !== undefined;
+      visible = !initialized || tooltip.tooltip('tip').is(':visible');
       if (visible) {
         tooltip.tooltip('hide');
         relinquishOccupiedPosition(entID);

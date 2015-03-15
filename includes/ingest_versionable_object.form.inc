@@ -17,6 +17,7 @@ function emicdora_valid_source_types() {
     'islandora:bookCModel' => t('Text'),
     'islandora:sp-audioCModel' => t('Audio'),
     'islandora:sp_videoCModel' => t('Video'),
+    'islandora:sp_large_image_cmodel' => t('Image'),
   );
 }
 

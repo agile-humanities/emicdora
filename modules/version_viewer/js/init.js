@@ -6,27 +6,6 @@
       // Hide any active tooltips (sometimes they do not clear).
       Drupal.versionViewer.tooltips.hideTooltips();
     });
-    // Initilize our layout per versionable obj type.
-    switch (Drupal.settings.versionable_object_viewer.mode) {
-      case "audio":
-        $('#wb_tei_markup').hide();
-        $('#wb_show_annos').hide();
-        $('#wb_show_til').hide();
-        break;
-      case "image":
-        $('#wb_tei_markup').hide();
-        $('#wb_show_annos').hide();
-        $('#wb_show_til').hide();
-        break;
-      case "video":
-        $('#wb_tei_markup').hide();
-        $('#wb_show_annos').hide();
-        $('#wb_show_til').hide();
-        break;
-    }
-
-    var is_toggled = false;
-
     // Setup the initial menu 'look'.
     $('#wb_show_til').addClass('annos');
     $('#wb_show_annos').addClass('annos');
@@ -35,6 +14,20 @@
     $('#wb_reading').addClass('img_selected');
     $('#wb_show_til').addClass('img_selected');
     $('#wb_show_annos').addClass('img_selected');
+
+    // Initilize our layout per versionable obj type.
+    switch (Drupal.settings.versionable_object_viewer.mode) {
+      case "audio":
+        $('#wb_show_til').hide();
+        $('#wb_show_til').removeClass('annos');
+        break;
+      case "video":
+        $('#wb_show_til').hide();
+        $('#wb_show_til').removeClass('annos');
+        break;
+    }
+
+    var is_toggled = false;
 
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
@@ -50,7 +43,7 @@
         else {
           hide_annotations(nodes);
         }
-      }
+      },
     });
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
@@ -61,16 +54,20 @@
         url: Drupal.settings.basePath + 'islandora/object/' + pid + '/get_tree_data/' + dpid + '/' + version_pid,
         async: false,
         success: function(data, status, xhr) {
+          Drupal.versionViewer.tooltips.destroyTooltips();
           $('#easyui_tree').tree({
             data: data
           });
+          add_tooltip_imageannotations();
           // Resize content.
           $('#eui_window').layout('resize', {
             width: '100%'
           });
-          data[0]['children'].forEach(function(info){
-            $("span[data-annotationid='" + info.id + "']").addClass(info['attributes']['cwrcType']);
-          });
+          if (data[0] !== undefined) {
+            data[0]['children'].forEach(function (info) {
+              $("span[data-annotationid='" + info.id + "']").addClass(info['attributes']['cwrcType']);
+            });
+          }
         },
         error: function(data, status, xhd) {
         }
@@ -79,6 +76,10 @@
 
     $('#ui-easy-paginator').pagination({
       onSelectPage: function(pageNumber, pageSize) {
+        Drupal.versionViewer.tooltips.destroyTooltips();
+        $('#easyui_tree').tree({
+          data: []
+        });
         show_transcription(pageNumber);
         update_tree_data();
       }
@@ -613,6 +614,10 @@
     }
 
     function construct_tab(data, type) {
+      Drupal.versionViewer.tooltips.destroyTooltips();
+      $('#easyui_tree').tree({
+        data: []
+      });
       $('#content_data').empty();
       $('#content_data').append(data['body']);
       prettyPrint();
@@ -655,7 +660,7 @@
         }
       }
     }
-    add_tooltip_imageannotations();
+
     var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
     var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + (pageNumber);
 

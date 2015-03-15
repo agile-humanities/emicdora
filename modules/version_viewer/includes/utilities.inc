@@ -799,30 +799,29 @@ function versionable_object_viewer_build_version_media_view($version, &$variable
 
     drupal_add_js($module_path . '/js/islandora_image_annotation_init.js');
   }
+  $members = versionable_object_viewer_get_members($variables['islandora_object']);
+  $pids = array();
+  // Ensure page pids have a 'TEI_RDF' datastream.
+  foreach ($members as $member) {
+    array_push($pids, $member['obj']['value']);
+  }
+  $derivation_pids = array();
+  foreach ($pids as $pid) {
+    $page_derivation = islandora_object_load($pid);
+    $page_derivation_source = $page_derivation->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
+    $pg_derivation_pid = $page_derivation_source[0]['object']['value'];
+    array_push($derivation_pids, $pg_derivation_pid);
+  }
+  $variables['pager_data'] = $pids;
+  drupal_add_js(array('versionable_object_viewer' => array('tei_rdf_pids' => $pids)), 'setting');
+  drupal_add_js(array('versionable_object_viewer' => array('pids' => $derivation_pids)), 'setting');
+  $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data/{$version->id}");
   if ($variables['content_model_type'] == 'text') {
-
-    $module_path = drupal_get_path('module', 'versionable_object_viewer');
-    $members = versionable_object_viewer_get_members($variables['islandora_object']);
-    $pids = array();
-    // Ensure page pids have a 'TEI_RDF' datastream.
-    foreach ($members as $member) {
-      array_push($pids, $member['obj']['value']);
-    }
-    $derivation_pids = array();
-    foreach ($pids as $pid) {
-      $page_derivation = islandora_object_load($pid);
-      $page_derivation_source = $page_derivation->relationships->get(FEDORA_RELS_EXT_URI, EMICDORA_ISDERIVATIONOF);
-      $pg_derivation_pid = $page_derivation_source[0]['object']['value'];
-      array_push($derivation_pids, $pg_derivation_pid);
-    }
-    $variables['pager_data'] = $pids;
-    drupal_add_js(array('versionable_object_viewer' => array('tei_rdf_pids' => $pids)), 'setting');
-    drupal_add_js(array('versionable_object_viewer' => array('pids' => $derivation_pids)), 'setting');
-    $variables['tree_source'] = url("islandora/object/$derivation_pids[0]/get_tree_data/{$version->id}");
     $variables['islandora_content'] = theme('islandora_anno_image_pane');
     drupal_add_js(array('islandora_image_annotation' => array('PID' => $derivation_pids[0])), 'setting');
     islandora_image_annotation_include_common_js();
     islandora_image_annotation_include_common_css();
+    $module_path = drupal_get_path('module', 'versionable_object_viewer');
     drupal_add_js($module_path . '/js/islandora_image_annotation_init.js');
   }
   return $variables;
