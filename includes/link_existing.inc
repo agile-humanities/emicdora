@@ -110,7 +110,7 @@ function emicdora_get_all_source_objects($critical_edition_pid, $start = 0, $row
  * @return array
  *   Drupal Form
  */
-function emicdora_sources_update_form(array $form, array $form_state, $pid) {
+function emicdora_sources_update_form(array $form, array &$form_state, $pid) {
   $path_parts = explode('/', $_GET['q']);
   $filter = isset($path_parts[5]) ? $path_parts[5] : '';
   $form['filter'] = array(
@@ -147,7 +147,7 @@ function emicdora_sources_update_form(array $form, array $form_state, $pid) {
  * @param array $form_state
  *   Drupal Form_state definition
  */
-function emicdora_sources_update_form_submit(array $form, array $form_state) {
+function emicdora_sources_update_form_submit(array $form, array &$form_state) {
   unset($_GET['destination']);
   $filter = $form_state['values']['filter'];
   $field = $form_state['values']['field'];

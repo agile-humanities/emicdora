@@ -18,7 +18,7 @@
  * @return array
  *   The Drupal form definition.
  */
-function emicdora_apparatus_form(array $form, array $form_state, AbstractObject $object) {
+function emicdora_apparatus_form(array $form, array &$form_state, AbstractObject $object) {
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
@@ -85,7 +85,7 @@ function emicdora_apparatus_form_ajax_callback(array $form, array $form_state) {
  * @param array $form_state
  *   Drupal form state
  */
-function emicdora_apparatus_form_submit(array $form, array $form_state) {
+function emicdora_apparatus_form_submit(array $form, array &$form_state) {
 
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   $object = islandora_object_load($form_state['pid']);

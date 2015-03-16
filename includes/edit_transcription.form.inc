@@ -18,7 +18,7 @@
  * @return array
  *   An array containing the transcription form to be rendered.
  */
-function emicdora_edit_transcription_form($form, $form_state, AbstractObject $transcription) {
+function emicdora_edit_transcription_form($form, &$form_state, AbstractObject $transcription) {
   drupal_set_title(t('Edit @transcription', array('@transcription' => $transcription->label)));
   $content = "";
   if ($transcription['TRANSCRIPTION']) {
@@ -52,7 +52,7 @@ function emicdora_edit_transcription_form($form, $form_state, AbstractObject $tr
  * @param array $form_state
  *   Drupal form
  */
-function emicdora_edit_transcription_form_submit($form, $form_state) {
+function emicdora_edit_transcription_form_submit($form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;

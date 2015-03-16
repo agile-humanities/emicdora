@@ -8,7 +8,7 @@
 /**
  * Emicdora Terms form.
  */
-function emicdora_configure_version_links($form, $form_state, $critical_edition) {
+function emicdora_configure_version_links($form, &$form_state, $critical_edition) {
   module_load_include('inc', 'islandora_solr', 'includes/admin');
   module_load_include('inc', 'emicdora', 'includes/db');
 
@@ -646,7 +646,7 @@ function emicdora_configure_version_links_validate($form, &$form_state) {
  * @param array $form_state
  *   Drupal Form State
  */
-function emicdora_admin_settings_submit($form, $form_state) {
+function emicdora_admin_settings_submit($form, &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/db');
   $critical_edition = $form_state['values']['critical_edition_pid'];
   emicdora_delete_terms($critical_edition);

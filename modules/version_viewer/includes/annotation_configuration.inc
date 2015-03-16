@@ -20,7 +20,7 @@
  * @return array
  *   The Drupal From definition.
  */
-function islandora_emicdora_annotation_availability(array $form, array $form_state, AbstractObject $version, $critical_edition_pid = NULL) {
+function islandora_emicdora_annotation_availability(array $form, array &$form_state, AbstractObject $version, $critical_edition_pid = NULL) {
   drupal_add_css(drupal_get_path('module', 'versionable_object_viewer') . '/css/annotation_access.css');
   $total = db_select('versionable_object_custom_config')
       ->fields('versionable_object_custom_config')
@@ -297,7 +297,7 @@ function islandora_emicdora_annotation_availability(array $form, array $form_sta
  * @param array $form_state
  *   Drupal Form State
  */
-function islandora_emicdora_annotation_availability_validate(array $form, array $form_state) {
+function islandora_emicdora_annotation_availability_validate(array $form, array &$form_state) {
   $action = $form_state['triggering_element']['#attributes']['data-action'];
   switch ($action) {
     case 'save':

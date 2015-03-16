@@ -88,7 +88,7 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
  * @param array $form_state
  *   Drupal Form State
  */
-function emicdora_mvd_form_validate($form, $form_state) {
+function emicdora_mvd_form_validate($form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $critical_edition_object = islandora_object_load($form_state['values']['pid']);
   $mvds = emicdora_calliope_find_mvds($critical_edition_object);

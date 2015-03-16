@@ -18,7 +18,7 @@
  * @return array
  *   A Drupal Form for linking a new object of the given type.
  */
-function emicdora_link_version_form($form, $form_state, $critical_edition) {
+function emicdora_link_version_form($form, &$form_state, $critical_edition) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $module_path = drupal_get_path('module', 'emicdora');
   $destination_parts = explode('?', $_GET['destination']);
@@ -84,7 +84,7 @@ EOQ;
  * @param array $form_state
  *   The Drupal form state.
  */
-function emicdora_link_version_form_submit($form, $form_state) {
+function emicdora_link_version_form_submit($form, &$form_state) {
   $version_id = $form_state['values']['versions'];
   if ($version_id) {
     $version = islandora_object_load($version_id);

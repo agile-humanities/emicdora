@@ -13,7 +13,7 @@
  * @param array $form_state
  *   The Drupal form state.
  */
-function islandora_emicdora_add_transcription_form($form, $form_state, AbstractObject $object) {
+function islandora_emicdora_add_transcription_form($form, &$form_state, AbstractObject $object) {
 
   module_load_include('inc', 'emicdora', 'includes/utilities');
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
@@ -145,7 +145,7 @@ function islandora_emicdora_add_transcription_form($form, $form_state, AbstractO
  * @param array $form_state
  *   Drupal form state
  */
-function islandora_emicdora_add_transcription_form_validate($form, $form_state) {
+function islandora_emicdora_add_transcription_form_validate($form, &$form_state) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $versionable_object = islandora_object_load($form_state['values']['version']);
   $parents = $versionable_object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
@@ -358,7 +358,7 @@ function emicdora_manage_transcriptions_form_submit(array $form, array &$form_st
  * @param abstractObject $transcription
  *   transcription object
  */
-function islandora_critical_transcription_edit_form($form, $form_state, $transcription) {
+function islandora_critical_transcription_edit_form($form, &$form_state, $transcription) {
   drupal_set_title($transcription->label);
   $content = "";
   if ($transcription['TRANSCRIPTION']) {
@@ -392,7 +392,7 @@ function islandora_critical_transcription_edit_form($form, $form_state, $transcr
  * @param array $form_state
  *   Drupal form
  */
-function islandora_critical_transcription_edit_form_submit($form, $form_state) {
+function islandora_critical_transcription_edit_form_submit($form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $transcription_object = islandora_object_load($form_state['values']['pid']);
   $success = FALSE;

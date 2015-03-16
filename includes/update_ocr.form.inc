@@ -18,7 +18,7 @@
  * @return array
  *   The Drupal form definition.
  */
-function emicdora_update_ocr_form(array $form, array $form_state, $tei_rdf) {
+function emicdora_update_ocr_form(array $form, array &$form_state, $tei_rdf) {
   $form_state['tei_rdf'] = $tei_rdf;
   return array(
     'intro' => array(
@@ -42,7 +42,7 @@ function emicdora_update_ocr_form(array $form, array $form_state, $tei_rdf) {
  * @param array $form_state
  *   The Drupal form state.
  */
-function emicdora_update_ocr_form_submit(array $form, array $form_state) {
+function emicdora_update_ocr_form_submit(array $form, array &$form_state) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   $tei_rdf = islandora_object_load($form_state['tei_rdf']);
   $pages = islandora_paged_content_get_pages($tei_rdf);
