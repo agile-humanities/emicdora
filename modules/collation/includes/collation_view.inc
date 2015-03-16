@@ -34,6 +34,7 @@ function emicdora_compare_view($right = NULL, $left = NULL) {
         ),
       ), 'setting'
   );
+  drupal_add_js($module_path . '/ui/app/controller/CompareAppController.js');
   drupal_add_js($module_path . '/ui/compareapp.js');
   $contents = theme('collation_compare', array('left' => $left, 'right' => $right));
   return "<div id='emicdora_collation_container'>$contents</div>";
