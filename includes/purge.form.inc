@@ -234,7 +234,7 @@ PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
 SELECT ?pid ?model
 FROM <#ri>
 WHERE {
-  ?pid <fedora-rels-ext:isMemberOf> <info:fedora/emic:sample-version> ;
+  ?pid <fedora-rels-ext:isMemberOf> <info:fedora/$pid> ;
        <fedora-model:hasModel> ?model .
 }
 EOQ;
