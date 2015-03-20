@@ -11,8 +11,18 @@
 function emicdora_collation_edit() {
   module_load_include('inc', 'collation', 'includes/calliope');
   $config = emicdora_get_config();
-  $fixed_deleted = "<div id='emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>";
-  $fixed_added = "<div id='emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>";
+  $base_doc = <<<EOQ
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  </head>
+<body>
+!body
+</body>
+</html>
+EOQ;
+  $fixed_deleted = format_string($base_doc, array('!body' => "<div id='emicdora_deleted'>" . emicdora_cleaned_post('all_deleted') . "</div>"));
+  $fixed_added = format_string($base_doc, array('!body' => "<div id='emicdora_added'>" . emicdora_cleaned_post('all_added') . "</div>"));
   $action = emicdora_cleaned_post('action');
   $counter = emicdora_cleaned_post('emicdora_counter');
   // Let's grab the two versions so there's context for Mongo to query on.
@@ -98,9 +108,8 @@ function emicdora_collation_edit() {
 function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $prefix = $type[0];
   $config = emicdora_get_config();
-  $dom = new DOMDocument();
+  $dom = new DOMDocument('1.0', 'UTF-8');
   $dom->loadHTML($fixed_content);
-
   $range_info = filter_input(INPUT_POST, $type, FILTER_DEFAULT, FILTER_REQUIRE_ARRAY);
 
   $find_text_node = function ($node_info) use ($dom) {
@@ -257,8 +266,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
     // Nuke all the "replaced" spans.
     $nuke->parentNode->removeChild($nuke);
   }
-  $wrapper_node = emicdora_get_element_by_id($dom, $config[$type]);
-  return $dom->saveXML($wrapper_node);
+  return $dom;
 }
 
 /**
@@ -396,19 +404,13 @@ function emicdora_flip_id($id) {
 /**
  * Removes orphaned merged spans.
  *
- * @param array $inputs
- *   input HTML
+ * @param array $doms
+ *   An array of DOMDocuments containing the XML to be cleaned up.
  *
  * @return array
  *   DOM
  */
-function emicdora_cleanup_merged($inputs) {
-  $doms = array();
-  foreach ($inputs as $type => $text) {
-    $dom = new DOMDocument();
-    $dom->loadHTML($text);
-    $doms[$type] = $dom;
-  }
+function emicdora_cleanup_merged($doms) {
   foreach ($doms as $type => $dom) {
     $spans[$type] = $dom->getElementsByTagName('span');
   }
