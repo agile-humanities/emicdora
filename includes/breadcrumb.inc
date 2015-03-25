@@ -214,7 +214,7 @@ function emicdora_set_title_and_breadcrumbs_versions(AbstractObject $critical_ed
   }
   $breadcrumbs[] = t("Versions");
   drupal_set_breadcrumb($breadcrumbs);
-  emicdora_set_page_title_and_subtitle($critical_edition->label, t("Search Versions(s)"));
+  emicdora_set_page_title_and_subtitle($critical_edition->label, t("Search Version(s)"));
 }
 
 /**
