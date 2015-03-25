@@ -29,6 +29,7 @@
     <button class = "emicdora_button" id="save_changes">Save Changes</button>
   <?php endif; ?>
   <br/>
+  <hr />
   <div id="collatex_iframe">
     <input id="full-window-button" class="emicdora_button" type="button" value="<?php print t("Full Window"); ?>" />
     <div id ="emicdora_collatex_info_window" title = 'Copyright © 2010-2013 The Interedition Development Group. All rights reserved.'>
