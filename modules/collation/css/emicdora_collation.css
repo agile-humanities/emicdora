@@ -99,10 +99,11 @@ vertical-align: baseline;
 white-space: nowrap;
 }
 .variant {
-  color: #4E9258;
+  color: #C11B17;
+
 }
 .merged {
-  color: #C11B17;
+  color: #4E9258;
 }
 .variant_selected {
   background-color: lightgray;
