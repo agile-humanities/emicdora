@@ -80,7 +80,7 @@ function islandora_emicdora_add_transcription_form($form, &$form_state, Abstract
     $form['page'] = array(
       '#type' => 'fieldset',
       '#title' => t('Select page range'),
-      '#description' => t('You may optionally restrict the pages used int this transcription'),
+      '#description' => t('You may optionally restrict the pages used in this transcription'),
       '#states' => array(
         'visible' => array(
           ':input[name="content_source"]' => array('value' => 'tei_rdf'),
@@ -207,7 +207,7 @@ function islandora_emicdora_add_transcription_form_submit(array $form, array &$f
   $transcription_datastream->label = 'Transcription';
   if ($content_source == 'tei_rdf') {
     // Cant trust form state data for page min/max range, so
-    // get it agian to be sure.
+    // get it again to be sure.
     $page_results = islandora_paged_content_get_pages($versionable_object);
     $start_page = 1;
     $end_page = count($page_results);
@@ -433,10 +433,10 @@ function islandora_critical_transcription_edit_form_submit($form, &$form_state) 
  * @param IslandoraFedoraDatastream $transcription_datastream
  *   Datastream object to be updated
  */
-function emicdora_add_derived_transcription($pages, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page) {
+function emicdora_add_derived_transcription($pages, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page, $critical_edition_pid = NULL) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
-
+  $url = $critical_edition_pid ? "islandora/object/$critical_edition_pid/transcription/{$transcription->id}" : NULL;
   $offset = $start_page - 1;
   $range = $end_page - $offset;
   $pages = array_slice($pages, $offset, $range);
@@ -461,7 +461,7 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
       'transcription_datastream' => $transcription_datastream,
       'filename' => $filename));
   batch_set($batch);
-  batch_process();
+  batch_process($url);
 }
 
 /**
@@ -562,4 +562,105 @@ function emicdora_build_transcription($versionable_object, $label) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   $transcription = emicdora_construct_transcription($versionable_object, $label);
   return $transcription;
+}
+
+/**
+ * The form for rebuilding a transcription object.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ * @param string $transcription_pid
+ *   PID of transcription object
+ */
+function emicdora_rebuild_transcription_form($form, $form_state, $transcription_pid, $critical_edition_pid) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
+  module_load_include('inc', 'emicdora', 'includes/breadcrumb');
+  $critical_edition = islandora_object_load($critical_edition_pid);
+  $transcription_object = islandora_object_load($transcription_pid);
+  emicdora_set_title_and_breadcrumbs_transcription_update($critical_edition, $transcription_object);
+  $parent = emicdora_get_transcription_version($transcription_object);
+  $page_results = islandora_paged_content_get_pages($parent);
+  $count = count($page_results);
+  $form['version_pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $parent->id,
+  );
+  $form['transcription_pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $transcription_pid,
+  );
+  $form['critical_edition_pid'] = array(
+    '#type' => 'hidden',
+    '#value' => $critical_edition_pid,
+  );
+
+  $form['page'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Select page range'),
+    '#description' => t('You may optionally restrict the pages used in this transcription'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_source"]' => array('value' => 'tei_rdf'),
+      ),
+    ),
+  );
+  $form['page']['restricted'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use restricted page range'),
+    '#default_value' => FALSE,
+  );
+  $form['page']['first_page'] = array(
+    '#type' => 'textfield',
+    '#size' => 6,
+    '#title' => t('First page'),
+    '#default_value' => '1',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="restricted"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['page']['last_page'] = array(
+    '#type' => 'textfield',
+    '#size' => 6,
+    '#title' => t('Last page'),
+    '#default_value' => $count,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="restricted"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Refresh Transcription'),
+  );
+  return $form;
+}
+
+/**
+ * Submit handler.
+ *
+ * @param array $form
+ *   The Drupal form definition.
+ * @param array $form_state
+ *   The Drupal form state.
+ */
+function emicdora_rebuild_transcription_form_submit($form, $form_state) {
+  $transcription = islandora_object_load($form_state['values']['transcription_pid']);
+  $transcription_datastream = $transcription['TRANSCRIPTION'];
+  $versionable_object_pid = $form_state['values']['version_pid'];
+  $versionable_object = islandora_object_load($versionable_object_pid);
+  $page_results = islandora_paged_content_get_pages($versionable_object);
+  $critical_edition_pid = $form_state['values']['critical_edition_pid'];
+  $start_page = 1;
+  $end_page = count($page_results);
+  if (isset($form_state['values']['restricted']) && $form_state['values']['restricted']) {
+    $start_page = $form_state['values']['first_page'];
+    $end_page = $form_state['values']['last_page'];
+  }
+  emicdora_add_derived_transcription($page_results, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page, $critical_edition_pid);
 }

@@ -977,6 +977,14 @@ function emicdora_contextual_redirect($source_object, $delta) {
       drupal_goto("islandora/object/$pid/delete", $options);
       break;
 
+    case "refresh_transcription_object":
+      module_load_include('inc', 'emicdora', 'includes/add_transcription.form');
+      $transcription_pid = $get_parts[3];
+      $critical_edition_pid = $destination_parts[2];
+      drupal_goto("emicdora/refresh/edited_transcription/$transcription_pid/$critical_edition_pid");
+
+      break;
+
     default:
       return "This function has not yet been implemented";
   }

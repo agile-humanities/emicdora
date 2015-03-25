@@ -111,6 +111,7 @@ white-space: nowrap;
   background-color: lightblue;
 }
 .field_label{
-  width: 20%;
-  padding-left:3%;
+  width: 25%;
+  padding:1%;
+  font-size: larger;
 }
