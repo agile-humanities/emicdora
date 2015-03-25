@@ -374,6 +374,17 @@ function emicdora_menu() {
       'page callback' => TRUE,
       'access callback' => TRUE,
     ),
+    'emicdora/contextual-links/version_operations/%islandora_object/view_tei_rdf' => array(
+      'title' => 'Edition View',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'show_viewer'),
+      'weight' => -48,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    ),
     'emicdora/contextual-links/version_operations/%islandora_object/edit_tei_rdf' => array(
       'title' => 'Edit TEI-RDF',
       'file' => 'includes/utilities.inc',
@@ -404,17 +415,6 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(EMICDORA_ADMINISTER_EDITION, 3),
       'weight' => -43,
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    ),
-    'emicdora/contextual-links/version_operations/%islandora_object/view_tei_rdf' => array(
-      'title' => 'Reading View',
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
-      'access callback' => 'emicdora_object_management_access',
-      'access arguments' => array(3, 'show_viewer'),
-      'weight' => -40,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
@@ -936,7 +936,7 @@ function emicdora_block_view($delta = '') {
         );
         foreach ($rels as $rel) {
           $parent_edition = islandora_object_load($rel['object']['value']);
-          if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
+          if (isset($parent_edition) && in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
             $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
           }
         }
