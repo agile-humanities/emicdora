@@ -342,3 +342,8 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 #easy-ui-east{
   background-image: none;
 }
+
+.clear-transcript-text {
+     border: none !important;
+     color: inherit !important;
+ }

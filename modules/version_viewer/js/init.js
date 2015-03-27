@@ -505,6 +505,7 @@
               $('#' + dda.domId).hide();
               if (dda['children'].length > 0) {
                 hide_tree_children(dda['children']);
+                hide_transcription_styles(dda['children']);
               }
             }
           }
@@ -521,6 +522,7 @@
               $('#' + dda.domId).show();
               if (dda['children'].length > 0) {
                 show_tree_children(dda['children']);
+                show_transcription_styles(dda['children']);
               }
             }
           }
@@ -534,6 +536,7 @@
               $('#' + ddt.domId).hide();
               if (ddt['children'].length > 0) {
                 hide_tree_children(ddt['children']);
+                hide_transcription_styles(ddt['children']);
               }
             }
           }
@@ -544,6 +547,7 @@
               $('#' + ddt.domId).show();
               if (ddt['children'].length > 0) {
                 show_tree_children(ddt['children']);
+                show_transcription_styles(ddt['children']);
               }
             }
           }
@@ -673,6 +677,24 @@
       hide_annotations(children);
       show_annotations(children);
     };
+
+    // Hide transcription styles for node elements (text color and borders).
+    function hide_transcription_styles(nodes){
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j]['attributes']['anchorType'] != 'offset') {
+          $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").addClass('clear-transcript-text');
+        }
+      }
+    }
+
+    // Show transcription styles for node elements (text color and borders).
+    function show_transcription_styles(nodes){
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j]['attributes']['anchorType'] != 'offset') {
+          $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").removeClass('clear-transcript-text');
+        }
+      }
+    }
 
     $('#easy-ui-east').panel({
       onResize: function(w, h) {
