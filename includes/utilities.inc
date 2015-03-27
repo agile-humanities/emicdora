@@ -506,18 +506,20 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
  * @param string $tei
  *   A document containing TEI xml.
  */
-function emicdora_convert_tei_to_plain_text($tei) {
+function emicdora_convert_tei_to_plain_text($tei, $update = FALSE) {
   // @codingStandardsIgnoreStart
   $replace_candidates = array(
     '<br>',
     '<br />',
+    '<br/>',
     '<lb></lb>',
     '<lb/>',
     '</l>',
     '</lg>',
   );
   // @codingStandardsIgnoreEnd
-  $text = @simplexml_load_string($tei)->text[0]->asXML();
+  $text = $update ? $tei : @simplexml_load_string($tei)->text[0]->asXML();
+
   foreach ($replace_candidates as $candidate) {
     $text = str_replace($candidate, "$candidate\n", $text);
   }

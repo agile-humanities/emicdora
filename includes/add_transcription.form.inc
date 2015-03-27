@@ -436,7 +436,8 @@ function islandora_critical_transcription_edit_form_submit($form, &$form_state) 
 function emicdora_add_derived_transcription($pages, $versionable_object_pid, $transcription, $transcription_datastream, $start_page, $end_page, $critical_edition_pid = NULL) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   module_load_include('inc', 'islandora', 'includes/utilities');
-  $url = $critical_edition_pid ? "islandora/object/$critical_edition_pid/transcription/{$transcription->id}" : NULL;
+  $is_update = $critical_edition_pid ? TRUE : FALSE;
+  $url = $is_update ? "islandora/object/$critical_edition_pid/transcription/{$transcription->id}" : NULL;
   $offset = $start_page - 1;
   $range = $end_page - $offset;
   $pages = array_slice($pages, $offset, $range);
@@ -453,7 +454,10 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
   foreach ($pages as $page) {
     $batch['operations'][] = array('emicdora_build_text_file', array(
         'page_object' => islandora_object_load($page['pid']),
-        'filename' => $filename));
+        'filename' => $filename,
+        'update' => $is_update,
+      ),
+    );
   }
   $batch['operations'][] = array('emicdora_transcription_file_add',
     array(
@@ -472,10 +476,15 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
  * @param string $filename
  *   Temp file to hold data
  */
-function emicdora_build_text_file($object, $filename) {
+function emicdora_build_text_file($object, $filename, $update = FALSE) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
+  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
   if (isset($object['CWRC'])) {
-    $text = emicdora_convert_tei_to_plain_text($object['CWRC']->content);
+    $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+    $version_pid = $parents[0]['object']['value'];
+    $datastream = $object['CWRC'];
+    $reading_tei = versionable_object_viewer_render_transcription($version_pid, $datastream, 'reading');
+    $text = emicdora_convert_tei_to_plain_text($reading_tei, $update);
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
   }
 }
