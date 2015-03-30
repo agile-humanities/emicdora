@@ -691,9 +691,21 @@
 
     // Callback to fix the drawing of SVG annotations upon resize.
     var cleanDrawSVGAnnotations = function() {
+      var nodes_to_redraw = [];
       var children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
-      show_annotations(children);
+      // Trim down the children list and only show the checked ones that
+      // need to be redrawn based on if the show is enabled for that text image
+      // or image annotions/entities.
+      for (var j = 0; j < children.length; j++) {
+        if (children[j]['attributes']['cwrcType'] == 'textimagelink' && $('#wb_show_til').hasClass('annos')) {
+            nodes_to_redraw.push(children[j]);
+        }
+        else if (children[j]['attributes']['cwrcType'] == 'imageannotation' && $('#wb_show_annos').hasClass('annos')) {
+          nodes_to_redraw.push(children[j]);
+        }
+      }
+      show_annotations(nodes_to_redraw);
     };
 
     // Hide transcription styles for node elements (text color and borders).
