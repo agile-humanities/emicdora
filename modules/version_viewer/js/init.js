@@ -59,6 +59,18 @@
             data: data
           });
           add_tooltip_imageannotations();
+          // Check to see if text-image or entities transcript styles need to be
+          // hidden on page change.
+          if (!$('#wb_show_annos').hasClass('annos')) {
+            var dda = $("#easyui_tree").tree('find', 'tree_entities');
+            hide_transcription_styles(dda['children']);
+          }
+
+          if (!$('#wb_show_til').hasClass('annos')) {
+            var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+            hide_transcription_styles(ddt['children']);
+          }
+
           // Resize content.
           $('#eui_window').layout('resize', {
             width: '100%'
@@ -298,7 +310,9 @@
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
-          $('.svg_' + anno_id).remove();
+          if (can_remove_svg(anno_id)) {
+            $('.svg_' + anno_id).remove();
+          }
         }
       }
       else {
@@ -344,11 +358,15 @@
             $(selector).off();
             if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
               var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-              $('.svg_' + anno_id).remove();
+              if (can_remove_svg(anno_id)) {
+                $('.svg_' + anno_id).remove();
+              }
             }
             if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
               var anno_id = nodes[i]['attributes']['uuid'];
-              $('.svg_' + anno_id).remove();
+              if (can_remove_svg(anno_id)) {
+                $('.svg_' + anno_id).remove();
+              }
             }
           }
         }
@@ -694,6 +712,28 @@
           $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").removeClass('clear-transcript-text');
         }
       }
+    }
+
+    // Check that the svg needs to be removed
+    function can_remove_svg(svg_anno){
+      var can_remove = true;
+      var nodes = $("#easyui_tree").tree('getChecked');
+      for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+          var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+          if (anno_id == svg_anno && $('#wb_show_til').hasClass('annos')) {
+            can_remove = false;
+          }
+        }
+        else if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+          var anno_id = nodes[i]['attributes']['uuid'];
+          if (anno_id == svg_anno && $('#wb_show_annos').hasClass('annos')) {
+            can_remove = false;
+          }
+        }
+
+      }
+      return can_remove;
     }
 
     $('#easy-ui-east').panel({
