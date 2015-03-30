@@ -709,7 +709,7 @@
     };
 
     // Hide transcription styles for node elements (text color and borders).
-    function hide_transcription_styles(nodes){
+    function hide_transcription_styles(nodes) {
       for (var j = 0; j < nodes.length; j++) {
         if (nodes[j]['attributes']['anchorType'] != 'offset') {
           $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").addClass('clear-transcript-text');
@@ -718,7 +718,7 @@
     }
 
     // Show transcription styles for node elements (text color and borders).
-    function show_transcription_styles(nodes){
+    function show_transcription_styles(nodes) {
       for (var j = 0; j < nodes.length; j++) {
         if (nodes[j]['attributes']['anchorType'] != 'offset') {
           $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").removeClass('clear-transcript-text');
@@ -727,7 +727,7 @@
     }
 
     // Check that the svg needs to be removed
-    function can_remove_svg(svg_anno){
+    function can_remove_svg(svg_anno) {
       var can_remove = true;
       var nodes = $("#easyui_tree").tree('getChecked');
       for (var i = 0; i < nodes.length; i++) {
@@ -775,5 +775,10 @@
       width: '100%',
       height: '729px'
     });
+
+    // Force default page load to hide all annotations by triggering the click
+    // events and allowing the logic take care of hiding everything.
+    $('#wb_show_annos').trigger('click');
+    $('#wb_show_til').trigger('click');
   });
 })(jQuery);
