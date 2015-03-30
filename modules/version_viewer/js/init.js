@@ -100,7 +100,6 @@
     function show_annotations(nodes) {
       // Hide any active tooltips (sometimes they do not clear).
       Drupal.versionViewer.tooltips.hideTooltips();
-
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
@@ -258,17 +257,16 @@
                 show_entity_tooltip(checked[j]['attributes'], checked[j]['attributes']['annotationId']);
               }
             }
-          } else {
-            $("span[data-annotationid='" + ent_id + "']").addClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
-            show_entity_tooltip(nodes[i]['attributes'], ent_id);
-            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
-            }
-            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-              var anno_id = nodes[i]['attributes']['uuid'];
-              paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
-            }
+          }
+          $("span[data-annotationid='" + ent_id + "']").addClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
+          show_entity_tooltip(nodes[i]['attributes'], ent_id);
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
+          }
+          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+            var anno_id = nodes[i]['attributes']['uuid'];
+            paint_commentAnnoTargets(null, 'canvas_0', anno_id, "comment");
           }
         }
       }
@@ -280,7 +278,7 @@
     function get_entity_class(cwrc_type) {
       // The cwrc_writer uses specific CSS class names
       // to style entities in TEI that dont match the defined
-      // entity type in the JSON. So, we must find 
+      // entity type in the JSON. So, we must find
       // there match.
       var entity_class = "";
       switch(cwrc_type) {
@@ -351,22 +349,20 @@
               }
             }
           }
-          else {
-            var selector = "span[data-annotationid='" + ent_id + "']";
-            $(selector).removeClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
-            // Clear all click and tooltip events.
-            $(selector).off();
-            if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
-              var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-              if (can_remove_svg(anno_id)) {
-                $('.svg_' + anno_id).remove();
-              }
+          var selector = "span[data-annotationid='" + ent_id + "']";
+          $(selector).removeClass('v-viewer-' + nodes[i]['attributes']['cwrcType']);
+          // Clear all click and tooltip events.
+          $(selector).off();
+          if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+            var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+            if (can_remove_svg(anno_id)) {
+              $('.svg_' + anno_id).remove();
             }
-            if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
-              var anno_id = nodes[i]['attributes']['uuid'];
-              if (can_remove_svg(anno_id)) {
-                $('.svg_' + anno_id).remove();
-              }
+          }
+          if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+            var anno_id = nodes[i]['attributes']['uuid'];
+            if (can_remove_svg(anno_id)) {
+              $('.svg_' + anno_id).remove();
             }
           }
         }
