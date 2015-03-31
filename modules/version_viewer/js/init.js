@@ -724,24 +724,22 @@
 
     // Check that the svg needs to be removed
     function can_remove_svg(svg_anno) {
-      var can_remove = true;
       var nodes = $("#easyui_tree").tree('getChecked');
       for (var i = 0; i < nodes.length; i++) {
         if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
           var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
           if (anno_id == svg_anno && $('#wb_show_til').hasClass('annos')) {
-            can_remove = false;
+            return false;
           }
         }
         else if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
           var anno_id = nodes[i]['attributes']['uuid'];
           if (anno_id == svg_anno && $('#wb_show_annos').hasClass('annos')) {
-            can_remove = false;
+            return false;
           }
         }
-
       }
-      return can_remove;
+      return true;
     }
 
     $('#easy-ui-east').panel({
