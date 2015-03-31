@@ -7,13 +7,9 @@
       Drupal.versionViewer.tooltips.hideTooltips();
     });
     // Setup the initial menu 'look'.
-    $('#wb_show_til').addClass('annos');
-    $('#wb_show_annos').addClass('annos');
 
     $('#wb_image').addClass('img_selected');
     $('#wb_reading').addClass('img_selected');
-    $('#wb_show_til').addClass('img_selected');
-    $('#wb_show_annos').addClass('img_selected');
 
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
@@ -27,7 +23,7 @@
         break;
     }
 
-    var is_toggled = false;
+    var is_toggled = true;
 
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
@@ -63,12 +59,16 @@
           // hidden on page change.
           if (!$('#wb_show_annos').hasClass('annos')) {
             var dda = $("#easyui_tree").tree('find', 'tree_entities');
-            hide_transcription_styles(dda['children']);
+            if (dda !== null) {
+              hide_transcription_styles(dda['children']);
+            }
           }
 
           if (!$('#wb_show_til').hasClass('annos')) {
             var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
-            hide_transcription_styles(ddt['children']);
+            if (ddt !== null) {
+              hide_transcription_styles(ddt['children']);
+            }
           }
 
           // Resize content.
@@ -769,10 +769,5 @@
       width: '100%',
       height: '729px'
     });
-
-    // Force default page load to hide all annotations by triggering the click
-    // events and allowing the logic take care of hiding everything.
-    $('#wb_show_annos').trigger('click');
-    $('#wb_show_til').trigger('click');
   });
 })(jQuery);
