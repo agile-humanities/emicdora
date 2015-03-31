@@ -7,13 +7,9 @@
       Drupal.versionViewer.tooltips.hideTooltips();
     });
     // Setup the initial menu 'look'.
-    $('#wb_show_til').addClass('annos');
-    $('#wb_show_annos').addClass('annos');
 
     $('#wb_image').addClass('img_selected');
     $('#wb_reading').addClass('img_selected');
-    $('#wb_show_til').addClass('img_selected');
-    $('#wb_show_annos').addClass('img_selected');
 
     // Initilize our layout per versionable obj type.
     switch (Drupal.settings.versionable_object_viewer.mode) {
@@ -27,7 +23,7 @@
         break;
     }
 
-    var is_toggled = false;
+    var is_toggled = true;
 
     // jQuery EasyUI tree controller.
     // Use this to control image anotations.
@@ -59,6 +55,22 @@
             data: data
           });
           add_tooltip_imageannotations();
+          // Check to see if text-image or entities transcript styles need to be
+          // hidden on page change.
+          if (!$('#wb_show_annos').hasClass('annos')) {
+            var dda = $("#easyui_tree").tree('find', 'tree_entities');
+            if (dda !== null) {
+              hide_transcription_styles(dda['children']);
+            }
+          }
+
+          if (!$('#wb_show_til').hasClass('annos')) {
+            var ddt = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+            if (ddt !== null) {
+              hide_transcription_styles(ddt['children']);
+            }
+          }
+
           // Resize content.
           $('#eui_window').layout('resize', {
             width: '100%'
@@ -296,7 +308,9 @@
       if (nodes.length > 0 && nodes[0]['attributes']['urn']) {
         for (var i = 0; i < nodes.length; i++) {
           var anno_id = nodes[i]['attributes']['urn'].replace("urn:uuid:", "");
-          $('.svg_' + anno_id).remove();
+          if (can_remove_svg(anno_id)) {
+            $('.svg_' + anno_id).remove();
+          }
         }
       }
       else {
@@ -341,11 +355,15 @@
           $(selector).off();
           if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
             var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
-            $('.svg_' + anno_id).remove();
+            if (can_remove_svg(anno_id)) {
+              $('.svg_' + anno_id).remove();
+            }
           }
           if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
             var anno_id = nodes[i]['attributes']['uuid'];
-            $('.svg_' + anno_id).remove();
+            if (can_remove_svg(anno_id)) {
+              $('.svg_' + anno_id).remove();
+            }
           }
         }
       }
@@ -501,6 +519,7 @@
               $('#' + dda.domId).hide();
               if (dda['children'].length > 0) {
                 hide_tree_children(dda['children']);
+                hide_transcription_styles(dda['children']);
               }
             }
           }
@@ -517,6 +536,7 @@
               $('#' + dda.domId).show();
               if (dda['children'].length > 0) {
                 show_tree_children(dda['children']);
+                show_transcription_styles(dda['children']);
               }
             }
           }
@@ -530,6 +550,7 @@
               $('#' + ddt.domId).hide();
               if (ddt['children'].length > 0) {
                 hide_tree_children(ddt['children']);
+                hide_transcription_styles(ddt['children']);
               }
             }
           }
@@ -540,6 +561,7 @@
               $('#' + ddt.domId).show();
               if (ddt['children'].length > 0) {
                 show_tree_children(ddt['children']);
+                show_transcription_styles(ddt['children']);
               }
             }
           }
@@ -665,10 +687,60 @@
 
     // Callback to fix the drawing of SVG annotations upon resize.
     var cleanDrawSVGAnnotations = function() {
+      var nodes_to_redraw = [];
       var children = $("#easyui_tree").tree('getChecked');
       hide_annotations(children);
-      show_annotations(children);
+      // Trim down the children list and only show the checked ones that
+      // need to be redrawn based on if the show is enabled for that text image
+      // or image annotions/entities.
+      for (var j = 0; j < children.length; j++) {
+        if (children[j]['attributes']['cwrcType'] == 'textimagelink' && $('#wb_show_til').hasClass('annos')) {
+            nodes_to_redraw.push(children[j]);
+        }
+        else if (children[j]['attributes']['cwrcType'] == 'imageannotation' && $('#wb_show_annos').hasClass('annos')) {
+          nodes_to_redraw.push(children[j]);
+        }
+      }
+      show_annotations(nodes_to_redraw);
     };
+
+    // Hide transcription styles for node elements (text color and borders).
+    function hide_transcription_styles(nodes) {
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j]['attributes']['anchorType'] != 'offset') {
+          $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").addClass('clear-transcript-text');
+        }
+      }
+    }
+
+    // Show transcription styles for node elements (text color and borders).
+    function show_transcription_styles(nodes) {
+      for (var j = 0; j < nodes.length; j++) {
+        if (nodes[j]['attributes']['anchorType'] != 'offset') {
+          $("span[data-annotationid='" + nodes[j]['attributes']['annotationId'] + "']").removeClass('clear-transcript-text');
+        }
+      }
+    }
+
+    // Check that the svg needs to be removed
+    function can_remove_svg(svg_anno) {
+      var nodes = $("#easyui_tree").tree('getChecked');
+      for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i]['attributes']['cwrcType'] == 'textimagelink') {
+          var anno_id = nodes[i]['attributes']['cwrcAttributes']['attributes']['uuid'].replace("urn:uuid:", "");
+          if (anno_id == svg_anno && $('#wb_show_til').hasClass('annos')) {
+            return false;
+          }
+        }
+        else if (nodes[i]['attributes']['cwrcType'] == 'imageannotation') {
+          var anno_id = nodes[i]['attributes']['uuid'];
+          if (anno_id == svg_anno && $('#wb_show_annos').hasClass('annos')) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
 
     $('#easy-ui-east').panel({
       onResize: function(w, h) {
