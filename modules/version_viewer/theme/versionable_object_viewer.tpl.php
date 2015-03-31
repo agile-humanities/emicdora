@@ -38,7 +38,7 @@
         <div id="easy-ui-east" class="easyui-panel" data-options="region:'east',split:true,border:true,collapsible:false"  style="width:200px;border-style:solid #191972">
           <?php print $islandora_content; ?>
         </div>
-        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false" style="width:150px;border-style:solid #191972">
+        <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false,collapsed:true" style="width:150px;border-style:solid #191972">
           <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;border-style:solid #191972">
               <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
               </ul>
