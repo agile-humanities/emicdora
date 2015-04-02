@@ -762,6 +762,30 @@
       }
     });
 
+    // On initial page load remove all annotations from the tree.
+    var image_annotations = $("#easyui_tree").tree('find', 'tree_imageannotations');
+    var entities = $("#easyui_tree").tree('find', 'tree_entities');
+    var textimage = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+
+    if (image_annotations) {
+      $('#' + image_annotations.domId).hide();
+      if (image_annotations['children'].length > 0) {
+        hide_tree_children(image_annotations['children']);
+      }
+    }
+    if (entities) {
+      $('#' + entities.domId).hide();
+      if (entities['children'].length > 0) {
+        hide_tree_children(entities['children']);
+      }
+    }
+    if (textimage) {
+      $('#' + textimage.domId).hide();
+      if (textimage['children'].length > 0) {
+        hide_tree_children(textimage['children']);
+      }
+    }
+
     $('#eui_window').css('max-height', '729px');
     // The panels will automatically set to fit, but we
     // use these method to trigger the resize event.
