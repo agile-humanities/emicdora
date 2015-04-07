@@ -99,10 +99,11 @@ vertical-align: baseline;
 white-space: nowrap;
 }
 .variant {
-  color: #4E9258;
+  color: #C11B17;
+
 }
 .merged {
-  color: #C11B17;
+  color: #4E9258;
 }
 .variant_selected {
   background-color: lightgray;
@@ -111,6 +112,7 @@ white-space: nowrap;
   background-color: lightblue;
 }
 .field_label{
-  width: 20%;
-  padding-left:3%;
+  width: 25%;
+  padding:1%;
+  font-size: larger;
 }

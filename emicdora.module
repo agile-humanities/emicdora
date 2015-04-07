@@ -4,7 +4,6 @@
  * @file
  * Defines all the hooks this module implements.
  */
-
 define('EMICDORA_ROOT', 'emic:root');
 define('EMICDORA_EDITION_COLLECTION', 'emic:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'emic:featured_collections');
@@ -340,7 +339,7 @@ function emicdora_menu() {
       'access callback' => TRUE,
     ),
     'emicdora/contextual-links/transcription_operations/%islandora_object/edit_transcription' => array(
-      'title' => 'Edit',
+      'title' => 'Edit Transcription',
       'file' => 'includes/edit_transcription.form.inc',
       'page callback' => 'drupal_get_form',
       'page arguments' => array('emicdora_edit_transcription_form', 3),
@@ -350,7 +349,17 @@ function emicdora_menu() {
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/transcription_operations/%islandora_object/delete_transcription' => array(
-      'title' => 'Delete',
+      'title' => 'Delete transcription',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/contextual-links/transcription_operations/%islandora_object/refresh_transcription_object' => array(
+      'title' => 'Refresh transcription from Edited TEI',
       'file' => 'includes/utilities.inc',
       'page callback' => 'emicdora_contextual_redirect',
       'page arguments' => array(3, 4),
@@ -364,6 +373,17 @@ function emicdora_menu() {
       'title' => 'Operations',
       'page callback' => TRUE,
       'access callback' => TRUE,
+    ),
+    'emicdora/contextual-links/version_operations/%islandora_object/view_tei_rdf' => array(
+      'title' => 'Edition View',
+      'file' => 'includes/utilities.inc',
+      'page callback' => 'emicdora_contextual_redirect',
+      'page arguments' => array(3, 4),
+      'access callback' => 'emicdora_object_management_access',
+      'access arguments' => array(3, 'show_viewer'),
+      'weight' => -48,
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
     'emicdora/contextual-links/version_operations/%islandora_object/edit_tei_rdf' => array(
       'title' => 'Edit TEI-RDF',
@@ -395,17 +415,6 @@ function emicdora_menu() {
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(EMICDORA_ADMINISTER_EDITION, 3),
       'weight' => -43,
-      'type' => MENU_LOCAL_TASK,
-      'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    ),
-    'emicdora/contextual-links/version_operations/%islandora_object/view_tei_rdf' => array(
-      'title' => 'Reading View',
-      'file' => 'includes/utilities.inc',
-      'page callback' => 'emicdora_contextual_redirect',
-      'page arguments' => array(3, 4),
-      'access callback' => 'emicdora_object_management_access',
-      'access arguments' => array(3, 'show_viewer'),
-      'weight' => -40,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     ),
@@ -500,6 +509,17 @@ function emicdora_menu() {
       'page arguments' => array(3, 4),
       'access callback' => 'islandora_object_access_callback',
       'access arguments' => array(ISLANDORA_PURGE, 3),
+      'type' => MENU_LOCAL_TASK,
+      'context' => MENU_CONTEXT_INLINE,
+    ),
+    'emicdora/refresh/edited_transcription' => array(
+      'title' => 'Refresh Edited Transcription',
+      'file' => 'includes/add_transcription.form.inc',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('emicdora_rebuild_transcription_form'),
+      'access callback' => 'user_access',
+      'access arguments' => array(ISLANDORA_INGEST),
+      'weight' => -35,
       'type' => MENU_LOCAL_TASK,
       'context' => MENU_CONTEXT_INLINE,
     ),
@@ -916,7 +936,7 @@ function emicdora_block_view($delta = '') {
         );
         foreach ($rels as $rel) {
           $parent_edition = islandora_object_load($rel['object']['value']);
-          if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
+          if (isset($parent_edition) && in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
             $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
           }
         }
@@ -1693,7 +1713,7 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
     // Not our operations block.
     return;
   }
-  $links =& $element['#links'];
+  $links = & $element['#links'];
   if (isset($links['emicdora-delete']) && $items['emicdora-delete']['path'] == 'emicdora/contextual-links/critical_edition/%/delete') {
     $links['emicdora-delete']['query']['destination'] = 'workbench';
   }
@@ -1702,7 +1722,7 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
     $destination = explode('/', $links['emicdora-create']['query']['destination']);
     $critical_edition = $destination[2];
     $source = $destination[4];
-    $create =& $links['emicdora-create'];
+    $create = & $links['emicdora-create'];
     $create['href'] = "emicdora/contextual-links/source_operations/{$destination[2]}/create";
     // XXX: "destination" is making a mess with redirects... Since we're going
     // to be redirecting elsewhere anyway, let's just "move" it.
