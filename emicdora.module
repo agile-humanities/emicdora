@@ -916,7 +916,7 @@ function emicdora_block_view($delta = '') {
         );
         foreach ($rels as $rel) {
           $parent_edition = islandora_object_load($rel['object']['value']);
-          if (in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
+          if (is_object($parent_edition) && in_array('islandora:criticalEditionContainerCModel', $parent_edition->models)) {
             $links[] = l($parent_edition->label, "islandora/object/{$parent_edition->id}/source/{$source_object->id}", $options);
           }
         }
