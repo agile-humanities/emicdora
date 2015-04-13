@@ -165,7 +165,6 @@
         <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-at-least-one-member-of">
           <SubjectAttributeDesignator AttributeId="urn:fedora:names:fedora:2.1:subject:loginId" DataType="http://www.w3.org/2001/XMLSchema#string" MustBePresent="false"></SubjectAttributeDesignator>
           <Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-bag">
-            <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">islandora</AttributeValue>
             <AttributeValue DataType="http://www.w3.org/2001/XMLSchema#string">fedoraAdmin</AttributeValue>
           </Apply>
         </Apply>
