@@ -272,6 +272,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
         }
       }
     }
+
+    // Get the type of annotation.
     $types = array(
       'http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing' => 'place',
       'http://xmlns.com/foaf/0.1/Organization' => 'organization',
@@ -281,6 +283,17 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'http://purl.org/dc/terms/BibliographicResource' => 'title',
     );
     $type = isset($types[$type]) ? $types[$type] : '';
+
+    // Get description directly from text to image annotation objects.
+    if ($type == 'textimagelink') {
+      $image_annotation_object = islandora_object_load(islandora_image_annotation_get_annotation_from_uuid($cwrc_attributes->attributes->id));
+      $annotation_xml_string = $image_annotation_object['OAC']->content;
+      $annotation_xml = simplexml_load_string($annotation_xml_string);
+      $xpath = "//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars";
+      $char_sets = $annotation_xml->xpath("//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars");
+      $cwrc_info->description = (string) reset($char_sets);
+    }
+
     $matches = array();
     preg_match('/@annotationId="(.*)"/', $selection, $matches);
     if (empty($matches)) {
