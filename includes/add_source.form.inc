@@ -118,6 +118,12 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
     $xacml->writeBackToFedora();
     $xacml = TRUE;
   }
+  else {
+    $collection = islandora_object_load($mapping['collection']);
+    if ($collection) {
+      islandora_xacml_editor_apply_parent_policy($object, $collection);
+    }
+  }
   // Add thumbnail.
   if (isset($form_state['values']['tn_wrapper']['tn_file'])) {
     $tn_file = $form_state['values']['tn_wrapper']['tn_file'];

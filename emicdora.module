@@ -1216,6 +1216,9 @@ function emicdora_islandora_required_objects(IslandoraTuque $connection) {
     ),
   ));
   $coop->relationships->add(FEDORA_RELS_EXT_URI, 'isMemberOfCollection', 'emic:root');
+  $coop_xacml = new IslandoraXacml($coop, file_get_contents("$module_path/data/objects/co_op_xacml_policy.xml"));
+  $coop_xacml->writeBackToFedora();
+
   // Featured Editions - Featured Critical Edition Collection.
   $featured_editions = emicdora_create_required_object($connection, array(
     'pid' => EMICDORA_FEATURED_EDITIONS_COLLECTION,
