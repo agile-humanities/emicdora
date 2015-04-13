@@ -582,6 +582,21 @@ function emicdora_menu_alter(array &$items) {
   $item['title arguments'] = array(
     'emicdora_set_title_and_breadcrumbs_object', 2,
   );
+  unset($item);
+
+  $types = array(
+    'source_operations',
+    'version_operations',
+    'critical_edition',
+  );
+  foreach ($types as $type) {
+    $item = array(
+      'context' => MENU_CONTEXT_INLINE,
+    ) + $items['islandora/object/%islandora_object/manage/xacml'];
+    $item['page arguments'][1] = 3;
+    $item['access arguments'][0] = 3;
+    $items["emicdora/contextual-links/$type/%islandora_object/xacml"] = $item;
+  }
 }
 
 /**
@@ -1735,4 +1750,24 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
     $version = emicdora_get_transcription_version(islandora_object_load($transcription));
     $links['emicdora-delete-transcription']['query']['destination'] = "islandora/object/{$critical_edition}/version/{$version->id}";
   }
+}
+
+/**
+ * Implements hook_islandora_xacml_editor_child_query().
+ */
+function emicdora_islandora_versionCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
+  $pages_query = <<<EOQ
+SELECT ?object from <#ri> WHERE
+{
+  ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
+}
+EOQ;
+  return array(
+    'book_pages' => array(
+      'type' => 'sparql',
+      'query' => $pages_query,
+      'description' => t('All pages of this version (existing and new).'),
+      'recurse' => TRUE,
+    ),
+  );
 }
