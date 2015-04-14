@@ -289,7 +289,6 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $image_annotation_object = islandora_object_load(islandora_image_annotation_get_annotation_from_uuid($cwrc_attributes->attributes->id));
       $annotation_xml_string = $image_annotation_object['OAC']->content;
       $annotation_xml = simplexml_load_string($annotation_xml_string);
-      $xpath = "//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars";
       $char_sets = $annotation_xml->xpath("//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars");
       $cwrc_info->description = (string) reset($char_sets);
     }
