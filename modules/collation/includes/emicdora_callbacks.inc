@@ -509,7 +509,7 @@ function emicdora_get_config() {
  * @param DOMDocument $dom
  *   DOMDocument
  * @param string $id
- *  ID being sought
+ *   ID being sought
  *
  * @return DOMElement|NULL
  *   The element if found, NULL otherwise.

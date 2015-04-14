@@ -278,13 +278,13 @@
           }
           if (args.data.action == 'link' || args.data.action == 'variant') {
             if (text_added.length < 1 || text_deleted.length < 1) {
-              alert('Text to link must be selected from both panes.')
+              alert(Drupal.t('Text to link must be selected from both panes.'))
               return;
             }
           }
           if (args.data.action == 'unlink') {
             if ($('#merged_text').text() == '') {
-              alert('No text selected to unmerge.')
+              alert(Drupal.t('No text selected to unmerge.'))
               return;
             }
           }

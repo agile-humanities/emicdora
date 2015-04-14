@@ -903,8 +903,8 @@ function versionable_object_viewer_get_audio_params($reference_object) {
  *   Associative array containing params.
  */
 function versionable_object_viewer_get_video_params($reference_object) {
-  $isChrome = stristr($_SERVER['HTTP_USER_AGENT'], 'chrome') !== FALSE;
-  $viewer_dsid = ($isChrome && isset($reference_object['OGG'])) ? 'OGG' : 'MP4';
+  $chrome = stristr($_SERVER['HTTP_USER_AGENT'], 'chrome') !== FALSE;
+  $viewer_dsid = ($chrome && isset($reference_object['OGG'])) ? 'OGG' : 'MP4';
 
   $video_params = array(
     'pid' => $reference_object->id,

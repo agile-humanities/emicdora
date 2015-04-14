@@ -4,6 +4,7 @@
  * @file
  * Defines all the hooks this module implements.
  */
+
 define('EMICDORA_ROOT', 'emic:root');
 define('EMICDORA_EDITION_COLLECTION', 'emic:editions');
 define('EMICDORA_FEATURED_EDITIONS_COLLECTION', 'emic:featured_collections');
