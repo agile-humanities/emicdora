@@ -5,6 +5,8 @@
  * Defines all the hooks this module implements.
  */
 
+const TEI_EDITOR_EMIC_TEI_SCHEMA_PID = 'emic:emic-tei-schema';
+
 /**
  * Implements hook_menu().
  */
@@ -46,7 +48,7 @@ function tei_editor_islandora_required_objects(IslandoraTuque $connection) {
   $module_path = drupal_get_path('module', 'tei_editor');
 
   // CWRC Basic TEI Schema.
-  $tei_schema = $connection->repository->constructObject('emic:emic-tei-schema');
+  $tei_schema = $connection->repository->constructObject(TEI_EDITOR_EMIC_TEI_SCHEMA_PID);
   $tei_schema->owner = 'fedoraAdmin';
   $tei_schema->label = 'EMIC Basic TEI Schema';
   $tei_schema->models = ISLANDORA_CWRC_WRITER_SCHEMA_CONTENT_MODEL;
@@ -147,4 +149,23 @@ function tei_editor_add_entity($content_model) {
     'objects' => array($object),
     'parent' => islandora_cwrc_writer_default_entity_collection($type),
   ));
+}
+
+/**
+ * Implements hook_CMODEL_PID_islandora_object_alter().
+ */
+function tei_editor_islandora_tei_rdfcmodel_islandora_object_alter(AbstractObject $object, &$context) {
+  if ($context['action'] == 'ingest') {
+    $schema = TEI_EDITOR_EMIC_TEI_SCHEMA_PID;
+
+    $derived = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
+    $derived = reset($derived);
+    if ($derived) {
+      $schema = $derived['object']['value'];
+    }
+
+    $schema_object = islandora_object_load($schema);
+    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
+    islandora_cwrc_writer_set_document_schema($object, $schema_object);
+  }
 }
