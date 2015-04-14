@@ -20,7 +20,7 @@
   <p><?php print t('Welcome to the CO-OP. This is where all the source material for the Critical </br> Editions resides. We have grouped the content by various categories.'); ?></p>
   <?php print $browse_all_link; ?>
   <div class="emicdora_author">
-    <h1>Browse by Author</h1>
+    <h1>Browse by Creator</h1>
 
     <?php print $variables['author_table']; ?>
     <div class="coop_browse_more">

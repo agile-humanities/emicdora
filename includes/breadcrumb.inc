@@ -214,7 +214,7 @@ function emicdora_set_title_and_breadcrumbs_versions(AbstractObject $critical_ed
   }
   $breadcrumbs[] = t("Versions");
   drupal_set_breadcrumb($breadcrumbs);
-  emicdora_set_page_title_and_subtitle($critical_edition->label, t("Search Versions(s)"));
+  emicdora_set_page_title_and_subtitle($critical_edition->label, t("Search Version(s)"));
 }
 
 /**
@@ -278,4 +278,27 @@ function emicdora_set_title_and_breadcrumbs_editor(AbstractObject $version) {
   $breadcrumbs[] = l(filter_xss($version->label), "islandora/object/{$critical_edition->id}/version/{$version->id}");
   $breadcrumbs[] = t('Edit View');
   drupal_set_breadcrumb($breadcrumbs);
+}
+
+/**
+ * Sets the title / subtitle / breadcrumbs for the "Transcription update" page.
+ *
+ * @param AbstractObject $critical_edition
+ *   The critical edition object used to generate the breadcrumbs and title.
+ *
+ * @param AbstractObject $transcription
+ *   The transcription object used to generate the breadcrumbs and title.
+ */
+function emicdora_set_title_and_breadcrumbs_transcription_update(AbstractObject $critical_edition, AbstractObject $transcription) {
+  module_load_include('inc', 'emicdora', 'includes/utilities');
+  $base_path = "islandora/object/{$critical_edition->id}";
+  $version = emicdora_get_transcription_version($transcription);
+  $source = emicdora_get_version_source($version);
+  $breadcrumbs = emicdora_get_breadcrumbs_critical_edition($critical_edition);
+  $breadcrumbs[] = l(filter_xss($source->label), "{$base_path}/source/{$source->id}");
+  $breadcrumbs[] = l(filter_xss($version->label), "{$base_path}/version/{$version->id}");
+  $breadcrumbs[] = l(filter_xss($transcription->label), "{$base_path}/transcription/{$transcription->id}");
+  $breadcrumbs[] = t("Update transcription from edited TEI");
+  drupal_set_breadcrumb($breadcrumbs);
+  emicdora_set_page_title_and_subtitle($critical_edition->label, $transcription->label);
 }
