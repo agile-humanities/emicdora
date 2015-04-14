@@ -399,7 +399,7 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $critical_edition = $parents[0]['object']['value'];
 
   // Inherit source XACML.
-  $versionable_object->relationships->add(ISLANDORA_RELS_EXT_URI, 'inheritXacmlFrom', $source->id, RELS_TYPE_URI);
+  islandora_xacml_editor_apply_parent_policy($versionable_object, $source);
 
   // Link to an existing TEI-RDF Object.
   if ($values['tei_rdf_source'] == 'existing') {

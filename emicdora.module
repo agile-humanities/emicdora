@@ -1757,17 +1757,37 @@ function emicdora_contextual_links_view_alter(&$element, $items) {
  */
 function emicdora_islandora_versionCModel_islandora_xacml_editor_child_query(AbstractObject $object) {
   $pages_query = <<<EOQ
-SELECT ?object from <#ri> WHERE
-{
+SELECT ?object
+FROM <#ri>
+WHERE {
   ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}>
 }
 EOQ;
   return array(
-    'book_pages' => array(
+    'emicdora_version_pages' => array(
       'type' => 'sparql',
       'query' => $pages_query,
       'description' => t('All pages of this version (existing and new).'),
       'recurse' => TRUE,
     ),
   );
+}
+
+/**
+ * Implements hook_islandora_object_alter().
+ */
+function emicdora_islandora_object_alter(AbstractObject $object, &$context) {
+  if ($context['action'] == 'ingest' && array_intersect($object->models, array(
+    'islandora:tei-rdfCModel',
+    'islandora:transcriptionCModel',
+  ))) {
+    $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
+    $parent = reset($parents);
+    if ($parent) {
+      $parent = islandora_object_load($parent['object']['value']);
+      if ($parent) {
+        islandora_xacml_editor_apply_parent_policy($object, $parent);
+      }
+    }
+  }
 }
