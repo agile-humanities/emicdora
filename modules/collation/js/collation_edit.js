@@ -175,9 +175,15 @@
           opacity = sync_on ? 1 : .5;
           $('.emicdora_sync_button').css('opacity', opacity);
         });
+
+        // Listening to the change event of the combo boxes was being blocked.
+        setInterval(function() {
+          $("#top-label").text($('#combobox-1029-inputEl').val());
+          $("#bottom-label").text($('#combobox-1031-inputEl').val());
+        }, 500);
+
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
-          $("#top-label").text($('#combobox-1029-inputEl').val());
           selection_deleted = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_deleted.rangeCount !== 1;
@@ -195,7 +201,6 @@
         });
         // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
-          $("#bottom-label").text($('#combobox-1031-inputEl').val());
           selection_added = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_added.rangeCount !== 1;
