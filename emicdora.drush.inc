@@ -19,7 +19,7 @@ function emicdora_drush_command() {
         'description' => dt('The max number of objects for which to query at a time. (affects memory usage, defaults to 100)'),
       ),
     ),
-    'drupal dependenies' => array(
+    'drupal dependencies' => array(
       'islandora',
       'islandora_xacml_api',
     ),
