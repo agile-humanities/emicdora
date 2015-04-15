@@ -156,16 +156,19 @@ function tei_editor_add_entity($content_model) {
  */
 function tei_editor_islandora_tei_rdfcmodel_islandora_object_alter(AbstractObject $object, &$context) {
   if ($context['action'] == 'ingest') {
+    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
     $schema = TEI_EDITOR_EMIC_TEI_SCHEMA_PID;
 
     $derived = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isDerivationOf');
     $derived = reset($derived);
     if ($derived) {
-      $schema = $derived['object']['value'];
+      $derived_object = islandora_object_load($derived['object']['value']);
+      $schema = islandora_cwrc_writer_get_document_schema_pid($derived_object);
     }
 
     $schema_object = islandora_object_load($schema);
-    module_load_include('inc', 'islandora_cwrc_writer', 'includes/utilities');
-    islandora_cwrc_writer_set_document_schema($object, $schema_object);
+    if ($schema_object) {
+      islandora_cwrc_writer_set_document_schema($object, $schema_object);
+    }
   }
 }
