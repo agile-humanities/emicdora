@@ -163,7 +163,10 @@ function tei_editor_islandora_tei_rdfcmodel_islandora_object_alter(AbstractObjec
     $derived = reset($derived);
     if ($derived) {
       $derived_object = islandora_object_load($derived['object']['value']);
-      $schema = islandora_cwrc_writer_get_document_schema_pid($derived_object);
+      if (in_array('islandora:tei-rdfCModel', $derived_object->models)) {
+        // When the object has been copied, grab the schema.
+        $schema = islandora_cwrc_writer_get_document_schema_pid($derived_object);
+      }
     }
 
     $schema_object = islandora_object_load($schema);
