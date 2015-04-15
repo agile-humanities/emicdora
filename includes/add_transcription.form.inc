@@ -478,13 +478,12 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
  */
 function emicdora_build_text_file($object, $filename, $update = FALSE) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
-  module_load_include('inc', 'versionable_object_viewer', 'includes/utilities');
   if (isset($object['CWRC'])) {
     $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
     $version_pid = $parents[0]['object']['value'];
     $datastream = $object['CWRC'];
-    $reading_tei = versionable_object_viewer_render_transcription($version_pid, $datastream, 'reading');
-    $text = emicdora_convert_tei_to_plain_text($reading_tei, $update);
+    // @todo strip out to reading version of TEI.
+    $text = emicdora_convert_tei_to_plain_text($datastream->content, $update);
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
   }
 }

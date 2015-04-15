@@ -3,3 +3,5 @@ description = "A versionable object viewer"
 package = EMiC
 version = 7.x-dev
 core = 7.x
+dependencies[] = emicdora
+dependencies[] = islandora

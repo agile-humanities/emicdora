@@ -1348,7 +1348,6 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
   module_load_include('inc', 'emicdora', 'includes/apparatus');
   $supplied_object = menu_get_object('islandora_object', 4);
   $content_models = array_keys(emicdora_source_content_models());
-  $content_models[] = 'islandora:versionCModel';
 
   module_load_include('inc', 'emicdora', 'includes/breadcrumb');
   emicdora_set_page_title_and_subtitle($object->label, t('Critical Apparatus'));
@@ -1367,31 +1366,28 @@ function emicdora_islandora_criticalEditionContainerCModel_islandora_view_object
       $model = $content_model;
     }
   }
+  if (isset($model)) {
+    switch ($model) {
+      case 'islandora:bookCModel':
+        $content = theme('islandora_book_book', array('object' => $supplied_object));
+        $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($supplied_object, FALSE) . "</div>";
+        break;
 
-  switch ($model) {
-    case 'islandora:bookCModel':
-      $content = theme('islandora_book_book', array('object' => $supplied_object));
-      $content .= '<div class="emicdora_metadata_details">' . islandora_retrieve_metadata_markup($supplied_object, FALSE) . "</div>";
-      break;
+      case 'islandora:sp-audioCModel':
+        $content = theme('islandora_audio', array('islandora_object' => $supplied_object));
+        break;
 
-    case 'islandora:sp-audioCModel':
-      $content = theme('islandora_audio', array('islandora_object' => $supplied_object));
-      break;
+      case 'islandora:sp_videoCModel':
+        $content = theme('islandora_video', array('object' => $supplied_object));
+        break;
 
-    case 'islandora:sp_videoCModel':
-      $content = theme('islandora_video', array('object' => $supplied_object));
-      break;
+      case 'islandora:sp_large_image_cmodel':
+        $content = theme('islandora_large_image', array('islandora_object' => $supplied_object));
+        break;
+    }
 
-    case 'islandora:sp_large_image_cmodel':
-      $content = theme('islandora_large_image', array('islandora_object' => $supplied_object));
-      break;
-
-    case 'islandora:versionCModel':
-      $content = theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
-      break;
+    return array('emicdora' => $content);
   }
-
-  return array('emicdora' => $content);
 }
 
 /**
