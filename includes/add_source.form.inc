@@ -387,12 +387,13 @@ function emicdora_batch_add_zipped_pages($files_to_add, $pid, $xacml, $language)
  *   Book PID
  * @param int $page_number
  *   page number
- * @param bool $xacml
- *   Whether the pages need the base XACML policy or not.
+ * @param bool $private
+ *   A boolean indicating if book access should be allowed to only the
+ *   owner/creator/current user.
  * @param string $language
  *   Chosen language for OCR process
  */
-function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $language) {
+function emicdora_consolidate_add_page($page, $book, $page_number, $private, $language) {
   module_load_include('inc', 'islandora_paged_content', 'includes/utilities');
   global $user;
 
@@ -412,10 +413,13 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $xacml, $lang
   if ($language) {
     islandora_paged_content_set_relationship($rels_ext, ISLANDORA_RELS_EXT_URI, 'hasLanguage', $language, TRUE);
   }
-  if ($xacml) {
+  if ($private) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
     $xacml->writeBackToFedora();
+  }
+  else {
+    islandora_xacml_editor_apply_parent_policy($object, $book_object);
   }
   islandora_add_object($object);
 }
