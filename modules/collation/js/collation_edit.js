@@ -175,9 +175,15 @@
           opacity = sync_on ? 1 : .5;
           $('.emicdora_sync_button').css('opacity', opacity);
         });
+
+        // Listening to the change event of the combo boxes was being blocked.
+        setInterval(function() {
+          $("#top-label").text($('#combobox-1029-inputEl').val());
+          $("#bottom-label").text($('#combobox-1031-inputEl').val());
+        }, 500);
+
         // Adds html to context_deleted.
         $('#versionview-1010-body').mouseup(function(evt) {
-          $("#top-label").text($('#combobox-1026-inputEl').val());
           selection_deleted = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_deleted.rangeCount !== 1;
@@ -195,7 +201,6 @@
         });
         // Adds html to context_added.
         $('#versionview-1011-body').mouseup(function(evt) {
-          $("#bottom-label").text($('#combobox-1027-inputEl').val());
           selection_added = rangy.getSelection();
           // If multiple ranges ignore the selection.
           var invalid_range = selection_added.rangeCount !== 1;
@@ -278,13 +283,13 @@
           }
           if (args.data.action == 'link' || args.data.action == 'variant') {
             if (text_added.length < 1 || text_deleted.length < 1) {
-              alert('Text to link must be selected from both panes.')
+              alert(Drupal.t('Text to link must be selected from both panes.'))
               return;
             }
           }
           if (args.data.action == 'unlink') {
             if ($('#merged_text').text() == '') {
-              alert('No text selected to unmerge.')
+              alert(Drupal.t('No text selected to unmerge.'))
               return;
             }
           }
@@ -429,5 +434,6 @@
         ));
       });
     }
+
   };
 })(jQuery);

@@ -507,7 +507,9 @@ function emicdora_get_config() {
  * As it does not work in earlier versions (<=5.3.3) of PHP with HTML.
  *
  * @param DOMDocument $dom
+ *   DOMDocument
  * @param string $id
+ *   ID being sought
  *
  * @return DOMElement|NULL
  *   The element if found, NULL otherwise.

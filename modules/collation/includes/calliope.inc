@@ -271,7 +271,7 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
   $response = curl_exec($ch);
   $err = curl_errno($ch);
   $error = curl_error($ch);
-  $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+  $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
   curl_close($ch);
   if ($err) {
     drupal_set_message(t("Error @err @error @response", array(
@@ -313,7 +313,7 @@ function emicdora_calliope_create_mvd($critical_edition, $mvd_title, $mvd_descri
         $mvd_success = emicdora_calliope_write_mvd($newmvd);
       }
     }
-    else if ($contentType == 'text/html;charset=UTF-8') {
+    elseif ($content_type == 'text/html;charset=UTF-8') {
       $doc = new DOMDocument(1.0, 'UTF-8');
       $doc->loadHTML($response);
       $xpath = new DOMXPath($doc);

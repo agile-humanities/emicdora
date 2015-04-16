@@ -170,7 +170,7 @@ function emicdora_mvd_form_submit(&$form, &$form_state) {
     $mvd_title = str_replace(' ', '_', $mvd_title);
     $form_state['redirect'] = array(
       "islandora/object/$critical_edition_pid/compare/$mvd_title",
-      array('fragment' => "$mvd_title/$critical_edition_pid")
+      array('fragment' => "$mvd_title/$critical_edition_pid"),
     );
   }
 }
