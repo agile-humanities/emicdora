@@ -9,28 +9,6 @@ namespace VersionableObjectViewer;
 use \DOMXPath, \DOMElement;
 
 /**
- * Flag text nodes in the given document.
- *
- * Effectively goes over every (un/re)do node and flips the flag on the node
- * wrapping each text node. Kind of naive with respect to "redo", as we do not
- * first require something to be "undone" to apply it... Effectively, undo and
- * redo are handled the same.
- *
- * @param DOMDocument $doc
- *   The document in which to adjust the flags of wrapping nodes. Note: This
- *   document will be modified!
- */
-function count_refs($doc) {
-  $xpath = new DOMXPath($doc);
-  $xpath->registerNamespace('wrap', 'http://islandora.ca/ontology/tei-text-wrapper');
-  $xpath->registerNamespace('tei', 'http://www.tei-c.org/ns/1.0');
-
-  foreach ($xpath->query('//tei:undo | //tei:redo') as $element) {
-    deref_nodes($xpath, $element);
-  }
-}
-
-/**
  * Actually flip the flags resulting from the given item.
  *
  * @param DOMXPath $xpath

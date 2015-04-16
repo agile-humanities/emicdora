@@ -991,3 +991,70 @@ function emicdora_contextual_redirect($source_object, $delta) {
       return "This function has not yet been implemented";
   }
 }
+
+/**
+ * Flag text nodes in the given document.
+ *
+ * Effectively goes over every (un/re)do node and flips the flag on the node
+ * wrapping each text node. Kind of naive with respect to "redo", as we do not
+ * first require something to be "undone" to apply it... Effectively, undo and
+ * redo are handled the same.
+ *
+ * @param DOMDocument $doc
+ *   The document in which to adjust the flags of wrapping nodes. Note: This
+ *   document will be modified!
+ */
+function emicdora_count_refs($doc) {
+  $xpath = new DOMXPath($doc);
+  $xpath->registerNamespace('wrap', 'http://islandora.ca/ontology/tei-text-wrapper');
+  $xpath->registerNamespace('tei', 'http://www.tei-c.org/ns/1.0');
+
+  foreach ($xpath->query('//tei:undo | //tei:redo') as $element) {
+    deref_nodes($xpath, $element);
+  }
+}
+
+/**
+ * Prepare TEI as either reading or diplomatic.
+ *
+ * @param string $tei
+ *   The TEI for which to produce a transcription.
+ * @param string $type
+ *   The type of transcription we support:
+ *   - reading
+ *   - diplomatic
+ *
+ * @return string
+ *   A string of the prepared TEI.
+ */
+function emicdora_process_tei($tei, $type){
+  $emicdora_transforms_path = drupal_get_path('module', 'emicdora');
+  $input = new DOMDocument();
+  $content = preg_replace('/<\?xml-model .*\?>/', '', $tei);
+  $input->loadXML($content);
+  $wrapper_xslt_doc = new DOMDocument();
+  $wrapper_xslt_doc->load("$emicdora_transforms_path/transforms/wrap.xslt");
+  $wrapper_xslt = new XSLTProcessor();
+  $wrapper_xslt->importStylesheet($wrapper_xslt_doc);
+  $wrapped = $wrapper_xslt->transformToDoc($input);
+
+  emicdora_count_refs($wrapped);
+  $unwrapper_xslt_doc = new DOMDocument();
+  $unwrapper_xslt_doc->load("$emicdora_transforms_path/transforms/unwrap.xslt");
+  $unwrapper_xslt = new XSLTProcessor();
+  $unwrapper_xslt->importStylesheet($unwrapper_xslt_doc);
+  $unwrapper_xslt->setParameter('', 'type', $type);
+  $unwrapped_doc = $unwrapper_xslt->transformToDoc($wrapped);
+
+  // Remove non-display info from reading TEI.
+  if ($type == 'reading') {
+    $xpath = new DOMXpath($unwrapped_doc);
+    $xpath->registerNamespace('tei', 'http://www.tei-c.org/ns/1.0');
+    $xpath->registerNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+    $nukable = $xpath->query('//rdf:RDF | //tei:teiHeader');
+    foreach($nukable as $nukee) {
+      $nukee->parentNode->removeChild($nukee);
+    }
+  }
+  return $unwrapped_doc->saveXML();
+}

@@ -481,9 +481,10 @@ function emicdora_build_text_file($object, $filename, $update = FALSE) {
   if (isset($object['CWRC'])) {
     $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
     $version_pid = $parents[0]['object']['value'];
-    $datastream = $object['CWRC'];
-    // @todo strip out to reading version of TEI.
-    $text = emicdora_convert_tei_to_plain_text($datastream->content, $update);
+    $text = emicdora_convert_tei_to_plain_text(
+      emicdora_process_tei($object['CWRC']->content, 'reading'),
+      $update
+    );
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
   }
 }
