@@ -1027,7 +1027,7 @@ function emicdora_count_refs($doc) {
  * @return string
  *   A string of the prepared TEI.
  */
-function emicdora_process_tei($tei, $type){
+function emicdora_process_tei($tei, $type) {
   $emicdora_transforms_path = drupal_get_path('module', 'emicdora');
   $input = new DOMDocument();
   $content = preg_replace('/<\?xml-model .*\?>/', '', $tei);
@@ -1052,7 +1052,7 @@ function emicdora_process_tei($tei, $type){
     $xpath->registerNamespace('tei', 'http://www.tei-c.org/ns/1.0');
     $xpath->registerNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
     $nukable = $xpath->query('//rdf:RDF | //tei:teiHeader');
-    foreach($nukable as $nukee) {
+    foreach ($nukable as $nukee) {
       $nukee->parentNode->removeChild($nukee);
     }
   }
