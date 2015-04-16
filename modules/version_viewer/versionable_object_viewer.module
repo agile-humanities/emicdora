@@ -158,6 +158,8 @@ function versionable_object_viewer_islandora_versionCModel_islandora_view_object
  */
 function versionable_object_viewer_islandora_criticalEditionContainerCModel_islandora_view_object(AbstractObject $object) {
   $supplied_object = menu_get_object('islandora_object', 4);
-  $content = theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
-  return array('emicdora' => $content);
+  if ($supplied_object && in_array('islandora:versionCModel', $supplied_object->models)) {
+    $content = theme('versionable_object_viewer', array('islandora_object' => $supplied_object));
+    return array('emicdora' => $content);
+  }
 }
