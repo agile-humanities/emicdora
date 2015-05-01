@@ -211,6 +211,10 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
         $resource_ids[] = $transcription['id'];
       }
       $filter = $mvd['metadata']['filter'];
+      // Need to delete the files out of Calliope too.
+      foreach ($resource_ids as $resource) {
+        emicdora_calliope_delete_file($resource);
+      }
       emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
