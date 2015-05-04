@@ -432,6 +432,10 @@
           type: "text/css"
         }
         ));
+        var footer_bar = contents.find(".yui3-skin-sam div#input div.yui-3 div.yui3-u");
+        footer_bar.append("<span class='collate-x-logo'></span>");
+        console.log(footer_bar);
+        
       });
     }
 
