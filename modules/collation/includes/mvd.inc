@@ -91,16 +91,14 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
 function emicdora_mvd_form_validate($form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $critical_edition_object = islandora_object_load($form_state['values']['pid']);
-  $mvds = emicdora_calliope_find_mvds($critical_edition_object);
   // Collation name cannot contain special characters but allow _ and space.
   // Note: when saved space gets translated to _.
   if (!preg_match('/^[a-z A-Z_0-9]+$/', $form_state['values']['mvd'])) {
     form_set_error('mvd', t('A collation name cannot contain any special characters.'));
   }
-  foreach ($mvds as $mvd) {
-    if ($mvd['name'] == $form_state['values']['mvd']) {
-      form_set_error('mvd', t('A collation with this name is already associated with this critical edition.'));
-    }
+  $name = $form_state['values']['mvd'];
+  if (emicdora_calliope_does_mvd_exist($name)) {
+    form_set_error('mvd', t('A collation with the name @name is already created.', array('@name' => $name)));
   }
   // Check to make sure at least two files are selected for the Collation.
   if (count(array_filter($form_state['values']['transcriptions'])) < 2) {
@@ -211,6 +209,10 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
         $resource_ids[] = $transcription['id'];
       }
       $filter = $mvd['metadata']['filter'];
+      // Need to delete the files out of Calliope too.
+      foreach ($resource_ids as $resource) {
+        emicdora_calliope_delete_file($resource);
+      }
       emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
