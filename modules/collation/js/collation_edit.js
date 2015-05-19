@@ -433,7 +433,7 @@
         }
         ));
         var footer_bar = contents.find(".yui3-skin-sam div#input div.yui-3 div.yui3-u");
-        footer_bar.append("<span class='collate-x-logo'></span>");
+        footer_bar.append("<a target='_blank' href='http://collatex.net/' class='collate-x-click' ><span class='collate-x-logo'></span></a>");
       });
     }
 
