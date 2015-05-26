@@ -297,6 +297,80 @@ function emicdora_mvd_operation_confirm_form($form, &$form_state, AbstractObject
 }
 
 /**
+ * Form validation to check the update transcripts on collation refresh.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal Form State
+ */
+function emicdora_mvd_operation_confirm_form_validate($form, &$form_state) {
+  $critical_edition = $form_state['critical_edition'];
+  $mvd = $form_state['mvd'];
+  $operation = $form_state['operation'];
+  // Validate if the transcription is valid for generation a collation.
+  if ($operation == 'refresh') {
+    module_load_include('inc', 'collation', 'includes/calliope');
+    $query = array(
+      'metadata.critical_edition' => $critical_edition,
+      'metadata.name' => $mvd,
+    );
+    $mvds = emicdora_calliope_find_mvd($query);
+    if (empty($mvds)) {
+      return;
+    }
+    $mvd = $mvds[0];
+
+    foreach ($mvd['metadata']['resources'] as $transcription) {
+      $transcription_pids[] = $transcription['id'];
+    }
+
+    $get_transcriptions = function($pid) {
+      $object = islandora_object_load($pid);
+      return $object['TRANSCRIPTION'];
+    };
+    $transcriptions = array_map($get_transcriptions, $transcription_pids);
+
+    // Check that each transcript can be used to generate a valid collation.
+    foreach ($transcriptions as $transcription) {
+      // Calliope has limits on the length of a transcription.
+      $size = $transcription->size;
+      if ($size <= 0) {
+        form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
+          '%label' => $transcription->parent->label,
+          '%pid' => $transcription->parent->id,
+        )));
+        break;
+      }
+      if ($size >= 102400) {
+        form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
+          '%label' => $transcription->parent->label,
+          '%pid' => $transcription->parent->id,
+          '%length' => $size,
+        )));
+        break;
+      }
+      // Compare each possible combination to check that they can be compared.
+      foreach ($transcriptions as $second) {
+        $second_size = $second->size;
+        $difference_in_length = min($size, $second_size) / max($size, $second_size);
+        if ($difference_in_length < 0.1) {
+          form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
+            '%label_one' => $transcription->parent->label,
+            '%pid_one' => $transcription->parent->id,
+            '%length_one' => $size,
+            '%label_two' => $second->parent->label,
+            '%pid_two' => $second->parent->id,
+            '%length_two' => $second_size,
+          )));
+          break 2;
+        }
+      }
+    }
+  }
+}
+
+/**
  * Submit handler for the MVD confirm form.
  *
  * @param array $form
