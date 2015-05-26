@@ -1391,15 +1391,15 @@
   display: block;
 }
 /* line 320, ../sass/_tei.scss */
-.tei .line br {
+.tei .line span.fake.br {
   content: "";
 }
 /* line 323, ../sass/_tei.scss */
-.tei .line br:before {
+.tei .line span.fake.br:before {
   content: "\0a";
 }
 /* line 326, ../sass/_tei.scss */
-.tei .line br:last-child:after {
+.tei .line span.fake.br:last-child:after {
   content: "\0a";
 }
 /* line 332, ../sass/_tei.scss */

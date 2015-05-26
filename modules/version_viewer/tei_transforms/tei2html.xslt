@@ -276,7 +276,7 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="substring-before($text, '&#xa;')"/>
-        <br/>
+        <span class="fake br"/>
         <xsl:call-template name="nl2br">
           <xsl:with-param name="text" select="substring-after($text, '&#xa;')"/>
         </xsl:call-template>

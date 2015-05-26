@@ -317,7 +317,7 @@ $line_height_double: 3em;
   .line {
     white-space: pre-wrap;
     display: block;
-    br {
+    span.fake.br {
       content: "";
 
       &:before {
