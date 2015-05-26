@@ -6,6 +6,54 @@
  */
 
 /**
+ * Validate transcripts can be used for collations.
+ *
+ * @param array $pids
+ *   An array of transcription object PIDs.
+ */
+function emicdora_mvd_validate_transcripts(array $pids) {
+  $get_transcription_size = function($pid) {
+    $object = islandora_object_load($pid);
+    return isset($object['TRANSCRIPTION']) ? $object['TRANSCRIPTION']->size : -1;
+  };
+  $transcriptions = array_map($get_transcription_size, drupal_map_assoc($pids));
+  $min = min($transcriptions);
+  $max = max($transcriptions);
+
+  $min_pids = array_keys($transcriptions, $min, TRUE);
+  $min_pid = reset($min_pids);
+  $min_object = islandora_object_load($min_pid);
+
+  $max_pids = array_keys($transcriptions, $max, TRUE);
+  $max_pid = reset($max_pids);
+  $max_object = islandora_object_load($max_pid);
+
+  if ($min <= 0) {
+    form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
+      '%label' => $min_object->label,
+      '%pid' => $min_object->id,
+    )));
+  }
+  elseif ($max >= 102400) {
+    form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
+      '%label' => $max_object->label,
+      '%pid' => $max_object->id,
+      '%length' => $max,
+    )));
+  }
+  elseif (1.0 * $min / $max < 0.1) {
+    form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
+      '%label_one' => $min_object->label,
+      '%pid_one' => $min_object->id,
+      '%length_one' => $min,
+      '%label_two' => $max_object->label,
+      '%pid_two' => $max_object->id,
+      '%length_two' => $max,
+    )));
+  }
+}
+
+/**
  * The form for creating a MVD object.
  *
  * @param array $form
@@ -105,46 +153,7 @@ function emicdora_mvd_form_validate($form, &$form_state) {
     form_set_error('transcriptions', t('A minimum of two transcriptions are required to create a collation.'));
   }
   $pids = array_filter($form_state['values']['transcriptions']);
-  $get_transcriptions = function($pid) {
-    $object = islandora_object_load($pid);
-    return $object['TRANSCRIPTION'];
-  };
-  $transcriptions = array_map($get_transcriptions, $pids);
-  foreach ($transcriptions as $transcription) {
-    // Calliope has limits on the length of a transcription.
-    $size = $transcription->size;
-    if ($size <= 0) {
-      form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
-        '%label' => $transcription->parent->label,
-        '%pid' => $transcription->parent->id,
-      )));
-      break;
-    }
-    if ($size >= 102400) {
-      form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
-        '%label' => $transcription->parent->label,
-        '%pid' => $transcription->parent->id,
-        '%length' => $size,
-      )));
-      break;
-    }
-    // Compare each possible combination to check that they can be compared.
-    foreach ($transcriptions as $second) {
-      $second_size = $second->size;
-      $difference_in_length = min($size, $second_size) / max($size, $second_size);
-      if ($difference_in_length < 0.1) {
-        form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
-          '%label_one' => $transcription->parent->label,
-          '%pid_one' => $transcription->parent->id,
-          '%length_one' => $size,
-          '%label_two' => $second->parent->label,
-          '%pid_two' => $second->parent->id,
-          '%length_two' => $second_size,
-        )));
-        break 2;
-      }
-    }
-  }
+  emicdora_mvd_validate_transcripts($pids);
 }
 
 /**
@@ -324,49 +333,7 @@ function emicdora_mvd_operation_confirm_form_validate($form, &$form_state) {
     foreach ($mvd['metadata']['resources'] as $transcription) {
       $transcription_pids[] = $transcription['id'];
     }
-
-    $get_transcriptions = function($pid) {
-      $object = islandora_object_load($pid);
-      return $object['TRANSCRIPTION'];
-    };
-    $transcriptions = array_map($get_transcriptions, $transcription_pids);
-
-    // Check that each transcript can be used to generate a valid collation.
-    foreach ($transcriptions as $transcription) {
-      // Calliope has limits on the length of a transcription.
-      $size = $transcription->size;
-      if ($size <= 0) {
-        form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
-          '%label' => $transcription->parent->label,
-          '%pid' => $transcription->parent->id,
-        )));
-        break;
-      }
-      if ($size >= 102400) {
-        form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
-          '%label' => $transcription->parent->label,
-          '%pid' => $transcription->parent->id,
-          '%length' => $size,
-        )));
-        break;
-      }
-      // Compare each possible combination to check that they can be compared.
-      foreach ($transcriptions as $second) {
-        $second_size = $second->size;
-        $difference_in_length = min($size, $second_size) / max($size, $second_size);
-        if ($difference_in_length < 0.1) {
-          form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
-            '%label_one' => $transcription->parent->label,
-            '%pid_one' => $transcription->parent->id,
-            '%length_one' => $size,
-            '%label_two' => $second->parent->label,
-            '%pid_two' => $second->parent->id,
-            '%length_two' => $second_size,
-          )));
-          break 2;
-        }
-      }
-    }
+    emicdora_mvd_validate_transcripts($transcription_pids);
   }
 }
 
