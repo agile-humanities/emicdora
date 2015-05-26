@@ -313,6 +313,21 @@ $line_height_double: 3em;
   .v-viewer-title:not(.overlap-spanning-annotation) {
     border-bottom-style: solid;
   }
+
+  .line {
+    white-space: pre-wrap;
+    display: block;
+    br {
+      content: "";
+
+      &:before {
+        content: "\0a";
+      }
+      &:last-child:after {
+        content: "\0a";
+      }
+    }
+  }
  
   &.reading {
     .seg.class--rend--undone, .corr, .reg {
@@ -322,9 +337,6 @@ $line_height_double: 3em;
     /* Only hide inline notes, footnotes are still displayed */
     div.note {
       display: none;
-    }
-    .line {
-      display: block;
     }
   }
 
@@ -341,9 +353,6 @@ $line_height_double: 3em;
         content: ")";
         color: slategrey;
       }
-    }
-    .line {
-      display: block;
     }
     .add {
       display: inline;
