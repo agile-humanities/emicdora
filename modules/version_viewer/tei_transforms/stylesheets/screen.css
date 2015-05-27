@@ -1398,44 +1398,40 @@
 .tei .line span.fake.br:before {
   content: "\0a";
 }
-/* line 326, ../sass/_tei.scss */
-.tei .line span.fake.br:last-child:after {
-  content: "\0a";
-}
-/* line 332, ../sass/_tei.scss */
+/* line 329, ../sass/_tei.scss */
 .tei.reading {
   /* Only hide inline notes, footnotes are still displayed */
 }
-/* line 333, ../sass/_tei.scss */
+/* line 330, ../sass/_tei.scss */
 .tei.reading .seg.class--rend--undone, .tei.reading .corr, .tei.reading .reg {
   color: black;
   font-style: normal;
 }
-/* line 338, ../sass/_tei.scss */
+/* line 335, ../sass/_tei.scss */
 .tei.reading div.note {
   display: none;
 }
-/* line 344, ../sass/_tei.scss */
+/* line 341, ../sass/_tei.scss */
 .tei:not(.reading) .seg.class--rend--undone {
   color: green;
 }
-/* line 348, ../sass/_tei.scss */
+/* line 345, ../sass/_tei.scss */
 .tei:not(.reading) .subst:before {
   content: "(";
   color: slategrey;
 }
-/* line 352, ../sass/_tei.scss */
+/* line 349, ../sass/_tei.scss */
 .tei:not(.reading) .subst:after {
   content: ")";
   color: slategrey;
 }
-/* line 357, ../sass/_tei.scss */
+/* line 354, ../sass/_tei.scss */
 .tei:not(.reading) .add {
   display: inline;
   color: green;
   text-decoration: underline;
 }
-/* line 362, ../sass/_tei.scss */
+/* line 359, ../sass/_tei.scss */
 .tei:not(.reading) .del {
   display: inline;
   color: red;

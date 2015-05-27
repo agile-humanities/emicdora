@@ -323,9 +323,6 @@ $line_height_double: 3em;
       &:before {
         content: "\0a";
       }
-      &:last-child:after {
-        content: "\0a";
-      }
     }
   }
  
