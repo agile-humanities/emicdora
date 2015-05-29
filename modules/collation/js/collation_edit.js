@@ -21,7 +21,7 @@
       function emicdora_get_variants() {
         var raw_variant_map = [];
         var variant_map = [];
-        $(".variant").each(function(index, element) {
+        $(".variant, .merged").each(function(index, element) {
           raw_variant_map.push($(this).data('variant'));
         });
         // Home rolled unique function - will not reorder.
@@ -88,7 +88,7 @@
         }
       });
 
-      $(document).delegate('span.variant', 'click', function(e) {
+      $(document).delegate('span.variant, span.merged', 'click', function(e) {
         // Prevents scripted click events from firing.
         if (e.screenY == 0 && e.screenX == 0) {
           return;
@@ -100,7 +100,7 @@
         if ($(this).hasClass('variant_selected')) {
           merged_content = '';
           $('#merged_text').val('');
-          $(".variant").removeClass('variant_selected');
+          $(".variant, .merged").removeClass('variant_selected');
           variant_selected = false;
         } else {
           $(".variant").removeClass('variant_selected');
@@ -229,7 +229,8 @@
             next_index = (next_index < variant_map.length) ? next_index : 0;
             next_variant = variant_map[next_index];
             next_selector = '[data-variant=' + next_variant + ']';
-            $('.variant').removeClass('variant_selected');
+            $('.variant, .merged').removeClass('variant_selected');
+            console.log(next_selector);
             $(next_selector).addClass('variant_selected');
             $(next_selector).each(function(index) {
               $(this).parent().scrollTop($(this).position().top);
@@ -250,7 +251,7 @@
             previous_variant = variant_map[previous_index];
             current_selector = '[data-variant=' + current_variant + ']';
             previous_selector = '[data-variant=' + previous_variant + ']';
-            $('.variant').removeClass('variant_selected');
+            $('.variant, .merged').removeClass('variant_selected');
             $(previous_selector).addClass('variant_selected');
             variant_selected = $(previous_selector).data('variant');
             $(previous_selector).each(function(index) {
@@ -294,7 +295,7 @@
             }
           }
           if (args.data.action == 'save') {
-            $('.variant').removeClass('variant_selected');
+            $('.variant, .merged').removeClass('variant_selected');
             if ($("#save_changes").text() == 'Saving..') {
               return;
             }
@@ -302,7 +303,7 @@
             $(".merged").css('background-color', '');
             all_added = encodeURIComponent($("#versionview-1011-body").html());
             all_deleted = encodeURIComponent($("#versionview-1010-body").html());
-            $(".variant").removeClass('variant_selected');
+           $('.variant, .merged').removeClass('variant_selected');
           }
           else {
             $("#save_changes").show();
