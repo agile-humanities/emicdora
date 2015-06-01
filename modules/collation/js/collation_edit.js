@@ -182,8 +182,8 @@
          *   A jQuery object with the element to scroll. Defaults to the
          *   window, if not provided.
          */
-        function scroll($element, $parent = null) {
-          if ($parent === null) {
+        function scroll($element, $parent) {
+          if (typeof $parent === "undefined") {
             $parent = $(window);
           }
           var cTop = $element.position().top;
