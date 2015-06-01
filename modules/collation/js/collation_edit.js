@@ -280,21 +280,29 @@
             }
           }
           if (args.data.action == 'save') {
-            $('.variant').removeClass('variant_selected');
             if ($("#save_changes").text() == 'Saving..') {
               return;
             }
-            $("#save_changes").text("Saving..")
-            $(".merged").css('background-color', '');
-            all_added = encodeURIComponent($("#versionview-1011-body").html());
-            all_deleted = encodeURIComponent($("#versionview-1010-body").html());
-            $(".variant").removeClass('variant_selected');
+            $("#save_changes").text("Saving..");
+            var $right = $("#versionview-1011-body");
+            var $left = $("#versionview-1010-body");
           }
           else {
             $("#save_changes").show();
-            all_added = encodeURIComponent($("#versionview-1011").html());
-            all_deleted = encodeURIComponent($("#versionview-1010").html());
+            var $right = $("#versionview-1011");
+            var $left = $("#versionview-1010");
           }
+
+          // Find any selected parts.
+          var $selected = $left.add($right).find('.variant_selected, .merged_selected');
+          var merged = $selected.hasClass('merged_selected');
+          // Remove the class used for selecting, so it will not get pushed to
+          // the backend.
+          $selected.removeClass('variant_selected merged_selected');
+          all_added = encodeURIComponent($right.html());
+          all_deleted = encodeURIComponent($left.html());
+          // Restore the class, for GUI consistency.
+          $selected.addClass(merged ? 'merged_selected' : 'variant_selected');
 
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
           var build_selection = function(range) {
