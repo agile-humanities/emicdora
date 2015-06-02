@@ -9,7 +9,6 @@
  * Ajax callback for collation editing.
  */
 function emicdora_collation_edit() {
-  dd($_POST, 'that shit');
   module_load_include('inc', 'collation', 'includes/calliope');
   $config = emicdora_get_config();
   $base_doc = <<<EOQ
