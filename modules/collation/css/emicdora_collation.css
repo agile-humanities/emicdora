@@ -9,6 +9,11 @@
   width: 125px;
 }
 
+#collation_link, #collation_variant, #collation_unlink{
+  margin-top: 5px !important;
+  padding-top: 5px !important;
+}
+
 .x-css-shadow{
   display:none !important;
 }
@@ -63,8 +68,15 @@
 {
  float: top;
  border-radius: 0px;
+ width: 23px;
+ height: 23px;
+ margin-top: 4px !important;
+ padding-top: 0px !important;
 }
 
+#content > h1 {
+  font-size: 150%;
+}
 .emicdora-collation_fullwindow
 {
   position: fixed;
@@ -129,6 +141,7 @@ text-decoration: none;
 transition: box-shadow 0.1s linear 0s;
 vertical-align: baseline;
 white-space: nowrap;
+padding-top: 5px;
 }
 .variant {
   color: #C11B17;
@@ -147,4 +160,7 @@ white-space: nowrap;
   width: 25%;
   padding:1%;
   font-size: larger;
+}
+#top-label, #bottom-label, #merged{
+  padding-left: 1.25em !important;
 }

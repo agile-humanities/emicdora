@@ -240,7 +240,12 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
         break;
       }
       do {
-        $current = $current->nextSibling;
+        if ($current->nextSibling !== NULL) {
+          $current = $current->nextSibling;
+        }
+        else {
+          break;
+        }
       } while ($current->childNodes === NULL);
     }
   };
