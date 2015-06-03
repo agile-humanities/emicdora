@@ -348,6 +348,25 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
   color: inherit !important;
 }
 
+del[change = "a"], add[change = "a"] {
+  color: red !important;
+}
+del[change = "b"], add[change = "b"] {
+  color: blue !important;
+}
+del[change = "c"], add[change = "c"] {
+  color: green !important;
+}
+del[change = "d"], add[change = "d"] {
+  color: orange !important;
+}
+del[change = "e"], add[change = "e"] {
+  color: purple !important;
+}
+del[change = "f"], add[change = "f"] {
+  color: yellow !important;
+}
+
 del[change = "A"], add[change = "A"] {
   color: red !important;
 }
