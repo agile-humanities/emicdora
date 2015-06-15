@@ -210,10 +210,6 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
 
   switch ($operation) {
     case 'refresh':
-      // Redirect won't work if destination is set.
-      if (isset($_GET['destination'])) {
-        unset($_GET['destination']);
-      }
       foreach ($mvd['metadata']['resources'] as $transcription) {
         $resource_ids[] = $transcription['id'];
       }
@@ -235,10 +231,6 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
     case 'delete':
       emicdora_calliope_delete_mvd($mvd['_id']);
       drupal_set_message(t("Collation successfully removed"));
-      // Redirect won't work if destination is set.
-      if (isset($_GET['destination'])) {
-        unset($_GET['destination']);
-      }
       drupal_goto("islandora/object/$critical_edition_pid");
       break;
 
@@ -298,6 +290,11 @@ function emicdora_mvd_operation_confirm_form($form, &$form_state, AbstractObject
     'path' => "islandora/object/$critical_edition->id/$previous_view/$mvd_label",
     'fragment' => "$mvd_label/$critical_edition->id",
   );
+  // The confirm_form uses $_GET['destination'] by default so to get the
+  // cancel redirect to go to the proper destination it needs to be unset.
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
+  }
   $form_state['previous_view'] = $previous_view;
   $form_state['critical_edition'] = $critical_edition->id;
   $form_state['operation'] = $operation;
