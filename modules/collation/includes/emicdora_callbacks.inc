@@ -170,7 +170,7 @@ function emicdora_merge($fixed_content, $type, $linkage_type, $counter) {
   $replacements['content'] = $dom->createElement('span');
   $replacements['content']->setAttribute('id', $content_id);
   $replacements['content']->setAttribute('class', $linkage_type);
-  $replacements['content']->setAttribute("data-$linkage_type", $counter);
+  $replacements['content']->setAttribute("data-variant", $counter);
   $replacements['suffix'] = $dom->createElement('span');
   $replacements['suffix']->setAttribute('id', "{$prefix}osuf{$counter}e{$content_id}");
 
