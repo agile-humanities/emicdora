@@ -232,10 +232,18 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
     ),
   );
 
+  // Check if the file upload should be required.
+  $require_upload_for_content_models = array(
+    "islandora:sp-audioCModel",
+    "islandora:sp_videoCModel",
+    "islandora:sp_large_image_cmodel",
+  );
+  $require_file = in_array($content_model, $require_upload_for_content_models);
+
   $form['content_wrapper']['content'] = array(
     '#title' => $mappings['upload_prompt'],
     '#type' => 'managed_file',
-    '#required' => FALSE,
+    '#required' => $require_file,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
       'file_validate_extensions' => array($mappings['extensions']),
