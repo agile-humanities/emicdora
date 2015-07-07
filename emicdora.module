@@ -916,14 +916,38 @@ function emicdora_block_view($delta = '') {
       if (emicdora_show_apparatus_block()) {
         module_load_include('inc', 'emicdora', 'includes/apparatus');
         $links = array();
-        foreach ($critical_edition as $dsid => $datastream) {
-          if (emicdora_is_apparatus_supported_datastream($dsid)) {
-            $links[] = array(
-              'title' => $datastream->label,
-              'href' => "islandora/object/{$critical_edition->id}/apparatus/$dsid",
-              'attributes' => array('class' => array('apparatus_link')),
-            );
+        $dses = iterator_to_array($critical_edition);
+        $apparatus_dses = array_filter($dses, function ($ds) {
+          return emicdora_is_apparatus_supported_datastream($ds->id);
+        });
+
+        $ds_order = array(
+          'EPIGRAPH',
+          'ACKNOWLEDGEMENTS',
+          'PREFACE',
+          'FOREWORD',
+          'INTRODUCTION',
+          'EDITORIAL_PROCEDURES',
+          'CHRONOLOGY',
+          'ILLUSTRATIONS',
+          'EPILOGUE',
+          'AFTERWORD',
+          'APPENDIX',
+          'BIBLIOGRAPHY',
+        );
+        // Re-order the array to what we want now.
+        $link_dses = array();
+        foreach ($ds_order as $dsid) {
+          if (isset($apparatus_dses[$dsid])) {
+            $link_dses[$dsid] = $apparatus_dses[$dsid];
           }
+        }
+        foreach ($link_dses as $datastream) {
+          $links[] = array(
+            'title' => $datastream->label,
+            'href' => "islandora/object/{$critical_edition->id}/apparatus/{$datastream->id}",
+            'attributes' => array('class' => array('apparatus_link')),
+          );
         }
         $block['subject'] = t('Apparatus');
         $block['content'] = array(

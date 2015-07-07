@@ -368,7 +368,6 @@ EOD;
  *   array of form elements
  */
 function emicdora_get_apparatus_as_content($object, $dsid = NULL) {
-  $path = drupal_get_path('module', 'emicdora');
   $dsid = isset($dsid) ? strtoupper($dsid) : NULL;
   $datastreams = emicdora_get_apparatus_datastreams($object);
   if (count($datastreams) == 0) {
