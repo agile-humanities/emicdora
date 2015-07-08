@@ -1808,3 +1808,29 @@ function emicdora_islandora_object_alter(AbstractObject $object, &$context) {
     }
   }
 }
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function emicdora_theme_registry_alter(&$theme_registry) {
+  // Override theme templates to remove "In Collections" section from files.
+  $template_base_path = drupal_get_path('module', 'emicdora') . '/theme/';
+  $theme_overrides = array(
+    'islandora_audio' => $template_base_path . 'emicdora_override_islandora-audio',
+    'islandora_basic_image' => $template_base_path . 'emicdora_override_islandora-basic-image',
+    'islandora_book_book' => $template_base_path . 'emicdora_override_islandora-book-book',
+    'islandora_default' => $template_base_path . 'emicdora_override_islandora-object',
+    'islandora_document' => $template_base_path . 'emicdora_override_islandora_document',
+    'islandora_large_image' => $template_base_path . 'emicdora_override_islandora-large-image',
+    'islandora_newspaper' => $template_base_path . 'emicdora_override_islandora_newspaper',
+    'islandora_pdf' => $template_base_path . 'emicdora_override_islandora-pdf',
+    'islandora_video' => $template_base_path . 'emicdora_override_islandora-video',
+    'islandora_web_archive' => $template_base_path . 'emicdora_override_islandora-web-archive',
+  );
+  foreach ($theme_overrides as $theme => $template) {
+    if (isset($theme_registry[$theme])) {
+      $theme_registry[$theme]['template'] = $template;
+      $theme_registry[$theme]['theme path'] = drupal_get_path('module', 'emicdora');
+    }
+  }
+}
