@@ -2,7 +2,7 @@
 
 /**
  * @file
- * This is the template file for the object page for video
+ * This is an override template file for the object page for video
  *
  * Available variables:
  * - $islandora_object: The Islandora object rendered in this template file
@@ -15,6 +15,7 @@
  *
  * @see template_preprocess_islandora_video()
  * @see theme_islandora_video()
+ * @changes Removed "In Collections" section.
  */
 ?>
 

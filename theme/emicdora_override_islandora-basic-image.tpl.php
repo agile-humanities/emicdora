@@ -2,9 +2,9 @@
 
 /**
  * @file
- * This is the template file for the object page for basic image
+ * This is an override template file for the object page for basic image
  *
- * @TODO: add documentation about file and available variables
+ * @changes Removed "In Collections" section.
  */
 ?>
 

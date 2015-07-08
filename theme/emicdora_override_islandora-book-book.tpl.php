@@ -1,7 +1,9 @@
 <?php
 /**
  * @file
- * Template file to style output.
+ * This is an override template file for the object page for islandora books.
+ *
+ * @changes Removed "In Collections" section.
  */
 ?>
 <?php if(isset($viewer)): ?>

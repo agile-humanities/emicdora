@@ -2,7 +2,7 @@
 
 /**
  * @file
- * This is the template file for the object page for large image
+ * This is an override template file for the object page for large image
  *
  * Available variables:
  * - $islandora_object: The Islandora object rendered in this template file
@@ -19,6 +19,7 @@
  *
  * @see template_preprocess_islandora_large_image()
  * @see theme_islandora_large_image()
+ * @changes Removed "In Collections" section.
  */
 ?>
 <div class="islandora-large-image-object islandora" vocab="http://schema.org/" prefix="dcterms: http://purl.org/dc/terms/" typeof="ImageObject">

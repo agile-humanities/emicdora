@@ -4,8 +4,8 @@
  * @file
  * The default object view.
  *
- * This is a template for objects that do not have a module to registered to
- * build their display.
+ * This is an override template for objects that do not have a module to
+ * registered to build their display.
  *
  * islandora_object is a fedora tuque Object
  *    $object->label             - The label for this object.
@@ -56,6 +56,7 @@
  * foreach ($object as $ds) {
  * do something here
  * }
+ * @changes Removed "In Collections" section.
  */
 ?>
 <div class="islandora-object islandora">

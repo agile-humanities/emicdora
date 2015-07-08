@@ -2,7 +2,7 @@
 
 /**
  * @file
- * This is the template file for the object page for newspaper
+ * This is an override template file for the object page for newspaper
  *
  * Available variables:
  * - $islandora_content: A rendered vertical tabbed newspapper issue browser.
@@ -11,6 +11,7 @@
  * - $metadata: Rendered metadata display for the binary object.
  *
  * @see template_preprocess_islandora_newspaper()
+ * @changes Removed "In Collections" section.
  */
 ?>
 <div class="islandora-newspaper-object islandora">

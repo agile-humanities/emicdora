@@ -2,9 +2,9 @@
 
 /**
  * @file
- * This is the template file for the pdf object
+ * This is an override template file for the pdf object
  *
- * @TODO: Add documentation about this file and the available variables
+ * @changes Removed "In Collections" section.
  */
 ?>
 

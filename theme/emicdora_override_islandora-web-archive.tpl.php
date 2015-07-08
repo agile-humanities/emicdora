@@ -1,9 +1,9 @@
 <?php
 /**
  * @file
- * This is the template file for the object page for web archives
+ * This is an override template file for the object page for web archives
  *
- * @TODO: add documentation about file and available variables
+ * @changes Removed "In Collections" section.
  */
 ?>
 
