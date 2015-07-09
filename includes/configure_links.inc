@@ -634,6 +634,13 @@ function emicdora_configure_version_links_validate($form, &$form_state) {
       elseif (empty($fields)) {
         form_set_error($term_type, t('Configuration must be defined for fields in @type.', array('@type' => $term_type)));
       }
+      else {
+        foreach ($fields as $config_name => $field) {
+          if (!$field) {
+            form_set_error("{$term_type}_$config_name", t('Configuration must be defined for fields in @name (@type).', array('@name' => $config_name, '@type' => $term_type)));
+          }
+        }
+      }
     }
   }
 }
