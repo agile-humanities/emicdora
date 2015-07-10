@@ -455,7 +455,6 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
     $batch['operations'][] = array('emicdora_build_text_file', array(
         'page_object' => islandora_object_load($page['pid']),
         'filename' => $filename,
-        'update' => $is_update,
       ),
     );
   }
@@ -476,14 +475,11 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
  * @param string $filename
  *   Temp file to hold data
  */
-function emicdora_build_text_file($object, $filename, $update = FALSE) {
+function emicdora_build_text_file($object, $filename) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   if (isset($object['CWRC'])) {
-    $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-    $version_pid = $parents[0]['object']['value'];
     $text = emicdora_convert_tei_to_plain_text(
-      emicdora_process_tei($object['CWRC']->content, 'reading'),
-      $update
+      emicdora_process_tei($object['CWRC']->content, 'reading')
     );
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
   }
