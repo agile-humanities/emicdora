@@ -209,8 +209,8 @@ function emicdora_build_topic_table($type, $display_count, $element) {
   $total = count($results);
   $current_page = pager_default_initialize($total, $display_count, $element);
   $solr_term_mappings = array(
-    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
-    'genre' => 'mods_genre_authority_marcgt_ms',
+    'author' => 'mods_name_personal_namePart_ms',
+    'genre' => 'mods_genre_s',
   );
   $solr_term = $solr_term_mappings[$type];
   $options = array('query' => array('sort' => "fgs_label_ss asc", 'query_type' => 'coop'));
