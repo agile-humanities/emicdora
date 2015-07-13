@@ -625,20 +625,20 @@ function emicdora_field_table_ajax($form, &$form_state) {
 function emicdora_configure_version_links_validate($form, &$form_state) {
   if ($form_state['triggering_element']['#array_parents'] == array('actions', 'submit')) {
     module_load_include('inc', 'islandora_solr', 'includes/luke');
-    $terms['version'] = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
-    $terms['source'] = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
+    $version_settings = isset($form_state['solr_field_settings']['emicdora_version_fields']) ? $form_state['solr_field_settings']['emicdora_version_fields'] : array();
+    $term_settings = isset($form_state['solr_field_settings']['emicdora_source_fields']) ? $form_state['solr_field_settings']['emicdora_source_fields'] : array();
+    $terms['version'] = isset($form_state['values']['emicdora_version_fields']['terms']) ? $form_state['values']['emicdora_version_fields']['terms'] : array();
+    $terms['source'] = isset($form_state['values']['emicdora_source_fields']['terms']) ? $form_state['values']['emicdora_source_fields']['terms'] : array();
     foreach ($terms as $term_type => $fields) {
-      if (!isset($form_state['values']["emicdora_{$term_type}_fields"]['terms'])) {
-        continue;
-      }
-      elseif (empty($fields)) {
-        form_set_error($term_type, t('Configuration must be defined for fields in @type.', array('@type' => $term_type)));
+      if ($term_type == 'version') {
+        $solr_settings = $version_settings;
       }
       else {
-        foreach ($fields as $config_name => $field) {
-          if (!$field) {
-            form_set_error("{$term_type}_$config_name", t('Configuration must be defined for fields in @name (@type).', array('@name' => $config_name, '@type' => $term_type)));
-          }
+        $solr_settings = $term_settings;
+      }
+      foreach ($fields as $field) {
+        if (!isset($solr_settings[$field['solr_field']]) || empty($solr_settings[$field['solr_field']])) {
+          form_set_error("{$term_type}_{$field['solr_field']}", t('Configuration must be defined for fields in @name (@type).', array('@name' => $field['solr_field'], '@type' => $term_type)));
         }
       }
     }
