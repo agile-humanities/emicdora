@@ -180,7 +180,7 @@ function islandora_emicdora_add_transcription_form_validate($form, &$form_state)
       form_set_error('last_page', t('Number between 1 and @count required.', array('@count' => $page_count)));
     }
     if ($last_page < $start_page) {
-      form_set_error('last_page', t('Ending page number must be lower than starting page.'));
+      form_set_error('last_page', t('Ending page number must be greater than starting page.'));
     }
   }
 }
@@ -673,7 +673,7 @@ function emicdora_rebuild_transcription_form_validate($form, $form_state) {
       form_set_error('last_page', t('Number between 1 and @count required.', array('@count' => $length)));
     }
     if ($last_page < $start_page) {
-      form_set_error('last_page', t('Ending page number must be lower than starting page.'));
+      form_set_error('last_page', t('Ending page number must be greater than starting page.'));
     }
   }
 }
