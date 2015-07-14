@@ -80,7 +80,9 @@ Drupal.versionViewer.tooltips = Drupal.versionViewer.tooltips || {};
    *   otherwise.
    */
   Drupal.versionViewer.tooltips.entityHasTooltip = function (entID) {
-    return tooltips.hasOwnProperty(entID);
+    // XXX: Short-circuited to hide tooltips in the text area, as per EMIC-547.
+    return false;
+    //return tooltips.hasOwnProperty(entID);
   };
 
   /**

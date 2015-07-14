@@ -16,22 +16,7 @@
       var text_deleted = "";
       var text_added = "";
       var merged_content = "";
-      var variant_selected = false;
 
-      function emicdora_get_variants() {
-        var raw_variant_map = [];
-        var variant_map = [];
-        $(".variant").each(function(index, element) {
-          raw_variant_map.push($(this).data('variant'));
-        });
-        // Home rolled unique function - will not reorder.
-        $.each(raw_variant_map, function(index, value) {
-          if ($.inArray(value, variant_map) == -1) {
-            variant_map.push(value);
-          }
-        });
-        return variant_map;
-      }
       // Forces related spans to display next to each to each other.
       function emicdora_sync_spans(id) {
         var type = id.charAt(0);
@@ -66,53 +51,24 @@
           }
         }
       });
-      $(document).delegate('span.merged', 'click', function() {
+      $(document).delegate('span.merged_selected, span.variant_selected', 'click', function(e) {
+        $('.merged_selected, .variant_selected').removeClass('merged_selected variant_selected');
+        merged_content = '';
+        $('#merged_text').text('');
+      });
+      $(document).delegate('span.merged:not(.merged_selected), span.variant:not(.variant_selected)', 'click', function() {
+        $('.merged_selected, .variant_selected').removeClass('merged_selected variant_selected');
         var qualifier = $(this).attr('id').slice(1);
-        left = $('#d' + qualifier);
-        right = $('#a' + qualifier);
+        var $left = $('#d' + qualifier);
+        var merged = $left.hasClass('merged');
+        $left.add('#a' + qualifier).addClass(merged ? 'merged_selected' : 'variant_selected');
+        $('#merged_text').text($left.text());
+        var $wrapped_content = $left.wrap('<span/>');
+        merged_content = $wrapped_content.parent().html();
+        $wrapped_content.unwrap();
         emicdora_sync_spans($(this).attr('id'));
-        if ($(this).hasClass('merged_selected')) {
-          merged_content = '';
-          $('#merged_text').val('');
-          $(".merged").removeClass('merged_selected');
-        } else {
-          $(".merged").removeClass('merged_selected');
-          if (left.hasClass('merged') && right.hasClass('merged')) {
-            left.addClass('merged_selected');
-            right.addClass('merged_selected');
-            $('#merged_text').text($(left).text());
-            wrapped_content = left.wrap('<span/>');
-            merged_content = $(wrapped_content).parent().html();
-            $(wrapped_content).unwrap();
-          }
-        }
       });
 
-      $(document).delegate('span.variant', 'click', function(e) {
-        // Prevents scripted click events from firing.
-        if (e.screenY == 0 && e.screenX == 0) {
-          return;
-        }
-        var qualifier = $(this).attr('id').slice(1);
-        emicdora_sync_spans($(this).attr('id'));
-        left = $('#d' + qualifier);
-        right = $('#a' + qualifier);
-        if ($(this).hasClass('variant_selected')) {
-          merged_content = '';
-          $('#merged_text').val('');
-          $(".variant").removeClass('variant_selected');
-          variant_selected = false;
-        } else {
-          $(".variant").removeClass('variant_selected');
-          left.addClass('variant_selected');
-          right.addClass('variant_selected');
-          variant_selected = $(this).data('variant');
-          $('#merged_text').text($(left).text());
-          wrapped_content = left.wrap('<span/>');
-          merged_content = $(wrapped_content).parent().html();
-          $(wrapped_content).unwrap();
-        }
-      });
       $(".collation_resize").resizable();
       $('#full-window-button').click(function() {
         $('#collatex_iframe').toggleClass('emicdora-collation_fullwindow');
@@ -217,46 +173,76 @@
           $("#diff_r").html(text_added);
         });
 
+        /**
+         * Helper to make an element visible by scrolling.
+         *
+         * @param $element
+         *   A jQuery object with the element to make visible.
+         * @param $parent
+         *   A jQuery object with the element to scroll. Defaults to the
+         *   window, if not provided.
+         */
+        function scroll($element, $parent) {
+          if (typeof $parent === "undefined") {
+            $parent = $(window);
+          }
+          var cTop = $element.position().top;
+          var cHeight = $element.outerHeight(true);
+          var windowTop = $parent.scrollTop();
+          var visibleHeight = $parent.height();
+
+          if (cTop < 0) {
+            $parent.scrollTop(windowTop + cTop);
+          }
+          else if ((cTop + cHeight) > visibleHeight) {
+            $parent.scrollTop(windowTop + cTop - visibleHeight + cHeight);
+          }
+        }
+
+        /**
+         * Helper to select an merged/variant pair.
+         *
+         * @param $next
+         *   A jQuery object with the element to select.
+         */
+        function select($next) {
+          scroll($next, $next.parent());
+          $next.click();
+        };
+
+        // Map the previous/next merged/variant to the relevant body.
+        var map = {
+          'button-1013': '1010',
+          'button-1014': '1010',
+          'button-1022': '1011',
+          'button-1023': '1011',
+        };
+
         // Add functionality to arrow keys.
         $(".emicdora_next_button").click(function() {
-          if (typeof(variant_map) === 'undefined') {
-            var variant_map = emicdora_get_variants();
+          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected, .merged_selected');
+          var $next = $current.nextAll('.variant, .merged').first();
+          if ($current.length === 0 || $next.length === 0) {
+            // Select first occurence.
+            $next = $('.variant, .merged').first();
           }
-          if (variant_map.length > 0) {
-            current_index = $.inArray(variant_selected, variant_map);
-            current_variant = variant_map[current_index];
-            next_index = (current_index === -1) ? 0 : ++current_index;
-            next_index = (next_index < variant_map.length) ? next_index : 0;
-            next_variant = variant_map[next_index];
-            next_selector = '[data-variant=' + next_variant + ']';
-            $('.variant').removeClass('variant_selected');
-            $(next_selector).addClass('variant_selected');
-            $(next_selector).each(function(index) {
-              $(this).parent().scrollTop($(this).position().top);
-            });
-            variant_selected = $(next_selector).data('variant');
+          if ($next.length === 0) {
+            alert(Drupal.t('No items over which to iterate.'));
           }
+          select($next);
         });
 
         $(".emicdora_previous_button").click(function() {
-          if (typeof(variant_map) === 'undefined') {
-            var variant_map = emicdora_get_variants();
+          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected, .merged_selected');
+          var $next = $current.prevAll('.variant, .merged').first();
+          if ($current.length === 0 || $next.length === 0) {
+            // Select last occurence.
+            $next = $('.variant, .merged').last();
           }
-          if (variant_map.length > 0) {
-            current_index = $.inArray(variant_selected, variant_map);
-            current_variant = variant_map[current_index];
-            previous_index = (current_index === -1) ? variant_map.length - 1 : --current_index;
-            previous_index = (previous_index >= 0) ? previous_index : variant_map.length - 1;
-            previous_variant = variant_map[previous_index];
-            current_selector = '[data-variant=' + current_variant + ']';
-            previous_selector = '[data-variant=' + previous_variant + ']';
-            $('.variant').removeClass('variant_selected');
-            $(previous_selector).addClass('variant_selected');
-            variant_selected = $(previous_selector).data('variant');
-            $(previous_selector).each(function(index) {
-              $(this).parent().scrollTop($(this).position().top);
-            });
+          if ($next.length === 0) {
+            alert(Drupal.t('No items over which to iterate.'));
           }
+          select($next);
         });
         // Synchronize scolling.
         $("#versionview-1010-body").scroll(function(e) {
@@ -294,21 +280,29 @@
             }
           }
           if (args.data.action == 'save') {
-            $('.variant').removeClass('variant_selected');
             if ($("#save_changes").text() == 'Saving..') {
               return;
             }
-            $("#save_changes").text("Saving..")
-            $(".merged").css('background-color', '');
-            all_added = encodeURIComponent($("#versionview-1011-body").html());
-            all_deleted = encodeURIComponent($("#versionview-1010-body").html());
-            $(".variant").removeClass('variant_selected');
+            $("#save_changes").text("Saving..");
+            var $right = $("#versionview-1011-body");
+            var $left = $("#versionview-1010-body");
           }
           else {
             $("#save_changes").show();
-            all_added = encodeURIComponent($("#versionview-1011").html());
-            all_deleted = encodeURIComponent($("#versionview-1010").html());
+            var $right = $("#versionview-1011");
+            var $left = $("#versionview-1010");
           }
+
+          // Find any selected parts.
+          var $selected = $left.add($right).find('.variant_selected, .merged_selected');
+          var merged = $selected.hasClass('merged_selected');
+          // Remove the class used for selecting, so it will not get pushed to
+          // the backend.
+          $selected.removeClass('variant_selected merged_selected');
+          all_added = encodeURIComponent($right.html());
+          all_deleted = encodeURIComponent($left.html());
+          // Restore the class, for GUI consistency.
+          $selected.addClass(merged ? 'merged_selected' : 'variant_selected');
 
           var callback_url = Drupal.settings.basePath + 'emicdora/edit_collation/';
           var build_selection = function(range) {
@@ -378,7 +372,6 @@
               if (results.hasOwnProperty('message')) {
                 alert(results.message)
               }
-              variant_map = emicdora_get_variants();
               emicdora_counter = results.emicdora_counter;
               if (results.refresh == "refresh") {
                 $('#versionview-1010-body').html($(results.new_deleted).html());

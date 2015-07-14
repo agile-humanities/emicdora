@@ -6,6 +6,54 @@
  */
 
 /**
+ * Validate transcripts can be used for collations.
+ *
+ * @param array $pids
+ *   An array of transcription object PIDs.
+ */
+function emicdora_mvd_validate_transcripts(array $pids) {
+  $get_transcription_size = function($pid) {
+    $object = islandora_object_load($pid);
+    return isset($object['TRANSCRIPTION']) ? $object['TRANSCRIPTION']->size : -1;
+  };
+  $transcriptions = array_map($get_transcription_size, drupal_map_assoc($pids));
+  $min = min($transcriptions);
+  $max = max($transcriptions);
+
+  $min_pids = array_keys($transcriptions, $min, TRUE);
+  $min_pid = reset($min_pids);
+  $min_object = islandora_object_load($min_pid);
+
+  $max_pids = array_keys($transcriptions, $max, TRUE);
+  $max_pid = reset($max_pids);
+  $max_object = islandora_object_load($max_pid);
+
+  if ($min <= 0) {
+    form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
+      '%label' => $min_object->label,
+      '%pid' => $min_object->id,
+    )));
+  }
+  elseif ($max >= 102400) {
+    form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
+      '%label' => $max_object->label,
+      '%pid' => $max_object->id,
+      '%length' => $max,
+    )));
+  }
+  elseif (1.0 * $min / $max < 0.1) {
+    form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
+      '%label_one' => $min_object->label,
+      '%pid_one' => $min_object->id,
+      '%length_one' => $min,
+      '%label_two' => $max_object->label,
+      '%pid_two' => $max_object->id,
+      '%length_two' => $max,
+    )));
+  }
+}
+
+/**
  * The form for creating a MVD object.
  *
  * @param array $form
@@ -91,62 +139,21 @@ function emicdora_mvd_form(array $form, array &$form_state, AbstractObject $obje
 function emicdora_mvd_form_validate($form, &$form_state) {
   module_load_include('inc', 'collation', 'includes/calliope');
   $critical_edition_object = islandora_object_load($form_state['values']['pid']);
-  $mvds = emicdora_calliope_find_mvds($critical_edition_object);
   // Collation name cannot contain special characters but allow _ and space.
   // Note: when saved space gets translated to _.
   if (!preg_match('/^[a-z A-Z_0-9]+$/', $form_state['values']['mvd'])) {
     form_set_error('mvd', t('A collation name cannot contain any special characters.'));
   }
-  foreach ($mvds as $mvd) {
-    if ($mvd['name'] == $form_state['values']['mvd']) {
-      form_set_error('mvd', t('A collation with this name is already associated with this critical edition.'));
-    }
+  $name = $form_state['values']['mvd'];
+  if (emicdora_calliope_does_mvd_exist($name)) {
+    form_set_error('mvd', t('A collation with the name @name is already created.', array('@name' => $name)));
   }
   // Check to make sure at least two files are selected for the Collation.
   if (count(array_filter($form_state['values']['transcriptions'])) < 2) {
     form_set_error('transcriptions', t('A minimum of two transcriptions are required to create a collation.'));
   }
   $pids = array_filter($form_state['values']['transcriptions']);
-  $get_transcriptions = function($pid) {
-    $object = islandora_object_load($pid);
-    return $object['TRANSCRIPTION'];
-  };
-  $transcriptions = array_map($get_transcriptions, $pids);
-  foreach ($transcriptions as $transcription) {
-    // Calliope has limits on the length of a transcription.
-    $size = $transcription->size;
-    if ($size <= 0) {
-      form_set_error('transcriptions', t('The Transcription %label (%pid) is empty and can not be used to create a collation.', array(
-        '%label' => $transcription->parent->label,
-        '%pid' => $transcription->parent->id,
-      )));
-      break;
-    }
-    if ($size >= 102400) {
-      form_set_error('transcriptions', t('The Transcription %label (%pid) with length of (%length) exceeds the maximum size (102400) and can not be used to create a collation.', array(
-        '%label' => $transcription->parent->label,
-        '%pid' => $transcription->parent->id,
-        '%length' => $size,
-      )));
-      break;
-    }
-    // Compare each possible combination to check that they can be compared.
-    foreach ($transcriptions as $second) {
-      $second_size = $second->size;
-      $difference_in_length = min($size, $second_size) / max($size, $second_size);
-      if ($difference_in_length < 0.1) {
-        form_set_error('transcriptions', t('The Transcription(s) %label_one (%pid_one) with length of (%length_one) and %label_two (%pid_two) with length of (%length_two) can not be used to create a collation as the lengths are too different.', array(
-          '%label_one' => $transcription->parent->label,
-          '%pid_one' => $transcription->parent->id,
-          '%length_one' => $size,
-          '%label_two' => $second->parent->label,
-          '%pid_two' => $second->parent->id,
-          '%length_two' => $second_size,
-        )));
-        break 2;
-      }
-    }
-  }
+  emicdora_mvd_validate_transcripts($pids);
 }
 
 /**
@@ -203,14 +210,14 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
 
   switch ($operation) {
     case 'refresh':
-      // Redirect won't work if destination is set.
-      if (isset($_GET['destination'])) {
-        unset($_GET['destination']);
-      }
       foreach ($mvd['metadata']['resources'] as $transcription) {
         $resource_ids[] = $transcription['id'];
       }
       $filter = $mvd['metadata']['filter'];
+      // Need to delete the files out of Calliope too.
+      foreach ($resource_ids as $resource) {
+        emicdora_calliope_delete_file($resource);
+      }
       emicdora_calliope_create_mvd($critical_edition_pid, $mvd_label, $mvd_description, $resource_ids, $filter);
       if (!$ui) {
         drupal_goto("islandora/object/$critical_edition_pid/edit");
@@ -224,10 +231,6 @@ function emicdora_mvd_crud($critical_edition_pid, $mvd_label, $operation, $ui = 
     case 'delete':
       emicdora_calliope_delete_mvd($mvd['_id']);
       drupal_set_message(t("Collation successfully removed"));
-      // Redirect won't work if destination is set.
-      if (isset($_GET['destination'])) {
-        unset($_GET['destination']);
-      }
       drupal_goto("islandora/object/$critical_edition_pid");
       break;
 
@@ -287,11 +290,48 @@ function emicdora_mvd_operation_confirm_form($form, &$form_state, AbstractObject
     'path' => "islandora/object/$critical_edition->id/$previous_view/$mvd_label",
     'fragment' => "$mvd_label/$critical_edition->id",
   );
+  // The confirm_form uses $_GET['destination'] by default so to get the
+  // cancel redirect to go to the proper destination it needs to be unset.
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
+  }
   $form_state['previous_view'] = $previous_view;
   $form_state['critical_edition'] = $critical_edition->id;
   $form_state['operation'] = $operation;
   $form_state['mvd'] = $mvd_label;
   return confirm_form($form, $message, $path);
+}
+
+/**
+ * Form validation to check the update transcripts on collation refresh.
+ *
+ * @param array $form
+ *   Drupal Form
+ * @param array $form_state
+ *   Drupal Form State
+ */
+function emicdora_mvd_operation_confirm_form_validate($form, &$form_state) {
+  $critical_edition = $form_state['critical_edition'];
+  $mvd = $form_state['mvd'];
+  $operation = $form_state['operation'];
+  // Validate if the transcription is valid for generation a collation.
+  if ($operation == 'refresh') {
+    module_load_include('inc', 'collation', 'includes/calliope');
+    $query = array(
+      'metadata.critical_edition' => $critical_edition,
+      'metadata.name' => $mvd,
+    );
+    $mvds = emicdora_calliope_find_mvd($query);
+    if (empty($mvds)) {
+      return;
+    }
+    $mvd = $mvds[0];
+
+    foreach ($mvd['metadata']['resources'] as $transcription) {
+      $transcription_pids[] = $transcription['id'];
+    }
+    emicdora_mvd_validate_transcripts($transcription_pids);
+  }
 }
 
 /**

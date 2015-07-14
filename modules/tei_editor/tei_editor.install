@@ -1,0 +1,21 @@
+<?php
+/**
+ * @file
+ * Install hooks for this module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tei_editor_install() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('tei_editor');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tei_editor_uninstall() {
+  module_load_include('inc', 'islandora', 'includes/solution_packs');
+  islandora_install_solution_pack('tei_editor', 'uninstall');
+}

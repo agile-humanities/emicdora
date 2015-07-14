@@ -221,6 +221,8 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
     '#type' => 'checkbox',
     '#title' => $mappings['prompt'],
     '#default_value' => $mappings['required'],
+    '#title_display' => $mappings['title_display'],
+    '#attributes' => $mappings['attributes'],
   );
 
   $form['content_wrapper'] = array(
@@ -232,10 +234,18 @@ function emicdora_get_content_wrapper($mappings, $upload_size, $content_model) {
     ),
   );
 
+  // Check if the file upload should be required.
+  $require_upload_for_content_models = array(
+    "islandora:sp-audioCModel",
+    "islandora:sp_videoCModel",
+    "islandora:sp_large_image_cmodel",
+  );
+  $require_file = in_array($content_model, $require_upload_for_content_models);
+
   $form['content_wrapper']['content'] = array(
     '#title' => $mappings['upload_prompt'],
     '#type' => 'managed_file',
-    '#required' => FALSE,
+    '#required' => $require_file,
     '#upload_location' => 'temporary://',
     '#upload_validators' => array(
       'file_validate_extensions' => array($mappings['extensions']),
@@ -275,6 +285,8 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'required' => FALSE,
       'upload_prompt' => t('Add zipped page images'),
       'extensions' => 'zip',
+      'title_display' => 'after',
+      'attributes' => array(),
     ),
     'islandora:sp_videoCModel' => array(
       'form' => 'EMiC Source MODS form',
@@ -286,6 +298,8 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'required' => TRUE,
       'upload_prompt' => t('Add video file'),
       'extensions' => 'ogg mp4 mov qt m4a avi',
+      'title_display' => 'invisible',
+      'attributes' => array('style' => 'display:none;'),
     ),
     'islandora:sp-audioCModel' => array(
       'form' => 'EMiC Source MODS form',
@@ -297,6 +311,8 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'required' => TRUE,
       'upload_prompt' => t('Add audio file'),
       'extensions' => 'wav mp3',
+      'title_display' => 'invisible',
+      'attributes' => array('style' => 'display:none;'),
     ),
     'islandora:sp_large_image_cmodel' => array(
       'form' => 'EMiC Source MODS form',
@@ -308,6 +324,8 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'required' => TRUE,
       'upload_prompt' => t('Add image'),
       'extensions' => 'tiff tif',
+      'title_display' => 'invisible',
+      'attributes' => array('style' => 'display:none;'),
     ),
     'islandora:criticalEditionContainerCModel' => array(
       'form' => 'EMiC Critical Edition MODS form',

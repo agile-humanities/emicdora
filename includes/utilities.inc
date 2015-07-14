@@ -368,7 +368,6 @@ EOD;
  *   array of form elements
  */
 function emicdora_get_apparatus_as_content($object, $dsid = NULL) {
-  $path = drupal_get_path('module', 'emicdora');
   $dsid = isset($dsid) ? strtoupper($dsid) : NULL;
   $datastreams = emicdora_get_apparatus_datastreams($object);
   if (count($datastreams) == 0) {
@@ -506,7 +505,7 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
  * @param string $tei
  *   A document containing TEI xml.
  */
-function emicdora_convert_tei_to_plain_text($tei, $update = FALSE) {
+function emicdora_convert_tei_to_plain_text($tei) {
   // @codingStandardsIgnoreStart
   $replace_candidates = array(
     '<br>',
@@ -518,7 +517,7 @@ function emicdora_convert_tei_to_plain_text($tei, $update = FALSE) {
     '</lg>',
   );
   // @codingStandardsIgnoreEnd
-  $text = $update ? $tei : @simplexml_load_string($tei)->text[0]->asXML();
+  $text = @simplexml_load_string($tei)->text[0]->asXML();
 
   foreach ($replace_candidates as $candidate) {
     $text = str_replace($candidate, "$candidate\n", $text);
@@ -889,9 +888,9 @@ function emicdora_get_all($type) {
   $temp_get = $_GET;
   unset($_GET);
   $mappings = array(
-    'author' => 'mods_name_personal_author_authority_marcrelator_namePart_ms',
+    'author' => 'mods_name_personal_namePart_ms',
     'title' => 'mods_titleInfo_title_ms',
-    'genre' => 'mods_genre_authority_marcgt_ms',
+    'genre' => 'mods_genre_s',
   );
   $filter = 'RELS_EXT_hasModel_uri_ms:("info:fedora/islandora:bookCModel" OR "info:fedora/islandora:sp-audioCModel" OR "info:fedora/islandora:sp_videoCModel" OR "info:fedora/islandora:sp_large_image_cmodel")';
   $term = $mappings[$type];
@@ -902,7 +901,7 @@ function emicdora_get_all($type) {
   $qp->solrParams['fl'] = "PID $term";
   $qp->solrParams['facet.limit'] = 100000;
   $qp->solrParams['facet.field'] = array($term, 'RELS_EXT_hasModel_uri_s');
-  $qp->solrParams['sort'] = "mods_titleInfo_title_ss asc";
+  $qp->solrParams['facet.sort'] = 'index';
   $qp->solrParams['facet.mincount'] = 1;
   $qp->executeQuery(FALSE);
 
@@ -911,7 +910,33 @@ function emicdora_get_all($type) {
     $results[] = array('label' => $value, 'count' => $count);
   }
   $_GET = $temp_get;
-  sort($results);
+
+  if ($type == 'author') {
+    // Shenanigans to sort by last names in the author case.
+    $last_names = array();
+    $unsorted_names = array();
+    foreach ($results as $result) {
+      $qp = new IslandoraSolrQueryProcessor();
+      $qp->buildQuery($term . ':"' . $result['label'] . '"');
+      $qp->solrParams['fq'][] = $filter;
+      $qp->solrParams['fl'] = "PID, mods_name_personal_namePart_family_ss";
+      $qp->solrParams['limit'] = 1;
+      $qp->executeQuery(FALSE);
+      $last_obj = reset($qp->islandoraSolrResult['response']['objects']);
+      // Sort by last names if the field is available, if not stick into another
+      // array to be appended on at the end of the sorted array.
+      if (isset($last_obj['solr_doc']['mods_name_personal_namePart_family_ss'])) {
+        $last_name = $last_obj['solr_doc']['mods_name_personal_namePart_family_ss'];
+        $last_names[$last_name] = $result;
+      }
+      else {
+        $unsorted_names[$result['label']] = $result;
+      }
+    }
+    ksort($last_names);
+    ksort($unsorted_names);
+    $results = array_merge($last_names, $unsorted_names);
+  }
   return $results;
 }
 

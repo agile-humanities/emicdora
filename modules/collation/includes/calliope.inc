@@ -433,6 +433,23 @@ function emicdora_calliope_find_mvds_no_exit($critical_edition_object, $sort = "
 }
 
 /**
+ * Checks for existence for an already created MVD by name.
+ *
+ * @param string $name
+ *   The name of the MVD being created.
+ *
+ * @return bool
+ *   TRUE if it exists, FALSE otherwise;
+ */
+function emicdora_calliope_does_mvd_exist($name) {
+  $db = emicdora_calliope_create_mongo_db();
+  $collection = $db->selectCollection('mvds');
+  $query = array('metadata.name' => $name);
+  $cursor = $collection->find($query);
+  return $cursor->count();
+}
+
+/**
  * Pulls all MVD metadata from Mongo.
  *
  * @param array $query

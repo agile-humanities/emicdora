@@ -173,15 +173,14 @@ function islandora_emicdora_add_transcription_form_validate($form, &$form_state)
   if ($form_state['values']['content_source'] == 'tei_rdf' && $page_count > 1) {
     $start_page = $form_state['values']['first_page'];
     $last_page = $form_state['values']['last_page'];
-    $length = $form_state['values']['last_page'];
-    if (intval($start_page) == 0) {
-      form_set_error('first_page', t('Number between 1 and @count required.', array('@count' => $length)));
+    if (intval($start_page) == 0 || intval($start_page) > $page_count) {
+      form_set_error('first_page', t('Number between 1 and @count required.', array('@count' => $page_count)));
     }
-    if (intval($last_page) == 0) {
-      form_set_error('last_page', t('Number between 1 and @count required.', array('@count' => $length)));
+    if (intval($last_page) == 0 || intval($last_page) > $page_count) {
+      form_set_error('last_page', t('Number between 1 and @count required.', array('@count' => $page_count)));
     }
     if ($last_page < $start_page) {
-      form_set_error('last_page', t('Ending page number must be lower than starting page.'));
+      form_set_error('last_page', t('Ending page number must be greater than starting page.'));
     }
   }
 }
@@ -455,7 +454,6 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
     $batch['operations'][] = array('emicdora_build_text_file', array(
         'page_object' => islandora_object_load($page['pid']),
         'filename' => $filename,
-        'update' => $is_update,
       ),
     );
   }
@@ -476,14 +474,11 @@ function emicdora_add_derived_transcription($pages, $versionable_object_pid, $tr
  * @param string $filename
  *   Temp file to hold data
  */
-function emicdora_build_text_file($object, $filename, $update = FALSE) {
+function emicdora_build_text_file($object, $filename) {
   module_load_include('inc', 'emicdora', 'includes/utilities');
   if (isset($object['CWRC'])) {
-    $parents = $object->relationships->get(FEDORA_RELS_EXT_URI, 'isMemberOf');
-    $version_pid = $parents[0]['object']['value'];
     $text = emicdora_convert_tei_to_plain_text(
-      emicdora_process_tei($object['CWRC']->content, 'reading'),
-      $update
+      emicdora_process_tei($object['CWRC']->content, 'reading')
     );
     file_put_contents($filename, $text, FILE_APPEND | LOCK_EX);
   }
@@ -643,11 +638,40 @@ function emicdora_rebuild_transcription_form($form, $form_state, $transcription_
       ),
     ),
   );
+  $form['page']['num_pages'] = array(
+    '#type' => 'value',
+    '#value' => $count,
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Refresh Transcription'),
   );
   return $form;
+}
+
+/**
+ * Validation for rebuilding transcriptions.
+ *
+ * @param array $form
+ *   An array representing a form within Drupal.
+ * @param array $form_state
+ *   An array containing the Drupal form state.
+ */
+function emicdora_rebuild_transcription_form_validate($form, $form_state) {
+  if ($form_state['values']['restricted']) {
+    $start_page = $form_state['values']['first_page'];
+    $last_page = $form_state['values']['last_page'];
+    $length = $form_state['values']['num_pages'];
+    if (intval($start_page) == 0 || intval($start_page) > $length) {
+      form_set_error('first_page', t('Number between 1 and @count required.', array('@count' => $length)));
+    }
+    if (intval($last_page) == 0 || intval($last_page) > $length) {
+      form_set_error('last_page', t('Number between 1 and @count required.', array('@count' => $length)));
+    }
+    if ($last_page < $start_page) {
+      form_set_error('last_page', t('Ending page number must be greater than starting page.'));
+    }
+  }
 }
 
 /**
