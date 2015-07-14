@@ -243,10 +243,20 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 #critical-edition-viewer {
   border:none !important;
   margin: 0em !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 #critical-edition-viewer {
-  margin-top: 0.5em !important;
+  margin-top: 0em !important;
+}
+
+#easy-ui-north{
+  height: 41px !important
+}
+
+.easyui-pagination {
+  padding-top: 4px;
 }
 
 #ui-easy-paginator table{
