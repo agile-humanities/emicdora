@@ -40,8 +40,11 @@
         </div>
         <div id="easy-ui-west" data-options="region:'west',split:true,border:true,maximizable:false,closable:false,minimized:<?php print $hide_components['w']; ?>,border:true,collapsible:false,collapsed:true" style="width:150px;border-style:solid #191972">
           <div id="uitree-wrapper" class="easyui-panel" data-options="fit:true" style="width:auto;height:auto;border-style:solid #191972">
-              <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
-              </ul>
+            <a href="#" id="easyui_tree_show_annotations"><?php print t('Show all'); ?></a>
+            <?php print '/'; ?>
+            <a href="#" id="easyui_tree_hide_annotations" class="easyui_show_all"><?php print t('Hide all'); ?></a>
+            <ul id="easyui_tree" class="easyui-tree" data-options="animate:true,lines:true,checkbox:true,fit:true">
+            </ul>
           </div>
         </div>
         <div id="center_data" class="easyui-panel" data-options="region:'center'" style="width:100%;height:auto;border-style:solid #191972">
