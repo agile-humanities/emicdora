@@ -6,9 +6,9 @@
  */
 ?>
 <div id="eui_window" class="easyui-layout" style="width:100%;height:550px;" data-options="fit:true">
-        <div id="easy-ui-north" data-options="region:'north',onBeforeExpand:function(){return false}" style="height:50px;border-style:solid #191972">
+        <div id="easy-ui-north" data-options="region:'north',onBeforeExpand:function(){return false}" style="height:40px;border-style:solid #191972">
            <div id="critical-edition-viewer">
-                <div style="float:left;">
+                <div style="float:left; padding-top: 4px;">
                   <ul class="workbench_toolbar_lists action_img">
                     <li id="wb_reading" title="Reading Transcription" class="work_action_img transcription img_selected"></li>
   					<li id="wb_dt" title="Diplomatic Transcriptions" class="work_action_img diplomatic-transcriptions"></li>
