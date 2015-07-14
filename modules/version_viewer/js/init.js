@@ -40,6 +40,14 @@
           hide_annotations(nodes);
         }
       },
+      onClick: function(node) {
+        if (node.checked) {
+          $("#easyui_tree").tree('uncheck', node.target);
+        }
+        else {
+          $("#easyui_tree").tree('check', node.target);
+        }
+      }
     });
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
