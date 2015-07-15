@@ -276,7 +276,14 @@
       </xsl:when>
       <xsl:otherwise>
         <xsl:value-of select="substring-before($text, '&#xa;')"/>
-        <span class="fake br"/>
+        <xsl:choose>
+          <xsl:when test="ancestor::tei:line">
+              <span class="fake br"/>
+          </xsl:when>
+          <xsl:otherwise>
+              <br/>
+          </xsl:otherwise>
+        </xsl:choose>
         <xsl:call-template name="nl2br">
           <xsl:with-param name="text" select="substring-after($text, '&#xa;')"/>
         </xsl:call-template>

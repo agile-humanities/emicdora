@@ -40,7 +40,62 @@
           hide_annotations(nodes);
         }
       },
+      onClick: function(node) {
+        if (node.checked) {
+          $("#easyui_tree").tree('uncheck', node.target);
+        }
+        else {
+          $("#easyui_tree").tree('check', node.target);
+        }
+      }
     });
+
+    // Setup handler to show all annotations.
+    $("#easyui_tree_show_annotations").click(function() {
+      toggle_displayed_annotations('check');
+    });
+
+    // Setup handler to hide all annotations link.
+    $("#easyui_tree_hide_annotations").click(function() {
+      toggle_displayed_annotations('uncheck');
+    });
+
+    function toggle_displayed_annotations(check_or_uncheck) {
+      var anno_selected = $('#wb_show_annos').hasClass('img_selected');
+      var tei_selected = $('#wb_show_til').hasClass('img_selected');
+      var $tree = $("#easyui_tree");
+
+      if (anno_selected) {
+        var ddt = $tree.tree('find', 'tree_imageannotations');
+        var dda = $tree.tree('find', 'tree_entities');
+        if (ddt) {
+          $tree.tree('expandAll', ddt.target);
+          $.each(ddt['children'], function (index, child) {
+            var node = $tree.tree('find', child.id);
+            $tree.tree(check_or_uncheck, node.target);
+          });
+        }
+        if (dda) {
+          $tree.tree('expandAll', dda.target);
+          $.each(dda['children'], function (index, child) {
+            var node = $tree.tree('find', child.id);
+            $tree.tree(check_or_uncheck, node.target);
+          });
+        }
+      }
+
+      if (tei_selected) {
+        var til = $tree.tree('find', 'tree_textimagelinks');
+        if (til) {
+          $tree.tree('expandAll', til.target);
+          $.each(til['children'], function (index, child) {
+            var node = $tree.tree('find', child.id);
+            $tree.tree(check_or_uncheck, node.target);
+          });
+        }
+      }
+    }
+
     function update_tree_data() {
       var pageNumber = $('#ui-easy-paginator').pagination('options').pageNumber;
       var dpid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[pageNumber - 1];
@@ -465,7 +520,7 @@
             var height = $(window).height() - 50;
             $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
           } else {
-            $('#eui_window').layout('panel', 'south').panel('resize', {height: '650'});
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: '656'});
           }
           break;
         case 'wb_dt':
