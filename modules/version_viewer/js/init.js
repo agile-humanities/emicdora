@@ -110,6 +110,11 @@
             data: data
           });
           add_tooltip_imageannotations();
+
+          // XXX: Add tooltips for entities and text image annotations into
+          // the tree.  Used in place of putting the tooltips in the text.
+          add_tree_tooltips_for_entities_and_text_image_annotations();
+
           // Check to see if text-image or entities transcript styles need to be
           // hidden on page change.
           if (!$('#wb_show_annos').hasClass('annos')) {
@@ -730,6 +735,37 @@
             position: 'right',
             content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>'
           }).show();
+        }
+      }
+    }
+
+    /**
+     * Add tree tooltips for entities and text image annotations.
+     */
+    function add_tree_tooltips_for_entities_and_text_image_annotations() {
+      var nodes = new Array();
+      var entities = $("#easyui_tree").tree('find', 'tree_entities');
+      if (entities) {
+        nodes.push(entities);
+      }
+      var text_image_links = $("#easyui_tree").tree('find', 'tree_textimagelinks');
+      if (text_image_links) {
+        nodes.push(text_image_links);
+      }
+      for (var a = 0; a < nodes.length; a++) {
+        var children = nodes[a]['children'];
+        for (var i = 0; i < children.length; i++) {
+          var data = children[i]['attributes']['cwrcAttributes'];
+          var tool_tip_content = null;
+          if (data['cwrcInfo'].hasOwnProperty('description')) {
+            tool_tip_content = data['cwrcInfo']['description'];
+          }
+          if (tool_tip_content) {
+            $("#" + children[i].domId).tooltip({
+              position: 'right',
+              content: '<div class="easyui-panel" style="width:250px;height:\'auto\';padding:10px;">' + tool_tip_content + '</div>'
+            }).show();
+          }
         }
       }
     }
