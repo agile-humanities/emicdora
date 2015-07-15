@@ -465,7 +465,7 @@
             var height = $(window).height() - 50;
             $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
           } else {
-            $('#eui_window').layout('panel', 'south').panel('resize', {height: '678'});
+            $('#eui_window').layout('panel', 'south').panel('resize', {height: '650'});
           }
           break;
         case 'wb_dt':
@@ -636,8 +636,8 @@
       $('#easyui_tree').tree({
         data: []
       });
-      $('#content_data').empty();
-      $('#content_data').append(data['body']);
+      $('#center_data').empty();
+      $('#center_data').append(data['body']);
       prettyPrint();
     }
 
@@ -786,12 +786,16 @@
       }
     }
 
-    $('#eui_window').css('max-height', '729px');
-    // The panels will automatically set to fit, but we
-    // use these method to trigger the resize event.
-    $('#eui_window').layout('resize', {
-      width: '100%',
-      height: '729px'
+    $('#eui_window').layout('panel','west').panel({
+      onClose:function(){
+        // Need to manually trigger the resize update panel
+        // layout.
+        $('.layout-panel-center').css({left: 5});
+        $('#eui_window').layout('resize', {
+          width: '100%',
+          height: '729px'
+        });
+      }
     });
   });
 })(jQuery);
