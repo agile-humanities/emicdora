@@ -130,7 +130,7 @@ function versionable_object_viewer_library() {
 
   $items['jquery_easy_ui'] = array(
     'title' => t('jQuery EasyUI'),
-    'version' => '1.3.6',
+    'version' => '1.4.3',
     'js' => array(
       "$module_path/js/jquery/jquery-easyui/jquery.easyui.min.js" => array(),
     ),
