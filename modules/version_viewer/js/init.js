@@ -517,7 +517,7 @@
           // Change the window size based on if the easyui is fullscreen or not.
           if ($('#eui_window').hasClass('eui-window-fullscreen')) {
             // Use window height and subtract 50px for the menu bar display.
-            var height = $(window).height() - 50;
+            var height = $(window).height() - 54;
             $('#eui_window').layout('panel', 'south').panel('resize', {height: height});
           } else {
             $('#eui_window').layout('panel', 'south').panel('resize', {height: '656'});

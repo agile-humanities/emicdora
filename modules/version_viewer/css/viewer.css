@@ -305,7 +305,7 @@ a:not(.l-btn-disabled) span.pagination-first:hover{
 }
 
 .layout-panel-west, .layout-panel-center, .layout-panel-east{
-  max-height: 92.5%;
+  max-height: 100%;
   border: 2px solid #191972 !important;
   border-bottom-width: 1px;
   border-top-width: 1px;
