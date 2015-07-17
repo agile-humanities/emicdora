@@ -381,7 +381,26 @@ function emicdora_get_apparatus_as_content($object, $dsid = NULL) {
     $datastream = $datastreams[$dsid];
   }
   else {
-    $datastream = array_shift($datastreams);
+    $ds_order = array(
+      'EPIGRAPH',
+      'ACKNOWLEDGEMENTS',
+      'PREFACE',
+      'FOREWORD',
+      'INTRODUCTION',
+      'EDITORIAL_PROCEDURES',
+      'CHRONOLOGY',
+      'ILLUSTRATIONS',
+      'EPILOGUE',
+      'AFTERWORD',
+      'APPENDIX',
+      'BIBLIOGRAPHY',
+    );
+    foreach ($ds_order as $ds) {
+      if (isset($object[$ds])) {
+        $datastream = $object[$ds];
+        break;
+      }
+    }
   }
 
   $content['apparatus'][$datastream->id] = array(
