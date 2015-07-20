@@ -907,35 +907,74 @@ function emicdora_get_all($type) {
 
   $results = array();
   foreach ($qp->islandoraSolrResult['facet_counts']['facet_fields'][$term] as $value => $count) {
-    $results[] = array('label' => $value, 'count' => $count);
+    $results[$value] = array('label' => $value, 'count' => $count);
   }
   $_GET = $temp_get;
 
   if ($type == 'author') {
     // Shenanigans to sort by last names in the author case.
     $last_names = array();
-    $unsorted_names = array();
     foreach ($results as $result) {
       $qp = new IslandoraSolrQueryProcessor();
       $qp->buildQuery($term . ':"' . $result['label'] . '"');
       $qp->solrParams['fq'][] = $filter;
-      $qp->solrParams['fl'] = "PID, mods_name_personal_namePart_family_ss";
+      $qp->solrParams['fl'] = "PID, mods_name_personal_namePart_family_ms mods_name_personal_namePart_given_ms";
       $qp->solrParams['limit'] = 1;
       $qp->executeQuery(FALSE);
       $last_obj = reset($qp->islandoraSolrResult['response']['objects']);
-      // Sort by last names if the field is available, if not stick into another
-      // array to be appended on at the end of the sorted array.
-      if (isset($last_obj['solr_doc']['mods_name_personal_namePart_family_ss'])) {
-        $last_name = $last_obj['solr_doc']['mods_name_personal_namePart_family_ss'];
-        $last_names[$last_name] = $result;
+
+
+      // Need to determine the first and last name portions of the term for
+      // sorting.
+
+      foreach ($last_obj['solr_doc']['mods_name_personal_namePart_given_ms'] as $first_name) {
+        foreach ($last_obj['solr_doc']['mods_name_personal_namePart_family_ms'] as $last_name) {
+          $full_match = "$first_name $last_name";
+          // Found a match.
+          if ($result['label'] == $full_match) {
+            $last_names[$result['label']] = array(
+              'first' => $first_name,
+              'last' => $last_name,
+              'full' => $result['label'],
+            );
+            break;
+          }
+        }
       }
-      else {
-        $unsorted_names[$result['label']] = $result;
+      // Fallback from when we didn't get a match.
+      if (!isset($last_names[$result['label']])) {
+        $last_names[$result['label']] = array(
+          'full' => $result['label']);
       }
     }
-    ksort($last_names);
-    ksort($unsorted_names);
-    $results = array_merge($last_names, $unsorted_names);
+    $name_sort = function ($a, $b) {
+      if (isset($a['last']) && isset($b['last'])) {
+        if ($a['last'] == $b['last']) {
+          if (isset($a['first']) && $b['first']) {
+            return strcmp($a['first'], $b['first']);
+          }
+          else {
+            return 0;
+          }
+        }
+        return strcmp($a['last'], $b['last']);
+      }
+      elseif (isset($a['last'])) {
+        return strcmp($a['last'], $b['full']);
+      }
+      elseif (isset($b['last'])) {
+        return strcmp($a['full'], $b['last']);
+      }
+      else {
+        return strcmp($a['full'], $b['full']);
+      }
+    };
+    uasort($last_names, $name_sort);
+    $sorted_results = array();
+    foreach ($last_names as $values) {
+      $sorted_results[$values['full']] = $results[$values['full']];
+    }
+    $results = $sorted_results;
   }
   return $results;
 }
