@@ -923,10 +923,8 @@ function emicdora_get_all($type) {
       $qp->executeQuery(FALSE);
       $last_obj = reset($qp->islandoraSolrResult['response']['objects']);
 
-
       // Need to determine the first and last name portions of the term for
       // sorting.
-
       foreach ($last_obj['solr_doc']['mods_name_personal_namePart_given_ms'] as $first_name) {
         foreach ($last_obj['solr_doc']['mods_name_personal_namePart_family_ms'] as $last_name) {
           $full_match = "$first_name $last_name";
@@ -950,7 +948,7 @@ function emicdora_get_all($type) {
     $name_sort = function ($a, $b) {
       if (isset($a['last']) && isset($b['last'])) {
         if ($a['last'] == $b['last']) {
-          if (isset($a['first']) && $b['first']) {
+          if (isset($a['first']) && isset($b['first'])) {
             return strcmp($a['first'], $b['first']);
           }
           else {
