@@ -213,12 +213,14 @@ function emicdora_build_topic_table($type, $display_count, $element) {
     'genre' => 'mods_genre_s',
   );
   $solr_term = $solr_term_mappings[$type];
-  $options = array('query' => array('sort' => "fgs_label_ss asc", 'query_type' => 'coop'));
+  $base_options = array('query' => array('sort' => "fgs_label_ss asc", 'query_type' => 'coop'));
   foreach ($results as $data) {
     $label = $data['label'];
     $escaped_label = "\"$label\"";
+    $options = $base_options;
+    $options['query']['f'] = array("$solr_term:$escaped_label");
     $urls[] = array(
-      'url' => l($label, "islandora/search/{$solr_term}:($escaped_label) NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)", $options),
+      'url' => l($label, "islandora/search/*:* NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)", $options),
       'count' => $data['count'],
     );
   }
