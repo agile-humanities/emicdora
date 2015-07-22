@@ -19,5 +19,10 @@ function collation_preprocess_collation_compare(array &$variables) {
   drupal_add_js("$path/js/jquery/wait_for_existence.js");
   drupal_add_css("$path/css/emicdora_collation.css");
   drupal_add_css("$path/css/jquery-ui.min.css");
-  drupal_add_js(array('collation' => array('collation_name' => $variables['left'])), 'setting');
+  drupal_add_js(array(
+    'collation' => array(
+      'collation_name' => $variables['left'],
+      'cssPath' => file_create_url("$path/css/emicdora_collatex.css"),
+    ),
+  ), 'setting');
 }

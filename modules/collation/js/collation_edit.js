@@ -421,7 +421,7 @@
         var $head = contents.find("head");
         $head.append($("<link/>", {
           rel: "stylesheet",
-          href: Drupal.settings.basePath + "sites/all/modules/emicdora/modules/collation/css/emicdora_collatex.css",
+          href: Drupal.settings.collation.cssPath,
           type: "text/css"
         }
         ));
