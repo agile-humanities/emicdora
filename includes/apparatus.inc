@@ -55,9 +55,9 @@ function emicdora_get_apparatus_datastreams(AbstractObject $object) {
   $apparatus_datastreams = array();
   $supported_datastreams = emicdora_apparatus_supported_datastreams();
   $supported_datastream_identifiers = array_keys($supported_datastreams);
-  foreach ($object as $dsid => $datastream) {
-    if (in_array($dsid, $supported_datastream_identifiers)) {
-      $apparatus_datastreams[$dsid] = $datastream;
+  foreach ($supported_datastream_identifiers as $dsid) {
+    if (isset($object[$dsid])) {
+      $apparatus_datastreams[$dsid] = $object[$dsid];
     }
   }
   return $apparatus_datastreams;
