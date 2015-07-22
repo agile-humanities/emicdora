@@ -204,6 +204,7 @@ function emicdora_get_browse_view($type) {
  *   Themed table
  */
 function emicdora_build_topic_table($type, $display_count, $element) {
+  module_load_include('inc', 'islandora_solr', 'includes/utilities');
   $results = emicdora_get_all($type);
   $urls = array();
   $total = count($results);
@@ -216,9 +217,8 @@ function emicdora_build_topic_table($type, $display_count, $element) {
   $base_options = array('query' => array('sort' => "fgs_label_ss asc", 'query_type' => 'coop'));
   foreach ($results as $data) {
     $label = $data['label'];
-    $escaped_label = "\"$label\"";
     $options = $base_options;
-    $options['query']['f'] = array("$solr_term:$escaped_label");
+    $options['query']['f'] = array(islandora_solr_lesser_escape($solr_term) . ':"' . islandora_solr_facet_escape($label) . '"');
     $urls[] = array(
       'url' => l($label, "islandora/search/*:* NOT RELS_EXT_hasModel_uri_mt%3A(criticalEditionContainerCModel OR versionCModel)", $options),
       'count' => $data['count'],
