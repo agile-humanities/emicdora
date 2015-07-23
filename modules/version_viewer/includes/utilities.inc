@@ -267,6 +267,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'http://purl.org/dc/terms/BibliographicResource' => 'title',
     );
     $type = isset($types[$type]) ? $types[$type] : '';
+    // Default color to return.
+    $color = "#fff";
 
     // Get description directly from text to image annotation objects.
     if ($type == 'textimagelink') {
@@ -275,6 +277,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $annotation_xml = simplexml_load_string($annotation_xml_string);
       $char_sets = $annotation_xml->xpath("//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars");
       $cwrc_info->description = (string) reset($char_sets);
+      $color = version_viewer_get_first_annotation_color($annotation_xml);
     }
 
     $matches = array();
@@ -304,6 +307,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
           'start' => $parsed_start,
           'end' => $parsed_end,
         ),
+        'color' => $color,
       ),
     );
     $no_dialog_types = array(
@@ -1220,4 +1224,24 @@ function version_viewer_get_xpath($id) {
   $xpath = new DOMXPath($dom);
   $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
   return $xpath;
+}
+
+/**
+ * Grab the first annotation color from a loaded simple xml document (OAC DS).
+ *
+ * @param string $simple_xml
+ *   The a loaded OAC datastream using simplexml_load_string.
+ *
+ * @return string
+ *   The hex color of the first annotation or #fff.
+ */
+function version_viewer_get_first_annotation_color($simple_xml) {
+  $color = '#fff';
+  $cnt_chars = $simple_xml->xpath("//rdf:Description[rdf:type[@rdf:resource = 'http://www.w3.org/ns/openannotation/core/SvgConstraint']]//cnt:chars");
+  $svg = html_entity_decode((string) $cnt_chars[0], ENT_QUOTES);
+  preg_match("/(stroke)='([^']*)'/i", $svg, $matches);
+  if (isset($matches[2])) {
+    $color = $matches[2];
+  }
+  return $color;
 }
