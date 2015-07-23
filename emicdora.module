@@ -1805,3 +1805,79 @@ function emicdora_islandora_object_alter(AbstractObject $object, &$context) {
     }
   }
 }
+
+/**
+ * Implements hook_islandora_CMODEL_pid_islandora_derivative().
+ */
+function emicdora_cwrc_place_entityCModel_islandora_derivative(AbstractObject $object = NULL) {
+  $mod_path = drupal_get_path('module', 'emicdora');
+  $derivatives = array(
+    array(
+      'source_dsid' => 'PLACE',
+      'destination_dsid' => NULL,
+      'weight' => 0,
+      'function' => array(
+        'emicdora_update_object_label_from_place_entity',
+      ),
+      'file' => "$mod_path/includes/derivatives.inc",
+    ),
+  );
+  return $derivatives;
+}
+
+/**
+ * Implements hook_islandora_CMODEL_pid_islandora_derivative().
+ */
+function emicdora_islandora_cwrc_title_entityCModel_islandora_derivative(AbstractObject $object = NULL) {
+  $mod_path = drupal_get_path('module', 'emicdora');
+  $derivatives = array(
+    array(
+      'source_dsid' => 'TITLE',
+      'destination_dsid' => NULL,
+      'weight' => 0,
+      'function' => array(
+        'emicdora_update_object_label_from_title_entity',
+      ),
+      'file' => "$mod_path/includes/derivatives.inc",
+    ),
+  );
+  return $derivatives;
+}
+
+/**
+ * Implements hook_islandora_CMODEL_pid_islandora_derivative().
+ */
+function emicdora_cwrc_person_entityCModel_islandora_derivative(AbstractObject $object = NULL) {
+  $mod_path = drupal_get_path('module', 'emicdora');
+  $derivatives = array(
+    array(
+      'source_dsid' => 'PERSON',
+      'destination_dsid' => NULL,
+      'weight' => 0,
+      'function' => array(
+        'emicdora_update_object_label_from_person_entity',
+      ),
+      'file' => "$mod_path/includes/derivatives.inc",
+    ),
+  );
+  return $derivatives;
+}
+
+/**
+ * Implements hook_islandora_CMODEL_pid_islandora_derivative().
+ */
+function emicdora_cwrc_organization_entityCModel_islandora_derivative(AbstractObject $object = NULL) {
+  $mod_path = drupal_get_path('module', 'emicdora');
+  $derivatives = array(
+    array(
+      'source_dsid' => 'ORGANIZATION',
+      'destination_dsid' => NULL,
+      'weight' => 0,
+      'function' => array(
+        'emicdora_update_object_label_from_organization_entity',
+      ),
+      'file' => "$mod_path/includes/derivatives.inc",
+    ),
+  );
+  return $derivatives;
+}
