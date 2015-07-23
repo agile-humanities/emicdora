@@ -107,7 +107,17 @@
         success: function(data, status, xhr) {
           Drupal.versionViewer.tooltips.destroyTooltips();
           $('#easyui_tree').tree({
-            data: data
+            data: data,
+            formatter: function (node) {
+              // Insert the annotation color into the tree display to cover
+              // where the tree icon file is currently displayed.
+              if (node.attributes.cwrcType == 'textimagelink' || node.attributes.cwrcType == 'imageannotation') {
+                return '<span style="display: inherit; position: relative; right: 35px; width: 16px; height: 16px; background-color: '+ node.attributes.color + ';"></span><span style="position: relative;right: 16px; vertical-align: top;">' + node.text + '</span';
+              }
+              else {
+                return node.text;
+              }
+            }
           });
           add_tooltip_imageannotations();
 
