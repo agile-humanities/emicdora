@@ -1235,7 +1235,8 @@ function version_viewer_get_xpath($id) {
  *   The color to provide if none could be found. Defaults to '#fff'.
  *
  * @return string
- *   The hex color of the first annotation or the value of $color.
+ *   The hex color of the first annotation; otherwise, the value of $default if
+ *   no annotation could be found.
  */
 function version_viewer_get_first_annotation_color($simple_xml, $default = '#fff') {
   $oac_dom = dom_import_simplexml($simple_xml);
