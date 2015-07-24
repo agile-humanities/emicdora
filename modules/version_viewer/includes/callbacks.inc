@@ -164,6 +164,8 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
         $target_array = $xml->xpath("//oa:hasTarget");
         // target.
         $target = (string) $target_array[0]->attributes('rdf', 'about');
+        // Get the first annotation color to be included with attributes.
+        $color = version_viewer_get_first_annotation_color($xml);
         // Build the child image annotation.
         $child = array(
           "id" => $uuid,
@@ -178,6 +180,7 @@ function versionable_object_viewer_build_tree($object, $derivation_object, $vers
               'description' => $description,
             ),
             'cwrcType' => 'imageannotation',
+            'color' => $color,
           ),
         );
         array_push(

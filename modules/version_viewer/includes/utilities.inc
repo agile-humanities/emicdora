@@ -267,6 +267,8 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       'http://purl.org/dc/terms/BibliographicResource' => 'title',
     );
     $type = isset($types[$type]) ? $types[$type] : '';
+    // Default color to return.
+    $color = "#fff";
 
     // Get description directly from text to image annotation objects.
     if ($type == 'textimagelink') {
@@ -275,6 +277,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $annotation_xml = simplexml_load_string($annotation_xml_string);
       $char_sets = $annotation_xml->xpath("//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars");
       $cwrc_info->description = (string) reset($char_sets);
+      $color = version_viewer_get_first_annotation_color($annotation_xml, $color);
     }
 
     $matches = array();
@@ -304,6 +307,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
           'start' => $parsed_start,
           'end' => $parsed_end,
         ),
+        'color' => $color,
       ),
     );
     $no_dialog_types = array(
@@ -1220,4 +1224,37 @@ function version_viewer_get_xpath($id) {
   $xpath = new DOMXPath($dom);
   $xpath->registerNamespace("ns2", "http://viaf.org/viaf/data");
   return $xpath;
+}
+
+/**
+ * Grab the first annotation color from a loaded simple xml document (OAC DS).
+ *
+ * @param string $simple_xml
+ *   The a loaded OAC datastream using simplexml_load_string.
+ * @param string $default
+ *   The color to provide if none could be found. Defaults to '#fff'.
+ *
+ * @return string
+ *   The hex color of the first annotation; otherwise, the value of $default if
+ *   no annotation could be found.
+ */
+function version_viewer_get_first_annotation_color($simple_xml, $default = '#fff') {
+  $oac_dom = dom_import_simplexml($simple_xml);
+  $xpath = new DOMXPath($oac_dom->ownerDocument);
+  $cnt_chars = $xpath->query("//rdf:Description[rdf:type[@rdf:resource = 'http://www.w3.org/ns/openannotation/core/SvgConstraint']]/cnt:chars");
+  foreach ($cnt_chars as $cnt_char) {
+    $svg_xml = trim($cnt_char->nodeValue);
+    // XXX: DOM seems to be inconsistent about decoding the nodeValue. Let's
+    // check and do it ourselves, if need be.
+    if (strpos($svg_xml, '&lt;') === 0) {
+      $svg_xml = htmlspecialchars_decode($svg_xml, ENT_QUOTES);
+    }
+
+    $svg_dom = new DOMDocument();
+    $svg_dom->loadXML($svg_xml);
+    if ($svg_dom->documentElement->hasAttribute('stroke')) {
+      return $svg_dom->documentElement->getAttribute('stroke');
+    }
+  }
+  return $default;
 }
