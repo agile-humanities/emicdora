@@ -277,7 +277,7 @@ function versionable_object_viewer_read_rdf($object, $dsid = 'CWRC') {
       $annotation_xml = simplexml_load_string($annotation_xml_string);
       $char_sets = $annotation_xml->xpath("//rdf:Description[not(rdf:type[@rdf:resource='http://www.w3.org/ns/openannotation/core/SvgConstraint'])]/cnt:chars");
       $cwrc_info->description = (string) reset($char_sets);
-      $color = version_viewer_get_first_annotation_color($annotation_xml);
+      $color = version_viewer_get_first_annotation_color($annotation_xml, $color);
     }
 
     $matches = array();
@@ -1231,17 +1231,29 @@ function version_viewer_get_xpath($id) {
  *
  * @param string $simple_xml
  *   The a loaded OAC datastream using simplexml_load_string.
+ * @param string $default
+ *   The color to provide if none could be found. Defaults to '#fff'.
  *
  * @return string
- *   The hex color of the first annotation or #fff.
+ *   The hex color of the first annotation or the value of $color.
  */
-function version_viewer_get_first_annotation_color($simple_xml) {
-  $color = '#fff';
-  $cnt_chars = $simple_xml->xpath("//rdf:Description[rdf:type[@rdf:resource = 'http://www.w3.org/ns/openannotation/core/SvgConstraint']]//cnt:chars");
-  $svg = html_entity_decode((string) $cnt_chars[0], ENT_QUOTES);
-  preg_match("/(stroke)='([^']*)'/i", $svg, $matches);
-  if (isset($matches[2])) {
-    $color = $matches[2];
+function version_viewer_get_first_annotation_color($simple_xml, $default = '#fff') {
+  $oac_dom = dom_import_simplexml($simple_xml);
+  $xpath = new DOMXPath($oac_dom->ownerDocument);
+  $cnt_chars = $xpath->query("//rdf:Description[rdf:type[@rdf:resource = 'http://www.w3.org/ns/openannotation/core/SvgConstraint']]/cnt:chars");
+  foreach ($cnt_chars as $cnt_char) {
+    $svg_xml = trim($cnt_char->nodeValue);
+    // XXX: DOM seems to be inconsistent about decoding the nodeValue. Let's
+    // check and do it ourselves, if need be.
+    if (strpos($svg_xml, '&lt;') === 0) {
+      $svg_xml = htmlspecialchars_decode($svg_xml, ENT_QUOTES);
+    }
+
+    $svg_dom = new DOMDocument();
+    $svg_dom->loadXML($svg_xml);
+    if ($svg_dom->documentElement->hasAttribute('stroke')) {
+      return $svg_dom->documentElement->getAttribute('stroke');
+    }
   }
-  return $color;
+  return $default;
 }
