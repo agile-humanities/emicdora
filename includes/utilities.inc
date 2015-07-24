@@ -925,17 +925,21 @@ function emicdora_get_all($type) {
 
       // Need to determine the first and last name portions of the term for
       // sorting.
-      foreach ($last_obj['solr_doc']['mods_name_personal_namePart_given_ms'] as $first_name) {
-        foreach ($last_obj['solr_doc']['mods_name_personal_namePart_family_ms'] as $last_name) {
-          $full_match = "$first_name $last_name";
-          // Found a match.
-          if ($result['label'] == $full_match) {
-            $last_names[$result['label']] = array(
-              'first' => $first_name,
-              'last' => $last_name,
-              'full' => $result['label'],
-            );
-            break;
+      if (isset($last_obj['solr_doc']['mods_name_personal_namePart_given_ms'])) {
+        foreach ($last_obj['solr_doc']['mods_name_personal_namePart_given_ms'] as $first_name) {
+          if (isset($last_obj['solr_doc']['mods_name_personal_namePart_family_ms'])) {
+            foreach ($last_obj['solr_doc']['mods_name_personal_namePart_family_ms'] as $last_name) {
+              $full_match = "$first_name $last_name";
+              // Found a match.
+              if ($result['label'] == $full_match) {
+                $last_names[$result['label']] = array(
+                  'first' => $first_name,
+                  'last' => $last_name,
+                  'full' => $result['label'],
+                );
+                break;
+              }
+            }
           }
         }
       }
