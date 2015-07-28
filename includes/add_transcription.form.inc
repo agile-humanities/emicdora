@@ -66,11 +66,6 @@ function islandora_emicdora_add_transcription_form($form, &$form_state, Abstract
     '#default_value' => "",
     '#states' => array(
       'visible' => array(
-        ':input[name="content_source"]' => array('checked' => TRUE),
-      ),
-    ),
-    '#states' => array(
-      'visible' => array(
         ':input[name="content_source"]' => array('value' => 'none'),
       ),
     ),
@@ -169,7 +164,12 @@ function islandora_emicdora_add_transcription_form_validate($form, &$form_state)
   if (in_array($form_state['values']['transcription'], $current_transcriptions)) {
     form_set_error('transcription', t('A transcription with this name is already associated with this versionable object.'));
   }
-
+  if ($form_state['values']['content_source'] == 'none' && empty($form_state['values']['none'])) {
+    form_error($form['none'], t('Content is required to create a transcription.'));
+  }
+  if ($form_state['values']['content_source'] == 'file' && $form_state['values']['file'] == 0) {
+    form_error($form['file'], t('A file is required to create a transcription.'));
+  }
   if ($form_state['values']['content_source'] == 'tei_rdf' && $page_count > 1) {
     $start_page = $form_state['values']['first_page'];
     $last_page = $form_state['values']['last_page'];
