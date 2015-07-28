@@ -475,9 +475,6 @@ function emicdora_add_cwrc_datastream(AbstractObject $object) {
     if ($cwrc_datastream->label != 'CWRC') {
       $cwrc_datastream->label = 'CWRC';
     }
-    if ($cwrc_datastream->mimetype != 'text/plain') {
-      $cwrc_datastream->mimetype = 'text/plain';
-    }
     $cwrc_datastream->setContentFromString($cwrc_stream);
     $object->ingestDatastream($cwrc_datastream);
   }
