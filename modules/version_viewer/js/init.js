@@ -162,7 +162,9 @@
         $('#easyui_tree').tree({
           data: []
         });
+        
         show_transcription(pageNumber);
+        
         update_tree_data();
       }
     });
@@ -482,13 +484,43 @@
     }
 
     function show_transcription(page) {
-      var type = $('#wb_dt').hasClass('img_selected') ? 'dt' : 'rd';
-      var url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=' + type;
-      if (type = 'dt') {
+      var type;
+      var url;
+      $('.work_action_img').not('.image').not('.detail-meta').not('.switch').each(function(){
+        if ($(this).is('.img_selected')) {
+          var elem_id = $(this).attr('id');
+          switch (elem_id) {
+            case "wb_tei_markup":
+              type = "mk";
+              var pid = Drupal.settings.versionable_object_viewer.tei_rdf_pids[page - 1];
+              // URL endpoint is pretty different, so need to set it here.
+              url = Drupal.settings.basePath + 'islandora/version_viewer/tei_markup/page/' + pid;
+              break;
+
+            case "wb_reading":
+              type = "rd";
+              break;
+
+            case "wb_dt":
+              type = "dt";
+              break;
+
+          }
+        }
+      });
+
+      if (typeof url === 'undefined'){
+        url = Drupal.settings.versionable_object_viewer.trans_url + '?page=' + page + '&type=' + type;
+      };
+
+      if (type == 'dt') {
         add_tab("wb_dt_tab", url, 'diplomatic_tei');
       }
-      else {
+      else if (type == 'rd'){
         add_tab("wb_reading_tab", url, 'reading_tei');
+      }
+      else {
+        add_tab("wb_tei_markup", url, '');
       }
       advance_shared_canvas_page(page);
     }
