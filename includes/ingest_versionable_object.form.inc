@@ -390,6 +390,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
   $tn_datastream = $versionable_object->constructDatastream('TN', 'M');
+  $tn_datastream->label = 'Thumbanil';
+  $tn_datastream->mimetype = 'image/jpeg';
   $tn_datastream->setContentFromString($tn);
   $tn = '';
   $versionable_object->ingestDatastream($tn_datastream);
@@ -511,6 +513,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
       }
       else {
         $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
+        $datastream->mimetype = 'text/plain';
+        $datastream->label = 'Transcription';
         $datastream->setContentFromString(t('Transcription'));
         $transcription->ingestDatastream($datastream);
       }
@@ -518,6 +522,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
 
     case 'digital':
       $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
+      $datastream->mimetype = 'text/plain';
+      $datastream->label = 'Transcription';
       $datastream->setContentFromString($values['transcription']);
       $transcription->ingestDatastream($datastream);
       break;
@@ -525,6 +531,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
     case 'upload':
       $file = file_load($values['transcription_upload']);
       $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
+      $datastream->mimetype = 'text/plain';
+      $datastream->label = 'Transcription';
       $datastream->setContentFromFile(drupal_realpath($file->uri), FALSE);
       $transcription->ingestDatastream($datastream);
       break;
@@ -655,8 +663,21 @@ function emicdora_copy_versionable_object_tei_rdf_page_batch_operation($page_pid
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isPageNumber', $page_number_results[0]['object']['value'], RELS_TYPE_PLAIN_LITERAL);
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', 1, RELS_TYPE_PLAIN_LITERAL);
 
-  $dsids = array('OCR', 'TN', 'CWRC');
-  foreach ($dsids as $dsid) {
+  $dsids = array(
+    'OCR' => array(
+      'label' => 'OCR',
+      'mime' => 'text/plain',
+    ),
+    'TN' => array(
+      'label' => 'Thumbnail',
+      'mime' => 'image/jpeg',
+    ),
+    'CWRC' => array(
+      'label' => 'CWRC',
+      'mime' => 'text/xml',
+    ),
+  );
+  foreach ($dsids as $dsid => $values) {
     if (isset($page_object[$dsid])) {
       $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
       $unique_id = uniqid();
@@ -665,6 +686,8 @@ function emicdora_copy_versionable_object_tei_rdf_page_batch_operation($page_pid
       // Since the file must persist across multiple requests, we must not
       // delete it, until it has successfully been ingested.
       $page_object[$dsid]->getContent($filename);
+      $datastream->mimetype = $values['mime'];
+      $datastream->label = $values['label'];
       $datastream->setContentFromFile($filename, FALSE);
       $tei_rdf_page->ingestDatastream($datastream);
     }
@@ -698,8 +721,21 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
   $tei_rdf_page->relationships->add(ISLANDORA_RELS_EXT_URI, 'isSection', '1', RELS_TYPE_PLAIN_LITERAL);
   // Add a minimal set of datastreams from original page object.
   $page = islandora_object_load($page['pid']);
-  $dsids = array('OCR', 'TN', 'CWRC');
-  foreach ($dsids as $dsid) {
+  $dsids = array(
+    'OCR' => array(
+      'label' => 'OCR',
+      'mime' => 'text/plain',
+    ),
+    'TN' => array(
+      'label' => 'Thumbnail',
+      'mime' => 'image/jpeg',
+    ),
+    'CWRC' => array(
+      'label' => 'CWRC',
+      'mime' => 'text/xml',
+    ),
+  );
+  foreach ($dsids as $dsid => $values) {
     if (isset($page[$dsid])) {
       $datastream = $tei_rdf_page->constructDatastream($dsid, 'M');
       $unique_id = uniqid();
@@ -708,6 +744,8 @@ function emicdora_ingest_versionable_object_tei_rdf_page_batch_operation(array $
       // Since the file must persist across multiple requests, we must not
       // delete it, until it has successfully been ingested.
       $page[$dsid]->getContent($filename);
+      $datastream->mimetype = $values['mime'];
+      $datastream->label = $values['label'];
       $datastream->setContentFromFile($filename, FALSE);
       $tei_rdf_page->ingestDatastream($datastream);
     }
@@ -839,6 +877,8 @@ function emicdora_ingest_versionable_object_transcription_batch_finished($succes
     $transcription = $ingest_objects['transcription'];
     $datastream = $transcription->constructDatastream('TRANSCRIPTION', 'M');
     $contents = file_get_contents($results['filename']);
+    $datastream->label = 'Transcription';
+    $datastream->mimetype = 'text/plain';
     $datastream->setContentFromString($contents);
     $transcription->ingestDatastream($datastream);
     unlink($results['filename']);
