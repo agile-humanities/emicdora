@@ -390,6 +390,8 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
   $tn_datastream = $versionable_object->constructDatastream('TN', 'M');
+  $tn_datastream->label = 'Thumbanil';
+  $tn_datastream->mimetype = 'image/jpeg';
   $tn_datastream->setContentFromString($tn);
   $tn = '';
   $versionable_object->ingestDatastream($tn_datastream);
