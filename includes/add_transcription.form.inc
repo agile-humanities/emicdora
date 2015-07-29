@@ -29,7 +29,7 @@ function islandora_emicdora_add_transcription_form($form, &$form_state, Abstract
     '#title' => t('Title of new transcription'),
     '#size' => 40,
     '#default_value' => t('Transcription of') . ' ' . $object->label,
-    '#required' => TRUE,git st
+    '#required' => TRUE,
   );
 
   $page_results = islandora_paged_content_get_pages($object);
