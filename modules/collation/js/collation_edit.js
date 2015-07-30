@@ -220,11 +220,11 @@
 
         // Add functionality to arrow keys.
         $(".emicdora_next_button").click(function() {
-          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected, .merged_selected');
-          var $next = $current.nextAll('.variant, .merged').first();
+          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected');
+          var $next = $current.nextAll('.variant').first();
           if ($current.length === 0 || $next.length === 0) {
             // Select first occurence.
-            $next = $('.variant, .merged').first();
+            $next = $('.variant').first();
           }
           if ($next.length === 0) {
             alert(Drupal.t('No items over which to iterate.'));
@@ -233,11 +233,11 @@
         });
 
         $(".emicdora_previous_button").click(function() {
-          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected, .merged_selected');
-          var $next = $current.prevAll('.variant, .merged').first();
+          var $current = $('#versionview-' + map[this.id] + '-body').find('.variant_selected');
+          var $next = $current.prevAll('.variant').first();
           if ($current.length === 0 || $next.length === 0) {
             // Select last occurence.
-            $next = $('.variant, .merged').last();
+            $next = $('.variant').last();
           }
           if ($next.length === 0) {
             alert(Drupal.t('No items over which to iterate.'));
