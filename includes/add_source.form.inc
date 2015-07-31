@@ -115,6 +115,7 @@ function islandora_emicdora_add_source_form_submit(&$form, &$form_state) {
   if ($form_state['values']['choice_wrapper']['privacy']) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
+    $xacml->managementRule->addUser($user->name);
     $xacml->writeBackToFedora();
     $xacml = TRUE;
   }
@@ -434,6 +435,7 @@ function emicdora_consolidate_add_page($page, $book, $page_number, $private, $la
   if ($private) {
     $xacml = new IslandoraXacml($object);
     $xacml->viewingRule->addUser($user->name);
+    $xacml->managementRule->addUser($user->name);
     $xacml->writeBackToFedora();
   }
   else {
