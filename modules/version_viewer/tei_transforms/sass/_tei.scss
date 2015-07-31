@@ -361,5 +361,23 @@ $line_height_double: 3em;
       color: red;
       text-decoration: line-through;
     }
+    [data-change = "a"],[data-change = "A"] {
+      color: red !important;
+    }
+    [data-change = "b"], [data-change = "B"] {
+      color: blue !important;
+    }
+    [data-change = "c"], [data-change = "C"] {
+      color: green !important;
+    }
+    [data-change = "d"], [data-change = "D"] {
+      color: orange !important;
+    }
+    [data-change = "e"], [data-change = "E"] {
+      color: purple !important;
+    }
+    [data-change = "f"], [data-change = "F"] {
+      color: yellow !important;
+    }
   }
 }
