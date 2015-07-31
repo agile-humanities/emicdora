@@ -1459,5 +1459,5 @@
 }
 /* line 379, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="f"], .tei:not(.reading) [data-change="F"] {
-    color: yellow !important;
+    color: gold !important;
 }
