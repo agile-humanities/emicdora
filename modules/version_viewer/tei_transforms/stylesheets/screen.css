@@ -1437,3 +1437,27 @@
   color: red;
   text-decoration: line-through;
 }
+/* line 364, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="a"], .tei:not(.reading) [data-change="A"] {
+    color: red !important;
+}
+/* line 367, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="b"], .tei:not(.reading) [data-change="B"] {
+    color: blue !important;
+}
+/* line 370, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="c"], .tei:not(.reading) [data-change="C"] {
+    color: green !important;
+}
+/* line 373, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="d"], .tei:not(.reading) [data-change="D"] {
+    color: orange !important;
+}
+/* line 376, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="e"], .tei:not(.reading) [data-change="E"] {
+    color: purple !important;
+}
+/* line 379, ../sass/_tei.scss */
+.tei:not(.reading) [data-change="f"], .tei:not(.reading) [data-change="F"] {
+    color: gold !important;
+}
