@@ -21,7 +21,7 @@ $double_quote: '"';
 
 // Line height.
 // XXX: Could get into trouble here, if the font size is ever changed.
-$line_height_normal: 1.2em;
+$line_height_normal: 1.5em;
 // Double line height is needed if you want to render super/sublinear lines.
 $line_height_double: 3em;
 
@@ -362,22 +362,22 @@ $line_height_double: 3em;
       text-decoration: line-through;
     }
     [data-change = "a"],[data-change = "A"] {
-      color: red !important;
+      background-color: red !important;
     }
     [data-change = "b"], [data-change = "B"] {
-      color: blue !important;
+      background-color: blue !important;
     }
     [data-change = "c"], [data-change = "C"] {
-      color: green !important;
+      background-color: green !important;
     }
     [data-change = "d"], [data-change = "D"] {
-      color: orange !important;
+      background-color: orange !important;
     }
     [data-change = "e"], [data-change = "E"] {
-      color: purple !important;
+      background-color: purple !important;
     }
     [data-change = "f"], [data-change = "F"] {
-      color: gold !important;
+      background-color: gold !important;
     }
   }
 }
