@@ -618,6 +618,36 @@ function emicdora_menu_alter(array &$items) {
     $item['access arguments'][0] = 3;
     $items["emicdora/contextual-links/$type/%islandora_object/xacml"] = $item;
   }
+  // Add custom access for 'Image Annotation' tab.
+  if (isset($items['islandora/object/%islandora_object/annotation'])) {
+    // Change the access callback for displaying the tab.
+    $items['islandora/object/%islandora_object/annotation']['access callback'] = 'emicdora_image_annotation_tab_access';
+  }
+}
+
+/**
+ * Custom access callback for viewing Islandora Image Annotation tab.
+ *
+ * @param string $perm
+ *   User permission to test for.
+ * @param AbstractObject $object
+ *   An AbstractObject representing a Fedora object.
+ *
+ * @return bool
+ *   TRUE if the user can see the tab, FALSE otherwise.
+ */
+function emicdora_image_annotation_tab_access($perm, AbstractObject $object) {
+  // Block loading "Image Annotation" tab for books and pages.
+  if (!isset($object) || (in_array('islandora:pageCModel', $object->models) || in_array('islandora:bookCModel', $object->models))) {
+    return FALSE;
+  }
+  $models = variable_get('islandora_image_annotation_mappings', array());
+  foreach ($object->models as $model) {
+    if (isset($models[$model])) {
+      return islandora_object_access($perm, $object);
+    }
+  }
+  return FALSE;
 }
 
 /**
