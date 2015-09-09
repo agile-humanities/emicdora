@@ -1909,3 +1909,28 @@ function emicdora_cwrc_organization_entityCModel_islandora_derivative(AbstractOb
   );
   return $derivatives;
 }
+
+/**
+ * Implements hook_islandora_breadcrumbs_alter().
+ */
+function emicdora_islandora_breadcrumbs_alter(&$breadcrumbs, $context, $object = NULL) {
+  // Alter breadcrumbs from solr results to make it look like it's browsing
+  // Editions or the CO-OP, depending on the search filter.
+  $mapping = array(
+    '/>&quot;criticalEditionContainerCModel&quot;/' => '> Editions',
+    '/>criticalEditionContainerCModel/' => '> Editions',
+    '/\* NOT criticalEditionContainerCModel OR versionCModel/' => 'CO-OP',
+    '/NOT criticalEditionContainerCModel OR versionCModel/' => 'CO-OP',
+  );
+  for ($i = 0; $i < count($breadcrumbs); $i++) {
+    foreach ($mapping as $match => $replace) {
+      $new_breadcrumb = preg_replace($match, $replace, $breadcrumbs[$i]);
+      if ($new_breadcrumb != $breadcrumbs[$i]) {
+        // Update the page title which normally is 'Search results' to display
+        // Editions or CO-OP depending on what the user is browsing.
+        drupal_set_title(str_replace('> ', '', $replace));
+        $breadcrumbs[$i] = $new_breadcrumb;
+      }
+    }
+  }
+}
