@@ -18,7 +18,7 @@
   margin-bottom: 0.5in;
   color: black;
 }
-/* line 5, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 5, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei html, .tei body, .tei div, .tei span, .tei applet, .tei object, .tei iframe,
 .tei h1, .tei h2, .tei h3, .tei h4, .tei h5, .tei h6, .tei p, .tei blockquote, .tei pre,
 .tei a, .tei abbr, .tei acronym, .tei address, .tei big, .tei cite, .tei code,
@@ -39,39 +39,39 @@
   font-size: 100%;
   vertical-align: baseline;
 }
-/* line 22, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 22, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei html {
   line-height: 1;
 }
-/* line 24, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 24, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei ol, .tei ul {
   list-style: none;
 }
-/* line 26, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 26, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei table {
   border-collapse: collapse;
   border-spacing: 0;
 }
-/* line 28, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 28, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei caption, .tei th, .tei td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
-/* line 30, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 30, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei q, .tei blockquote {
   quotes: none;
 }
-/* line 103, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 103, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei q:before, .tei q:after, .tei blockquote:before, .tei blockquote:after {
   content: "";
   content: none;
 }
-/* line 32, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 32, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei a img {
   border: none;
 }
-/* line 116, ../../../../../../../../Library/Ruby/Gems/2.0.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 116, ../../../../../../../../../../lib/gems/1.8/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 .tei article, .tei aside, .tei details, .tei figcaption, .tei figure, .tei footer, .tei header, .tei hgroup, .tei main, .tei menu, .tei nav, .tei section, .tei summary {
   display: block;
 }
@@ -1439,25 +1439,25 @@
 }
 /* line 364, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="a"], .tei:not(.reading) [data-change="A"] {
-  background-color: red !important;
+  background-color: rgba(255, 0, 0, 0.2) !important;
 }
 /* line 367, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="b"], .tei:not(.reading) [data-change="B"] {
-  background-color: blue !important;
+  background-color: rgba(0, 150, 255, 0.2) !important;
 }
 /* line 370, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="c"], .tei:not(.reading) [data-change="C"] {
-  background-color: green !important;
+  background-color: rgba(0, 255, 0, 0.2) !important;
 }
 /* line 373, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="d"], .tei:not(.reading) [data-change="D"] {
-  background-color: orange !important;
+  background-color: rgba(255, 128, 0, 0.4) !important;
 }
 /* line 376, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="e"], .tei:not(.reading) [data-change="E"] {
-  background-color: purple !important;
+  background-color: rgba(127, 0, 255, 0.2) !important;
 }
 /* line 379, ../sass/_tei.scss */
 .tei:not(.reading) [data-change="f"], .tei:not(.reading) [data-change="F"] {
-  background-color: gold !important;
+  background-color: rgba(255, 215, 0, 0.2) !important;
 }

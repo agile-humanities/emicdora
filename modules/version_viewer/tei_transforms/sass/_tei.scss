@@ -362,22 +362,22 @@ $line_height_double: 3em;
       text-decoration: line-through;
     }
     [data-change = "a"],[data-change = "A"] {
-      background-color: red !important;
+      background-color: rgba(255, 0, 0, 0.2) !important;
     }
     [data-change = "b"], [data-change = "B"] {
-      background-color: blue !important;
+      background-color: rgba(0, 150, 255, 0.2) !important;
     }
     [data-change = "c"], [data-change = "C"] {
-      background-color: green !important;
+      background-color: rgba(0, 255, 0, 0.2) !important;
     }
     [data-change = "d"], [data-change = "D"] {
-      background-color: orange !important;
+      background-color: rgba(255, 128, 0, 0.4) !important;
     }
     [data-change = "e"], [data-change = "E"] {
-      background-color: purple !important;
+      background-color: rgba(127, 0, 255, 0.2) !important;
     }
     [data-change = "f"], [data-change = "F"] {
-      background-color: gold !important;
+      background-color: rgba(255, 215, 0, 0.2) !important;
     }
   }
 }
