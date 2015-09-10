@@ -1919,8 +1919,8 @@ function emicdora_islandora_breadcrumbs_alter(&$breadcrumbs, $context, $object =
   $mapping = array(
     '/>&quot;criticalEditionContainerCModel&quot;/' => '> Editions',
     '/>criticalEditionContainerCModel/' => '> Editions',
-    '/\* NOT criticalEditionContainerCModel OR versionCModel/' => 'CO-OP',
-    '/NOT criticalEditionContainerCModel OR versionCModel/' => 'CO-OP',
+    '/\* NOT criticalEditionContainerCModel OR versionCModel/' => 'Browse CO-OP',
+    '/NOT criticalEditionContainerCModel OR versionCModel/' => 'Browse CO-OP',
   );
   for ($i = 0; $i < count($breadcrumbs); $i++) {
     foreach ($mapping as $match => $replace) {
@@ -1928,7 +1928,7 @@ function emicdora_islandora_breadcrumbs_alter(&$breadcrumbs, $context, $object =
       if ($new_breadcrumb != $breadcrumbs[$i]) {
         // Update the page title which normally is 'Search results' to display
         // Editions or CO-OP depending on what the user is browsing.
-        drupal_set_title(str_replace('> ', '', $replace));
+        drupal_set_title(str_replace(array('> ','Browse '), '', $replace));
         $breadcrumbs[$i] = $new_breadcrumb;
       }
     }
