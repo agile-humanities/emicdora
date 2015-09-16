@@ -930,8 +930,8 @@ function emicdora_get_all($type) {
               // Found a match.
               if ($result['label'] == $full_match) {
                 $last_names[$result['label']] = array(
-                  'first' => $first_name,
-                  'last' => $last_name,
+                  'first' => ucwords($first_name),
+                  'last' => ucwords($last_name),
                   'full' => $result['label'],
                 );
                 break;
@@ -942,7 +942,24 @@ function emicdora_get_all($type) {
       }
       // Fallback from when we didn't get a match.
       if (!isset($last_names[$result['label']])) {
+        // To accommodate sorting by last name with out fixing the old data that
+        // does not have mods_name_personal_namePart_family_ms and/or
+        // mods_name_personal_namePart_given_ms set the full name will be
+        // exploded out and constructed into a first name and last name value.
+
+        // Reset variables.
+        $first_name = "";
+        $last_name = "";
+
+        $name_pieces = explode(' ', ucwords($result['label']));
+        if (count($name_pieces) > 1) {
+          $last_name = array_pop($name_pieces);
+          $first_name = implode(' ', $name_pieces);
+        }
+
         $last_names[$result['label']] = array(
+          'first' => $first_name,
+          'last' => $last_name,
           'full' => $result['label']);
       }
     }
