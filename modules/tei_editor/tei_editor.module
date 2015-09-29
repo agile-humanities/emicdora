@@ -143,14 +143,27 @@ function tei_editor_add_entity($content_model) {
   $type = array_search($content_model, $entity_content_models);
   drupal_set_title(t('Add New @type', array('@type' => ucfirst($type))));
   $tuque = islandora_get_tuque_connection();
-  $object = $tuque->repository->constructObject('cwrc', TRUE);
+  $cwrc_entity_namespace = 'cwrc';
+  $collection_pid = islandora_cwrc_writer_default_entity_collection($type);
+  // Assign the namespace based on the one configured in the parent collection.
+  if ($collection_pid) {
+    $collection = islandora_object_load($collection_pid);
+    if ($collection && isset($collection['COLLECTION_POLICY'])) {
+      $policy = new CollectionPolicy($collection['COLLECTION_POLICY']->content);
+      $collection_content_models = $policy->getContentModels();
+      if (array_key_exists($content_model, $collection_content_models)) {
+        $cwrc_entity_namespace = $collection_content_models[$content_model]['namespace'];
+      }
+    }
+  }
+  $object = $tuque->repository->constructObject($cwrc_entity_namespace, TRUE);
   $object->owner = $user->name;
   $object->models = $content_model;
   return drupal_get_form('islandora_ingest_form', array(
     'book' => $object,
     'models' => array($content_model),
     'objects' => array($object),
-    'parent' => islandora_cwrc_writer_default_entity_collection($type),
+    'parent' => $collection_pid,
   ));
 }
 
