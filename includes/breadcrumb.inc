@@ -99,7 +99,9 @@ EOT;
   $results = $child->repository->ri->itqlQuery($query_string);
   $breadcrumbs = array(l(t("CO-OP"), EMICDORA_SEARCH_COOP_PATH));
   foreach ($results as $result) {
-    $breadcrumbs[] = l($result['label']['value'], "islandora/object/{$result['parent']['value']}");
+    if ($result['parent']['value'] != EMICDORA_SOURCE_COLLECTION) {
+      $breadcrumbs[] = l($result['label']['value'], "islandora/object/{$result['parent']['value']}");
+    }
   }
   $breadcrumbs[] = filter_xss($child->label);
   return $breadcrumbs;
