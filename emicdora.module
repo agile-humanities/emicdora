@@ -604,6 +604,8 @@ function emicdora_menu_alter(array &$items) {
     'emicdora_set_title_and_breadcrumbs_object', 2,
   );
   unset($item);
+  // We don't want to route to the root object through /islandora.
+  $items['islandora'] = $items['co-op'];
 
   $types = array(
     'source_operations',
