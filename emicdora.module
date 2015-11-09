@@ -620,34 +620,14 @@ function emicdora_menu_alter(array &$items) {
     $item['access arguments'][0] = 3;
     $items["emicdora/contextual-links/$type/%islandora_object/xacml"] = $item;
   }
-  // Add custom access for 'Image Annotation' tab.
+  // Remove the 'Image Annotation' tab from all cmodels.
   if (isset($items['islandora/object/%islandora_object/annotation'])) {
     // XXX: Cannot disable through the image annotation configuration as it will
     // break the cwrc-writer annotation functionality.  Instead of disabling
-    // annotations for pageCModel changing the access callback for displaying
-    // the annotation tab to one that will remove the tab from pageCModel
-    // display.
-    $items['islandora/object/%islandora_object/annotation']['access callback'] = 'emicdora_image_annotation_tab_access';
+    // annotations for all module changing the type to a MENU_CALLBACK will
+    // prevent the tab display for all cmodels.
+    $items['islandora/object/%islandora_object/annotation']['type'] = MENU_CALLBACK;
   }
-}
-
-/**
- * Custom access callback for viewing Islandora Image Annotation tab.
- *
- * @param string $perm
- *   User permission to test for.
- * @param AbstractObject $object
- *   An AbstractObject representing a Fedora object.
- *
- * @return bool
- *   TRUE if the user can see the tab, FALSE otherwise.
- */
-function emicdora_image_annotation_tab_access($perm, AbstractObject $object) {
-  // Block loading "Image Annotation" tab for books and pages.
-  if (!isset($object) || (in_array('islandora:pageCModel', $object->models))) {
-    return FALSE;
-  }
-  return islandora_image_annotation_access($perm, $object);
 }
 
 /**
