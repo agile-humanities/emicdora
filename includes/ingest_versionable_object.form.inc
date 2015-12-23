@@ -385,12 +385,12 @@ function emicdora_versionable_object_form_submit(array $form, array &$form_state
   $values = $form_state['values'];
   $shared_storage =& islandora_ingest_form_get_shared_storage($form_state);
   $step_storage =& islandora_ingest_form_get_step_storage($form_state);
-  $source = islandora_object_load($step_storage['source']);
+  $source = islandora_object_load($form_state['values']['source']);
   $tn = $source['TN'] ? $source['TN']->content : NULL;
   // Get the versionable object and it's critical edition.
   $versionable_object = islandora_ingest_form_get_object($form_state);
   $tn_datastream = $versionable_object->constructDatastream('TN', 'M');
-  $tn_datastream->label = 'Thumbanil';
+  $tn_datastream->label = 'Thumbnail';
   $tn_datastream->mimetype = 'image/jpeg';
   $tn_datastream->setContentFromString($tn);
   $tn = '';
