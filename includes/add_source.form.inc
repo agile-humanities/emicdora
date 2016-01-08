@@ -324,7 +324,7 @@ function islandora_simplified_ingest_get_mappings($content_model) {
       'prompt' => t("Upload image file"),
       'required' => TRUE,
       'upload_prompt' => t('Add image'),
-      'extensions' => 'tiff tif',
+      'extensions' => 'tiff tif jp2',
       'title_display' => 'invisible',
       'attributes' => array('style' => 'display:none;'),
     ),
